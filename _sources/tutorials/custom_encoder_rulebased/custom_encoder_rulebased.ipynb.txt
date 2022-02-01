@@ -43,10 +43,10 @@
    "id": "raising-adventure",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-01-31T22:57:04.373801Z",
-     "iopub.status.busy": "2022-01-31T22:57:04.373200Z",
-     "iopub.status.idle": "2022-01-31T22:57:07.147158Z",
-     "shell.execute_reply": "2022-01-31T22:57:07.147582Z"
+     "iopub.execute_input": "2022-02-01T16:35:04.148093Z",
+     "iopub.status.busy": "2022-02-01T16:35:04.147261Z",
+     "iopub.status.idle": "2022-02-01T16:35:07.315314Z",
+     "shell.execute_reply": "2022-02-01T16:35:07.314363Z"
     }
    },
    "outputs": [
@@ -54,8 +54,8 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2540:No torchvision detected, image helpers not supported.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2533:No torchvision detected, image helpers not supported.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
      ]
     }
    ],
@@ -87,10 +87,10 @@
    "id": "technical-government",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-01-31T22:57:07.156658Z",
-     "iopub.status.busy": "2022-01-31T22:57:07.156123Z",
-     "iopub.status.idle": "2022-01-31T22:57:07.364366Z",
-     "shell.execute_reply": "2022-01-31T22:57:07.364794Z"
+     "iopub.execute_input": "2022-02-01T16:35:07.324126Z",
+     "iopub.status.busy": "2022-02-01T16:35:07.323494Z",
+     "iopub.status.idle": "2022-02-01T16:35:07.618510Z",
+     "shell.execute_reply": "2022-02-01T16:35:07.619242Z"
     }
    },
    "outputs": [
@@ -237,10 +237,10 @@
    "id": "absent-maker",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-01-31T22:57:07.370277Z",
-     "iopub.status.busy": "2022-01-31T22:57:07.369723Z",
-     "iopub.status.idle": "2022-01-31T22:57:09.365287Z",
-     "shell.execute_reply": "2022-01-31T22:57:09.364293Z"
+     "iopub.execute_input": "2022-02-01T16:35:07.624746Z",
+     "iopub.status.busy": "2022-02-01T16:35:07.624004Z",
+     "iopub.status.idle": "2022-02-01T16:35:09.941524Z",
+     "shell.execute_reply": "2022-02-01T16:35:09.942297Z"
     }
    },
    "outputs": [
@@ -248,29 +248,29 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2540:Dropping features: []\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Analyzing a sample of 6920\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:from a total population of 10668, this is equivalent to 64.9% of your data.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Infering type for: model\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Column model has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Infering type for: year\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Column year has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Infering type for: price\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Column price has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Infering type for: transmission\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Column transmission has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Infering type for: mileage\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Column mileage has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Infering type for: fuelType\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Column fuelType has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Infering type for: tax\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Column tax has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Infering type for: mpg\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Column mpg has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Infering type for: engineSize\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Column engineSize has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2533:Dropping features: []\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Analyzing a sample of 6920\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:from a total population of 10668, this is equivalent to 64.9% of your data.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Infering type for: model\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Column model has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Infering type for: year\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Column year has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Infering type for: price\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Column price has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Infering type for: transmission\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Column transmission has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Infering type for: mileage\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Column mileage has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Infering type for: fuelType\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Column fuelType has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Infering type for: tax\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Column tax has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Infering type for: mpg\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Column mpg has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Infering type for: engineSize\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Column engineSize has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Finished statistical analysis\u001b[0m\n"
      ]
     }
    ],
@@ -299,10 +299,10 @@
    "id": "coastal-paragraph",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-01-31T22:57:09.371870Z",
-     "iopub.status.busy": "2022-01-31T22:57:09.371349Z",
-     "iopub.status.idle": "2022-01-31T22:57:09.373814Z",
-     "shell.execute_reply": "2022-01-31T22:57:09.374373Z"
+     "iopub.execute_input": "2022-02-01T16:35:09.950007Z",
+     "iopub.status.busy": "2022-02-01T16:35:09.949331Z",
+     "iopub.status.idle": "2022-02-01T16:35:09.955652Z",
+     "shell.execute_reply": "2022-02-01T16:35:09.956242Z"
     }
    },
    "outputs": [
@@ -418,7 +418,7 @@
       "        \"unbias_target\": true,\n",
       "        \"seconds_per_mixer\": 57024.0,\n",
       "        \"seconds_per_encoder\": null,\n",
-      "        \"expected_additional_time\": 1.9613456726074219,\n",
+      "        \"expected_additional_time\": 2.2777035236358643,\n",
       "        \"time_aim\": 259200,\n",
       "        \"target_weights\": null,\n",
       "        \"positive_domain\": false,\n",
@@ -513,10 +513,10 @@
    "id": "e03db1b0",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-01-31T22:57:09.380350Z",
-     "iopub.status.busy": "2022-01-31T22:57:09.379703Z",
-     "iopub.status.idle": "2022-01-31T22:57:09.382531Z",
-     "shell.execute_reply": "2022-01-31T22:57:09.382099Z"
+     "iopub.execute_input": "2022-02-01T16:35:09.963844Z",
+     "iopub.status.busy": "2022-02-01T16:35:09.962576Z",
+     "iopub.status.idle": "2022-02-01T16:35:09.967616Z",
+     "shell.execute_reply": "2022-02-01T16:35:09.968133Z"
     }
    },
    "outputs": [
@@ -637,10 +637,10 @@
    "id": "e30866c1",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-01-31T22:57:09.386808Z",
-     "iopub.status.busy": "2022-01-31T22:57:09.386273Z",
-     "iopub.status.idle": "2022-01-31T22:57:09.388345Z",
-     "shell.execute_reply": "2022-01-31T22:57:09.388751Z"
+     "iopub.execute_input": "2022-02-01T16:35:09.972633Z",
+     "iopub.status.busy": "2022-02-01T16:35:09.971990Z",
+     "iopub.status.idle": "2022-02-01T16:35:09.984557Z",
+     "shell.execute_reply": "2022-02-01T16:35:09.983423Z"
     }
    },
    "outputs": [],
@@ -699,10 +699,10 @@
    "id": "elementary-fusion",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-01-31T22:57:09.393667Z",
-     "iopub.status.busy": "2022-01-31T22:57:09.392384Z",
-     "iopub.status.idle": "2022-01-31T22:57:09.394585Z",
-     "shell.execute_reply": "2022-01-31T22:57:09.395103Z"
+     "iopub.execute_input": "2022-02-01T16:35:09.989325Z",
+     "iopub.status.busy": "2022-02-01T16:35:09.988755Z",
+     "iopub.status.idle": "2022-02-01T16:35:09.992525Z",
+     "shell.execute_reply": "2022-02-01T16:35:09.993461Z"
     }
    },
    "outputs": [],
@@ -728,10 +728,10 @@
    "id": "inappropriate-james",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-01-31T22:57:09.399728Z",
-     "iopub.status.busy": "2022-01-31T22:57:09.399203Z",
-     "iopub.status.idle": "2022-01-31T22:57:09.611388Z",
-     "shell.execute_reply": "2022-01-31T22:57:09.610916Z"
+     "iopub.execute_input": "2022-02-01T16:35:09.999272Z",
+     "iopub.status.busy": "2022-02-01T16:35:09.996574Z",
+     "iopub.status.idle": "2022-02-01T16:35:10.250308Z",
+     "shell.execute_reply": "2022-02-01T16:35:10.249538Z"
     }
    },
    "outputs": [
@@ -739,7 +739,7 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2540:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2533:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
      ]
     }
    ],
@@ -770,10 +770,10 @@
    "id": "palestinian-harvey",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-01-31T22:57:09.616019Z",
-     "iopub.status.busy": "2022-01-31T22:57:09.615485Z",
-     "iopub.status.idle": "2022-01-31T22:57:10.291861Z",
-     "shell.execute_reply": "2022-01-31T22:57:10.292334Z"
+     "iopub.execute_input": "2022-02-01T16:35:10.255720Z",
+     "iopub.status.busy": "2022-02-01T16:35:10.255138Z",
+     "iopub.status.idle": "2022-02-01T16:35:11.063135Z",
+     "shell.execute_reply": "2022-02-01T16:35:11.063655Z"
     }
    },
    "outputs": [
@@ -781,39 +781,39 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2540:Performing statistical analysis on data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Finished statistical analysis\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `analyze_data` runtime: 0.28 seconds\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Cleaning the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `preprocess` runtime: 0.1 seconds\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Splitting the data into train/test\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `split` runtime: 0.0 seconds\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Preparing the encoders\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Encoder prepping dict length of: 1\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Encoder prepping dict length of: 2\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Encoder prepping dict length of: 3\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Encoder prepping dict length of: 4\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Encoder prepping dict length of: 5\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Encoder prepping dict length of: 6\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Encoder prepping dict length of: 7\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Encoder prepping dict length of: 8\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Encoder prepping dict length of: 9\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Done running for: price\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Categories Detected = 1\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Done running for: model\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Done running for: year\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Categories Detected = 1\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Done running for: transmission\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Done running for: mileage\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Categories Detected = 1\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Done running for: fuelType\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Done running for: tax\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Done running for: mpg\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Done running for: engineSize\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `prepare` runtime: 0.28 seconds\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Featurizing the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `featurize` runtime: 0.0 seconds\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2533:Performing statistical analysis on data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Finished statistical analysis\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2533: `analyze_data` runtime: 0.34 seconds\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Cleaning the data\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2533: `preprocess` runtime: 0.12 seconds\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Splitting the data into train/test\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2533: `split` runtime: 0.0 seconds\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Preparing the encoders\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Encoder prepping dict length of: 1\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Encoder prepping dict length of: 2\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Encoder prepping dict length of: 3\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Encoder prepping dict length of: 4\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Encoder prepping dict length of: 5\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Encoder prepping dict length of: 6\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Encoder prepping dict length of: 7\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Encoder prepping dict length of: 8\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Encoder prepping dict length of: 9\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Done running for: price\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Categories Detected = 1\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Done running for: model\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Categories Detected = 1\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Done running for: year\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Done running for: transmission\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Done running for: mileage\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Categories Detected = 1\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Done running for: fuelType\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Done running for: tax\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Done running for: mpg\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Done running for: engineSize\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2533: `prepare` runtime: 0.33 seconds\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2533:Featurizing the data\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2533: `featurize` runtime: 0.0 seconds\u001b[0m\n"
      ]
     }
    ],
@@ -848,10 +848,10 @@
    "id": "silent-dealing",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-01-31T22:57:10.299166Z",
-     "iopub.status.busy": "2022-01-31T22:57:10.298240Z",
-     "iopub.status.idle": "2022-01-31T22:57:10.315819Z",
-     "shell.execute_reply": "2022-01-31T22:57:10.315327Z"
+     "iopub.execute_input": "2022-02-01T16:35:11.082709Z",
+     "iopub.status.busy": "2022-02-01T16:35:11.075391Z",
+     "iopub.status.idle": "2022-02-01T16:35:11.087844Z",
+     "shell.execute_reply": "2022-02-01T16:35:11.087361Z"
     }
    },
    "outputs": [
@@ -953,10 +953,10 @@
    "id": "superior-mobility",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-01-31T22:57:10.320315Z",
-     "iopub.status.busy": "2022-01-31T22:57:10.319662Z",
-     "iopub.status.idle": "2022-01-31T22:57:10.324036Z",
-     "shell.execute_reply": "2022-01-31T22:57:10.324497Z"
+     "iopub.execute_input": "2022-02-01T16:35:11.092875Z",
+     "iopub.status.busy": "2022-02-01T16:35:11.092278Z",
+     "iopub.status.idle": "2022-02-01T16:35:11.094489Z",
+     "shell.execute_reply": "2022-02-01T16:35:11.094955Z"
     }
    },
    "outputs": [

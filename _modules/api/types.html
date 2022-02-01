@@ -743,10 +743,7 @@
 <span class="sd">    instead of returning only the predicted class, the output additionally includes the assigned probability for</span>
 <span class="sd">    each class.   </span>
 <span class="sd">    :param all_mixers: forces an ensemble to return predictions emitted by all its internal mixers. </span>
-<span class="sd">    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \</span>
-<span class="sd">        that predictions, in average, are correct `alpha` percent of the time.</span>
-<span class="sd">    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \</span>
-<span class="sd">        (respectively implies wider and tighter bounds, all other parameters being equal).</span>
+<span class="sd">    :param fixed_confidence: Used in the ICP analyzer module, specifies an `alpha` fixed confidence so that predictions, in average, are correct `alpha` percent of the time. For unsupervised anomaly detection, this also translates into the expected error rate. Bounded between 0.01 and 0.99 (respectively implies wider and tighter bounds, all other parameters being equal).</span>
 <span class="sd">    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \</span>
 <span class="sd">        detector.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
@@ -754,7 +751,6 @@
     <span class="n">predict_proba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">all_mixers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">fixed_confidence</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">anomaly_error_rate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">anomaly_cooldown</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">forecast_offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -772,7 +768,6 @@
         <span class="n">predict_proba</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;predict_proba&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">)</span>
         <span class="n">all_mixers</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;all_mixers&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">all_mixers</span><span class="p">)</span>
         <span class="n">fixed_confidence</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fixed_confidence&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">fixed_confidence</span><span class="p">)</span>
-        <span class="n">anomaly_error_rate</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anomaly_error_rate&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">anomaly_error_rate</span><span class="p">)</span>
         <span class="n">anomaly_cooldown</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anomaly_cooldown&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">anomaly_cooldown</span><span class="p">)</span>
         <span class="n">forecast_offset</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;forecast_offset&#39;</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="o">.</span><span class="n">forecast_offset</span><span class="p">)</span>
 
@@ -780,7 +775,6 @@
             <span class="n">predict_proba</span><span class="o">=</span><span class="n">predict_proba</span><span class="p">,</span>
             <span class="n">all_mixers</span><span class="o">=</span><span class="n">all_mixers</span><span class="p">,</span>
             <span class="n">fixed_confidence</span><span class="o">=</span><span class="n">fixed_confidence</span><span class="p">,</span>
-            <span class="n">anomaly_error_rate</span><span class="o">=</span><span class="n">anomaly_error_rate</span><span class="p">,</span>
             <span class="n">anomaly_cooldown</span><span class="o">=</span><span class="n">anomaly_cooldown</span><span class="p">,</span>
             <span class="n">forecast_offset</span><span class="o">=</span><span class="n">forecast_offset</span><span class="p">,</span>
         <span class="p">)</span>
