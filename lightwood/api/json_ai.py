@@ -1,4 +1,5 @@
 # TODO: _add_implicit_values unit test ensures NO changes for a fully specified file.
+from copy import deepcopy
 from lightwood.helpers.templating import call, inline_dict, align
 from lightwood.api import dtype
 from lightwood.api.types import (
@@ -647,6 +648,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
 
     :returns: Automated syntax of the ``PredictorInterface`` object.
     """
+    json_ai = deepcopy(json_ai)
     # ----------------- #
     # Fill in any missing values
     json_ai = _add_implicit_values(json_ai)
