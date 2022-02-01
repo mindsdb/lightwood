@@ -100,7 +100,7 @@ def get_numeric_conf_range(
         positive_domain: bool = False,
         std_tol: int = 1,
         group: Optional[str] = '__default',
-        error_rate: float = None
+        fixed_conf: float = None
 ):
     """
     Gets prediction bounds for numerical targets, based on ICP estimation and width tolerance.
@@ -110,14 +110,14 @@ def get_numeric_conf_range(
     :param positive_domain: Flag that indicates whether target is expected to be a positive number.
     :param std_tol: Tolerance for automatic confidence level selection; bigger tolerance means higher confidence, in general.
     :param group: For tasks with multiple different target groups (where each may have a different std_dev), indicates what group is being considered.
-    :param error_rate: Pre-determined error rate for the ICP, 0-1 bounded. Can be specified to bypass automatic confidence/bound detection, or to adjust the threshold sensitivity in anomaly detection tasks.
+    :param fixed_conf: Pre-determined confidence for the ICP, 0-1 bounded. Can be specified to bypass automatic confidence/bound detection, or to adjust the threshold sensitivity in anomaly detection tasks.
     
     :return: array with confidence for each data instance, along with lower and upper bounds for each prediction.
     """  # noqa
-    if not isinstance(error_rate, float):
+    if not isinstance(fixed_conf, float):
         error_rate = None
 
-    if error_rate is None:
+    if fixed_conf is None:
         significances = []
         conf_ranges = []
         std_dev = df_target_stddev[group]
@@ -143,8 +143,8 @@ def get_numeric_conf_range(
         conf_ranges = np.array(conf_ranges)
     else:
         # fixed error rate
-        error_rate = max(0.01, min(1.0, error_rate))
-        conf = 1 - error_rate
+        conf = max(0.01, min(1.0, fixed_conf))
+        error_rate = 1 - conf
         conf_idx = int(100 * error_rate) - 1
         conf_ranges = all_confs[:, :, conf_idx]
         significances = [conf for _ in range(conf_ranges.shape[0])]

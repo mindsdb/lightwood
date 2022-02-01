@@ -283,15 +283,10 @@ class ICP(BaseAnalysisBlock):
 
                 # convert (B, 2, 99) into (B, 2) given width or error rate constraints
                 if is_numerical:
-                    significances = ns.pred_args.fixed_confidence
-                    if significances is not None:
-                        confs = all_confs[:, :, int(100 * (1 - significances)) - 1]
-                    else:
-                        error_rate = ns.pred_args.anomaly_error_rate if is_anomaly_task else None
-                        significances, confs = get_numeric_conf_range(all_confs,
-                                                                      df_target_stddev=ns.analysis['df_target_stddev'],
-                                                                      positive_domain=self.positive_domain,
-                                                                      error_rate=error_rate)
+                    significances, confs = get_numeric_conf_range(all_confs,
+                                                                  df_target_stddev=ns.analysis['df_target_stddev'],
+                                                                  positive_domain=self.positive_domain,
+                                                                  fixed_conf=ns.pred_args.fixed_confidence)
                     result.loc[X.index, 'lower'] = confs[:, 0]
                     result.loc[X.index, 'upper'] = confs[:, 1]
                 else:
@@ -324,17 +319,17 @@ class ICP(BaseAnalysisBlock):
                                 # predict and get confidence level given width or error rate constraints
                                 if is_numerical:
                                     all_confs = icp.predict(X.values)
-                                    error_rate = ns.pred_args.anomaly_error_rate if is_anomaly_task else None
+                                    fixed_conf = ns.pred_args.fixed_confidence
                                     significances, confs = get_numeric_conf_range(
                                         all_confs,
                                         df_target_stddev=ns.analysis['df_target_stddev'],
                                         positive_domain=self.positive_domain,
                                         group=frozenset(group),
-                                        error_rate=error_rate
+                                        fixed_conf=fixed_conf
                                     )
 
                                     # only replace where grouped ICP is more informative (i.e. tighter)
-                                    if ns.pred_args.fixed_confidence is None:
+                                    if fixed_conf is None:
                                         default_widths = result.loc[X.index, 'upper'] - result.loc[X.index, 'lower']
                                         grouped_widths = np.subtract(confs[:, 1], confs[:, 0])
                                         insert_index = (default_widths > grouped_widths)[lambda x: x.isin([True])].index

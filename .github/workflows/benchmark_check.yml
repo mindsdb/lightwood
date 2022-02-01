@@ -15,7 +15,9 @@ jobs:
           wget https://raw.githubusercontent.com/torokmark/assert.sh/main/assert.sh
           source assert.sh
           commit=${{ github.event.pull_request.head.sha }}
-          against="last_3"
+          against="best"
           status=$(curl -X GET http://benchmarks.mindsdb.com:9107/compare/$against/$commit?release_only=True)
           echo Got benchmark status $status between $commit and $against
           assert_eq "$status" "Yes" && echo 'Good to go!'
+
+
