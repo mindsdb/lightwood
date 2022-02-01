@@ -25,7 +25,7 @@ class TestImputers(unittest.TestCase):
         df = self._load_df()
         for value, expected in zip(('mean', 'median', 'mode', 'zero'),
                                    (df[target].mean(), df[target].median(), df[target].dropna().mode().iloc[0], 0)):
-            imp = NumericalImputer(target_col=target, value=value)
+            imp = NumericalImputer(target=target, value=value)
             ndf = imp.impute(df)
 
             assert df[target].isna().any()
@@ -37,7 +37,7 @@ class TestImputers(unittest.TestCase):
         target = 'Development Index'
         df = self._load_df(cols_to_cat=[target])
         for value, expected in zip(('mode', 'unk'), (df[target].dropna().mode().iloc[0], 'UNK')):
-            imp = CategoricalImputer(target_col=target, value=value)
+            imp = CategoricalImputer(target=target, value=value)
             ndf = imp.impute(df)
 
             assert df[target].isna().any()
