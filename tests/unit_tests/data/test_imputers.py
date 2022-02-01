@@ -15,6 +15,7 @@ class TestImputers(unittest.TestCase):
         for col in cols_to_cat:
             df[col] = df[col].apply(_to_cat).astype(str)
 
+        np.random.seed(0)
         idxs = np.random.randint(0, high=len(df), size=(int(len(df) * 0.2)))  # drop some rows at random
         df.loc[idxs] = np.nan
         df.iloc[0] = np.nan  # force first row to be nan for filled value checks
