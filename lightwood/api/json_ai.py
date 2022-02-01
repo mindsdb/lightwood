@@ -40,6 +40,7 @@ from lightwood.helpers.device import *
 from lightwood.helpers.general import *
 from lightwood.helpers.log import *
 from lightwood.helpers.numeric import *
+from lightwood.helpers.imputers import *
 from lightwood.helpers.parallelism import *
 from lightwood.helpers.seed import *
 from lightwood.helpers.text import *
@@ -547,7 +548,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "dtype_dict": "$dtype_dict",
                 "target": "$target",
                 "mode": "$mode",
-                "imputers": "imputers",
+                "imputers": "$imputers",
                 "timeseries_settings": "$problem_definition.timeseries_settings",
                 "anomaly_detection": "$problem_definition.anomaly_detection",
             },
@@ -636,6 +637,8 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     }
 
     for field_name, implicit_value in hidden_fields.items():
+        if getattr(json_ai, field_name):
+            hidden_fields[field_name]['args'].update(getattr(json_ai, field_name)['args'])
         _populate_implicit_field(json_ai, field_name, implicit_value, tss.is_timeseries)
 
     return json_ai
@@ -658,6 +661,12 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
 
     # Instantiate data types
     dtype_dict = json_ai.dtype_dict
+
+    # Populate imputers
+    imputer_dict = {}
+    for imputer in json_ai.imputers:
+        imputer_dict[imputer['args']['target']] = call(imputer)
+    json_ai.imputers = imputer_dict
 
     # Populate encoders
     encoder_dict = {}
@@ -745,8 +754,14 @@ self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_bl
     # Pre-processing Body
     # ----------------- #
 
+    imputers = ""
+    for target_col, imputer in json_ai.imputers.items():
+        imputers += f"{target_col}: {imputer},"
+    imputers = "{" + imputers + "}"
+
     clean_body = f"""
 log.info('Cleaning the data')
+self.imputers = {imputers}
 data = {call(json_ai.cleaner)}
 
 # Time-series blocks
