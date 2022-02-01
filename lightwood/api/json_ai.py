@@ -637,8 +637,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     }
 
     for field_name, implicit_value in hidden_fields.items():
-        if getattr(json_ai, field_name):
-            hidden_fields[field_name]['args'].update(getattr(json_ai, field_name)['args'])
         _populate_implicit_field(json_ai, field_name, implicit_value, tss.is_timeseries)
 
     return json_ai
@@ -664,8 +662,9 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
 
     # Populate imputers
     imputer_dict = {}
-    for imputer in json_ai.imputers:
-        imputer_dict[imputer['args']['target']] = call(imputer)
+    if json_ai.imputers:
+        for imputer in json_ai.imputers:
+            imputer_dict[imputer['args']['target']] = call(imputer)
     json_ai.imputers = imputer_dict
 
     # Populate encoders
