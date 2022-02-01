@@ -1,9 +1,11 @@
+from typing import Union
 import unittest
 import numpy as np
 import pandas as pd
 
 from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import json_ai_from_problem, predictor_from_json_ai
+from lightwood.helpers.imputers import NumericalImputer, CategoricalImputer
 
 
 class TestCleaner(unittest.TestCase):
@@ -36,24 +38,22 @@ class TestCleaner(unittest.TestCase):
         cat_mode_target_value = df[cat_mode_impute_col].iloc[1:].mode().iloc[0]
         cat_unk_target_value = 'UNK'
 
-        jai.features[num_mean_impute_col].imputer = 'numerical.mean'
-        jai.features[num_mode_impute_col].imputer = 'numerical.mode'
-        jai.features[num_median_impute_col].imputer = 'numerical.median'
-        jai.features[num_zero_impute_col].imputer = 'numerical.zero'
-        jai.features[cat_mode_impute_col].imputer = 'categorical.mode'
-        jai.features[cat_unk_impute_col].imputer = 'categorical.unk'
+        jai.imputers = [
+            {"module": "NumericalImputer", "args": {"value": "'mean'", "target": f"'{num_mean_impute_col}'"}},
+            {"module": "NumericalImputer", "args": {"value": "'mode'", "target": f"'{num_mode_impute_col}'"}},
+            {"module": "NumericalImputer", "args": {"value": "'median'", "target": f"'{num_median_impute_col}'"}},
+            {"module": "NumericalImputer", "args": {"value": "'zero'", "target": f"'{num_zero_impute_col}'"}},
+            {"module": "CategoricalImputer", "args": {"value": "'mode'", "target": f"'{cat_mode_impute_col}'"}},
+            {"module": "CategoricalImputer", "args": {"value": "'unk'", "target": f"'{cat_unk_impute_col}'"}},
+        ]
         predictor = predictor_from_json_ai(jai)
         cleaned_data = predictor.preprocess(df)
 
-        # check cleaner was assigned imputers
-        assert jai.cleaner['args']['imputers'][num_mean_impute_col] == 'numerical.mean'
-        assert jai.cleaner['args']['imputers'][num_mode_impute_col] == 'numerical.mode'
-        assert jai.cleaner['args']['imputers'][num_zero_impute_col] == 'numerical.zero'
-        assert jai.cleaner['args']['imputers'][num_median_impute_col] == 'numerical.median'
-        assert jai.cleaner['args']['imputers'][cat_mode_impute_col] == 'categorical.mode'
-        assert jai.cleaner['args']['imputers'][cat_unk_impute_col] == 'categorical.unk'
+        # check cleaner was assigned imputers and data was imputed correctly
+        for _, imputer in predictor.imputers.items():
+            print(type(imputer))
+            assert isinstance(imputer, NumericalImputer) or isinstance(imputer, CategoricalImputer)
 
-        # check data was imputed correctly
         assert cleaned_data[num_mean_impute_col].iloc[0] == num_mean_target_value
         assert cleaned_data[num_mode_impute_col].iloc[0] == num_mode_target_value
         assert cleaned_data[num_zero_impute_col].iloc[0] == num_zero_target_value

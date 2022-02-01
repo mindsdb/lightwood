@@ -10,7 +10,9 @@ import pandas as pd
 from lightwood.api.dtype import dtype
 from lightwood.helpers import text
 from lightwood.helpers.log import log
-from lightwood.helpers.imputers import NumericalImputer, CategoricalImputer
+from lightwood.api.types import Module
+from lightwood.helpers.imputers import BaseImputer
+from lightwood.helpers.templating import call
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.numeric import is_nan_numeric
 
@@ -24,7 +26,7 @@ def cleaner(
     mode: str,
     timeseries_settings: TimeseriesSettings,
     anomaly_detection: bool,
-    imputers: Dict[str, str] = {},
+    imputers: Dict[str, Module] = {},
     custom_cleaning_functions: Dict[str, str] = {}
 ) -> pd.DataFrame:
     """
@@ -36,7 +38,7 @@ def cleaner(
     :param identifiers: A dict containing all identifier typed columns
     :param target: The target columns
     :param mode: Can be "predict" or "train"
-    :param imputers: Dictionary where keys are input columns, and values the respective strings that indicate which imputer will be used. String format should be $imputer_family.$mode. For options, refer to imputer documentation.
+    :param imputers: Dictionary where keys are input columns, and values the respective imputer objects to use, formatted as JsonAI modules. For module options and their respective parameters, refer to imputer documentation.
     :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object
     :param anomaly_detection: Are we detecting anomalies with this predictor?
 
@@ -55,10 +57,8 @@ def cleaner(
         data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
 
     for col, imputer in imputers.items():
-        imputer_name, mode = imputer.split(".")
-        imputer_class = NumericalImputer if imputer_name == 'numerical' else CategoricalImputer
-        imputer = imputer_class(target_col=col, value=mode, force_typecast=True)
-        data[col] = imputer.impute(data[[col]])
+        cols = [col] + [col for col in imputer.dependencies]
+        data[col] = imputer.impute(data[cols])
 
     return data
 
