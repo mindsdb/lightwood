@@ -10,7 +10,7 @@ class TestMixerSelection(unittest.TestCase):
         prob_kwargs = {'target': target, 'time_aim': 15} if not prob_kwargs else {'target': target, **prob_kwargs}
         prdb = ProblemDefinition.from_dict(prob_kwargs)
         json_ai = json_ai_from_problem(df, prdb).to_dict()
-        mixers = [mixer['module'] for mixer in json_ai['outputs'][target]['mixers']]
+        mixers = [mixer['module'] for mixer in json_ai['model']['args']['submodels']]
         return mixers
 
     def test_0_regression_task(self):
