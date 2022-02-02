@@ -656,7 +656,11 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     # ----------------- #
 
     # Instantiate data types
-    dtype_dict = json_ai.dtype_dict
+    dtype_dict = {}
+
+    for k in json_ai.dtype_dict:
+        if json_ai.dtype_dict[k] not in (dtype.invalid, dtype.empty):
+            dtype_dict[k] = json_ai.dtype_dict[k]
 
     # Populate encoders
     encoder_dict = {}
@@ -680,7 +684,7 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
             )
         )
 
-        dtype_dict[col_name] = f"""'{target_type}'"""
+        dtype_dict[col_name] = target_type
         # @TODO: Is populating the json_ai at this stage even necessary?
         json_ai.encoders[col_name] = encoder_dict[col_name]
         json_ai.dtype_dict[col_name] = target_type
@@ -1047,7 +1051,7 @@ class Predictor(PredictorInterface):
         self.problem_definition = ProblemDefinition.from_dict({json_ai.problem_definition.to_dict()})
         self.accuracy_functions = {json_ai.accuracy_functions}
         self.identifiers = {json_ai.identifiers}
-        self.dtype_dict = {inline_dict(json_ai.dtype_dict)}
+        self.dtype_dict = {inline_dict(dtype_dict)}
 
         # Any feature-column dependencies
         self.dependencies = {inline_dict(json_ai.dependency_dict)}
