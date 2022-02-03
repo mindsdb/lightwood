@@ -196,7 +196,7 @@ class TestTimeseries(unittest.TestCase):
     def test_4_time_series_classification_long_horizon_multiclass(self):
         df = pd.read_csv('tests/data/arrivals.csv')[:127]  # enforce "Country" to be "No information"
         target = 'Traffic'
-        df[target] = df[target].apply(lambda x: chr(65+int(str(x/10000)[0])))  # multiclass time series target
+        df[target] = df[target].apply(lambda x: chr(65 + int(str(x / 10000)[0])))  # multiclass time series target
 
         train_idxs = np.random.rand(len(df)) < 0.8
         train = df[train_idxs]
