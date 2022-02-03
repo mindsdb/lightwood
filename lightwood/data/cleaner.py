@@ -91,14 +91,17 @@ def get_cleaning_func(data_dtype: dtype, custom_cleaning_functions: Dict[str, st
     elif data_dtype in (dtype.date, dtype.datetime):
         clean_func = _standardize_datetime
 
-    elif data_dtype in (dtype.float, dtype.tsarray):
+    elif data_dtype in (dtype.float, dtype.num_tsarray):
         clean_func = _clean_float
 
     elif data_dtype in (dtype.integer):
         clean_func = _clean_int
 
-    elif data_dtype in (dtype.array):
-        clean_func = _standardize_array
+    elif data_dtype in (dtype.num_array):
+        clean_func = _standardize_num_array
+
+    elif data_dtype in (dtype.cat_array):
+        clean_func = _standardize_cat_array
 
     elif data_dtype in (dtype.tags):
         clean_func = _tags_to_tuples
@@ -113,7 +116,8 @@ def get_cleaning_func(data_dtype: dtype, custom_cleaning_functions: Dict[str, st
         dtype.binary,
         dtype.audio,
         dtype.image,
-        dtype.video
+        dtype.video,
+        dtype.cat_tsarray
     ):
         clean_func = _clean_text
 
@@ -163,7 +167,7 @@ def _tags_to_tuples(tags_str: str) -> Tuple[str]:
         return tuple()
 
 
-def _standardize_array(element: object) -> Optional[Union[List[float], float]]:
+def _standardize_num_array(element: object) -> Optional[Union[List[float], float]]:
     """
     Given an array of numbers in the form ``[1, 2, 3, 4]``, converts into a numerical sequence.
 
@@ -172,7 +176,7 @@ def _standardize_array(element: object) -> Optional[Union[List[float], float]]:
 
     Ex of edge case:
     >> element = [1]
-    >> _standardize_array(element)
+    >> _standardize_num_array(element)
     >> 1
     """
     try:
@@ -185,6 +189,34 @@ def _standardize_array(element: object) -> Optional[Union[List[float], float]]:
             element = _clean_float(element)
         else:
             element = [float(x) for x in element.split(" ")]
+    except Exception:
+        pass
+
+    return element
+
+
+def _standardize_cat_array(element: object) -> Optional[Union[List[float], float]]:
+    """
+    Given an array of labels in the form ``['a', 'a', 'b', 'c']``, converts into a label sequence.
+
+    :param element: An array-like element in a sequence
+    :returns: standardized array OR label IF edge case
+
+    Ex of edge case:
+    >> element = [1]
+    >> _standardize_num_array(element)
+    >> 1
+    """
+    try:
+        element = str(element)
+        element = element.rstrip("]").lstrip("[")
+        element = element.rstrip(" ").lstrip(" ")
+        element = element.replace(", ", " ").replace(",", " ")
+        # Handles cases where arrays are labels
+        if " " not in element:
+            element = _clean_text(element)
+        else:
+            element = [x for x in element.split(" ")]
     except Exception:
         pass
 

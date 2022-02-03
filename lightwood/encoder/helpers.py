@@ -60,7 +60,9 @@ class CatNormalizer:
         self.output_size = len(self.scaler.categories_[0]) if self.encoder_class == 'one_hot' else 1
 
     def encode(self, Y):
-        y = np.array([[str(j) if j is not None else self.unk for j in i] for i in Y])
+        y = [[str(j) if j is not None else self.unk for j in i] for i in Y]
+        y = [[j if j in self.scaler.categories_[0] else self.unk for j in i] for i in y]
+        y = np.array(y)
         out = []
         for i in y:
             transformed = self.scaler.transform(i.reshape(-1, 1))

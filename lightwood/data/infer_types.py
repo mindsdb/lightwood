@@ -116,7 +116,7 @@ def type_check_sequence(element: object) -> str:
                 break
 
         if len(ele_arr) > 1 and all_nr:
-            dtype_guess = dtype.array
+            dtype_guess = dtype.num_array
 
     return dtype_guess
 
@@ -216,7 +216,7 @@ def get_column_data_type(arg_tup):
             }
 
     # Check for Tags subtype
-    if curr_dtype not in (dtype.quantity, dtype.array):
+    if curr_dtype not in (dtype.quantity, dtype.num_array):  # @TODO: or cat_array?
         lengths = []
         unique_tokens = set()
 

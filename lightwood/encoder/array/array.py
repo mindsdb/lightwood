@@ -62,7 +62,7 @@ class ArrayEncoder(BaseEncoder):
             if is_none(priming_data[i]):
                 priming_data[i] = [0] * self.output_size
 
-        if self.original_type in (dtype.categorical, dtype.binary):
+        if self.original_type in (dtype.categorical, dtype.binary, dtype.cat_array, dtype.cat_tsarray):
             self._normalizer = CatNormalizer(encoder_class='ordinal')
         else:
             self._normalizer = MinMaxNormalizer()

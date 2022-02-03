@@ -82,8 +82,8 @@ class LightGBM(BaseMixer):
         self.use_optuna = use_optuna
         self.params = {}
         self.fit_on_dev = fit_on_dev
-        self.cls_dtypes = [dtype.categorical, dtype.binary]
-        self.float_dtypes = [dtype.float, dtype.quantity]
+        self.cls_dtypes = [dtype.categorical, dtype.binary, dtype.cat_tsarray]
+        self.float_dtypes = [dtype.float, dtype.quantity, dtype.num_tsarray]
         self.num_dtypes = [dtype.integer] + self.float_dtypes
         self.supports_proba = dtype_dict[target] in self.cls_dtypes
         self.stable = True
@@ -163,7 +163,6 @@ class LightGBM(BaseMixer):
         self.positive_domain = getattr(train_data.encoders.get(self.target, None), 'positive_domain', False)
 
         output_dtype = self.dtype_dict[self.target]
-
         data = self._to_dataset(data, output_dtype)
 
         if output_dtype not in self.cls_dtypes + self.num_dtypes:

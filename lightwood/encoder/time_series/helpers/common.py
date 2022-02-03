@@ -15,14 +15,14 @@ def generate_target_group_normalizers(data):
     group_combinations = []
 
     # categorical normalizers
-    if data['original_type'] in [dtype.categorical, dtype.binary]:
+    if data['original_type'] in (dtype.categorical, dtype.binary, dtype.cat_tsarray):
         normalizers['__default'] = CatNormalizer()
         normalizers['__default'].prepare(data['data'])
         group_combinations.append('__default')
 
     # numerical normalizers, here we spawn one per each group combination
     else:
-        if data['original_type'] == dtype.tsarray:
+        if data['original_type'] == dtype.num_tsarray:
             data['data'] = data['data'].reshape(-1, 1).astype(float)
 
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))

@@ -92,10 +92,12 @@ def lookup_encoder(
         dtype.image: "Img2VecEncoder",
         dtype.rich_text: "PretrainedLangEncoder",
         dtype.short_text: "CategoricalAutoEncoder",
-        dtype.array: "ArrayEncoder",
-        dtype.tsarray: "TimeSeriesEncoder",
         dtype.quantity: "NumericEncoder",
-        dtype.audio: "MFCCEncoder"
+        dtype.audio: "MFCCEncoder",
+        dtype.num_array: "ArrayEncoder",
+        dtype.cat_array: "ArrayEncoder",
+        dtype.num_tsarray: "TimeSeriesEncoder",
+        dtype.cat_tsarray: "TimeSeriesEncoder",
     }
 
     # If column is a target, only specific feature representations are allowed that enable supervised tasks
@@ -124,7 +126,7 @@ def lookup_encoder(
                     "target_weights"
                 ] = problem_defintion.target_weights
 
-        if col_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
+        if col_dtype in (dtype.integer, dtype.float, dtype.num_array, dtype.num_tsarray):
             encoder_dict["args"][
                 "positive_domain"
             ] = "$statistical_analysis.positive_domain"
@@ -147,7 +149,10 @@ def lookup_encoder(
             if tss.horizon > 1:
                 encoder_dict["args"]["grouped_by"] = f"{gby}"
                 encoder_dict["args"]["timesteps"] = f"{tss.horizon}"
-                encoder_dict["module"] = "TsArrayNumericEncoder"
+                if col_dtype in [dtype.num_tsarray]:
+                    encoder_dict["module"] = "TsArrayNumericEncoder"
+                elif col_dtype in [dtype.cat_tsarray]:
+                    encoder_dict["module"] = "TsCatArrayEncoder"
 
         if "__mdb_ts_previous" in col_name or col_name in tss.historical_columns:
             encoder_dict["module"] = "TimeSeriesEncoder"
@@ -266,7 +271,8 @@ def generate_json_ai(
                 ]
             )
 
-            if tss.use_previous_target:
+            if tss.use_previous_target and dtype_dict[target] in (dtype.integer, dtype.float, dtype.quantity):
+                # , dtype.num_tsarray):
                 submodels.extend(
                     [
                         {
@@ -290,7 +296,10 @@ def generate_json_ai(
     }
 
     if tss.is_timeseries and tss.horizon > 1:
-        dtype_dict[target] = dtype.tsarray
+        if dtype_dict[target] in (dtype.integer, dtype.float, dtype.quantity):
+            dtype_dict[target] = dtype.num_tsarray
+        else:
+            dtype_dict[target] = dtype.cat_tsarray
 
     encoders = {
         target: lookup_encoder(
@@ -325,8 +334,10 @@ def generate_json_ai(
         accuracy_functions = ["r2_score"]
     elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ["balanced_accuracy_score"]
-    elif output_dtype in (dtype.array, dtype.tsarray):
-        accuracy_functions = ["evaluate_array_accuracy"]
+    elif output_dtype in (dtype.num_array, dtype.num_tsarray):
+        accuracy_functions = ["evaluate_num_array_accuracy"]
+    elif output_dtype in (dtype.cat_array, dtype.cat_tsarray):
+        accuracy_functions = ["evaluate_cat_array_accuracy"]
     else:
         raise Exception(
             f"Please specify a custom accuracy function for output type {output_dtype}"
@@ -335,7 +346,7 @@ def generate_json_ai(
     # special dispatch for t+1 time series forecasters
     if is_ts:
         if output_dtype in [dtype.integer, dtype.float]:
-            accuracy_functions = ["evaluate_array_accuracy"]
+            accuracy_functions = ["evaluate_num_array_accuracy"]
 
     if problem_definition.time_aim is None:
         # 5 days
