@@ -19,7 +19,7 @@ class TestBasic(unittest.TestCase):
         pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 80})
         json_ai = json_ai_from_problem(df, problem_definition=pdef)
 
-        neural_args = json_ai.outputs[target].mixers[0]['args']
+        neural_args = json_ai.model['args']['submodels'][0]['args']
         neural_args["target_encoder"] = "$encoders[self.target]"
         neural_args["target"] = "$target"
         neural_args["dtype_dict"] = "$dtype_dict"
@@ -27,7 +27,7 @@ class TestBasic(unittest.TestCase):
         neural_args["timeseries_settings"] = "$problem_definition.timeseries_settings"
         neural_args["net"] = '"DefaultNet"'
 
-        json_ai.outputs[target].mixers = [{
+        json_ai.model['args']['submodels'] = [{
             'module': 'lightwood.mixer.QClassic',
             'args': neural_args
         }]

@@ -17,10 +17,11 @@ class TestBasic(unittest.TestCase):
             'time_aim': 80
         }))
 
-        json_ai.outputs[target].ensemble = {
+        json_ai.model = {
             'module': 'MeanEnsemble',
             "args": {
-                'dtype_dict': '$dtype_dict'
+                'dtype_dict': '$dtype_dict',
+                'submodels': json_ai.model['args']['submodels']
             }
         }
 
@@ -42,12 +43,13 @@ class TestBasic(unittest.TestCase):
             'time_aim': 5
         }))
 
-        json_ai.outputs[target].ensemble = {
+        json_ai.model = {
             'module': 'ModeEnsemble',
             "args": {
                 'dtype_dict': '$dtype_dict',
                 "args": "$pred_args",
                 "accuracy_functions": "$accuracy_functions",
+                'submodels': json_ai.model['args']['submodels']
             }
         }
 
@@ -68,12 +70,13 @@ class TestBasic(unittest.TestCase):
             'time_aim': 80
         }))
 
-        json_ai.outputs[target].ensemble = {
+        json_ai.model = {
             'module': 'WeightedMeanEnsemble',
             "args": {
-                "args": "$pred_args",
                 'dtype_dict': '$dtype_dict',
+                "args": "$pred_args",
                 "accuracy_functions": "$accuracy_functions",
+                'submodels': json_ai.model['args']['submodels']
             }
         }
 

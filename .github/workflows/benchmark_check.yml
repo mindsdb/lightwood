@@ -19,3 +19,5 @@ jobs:
           status=$(curl -X GET http://benchmarks.mindsdb.com:9107/compare/$against/$commit?release_only=True)
           echo Got benchmark status $status between $commit and $against
           assert_eq "$status" "Yes" && echo 'Good to go!'
+
+

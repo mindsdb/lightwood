@@ -3,6 +3,8 @@
 from typing import Dict, List, Optional, Union
 import sys
 
+from lightwood.api.dtype import dtype
+
 if sys.version_info >= (3, 8):
     from typing import TypedDict
 else:
@@ -26,104 +28,6 @@ class Module(TypedDict):
     """ # noqa
     module: str
     args: Dict[str, str]
-
-
-@dataclass
-class Feature:
-    """
-    Within a dataframe, each column is considered its own "feature" (unless ignored etc.). \
-        The following expects each feature to have descriptions of the following:
-
-    :param encoder: the methodology for encoding a feature (a Lightwood Encoder)
-    :param data_dtype: The type of information within this column (ex.: numerical, categorical, etc.)
-    :param dependency: Any custom attributes for this feature that may require non-standard processing. This highly\
-    depends on the encoder (ex: Pretrained text may be fine-tuned on the target; time-series requires prior time-steps).
-    """
-
-    encoder: Module
-    data_dtype: str
-    dependency: List[str] = None
-
-    @staticmethod
-    def from_dict(obj: Dict):
-        """
-        Create ``Feature`` objects from the a dictionary representation.
-
-        :param obj: A dictionary representation of a column feature's attributes. Must include keys *encoder*, \
-            *data_dtype*, and *dependency*.
-
-        :Example:
-
-        >>> my_dict = {"feature_A": {"encoder": MyEncoder, "data_dtype": "categorical", "dependency": None}}
-        >>> print(Feature.from_dict(my_dict["feature_A"]))
-        >>> Feature(encoder=None, data_dtype='categorical', dependency=None)
-
-        :returns: A Feature object with loaded information.
-        """
-        encoder = obj["encoder"]
-        data_dtype = obj.get("data_dtype", None)
-        dependency = obj.get("dependency", None)
-
-        feature = Feature(encoder=encoder, data_dtype=data_dtype, dependency=dependency)
-
-        return feature
-
-    @staticmethod
-    def from_json(data: str):
-        """
-        Create ``Feature`` objects from JSON representation. This method calls on :ref: `from_dict` after loading the \
-            json config.
-
-        :param data: A JSON representation of the feature.
-
-        :returns: Loaded information into the Feature representation.
-        """
-        return Feature.from_dict(json.loads(data))
-
-    def to_dict(self, encode_json=False) -> Dict[str, Json]:
-        """
-        Converts a Feature to a dictionary representation.
-
-        :returns: A python dictionary with strings indicating the three key elements and their respective values of \
-            the Feature class.
-        """
-        as_dict = _asdict(self, encode_json=encode_json)
-        for k in list(as_dict.keys()):
-            if as_dict[k] is None:
-                del as_dict[k]
-        return as_dict
-
-    def to_json(self) -> Dict[str, Json]:
-        """
-        Converts a Feature into a JSON object. Calls ``to_dict`` under the hood.
-
-        :returns: Json config syntax for the three key elements and their respective values of the Feature class.
-        """
-        return json.dumps(self.to_dict(), indent=4)
-
-
-@dataclass_json
-@dataclass
-class Output:
-    """
-    A representation for the output feature. This is specifically used on the target column of your dataset. \
-    Four attributes are expected as seen below.
-
-    Note, currently supervised tasks are supported, hence categorical, numerical, and time-series are the expected \
-    outputs types. Complex features such as text generation are not currently available by default.
-
-    :param data_dtype: The type of information within the target column (ex.: numerical, categorical, etc.).
-    :param encoder: the methodology for encoding the target feature (a Lightwood Encoder). There can only be one \
-    encoder for the output target.
-    :param mixers: The list of ML algorithms that are trained for the target distribution.
-    :param ensemble: For a panel of ML algorithms, the approach of selecting the best mixer, and the metrics used in \
-    that evaluation.
-    """
-
-    data_dtype: str
-    encoder: str = None
-    mixers: List[str] = None
-    ensemble: str = None
 
 
 @dataclass_json
@@ -436,8 +340,10 @@ class JsonAI:
     recipe of how to pre-process data, construct features, and train on the target column. To do so, the following \
     specifications are required internally.
 
-    :param features: The corresponding``Feature`` object for each of the column names of the dataset
-    :param outputs: The column name of the target and its ``Output`` object
+    :param encoders: A dictionary of the form: `column_name -> encoder module`
+    :param dtype_dict: A dictionary of the form: `column_name -> data type`
+    :param dependency_dict: A dictionary of the form: `column_name -> list of columns it depends on`
+    :param model: The ensemble and its submodels
     :param problem_definition: The ``ProblemDefinition`` criteria.
     :param identifiers: A dictionary of column names and respective data types that are likely identifiers/IDs within the data. Through the default cleaning process, these are ignored.
     :param cleaner: The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, "None" suggests Lightwood's default approach in ``data.cleaner``.
@@ -450,8 +356,10 @@ class JsonAI:
     :param accuracy_functions: A list of performance metrics used to evaluate the best mixers.
     """ # noqa
 
-    features: Dict[str, Feature]
-    outputs: Dict[str, Output]
+    encoders: Dict[str, Module]
+    dtype_dict: Dict[str, dtype]
+    dependency_dict: Dict[str, List[str]]
+    model: Dict[str, Module]
     problem_definition: ProblemDefinition
     identifiers: Dict[str, str]
     cleaner: Optional[Module] = None
@@ -468,8 +376,10 @@ class JsonAI:
         """
         Creates a JSON-AI object from dictionary specifications of the JSON-config.
         """
-        features = {k: Feature.from_dict(v) for k, v in obj["features"].items()}
-        outputs = {k: Output.from_dict(v) for k, v in obj["outputs"].items()}
+        encoders = obj["encoders"]
+        dtype_dict = obj["dtype_dict"]
+        dependency_dict = obj["dependency_dict"]
+        model = obj["model"]
         problem_definition = ProblemDefinition.from_dict(obj["problem_definition"])
         identifiers = obj["identifiers"]
         cleaner = obj.get("cleaner", None)
@@ -482,8 +392,10 @@ class JsonAI:
         accuracy_functions = obj.get("accuracy_functions", None)
 
         json_ai = JsonAI(
-            features=features,
-            outputs=outputs,
+            encoders=encoders,
+            dtype_dict=dtype_dict,
+            dependency_dict=dependency_dict,
+            model=model,
             problem_definition=problem_definition,
             identifiers=identifiers,
             cleaner=cleaner,
@@ -570,10 +482,7 @@ class PredictionArguments:
     instead of returning only the predicted class, the output additionally includes the assigned probability for
     each class.   
     :param all_mixers: forces an ensemble to return predictions emitted by all its internal mixers. 
-    :param fixed_confidence: For analyzer module, specifies a fixed `alpha` confidence for the model calibration so \
-        that predictions, in average, are correct `alpha` percent of the time.
-    :param anomaly_error_rate: Error rate for unsupervised anomaly detection. Bounded between 0.01 and 0.99 \
-        (respectively implies wider and tighter bounds, all other parameters being equal).
+    :param fixed_confidence: Used in the ICP analyzer module, specifies an `alpha` fixed confidence so that predictions, in average, are correct `alpha` percent of the time. For unsupervised anomaly detection, this also translates into the expected error rate. Bounded between 0.01 and 0.99 (respectively implies wider and tighter bounds, all other parameters being equal).
     :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
         detector.
     """  # noqa
@@ -581,7 +490,6 @@ class PredictionArguments:
     predict_proba: bool = True
     all_mixers: bool = False
     fixed_confidence: Union[int, float, None] = None
-    anomaly_error_rate: Union[float, None] = None
     anomaly_cooldown: int = 1
     forecast_offset: int = 0
 
@@ -599,7 +507,6 @@ class PredictionArguments:
         predict_proba = obj.get('predict_proba', PredictionArguments.predict_proba)
         all_mixers = obj.get('all_mixers', PredictionArguments.all_mixers)
         fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
-        anomaly_error_rate = obj.get('anomaly_error_rate', PredictionArguments.anomaly_error_rate)
         anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
         forecast_offset = obj.get('forecast_offset', PredictionArguments.forecast_offset)
 
@@ -607,7 +514,6 @@ class PredictionArguments:
             predict_proba=predict_proba,
             all_mixers=all_mixers,
             fixed_confidence=fixed_confidence,
-            anomaly_error_rate=anomaly_error_rate,
             anomaly_cooldown=anomaly_cooldown,
             forecast_offset=forecast_offset,
         )

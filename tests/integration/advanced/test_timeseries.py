@@ -66,11 +66,11 @@ class TestTimeseries(unittest.TestCase):
                                                                     'period_intervals': (('daily', 7),),
                                                                     'window': window
                                                                 }}))
-        for i, mixer in enumerate(jai.outputs[target].mixers):
+        for i, mixer in enumerate(jai.model['args']['submodels']):
             if mixer["module"] == 'SkTime':
                 sktime_mixer_idx = i
 
-        jai.outputs[target].mixers[sktime_mixer_idx] = {
+        jai.model['args']['submodels'][sktime_mixer_idx] = {
             "module": "SkTime",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
@@ -105,9 +105,8 @@ class TestTimeseries(unittest.TestCase):
 
         # Check custom ICP params
         test.pop('__mdb_make_predictions')
-        preds = pred.predict(test, {'fixed_confidence': 0.01, 'anomaly_cooldown': 100, 'anomaly_error_rate': 1})
+        preds = pred.predict(test, {'fixed_confidence': 0.01, 'anomaly_cooldown': 100})
         assert all([all([v == 0.01 for v in f]) for f in preds['confidence'].values])
-        assert pred.pred_args.anomaly_error_rate == 1
         assert pred.pred_args.anomaly_cooldown == 100
 
     def test_1_time_series_regression(self):
@@ -213,7 +212,7 @@ class TestTimeseries(unittest.TestCase):
                                             }})
 
         json_ai = json_ai_from_problem(df, problem_definition=pdef)
-        json_ai.outputs[target].mixers = [{
+        json_ai.model['args']['submodels'] = [{
             "module": "SkTime",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
