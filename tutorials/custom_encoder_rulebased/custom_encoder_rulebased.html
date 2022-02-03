@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Custom Encoder: Rule-Based &mdash; lightwood 22.1.4.0 documentation</title>
+  <title>Custom Encoder: Rule-Based &mdash; lightwood 22.2.1.0 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                22.1.4.0
+                22.2.1.0
               </div>
             
           
@@ -482,8 +482,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2533:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 </div>
@@ -631,29 +631,29 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2533:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Analyzing a sample of 6920</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Infering type for: model</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Column model has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Infering type for: year</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Column year has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Infering type for: price</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Column price has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Infering type for: transmission</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Column transmission has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Infering type for: mileage</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Column mileage has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Infering type for: fuelType</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Column fuelType has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Infering type for: tax</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Column tax has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Infering type for: mpg</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Column mpg has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Infering type for: engineSize</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Column engineSize has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Analyzing a sample of 6920</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Infering type for: model</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Column model has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Infering type for: year</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Column year has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Infering type for: price</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Column price has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Infering type for: transmission</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Column transmission has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Infering type for: mileage</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Column mileage has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Infering type for: fuelType</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Column fuelType has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Infering type for: tax</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Column tax has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Infering type for: mpg</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Column mpg has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Infering type for: engineSize</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Column engineSize has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Let’s take a look at our JSON-AI and print to file.</p>
@@ -671,75 +671,63 @@ div.rendered_html tbody tr:hover {
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 {
-    &#34;features&#34;: {
+    &#34;encoders&#34;: {
+        &#34;price&#34;: {
+            &#34;module&#34;: &#34;NumericEncoder&#34;,
+            &#34;args&#34;: {
+                &#34;is_target&#34;: &#34;True&#34;,
+                &#34;positive_domain&#34;: &#34;$statistical_analysis.positive_domain&#34;
+            }
+        },
         &#34;model&#34;: {
-            &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;OneHotEncoder&#34;,
-                &#34;args&#34;: {}
-            },
-            &#34;data_dtype&#34;: &#34;categorical&#34;
+            &#34;module&#34;: &#34;OneHotEncoder&#34;,
+            &#34;args&#34;: {}
         },
         &#34;year&#34;: {
-            &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;NumericEncoder&#34;,
-                &#34;args&#34;: {}
-            },
-            &#34;data_dtype&#34;: &#34;integer&#34;
+            &#34;module&#34;: &#34;NumericEncoder&#34;,
+            &#34;args&#34;: {}
         },
         &#34;transmission&#34;: {
-            &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;OneHotEncoder&#34;,
-                &#34;args&#34;: {}
-            },
-            &#34;data_dtype&#34;: &#34;categorical&#34;
+            &#34;module&#34;: &#34;OneHotEncoder&#34;,
+            &#34;args&#34;: {}
         },
         &#34;mileage&#34;: {
-            &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;NumericEncoder&#34;,
-                &#34;args&#34;: {}
-            },
-            &#34;data_dtype&#34;: &#34;integer&#34;
+            &#34;module&#34;: &#34;NumericEncoder&#34;,
+            &#34;args&#34;: {}
         },
         &#34;fuelType&#34;: {
-            &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;OneHotEncoder&#34;,
-                &#34;args&#34;: {}
-            },
-            &#34;data_dtype&#34;: &#34;categorical&#34;
+            &#34;module&#34;: &#34;OneHotEncoder&#34;,
+            &#34;args&#34;: {}
         },
         &#34;tax&#34;: {
-            &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;NumericEncoder&#34;,
-                &#34;args&#34;: {}
-            },
-            &#34;data_dtype&#34;: &#34;integer&#34;
+            &#34;module&#34;: &#34;NumericEncoder&#34;,
+            &#34;args&#34;: {}
         },
         &#34;mpg&#34;: {
-            &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;NumericEncoder&#34;,
-                &#34;args&#34;: {}
-            },
-            &#34;data_dtype&#34;: &#34;float&#34;
+            &#34;module&#34;: &#34;NumericEncoder&#34;,
+            &#34;args&#34;: {}
         },
         &#34;engineSize&#34;: {
-            &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;NumericEncoder&#34;,
-                &#34;args&#34;: {}
-            },
-            &#34;data_dtype&#34;: &#34;float&#34;
+            &#34;module&#34;: &#34;NumericEncoder&#34;,
+            &#34;args&#34;: {}
         }
     },
-    &#34;outputs&#34;: {
-        &#34;price&#34;: {
-            &#34;data_dtype&#34;: &#34;integer&#34;,
-            &#34;encoder&#34;: {
-                &#34;module&#34;: &#34;NumericEncoder&#34;,
-                &#34;args&#34;: {
-                    &#34;is_target&#34;: &#34;True&#34;,
-                    &#34;positive_domain&#34;: &#34;$statistical_analysis.positive_domain&#34;
-                }
-            },
-            &#34;mixers&#34;: [
+    &#34;dtype_dict&#34;: {
+        &#34;model&#34;: &#34;categorical&#34;,
+        &#34;year&#34;: &#34;integer&#34;,
+        &#34;price&#34;: &#34;integer&#34;,
+        &#34;transmission&#34;: &#34;categorical&#34;,
+        &#34;mileage&#34;: &#34;integer&#34;,
+        &#34;fuelType&#34;: &#34;categorical&#34;,
+        &#34;tax&#34;: &#34;integer&#34;,
+        &#34;mpg&#34;: &#34;float&#34;,
+        &#34;engineSize&#34;: &#34;float&#34;
+    },
+    &#34;dependency_dict&#34;: {},
+    &#34;model&#34;: {
+        &#34;module&#34;: &#34;BestOf&#34;,
+        &#34;args&#34;: {
+            &#34;submodels&#34;: [
                 {
                     &#34;module&#34;: &#34;Neural&#34;,
                     &#34;args&#34;: {
@@ -762,14 +750,9 @@ div.rendered_html tbody tr:hover {
                     }
                 }
             ],
-            &#34;ensemble&#34;: {
-                &#34;module&#34;: &#34;BestOf&#34;,
-                &#34;args&#34;: {
-                    &#34;args&#34;: &#34;$pred_args&#34;,
-                    &#34;accuracy_functions&#34;: &#34;$accuracy_functions&#34;,
-                    &#34;ts_analysis&#34;: null
-                }
-            }
+            &#34;args&#34;: &#34;$pred_args&#34;,
+            &#34;accuracy_functions&#34;: &#34;$accuracy_functions&#34;,
+            &#34;ts_analysis&#34;: null
         }
     },
     &#34;problem_definition&#34;: {
@@ -778,7 +761,7 @@ div.rendered_html tbody tr:hover {
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 57024.0,
         &#34;seconds_per_encoder&#34;: null,
-        &#34;expected_additional_time&#34;: 2.2777035236358643,
+        &#34;expected_additional_time&#34;: 1.689246416091919,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -977,15 +960,15 @@ Writing LabelEncoder.py
 <p>The first strategy requires just specifying which features you’d like to change. Once you have your list, you can manually set the encoder “module” to the class you’d like. <strong>This is best suited for a few columns or if you only want to override a few particular columns as opposed to replacing the ``Encoder`` behavior for an entire data type</strong>. #### Strategy 1: Change the encoders for the features directly</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">ft</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;transmission&quot;</span><span class="p">,</span> <span class="s2">&quot;fuelType&quot;</span><span class="p">]:</span> <span class="c1"># Features you want to replace</span>
     <span class="c1"># Set each feature to the custom encoder</span>
-    <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">ft</span><span class="p">]</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;LabelEncoder.LabelEncoder&#39;</span>
+    <span class="n">json_ai</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">ft</span><span class="p">][</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;LabelEncoder.LabelEncoder&#39;</span>
 </pre></div>
 </div>
 <p>Suppose you have many columns that are categorical- you may want to enforce your approach explicitly without naming each column. This can be done by examining the <code class="docutils literal notranslate"><span class="pre">data_dtype</span></code> of JSON-AI’s features. For all features that are type <code class="docutils literal notranslate"><span class="pre">categorical</span></code> (while this is a <code class="docutils literal notranslate"><span class="pre">str</span></code>, it’s ideal to import dtype and explicitly check the data type), replace the default <code class="docutils literal notranslate"><span class="pre">Encoder</span></code> with your encoder. In this case, this is <code class="docutils literal notranslate"><span class="pre">LabelEncoder.LabelEncoder</span></code>. #### Strategy 2: Programatically change <em>all</em> encoder
 assignments for a data type</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">data_dtype</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">:</span>
-        <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;LabelEncoder.LabelEncoder&#39;</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">:</span>
+        <span class="n">json_ai</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;LabelEncoder.LabelEncoder&#39;</span>
 </pre></div>
 </div>
 <p>We’ll go with the first approach for simplicity:</p>
@@ -995,7 +978,7 @@ assignments for a data type</p>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">ft</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;transmission&quot;</span><span class="p">,</span> <span class="s2">&quot;fuelType&quot;</span><span class="p">]:</span> <span class="c1"># Features you want to replace</span>
     <span class="c1"># Set each feature to the custom encoder</span>
-    <span class="n">json_ai</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">ft</span><span class="p">]</span><span class="o">.</span><span class="n">encoder</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;LabelEncoder.LabelEncoder&#39;</span>
+    <span class="n">json_ai</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">ft</span><span class="p">][</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;LabelEncoder.LabelEncoder&#39;</span>
 </pre></div>
 </div>
 </div>
@@ -1020,7 +1003,7 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2533:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <p>Now, let’s run our pipeline. To do so, let’s first:</p>
@@ -1056,39 +1039,39 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2533:Performing statistical analysis on data</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2533: `analyze_data` runtime: 0.34 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2533: `preprocess` runtime: 0.12 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2533: `split` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Preparing the encoders</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Encoder prepping dict length of: 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Encoder prepping dict length of: 2</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Encoder prepping dict length of: 3</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Encoder prepping dict length of: 4</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Encoder prepping dict length of: 5</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Encoder prepping dict length of: 6</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Encoder prepping dict length of: 7</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Encoder prepping dict length of: 8</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Encoder prepping dict length of: 9</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Done running for: price</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Done running for: model</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Done running for: year</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Done running for: transmission</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Done running for: mileage</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Done running for: fuelType</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Done running for: tax</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Done running for: mpg</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Done running for: engineSize</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2533: `prepare` runtime: 0.33 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2533:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2533: `featurize` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Performing statistical analysis on data</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2251: `analyze_data` runtime: 0.29 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2251: `preprocess` runtime: 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2251: `split` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Preparing the encoders</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Encoder prepping dict length of: 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Encoder prepping dict length of: 2</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Encoder prepping dict length of: 3</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Encoder prepping dict length of: 4</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Encoder prepping dict length of: 5</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Encoder prepping dict length of: 6</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Encoder prepping dict length of: 7</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Encoder prepping dict length of: 8</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Encoder prepping dict length of: 9</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Done running for: price</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Done running for: model</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Done running for: year</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Done running for: transmission</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Done running for: mileage</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Done running for: fuelType</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Done running for: tax</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Done running for: mpg</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Done running for: engineSize</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2251: `prepare` runtime: 0.25 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2251:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2251: `featurize` runtime: 0.0 seconds</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>
