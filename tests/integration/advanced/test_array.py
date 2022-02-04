@@ -1,10 +1,7 @@
-import random
 import unittest
 import numpy as np
 import pandas as pd
-from typing import List
 from lightwood.api.types import ProblemDefinition
-from tests.utils.timing import train_and_check_time_aim
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
 
 np.random.seed(0)
@@ -30,13 +27,11 @@ class TestArrayTarget(unittest.TestCase):
         predictor.learn(train)
         predictor.predict(test)
 
-
     def test_1_cat_array(self):
         """ Tests categorical array input and output. """
         # task: learn to reverse the `arr_len`-length input array.
         df = pd.DataFrame()
         arr_len = 4
-        # chr(65 + int(str(x / 10000)[0]
         df['input'] = [[chr(65 + i + row % 4) for i in range(arr_len)] for row in range(200)]
         df['output'] = [[chr(65 + i + row % 4) for i in range(arr_len)][::-1] for row in range(200)]
 
