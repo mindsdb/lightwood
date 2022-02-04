@@ -30,24 +30,12 @@ class AccStats(BaseAnalysisBlock):
     def fit(self, ns: SimpleNamespace, conf=Optional[np.ndarray]):
         self.col_stats = ns.dtype_dict
         self.target = ns.target
-        self.input_cols = list(ns.dtype_dict.keys())
+        self.input_cols = [col for col in ns.dtype_dict.keys() if col != self.target]
         self.buckets = ns.stats_info.buckets if ns.stats_info.buckets else {}
 
         self.normal_predictions_bucketized = []
         self.real_values_bucketized = []
         self.numerical_samples_arr = []
-
-        column_indexes = {}
-        for i, col in enumerate(self.input_cols):
-            column_indexes[col] = i
-
-        real_present_inputs_arr = []
-        for _, row in ns.data.iterrows():
-            present_inputs = [1] * len(self.input_cols)
-            for i, col in enumerate(self.input_cols):
-                if str(row[col]) in ('None', 'nan', '', 'Nan', 'NAN', 'NaN'):
-                    present_inputs[i] = 0
-            real_present_inputs_arr.append(present_inputs)
 
         for n in range(len(ns.normal_predictions)):
             row = ns.data.iloc[n]
