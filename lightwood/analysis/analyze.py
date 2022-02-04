@@ -44,8 +44,8 @@ def model_analyzer(
     input_cols = list([col for col in data.columns if col != target])
 
     # predictive task
-    is_numerical = data_type in (dtype.integer, dtype.float, dtype.num_array, dtype.num_tsarray, dtype.quantity)
-    is_classification = data_type in (dtype.categorical, dtype.binary, dtype.cat_array, dtype.cat_tsarray)
+    is_numerical = data_type in (dtype.integer, dtype.float, dtype.num_tsarray, dtype.quantity)
+    is_classification = data_type in (dtype.categorical, dtype.binary, dtype.cat_tsarray)
     is_multi_ts = tss.is_timeseries and tss.horizon > 1
     has_pretrained_text_enc = any([isinstance(enc, PretrainedLangEncoder)
                                    for enc in encoded_train_data.encoders.values()])

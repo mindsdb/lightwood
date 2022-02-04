@@ -63,9 +63,9 @@ class ArrayEncoder(BaseEncoder):
                 priming_data[i] = [0] * self.output_size
 
         if self.original_type in (dtype.categorical, dtype.binary, dtype.cat_array, dtype.cat_tsarray):
-            self._normalizer = CatNormalizer(encoder_class='ordinal')
+            self._normalizer = CatNormalizer(encoder_class='ordinal')  # @TODO: maybe turn into OHE encoder?
         else:
-            self._normalizer = MinMaxNormalizer()
+            self._normalizer = MinMaxNormalizer()  # @TODO: maybe turn into numerical encoder?
 
         if isinstance(priming_data, pd.Series):
             priming_data = priming_data.values
@@ -107,5 +107,24 @@ class ArrayEncoder(BaseEncoder):
         :param data: Encoded data prepared by this array encoder
         :returns: A list of iterable sequences in the original data space
         """
-        decoded = data.tolist()
+        decoded = self._normalizer.decode(data.tolist())
         return decoded
+
+
+class CatArrayEncoder(ArrayEncoder):
+    def __init__(self, stop_after: float, window: int = None, is_target: bool = False):
+        super(CatArrayEncoder, self).__init__(stop_after, window, is_target, original_type=dtype.cat_array)
+
+    def prepare(self, train_priming_data: Iterable[Iterable], dev_priming_data: Iterable[Iterable]):
+        super().prepare(train_priming_data, dev_priming_data)
+        self.index_weights = torch.ones(size=(self.output_size,))
+
+    def decode(self, data: torch.Tensor) -> List[Iterable]:
+        decoded = self._normalizer.decode(data.reshape(-1, 1).tolist()).reshape(1, -1)
+        return decoded
+
+
+class NumArrayEncoder(ArrayEncoder):
+    def __init__(self, stop_after: float, window: int = None, is_target: bool = False, positive_domain: bool = False):
+        self.positive_domain = positive_domain
+        super(NumArrayEncoder, self).__init__(stop_after, window, is_target, original_type=dtype.num_array)

@@ -8,7 +8,6 @@ from lightwood.encoder.numeric import TsNumericEncoder
 
 
 class TsArrayNumericEncoder(BaseEncoder):
-    # @TODO: move this over to array folder
     def __init__(self, timesteps: int, is_target: bool = False, positive_domain: bool = False, grouped_by=None):
         """
         This encoder handles arrays of numerical time series data by wrapping the numerical encoder with behavior specific to time series tasks.

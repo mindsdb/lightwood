@@ -56,24 +56,33 @@ def evaluate_accuracy(data: pd.DataFrame,
 
     for accuracy_function_str in accuracy_functions:
         if accuracy_function_str == 'evaluate_num_array_accuracy':
-            horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
-            gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
-            cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
-            true_values = data[cols]
+            if ts_analysis is None or not ts_analysis['tss'].is_timeseries:
+                # normal array, needs to be expanded
+                cols = [target]
+                true_values = data[cols].apply(lambda x: pd.Series(x[target]), axis=1)
+            else:
+                horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
+                gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
+                cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
+                true_values = data[cols]
             predictions = predictions.apply(pd.Series)
             score_dict[accuracy_function_str] = evaluate_num_array_accuracy(true_values,
                                                                             predictions,
-                                                                            data[cols],
+                                                                            data=data[cols],
                                                                             ts_analysis=ts_analysis)
         elif accuracy_function_str == 'evaluate_cat_array_accuracy':
-            horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
-            gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
-            cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
+            if ts_analysis is None:
+                cols = [target]
+            else:
+                horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
+                gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
+                cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
             true_values = data[cols]
             predictions = predictions.apply(pd.Series)
+            print(true_values)
+            print(predictions)
             score_dict[accuracy_function_str] = evaluate_cat_array_accuracy(true_values,
                                                                             predictions,
-                                                                            data[cols],
                                                                             ts_analysis=ts_analysis)
         else:
             true_values = data[target].tolist()
@@ -133,15 +142,18 @@ def evaluate_num_array_accuracy(
     and the final accuracy is the reciprocal of the average score through all timesteps.
     """
     ts_analysis = kwargs.get('ts_analysis', {})
-    naive_errors = ts_analysis.get('ts_naive_mae', {})
-    wrapped_data = {
-        'data': data.reset_index(drop=True),
-        'group_info': {gcol: data[gcol].tolist()
-                       for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
-    }
+    if not ts_analysis:
+        naive_errors = None
+    else:
+        naive_errors = ts_analysis.get('ts_naive_mae', {})
+        wrapped_data = {
+            'data': data.reset_index(drop=True),
+            'group_info': {gcol: data[gcol].tolist()
+                           for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
+        }
 
-    if ts_analysis['tss'].group_by:
-        [true_values.pop(gby_col) for gby_col in ts_analysis['tss'].group_by]
+        if ts_analysis['tss'].group_by:
+            [true_values.pop(gby_col) for gby_col in ts_analysis['tss'].group_by]
 
     true_values = np.array(true_values)
     predictions = np.array(predictions)
@@ -180,10 +192,10 @@ def evaluate_array_accuracy(
     """  # noqa
     base_acc_fn = kwargs.get('base_acc_fn', lambda t, p: max(0, r2_score(t, p)))
 
-    fh = kwargs.get('ts_analysis', {}).get('tss', None)
-    fh = fh.horizon if fh is not None else 1
+    fh = true_values.shape[1]
+    ts_analysis = kwargs.get('ts_analysis', None)
 
-    if kwargs.get('ts_analysis', {}).get('tss', False) and not kwargs['ts_analysis']['tss'].eval_cold_start:
+    if ts_analysis and ts_analysis.get('tss', False) and not kwargs['ts_analysis']['tss'].eval_cold_start:
         # only evaluate accuracy for rows with complete historical context
         true_values = true_values[kwargs['ts_analysis']['tss'].window:]
         predictions = predictions[kwargs['ts_analysis']['tss'].window:]
@@ -198,7 +210,6 @@ def evaluate_array_accuracy(
 def evaluate_cat_array_accuracy(
         true_values: pd.Series,
         predictions: pd.Series,
-        data: pd.DataFrame,
         **kwargs
 ) -> float:
     """
@@ -209,7 +220,7 @@ def evaluate_cat_array_accuracy(
     """
     ts_analysis = kwargs.get('ts_analysis', {})
 
-    if ts_analysis['tss'].group_by:
+    if ts_analysis and ts_analysis['tss'].group_by:
         [true_values.pop(gby_col) for gby_col in ts_analysis['tss'].group_by]
 
     true_values = np.array(true_values)

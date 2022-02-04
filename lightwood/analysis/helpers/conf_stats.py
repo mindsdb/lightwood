@@ -29,6 +29,8 @@ class ConfStats(BaseAnalysisBlock):
             task_type = 'numerical'
         elif ns.is_multi_ts:
             task_type = 'multi_ts'
+        else:
+            return info
 
         ces, ece, mce, gscore = self._get_stats(info['result_df'],
                                                 ns.normal_predictions,

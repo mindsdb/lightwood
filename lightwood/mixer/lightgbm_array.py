@@ -24,8 +24,6 @@ class LightGBMArray(BaseMixer):
             self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             input_cols: List[str],
             n_ts_predictions: int, fit_on_dev: bool, target_encoder: BaseEncoder):
-        print('pre lgbmarr init')
-        print(dtype_dict)
         super().__init__(stop_after)
         self.submodel_stop_after = stop_after / n_ts_predictions
         self.target = target

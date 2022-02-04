@@ -1,3 +1,4 @@
+import random
 import unittest
 import numpy as np
 import pandas as pd
@@ -198,6 +199,10 @@ class TestTimeseries(unittest.TestCase):
         target = 'Traffic'
         df[target] = df[target].apply(lambda x: chr(65 + int(str(x / 10000)[0])))  # multiclass time series target
 
+        # test array columns as additional input
+        df['test_num_array'] = [[random.choice([1, 2, 3, 4]) for __ in range(4)] for _ in range(df.shape[0])]
+        df['test_cat_array'] = [[random.choice(['a', 'b', 'c', 'd']) for __ in range(4)] for _ in range(df.shape[0])]
+
         train_idxs = np.random.rand(len(df)) < 0.8
         train = df[train_idxs]
         test = df[~train_idxs]
@@ -213,7 +218,6 @@ class TestTimeseries(unittest.TestCase):
                                                                             'horizon': 2
                                                                         },
                                                                         }))
-        print(predictor.dtype_dict)
 
         predictor.learn(train)
         predictor.predict(test)

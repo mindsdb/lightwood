@@ -22,7 +22,7 @@ class MinMaxNormalizer:
         x = x.astype(float)
         x[x == None] = 0 # noqa
         self.abs_mean = np.mean(np.abs(x))
-        self.scaler.fit(x)
+        self.scaler.fit(x.reshape(x.size, -1))
 
     def encode(self, y: np.ndarray) -> torch.Tensor:
         if isinstance(y[0], list):
@@ -52,11 +52,11 @@ class CatNormalizer:
         self.unk = "<UNK>"
 
     def prepare(self, x):
-        X = []
+        X = set()
         for i in x:
             for j in i:
-                X.append(j if j is not None else self.unk)
-        self.scaler.fit(np.array(X).reshape(-1, 1))
+                X.add(j if j is not None else self.unk)
+        self.scaler.fit(np.array(list(X)).reshape(-1, 1))
         self.output_size = len(self.scaler.categories_[0]) if self.encoder_class == 'one_hot' else 1
 
     def encode(self, Y):
@@ -73,4 +73,4 @@ class CatNormalizer:
         return torch.Tensor(out)
 
     def decode(self, y):
-        return [[i[0] for i in self.scaler.inverse_transform(o)] for o in y]
+        return self.scaler.inverse_transform(y)

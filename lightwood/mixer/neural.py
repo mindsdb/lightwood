@@ -92,10 +92,12 @@ class Neural(BaseMixer):
             criterion = TransformCrossEntropyLoss(weight=self.target_encoder.index_weights.to(self.model.device))
         elif self.dtype_dict[self.target] in (dtype.tags, dtype.cat_tsarray):
             criterion = nn.BCEWithLogitsLoss()
+        elif self.dtype_dict[self.target] in (dtype.cat_array, ):
+            criterion = nn.L1Loss()
         elif (self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.num_tsarray, dtype.quantity)
                 and self.timeseries_settings.is_timeseries):
             criterion = nn.L1Loss()
-        elif self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.quantity):
+        elif self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.quantity, dtype.num_array):
             criterion = MSELoss()
         else:
             criterion = MSELoss()

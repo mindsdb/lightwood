@@ -195,30 +195,22 @@ def _standardize_num_array(element: object) -> Optional[Union[List[float], float
     return element
 
 
-def _standardize_cat_array(element: object) -> Optional[Union[List[float], float]]:
+def _standardize_cat_array(element: List) -> Optional[List[str]]:
     """
-    Given an array of labels in the form ``['a', 'a', 'b', 'c']``, converts into a label sequence.
+    Given an array of labels in the form ``['a', 'a', 'b', 'c']``, replace None/nan with <UNK> tokens.
 
     :param element: An array-like element in a sequence
     :returns: standardized array OR label IF edge case
 
     Ex of edge case:
-    >> element = [1]
-    >> _standardize_num_array(element)
-    >> 1
+    >> element = ['a']
+    >> _standardize_cat_array(element)
+    >> 'a'
     """
-    try:
-        element = str(element)
-        element = element.rstrip("]").lstrip("[")
-        element = element.rstrip(" ").lstrip(" ")
-        element = element.replace(", ", " ").replace(",", " ")
-        # Handles cases where arrays are labels
-        if " " not in element:
-            element = _clean_text(element)
-        else:
-            element = [x for x in element.split(" ")]
-    except Exception:
-        pass
+    if len(element) == 1:
+        return element[0]
+    else:
+        element = [e if e else '<UNK>' for e in element]
 
     return element
 

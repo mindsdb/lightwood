@@ -94,8 +94,8 @@ def lookup_encoder(
         dtype.short_text: "CategoricalAutoEncoder",
         dtype.quantity: "NumericEncoder",
         dtype.audio: "MFCCEncoder",
-        dtype.num_array: "ArrayEncoder",
-        dtype.cat_array: "ArrayEncoder",
+        dtype.num_array: "NumArrayEncoder",
+        dtype.cat_array: "CatArrayEncoder",
         dtype.num_tsarray: "TimeSeriesEncoder",
         dtype.cat_tsarray: "TimeSeriesEncoder",
     }
@@ -239,7 +239,7 @@ def generate_json_ai(
             }
         ]
 
-        if not tss.is_timeseries or tss.horizon == 1:
+        if (not tss.is_timeseries or tss.horizon == 1) and dtype_dict[target] not in (dtype.num_array, dtype.cat_array):
             submodels.extend(
                 [
                     {
@@ -257,7 +257,7 @@ def generate_json_ai(
                     },
                 ]
             )
-        elif tss.horizon > 1:
+        elif tss.is_timeseries and tss.horizon > 1:
             submodels.extend(
                 [
                     {
@@ -272,7 +272,6 @@ def generate_json_ai(
             )
 
             if tss.use_previous_target and dtype_dict[target] in (dtype.integer, dtype.float, dtype.quantity):
-                # , dtype.num_tsarray):
                 submodels.extend(
                     [
                         {
@@ -807,7 +806,7 @@ encoder_prepping_dict = {{}}
 
 # Prepare encoders that do not require learned strategies
 for col_name, encoder in self.encoders.items():
-    if not encoder.is_trainable_encoder:
+    if col_name != self.target and not encoder.is_trainable_encoder:
         encoder_prepping_dict[col_name] = [encoder, concatenated_train_dev[col_name], 'prepare']
         log.info(f'Encoder prepping dict length of: {{len(encoder_prepping_dict)}}')
 
@@ -825,7 +824,7 @@ if self.target not in parallel_prepped_encoders:
 
 # Prepare any non-target encoders that are learned
 for col_name, encoder in self.encoders.items():
-    if encoder.is_trainable_encoder:
+    if col_name != self.target and encoder.is_trainable_encoder:
         priming_data = pd.concat([data['train'], data['dev']])
         kwargs = {{}}
         if self.dependencies[col_name]:
