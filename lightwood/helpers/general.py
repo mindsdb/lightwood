@@ -71,16 +71,15 @@ def evaluate_accuracy(data: pd.DataFrame,
                                                                             data=data[cols],
                                                                             ts_analysis=ts_analysis)
         elif accuracy_function_str == 'evaluate_cat_array_accuracy':
-            if ts_analysis is None:
+            if ts_analysis is None or not ts_analysis['tss'].is_timeseries:
                 cols = [target]
+                true_values = data[cols].apply(lambda x: pd.Series(x[target]), axis=1)
             else:
                 horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
                 gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
                 cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
-            true_values = data[cols]
+                true_values = data[cols]
             predictions = predictions.apply(pd.Series)
-            print(true_values)
-            print(predictions)
             score_dict[accuracy_function_str] = evaluate_cat_array_accuracy(true_values,
                                                                             predictions,
                                                                             ts_analysis=ts_analysis)
