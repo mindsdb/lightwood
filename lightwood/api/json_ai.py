@@ -838,7 +838,7 @@ for col_name, encoder in self.encoders.items():
 
         # If an encoder representation requires the target, provide priming data
         if hasattr(encoder, 'uses_target'):
-            kwargs['encoded_target_values'] = parallel_prepped_encoders[self.target].encode(priming_data[self.target])
+            kwargs['encoded_target_values'] = self.encoders[self.target].encode(priming_data[self.target])
 
         encoder.prepare(data['train'][col_name], data['dev'][col_name], **kwargs)
 
