@@ -120,6 +120,7 @@ class CatArrayEncoder(ArrayEncoder):
         self.index_weights = torch.ones(size=(self.output_size,))
 
     def decode(self, data: torch.Tensor) -> List[Iterable]:
+        data = torch.round(data)  # improves accuracy as by default ordinal encoder will truncate
         decoded = self._normalizer.decode(data.reshape(-1, 1).tolist()).reshape(1, -1)
         return decoded
 
