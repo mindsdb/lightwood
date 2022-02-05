@@ -37,18 +37,6 @@ class AccStats(BaseAnalysisBlock):
         self.real_values_bucketized = []
         self.numerical_samples_arr = []
 
-        column_indexes = {}
-        for i, col in enumerate(self.input_cols):
-            column_indexes[col] = i
-
-        real_present_inputs_arr = []
-        for _, row in ns.data.iterrows():
-            present_inputs = [1] * len(self.input_cols)
-            for i, col in enumerate(self.input_cols):
-                if str(row[col]) in ('None', 'nan', '', 'Nan', 'NAN', 'NaN'):
-                    present_inputs[i] = 0
-            real_present_inputs_arr.append(present_inputs)
-
         for n in range(len(ns.normal_predictions)):
             row = ns.data.iloc[n]
             real_value = row[self.target]
