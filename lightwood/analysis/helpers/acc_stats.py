@@ -37,7 +37,7 @@ class AccStats(BaseAnalysisBlock):
     def fit(self, ns: SimpleNamespace, conf=Optional[np.ndarray]):
         self.col_stats = ns.dtype_dict
         self.target = ns.target
-        self.input_cols = [col for col in ns.dtype_dict.keys() if col != self.target]
+        self.input_cols = ns.input_cols
         self.buckets = ns.stats_info.buckets if ns.stats_info.buckets else {}
 
         self.normal_predictions_bucketized = []
