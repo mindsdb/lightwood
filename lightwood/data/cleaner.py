@@ -51,6 +51,9 @@ def cleaner(
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
         data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
 
+    if timeseries_settings.is_timeseries:
+        data = clean_timeseries(data, timeseries_settings)
+
     return data
 
 
@@ -325,3 +328,24 @@ def _get_columns_to_clean(data: pd.DataFrame, dtype_dict: Dict[str, dtype], mode
         if name in data.columns:
             cleanable_columns.append(name)
     return cleanable_columns
+
+
+def clean_timeseries(df: pd.DataFrame, tss: TimeseriesSettings) -> pd.DataFrame:
+    """
+    All timeseries-specific cleaning logic goes here. Currently:
+
+    1) Any row with `nan`-valued order-by measurements is dropped.
+
+    :param df: data.
+    :param tss: timeseries settings
+    :return: cleaned data.
+    """
+    invalid_rows = []
+
+    for idx, row in df.iterrows():
+        if pd.isna(row[tss.order_by[0]]):
+            invalid_rows.append(idx)
+
+    df = df.drop(invalid_rows)
+
+    return df

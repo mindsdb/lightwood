@@ -73,11 +73,11 @@ def transform_timeseries(
             secondary_type_dict[col] = dtype_dict[col]
 
     # Convert order_by columns to numbers (note, rows are references to mutable rows in `original_df`)
-    for _, row in original_df.iterrows():
+    for i, row in original_df.iterrows():
         for col in ob_arr:
             # @TODO: Remove if the TS encoder can handle `None`
             if row[col] is None or pd.isna(row[col]):
-                row[col] = 0.0
+                original_df.at[i, col] = 0.0
             else:
                 if dtype_dict[col] == dtype.date:
                     try:

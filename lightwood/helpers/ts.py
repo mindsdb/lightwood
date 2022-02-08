@@ -9,7 +9,7 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss: Times
         gby = [f'group_{g}' for g in tss.group_by]
 
     for (idx, row) in df.iterrows():
-        last = row[f'order_{col}'][-1]
+        last = [r for r in row[f'order_{col}'] if r == r][-1]  # filter out nans (safeguard; it shouldn't happen anyway)
 
         if tss.group_by:
             try:
