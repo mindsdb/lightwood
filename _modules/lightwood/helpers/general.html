@@ -228,16 +228,17 @@
     <span class="n">score_dict</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">accuracy_function_str</span> <span class="ow">in</span> <span class="n">accuracy_functions</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">accuracy_function_str</span> <span class="o">==</span> <span class="s1">&#39;evaluate_array_accuracy&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;evaluate_array_accuracy&#39;</span> <span class="ow">in</span> <span class="n">accuracy_function_str</span><span class="p">:</span>
             <span class="n">horizon</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">gby</span> <span class="o">=</span> <span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tss&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">group_by</span> <span class="k">if</span> <span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tss&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="p">[]</span>
             <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s1">_timestep_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">horizon</span><span class="p">)]</span> <span class="o">+</span> <span class="n">gby</span>
             <span class="n">true_values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span>
             <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span>
-            <span class="n">score_dict</span><span class="p">[</span><span class="n">accuracy_function_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">evaluate_array_accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span>
-                                                                        <span class="n">predictions</span><span class="p">,</span>
-                                                                        <span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">],</span>
-                                                                        <span class="n">ts_analysis</span><span class="o">=</span><span class="n">ts_analysis</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">accuracy_function_str</span> <span class="o">==</span> <span class="s1">&#39;evaluate_array_accuracy&#39;</span><span class="p">:</span>
+                <span class="n">acc_fn</span> <span class="o">=</span> <span class="n">evaluate_array_accuracy</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">acc_fn</span> <span class="o">=</span> <span class="n">bounded_evaluate_array_accuracy</span>
+            <span class="n">score_dict</span><span class="p">[</span><span class="n">accuracy_function_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">acc_fn</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">],</span> <span class="n">ts_analysis</span><span class="o">=</span><span class="n">ts_analysis</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">true_values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;lightwood.helpers.accuracy&#39;</span><span class="p">),</span> <span class="n">accuracy_function_str</span><span class="p">):</span>
@@ -357,6 +358,31 @@
         <span class="n">aggregate</span> <span class="o">+=</span> <span class="n">base_acc_fn</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">true_values</span><span class="p">],</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">predictions</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">aggregate</span> <span class="o">/</span> <span class="n">fh</span></div>
+
+
+<span class="k">def</span> <span class="nf">bounded_evaluate_array_accuracy</span><span class="p">(</span>
+        <span class="n">true_values</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The normal MASE accuracy inside ``evaluate_array_accuracy`` has a break point of 1.0: smaller values mean a naive forecast is better, and bigger values imply the forecast is better than a naive one. It is upper-bounded by 1e4.</span>
+
+<span class="sd">    This 0-1 bounded MASE variant scores the 1.0 breakpoint to be equal to 0.5.</span>
+<span class="sd">    For worse-than-naive, it scales linearly (with a factor).</span>
+<span class="sd">    For better-than-naive, we fix 10 as 0.99, and scaled-logarithms (with 10 and 1e4 cutoffs as respective bases) are used to squash all remaining preimages to values between 0.5 and 1.0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">evaluate_array_accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="mi">10</span> <span class="o">&lt;</span> <span class="n">result</span> <span class="o">&lt;=</span> <span class="mf">1e4</span><span class="p">:</span>
+        <span class="n">step_base</span> <span class="o">=</span> <span class="mf">0.99</span>
+        <span class="k">return</span> <span class="n">step_base</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1e4</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">step_base</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">result</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">step_base</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="k">return</span> <span class="n">step_base</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.99</span> <span class="o">-</span> <span class="n">step_base</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span> <span class="o">/</span> <span class="mi">2</span>  <span class="c1"># worse than naive</span>
 
 
 <span class="c1"># ------------------------- #</span>

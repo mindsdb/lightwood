@@ -246,11 +246,11 @@
             <span class="n">secondary_type_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
 
     <span class="c1"># Convert order_by columns to numbers (note, rows are references to mutable rows in `original_df`)</span>
-    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">original_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">original_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">ob_arr</span><span class="p">:</span>
             <span class="c1"># @TODO: Remove if the TS encoder can handle `None`</span>
             <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]):</span>
-                <span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="n">original_df</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">date</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>

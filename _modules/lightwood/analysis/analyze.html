@@ -191,6 +191,7 @@
     <span class="n">tss</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span>
     <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">accuracy_functions</span><span class="p">,</span>
+    <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">analysis_blocks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">BaseAnalysisBlock</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ModelAnalysis</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -245,6 +246,7 @@
         <span class="s1">&#39;is_multi_ts&#39;</span><span class="p">:</span> <span class="n">is_multi_ts</span><span class="p">,</span>
         <span class="s1">&#39;stats_info&#39;</span><span class="p">:</span> <span class="n">stats_info</span><span class="p">,</span>
         <span class="s1">&#39;tss&#39;</span><span class="p">:</span> <span class="n">tss</span><span class="p">,</span>
+        <span class="s1">&#39;ts_analysis&#39;</span><span class="p">:</span> <span class="n">ts_analysis</span><span class="p">,</span>
         <span class="s1">&#39;accuracy_functions&#39;</span><span class="p">:</span> <span class="n">accuracy_functions</span><span class="p">,</span>
         <span class="s1">&#39;has_pretrained_text_enc&#39;</span><span class="p">:</span> <span class="n">has_pretrained_text_enc</span>
     <span class="p">}</span>

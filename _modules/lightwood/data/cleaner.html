@@ -224,6 +224,9 @@
         <span class="c1"># If you want to customize the cleaner, it&#39;s likely you can to modify ``get_cleaning_func``</span>
         <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">get_cleaning_func</span><span class="p">(</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">custom_cleaning_functions</span><span class="p">))</span>
 
+    <span class="k">if</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">clean_timeseries</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">timeseries_settings</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">data</span></div>
 
 
@@ -498,6 +501,27 @@
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">cleanable_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cleanable_columns</span>
+
+
+<span class="k">def</span> <span class="nf">clean_timeseries</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tss</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    All timeseries-specific cleaning logic goes here. Currently:</span>
+
+<span class="sd">    1) Any row with `nan`-valued order-by measurements is dropped.</span>
+
+<span class="sd">    :param df: data.</span>
+<span class="sd">    :param tss: timeseries settings</span>
+<span class="sd">    :return: cleaned data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">invalid_rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">[</span><span class="mi">0</span><span class="p">]]):</span>
+            <span class="n">invalid_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">invalid_rows</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span>
 </pre></div>
 
            </div>
