@@ -94,7 +94,8 @@ def model_analyzer(
         confusion_matrix=runtime_analyzer.get('cm', []),
         column_importances=runtime_analyzer.get('column_importances', {}),
         histograms=stats_info.histograms,
-        dtypes=dtype_dict
+        dtypes=dtype_dict,
+        submodel_data= predictor.submodel_data
     )
 
     return model_analysis, runtime_analyzer

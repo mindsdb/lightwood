@@ -4,7 +4,7 @@ import pandas as pd
 
 from lightwood.mixer.base import BaseMixer
 from lightwood.data.encoded_ds import EncodedDs
-from lightwood.api.types import PredictionArguments
+from lightwood.api.types import PredictionArguments, SubmodelData
 
 
 class BaseEnsemble:
@@ -26,12 +26,14 @@ class BaseEnsemble:
     mixers: List[BaseMixer]
     best_index: int  # @TODO: maybe only applicable to BestOf
     supports_proba: bool
+    submodel_data: List[SubmodelData]
 
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs) -> None:
         self.data = data
         self.mixers = mixers
         self.best_index = 0
         self.supports_proba = False
+        self.submodel_data = []
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         raise NotImplementedError()
