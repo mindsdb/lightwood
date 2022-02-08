@@ -95,7 +95,7 @@ def model_analyzer(
         column_importances=runtime_analyzer.get('column_importances', {}),
         histograms=stats_info.histograms,
         dtypes=dtype_dict,
-        submodel_data= predictor.submodel_data
+        submodel_data=predictor.submodel_data
     )
 
     return model_analysis, runtime_analyzer
