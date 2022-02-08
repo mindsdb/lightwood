@@ -18,6 +18,7 @@ def model_analyzer(
     tss: TimeseriesSettings,
     dtype_dict: Dict[str, str],
     accuracy_functions,
+    ts_analysis: Dict,
     analysis_blocks: Optional[List[BaseAnalysisBlock]] = []
 ) -> Tuple[ModelAnalysis, Dict[str, object]]:
     """
@@ -72,6 +73,7 @@ def model_analyzer(
         'is_multi_ts': is_multi_ts,
         'stats_info': stats_info,
         'tss': tss,
+        'ts_analysis': ts_analysis,
         'accuracy_functions': accuracy_functions,
         'has_pretrained_text_enc': has_pretrained_text_enc
     }
