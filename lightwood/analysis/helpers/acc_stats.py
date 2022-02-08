@@ -19,9 +19,15 @@ class AccStats(BaseAnalysisBlock):
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
 
-        # @TODO: maybe pass ts_analysis to trigger group-wise MASE instead of R2 mean, though it wouldn't be 0-1 bounded
+        if ns.accuracy_functions == ['evaluate_array_accuracy'] and ns.ts_analysis.get('ts_naive_mae', {}):
+            accuracy_functions = ['bounded_evaluate_array_accuracy']
+            log.info("AccStats will bound the array accuracy for reporting purposes. Check `bounded_evaluate_array_accuracy` for a description of the bounding procedure.")  # noqa
+        else:
+            accuracy_functions = ns.accuracy_functions
+
         info['score_dict'] = evaluate_accuracy(ns.data, ns.normal_predictions['prediction'],
-                                               ns.target, ns.accuracy_functions, ts_analysis={'tss': ns.tss})
+                                               ns.target, accuracy_functions, ts_analysis=ns.ts_analysis)
+
         info['normal_accuracy'] = np.mean(list(info['score_dict'].values()))
         self.fit(ns, info['result_df'])
         info['val_overall_acc'], info['acc_histogram'], info['cm'], info['acc_samples'] = self.get_accuracy_stats()
