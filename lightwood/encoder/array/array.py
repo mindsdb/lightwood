@@ -63,9 +63,9 @@ class ArrayEncoder(BaseEncoder):
                 priming_data[i] = [0] * self.output_size
 
         if self.original_type in (dtype.categorical, dtype.binary, dtype.cat_array, dtype.cat_tsarray):
-            self._normalizer = CatNormalizer(encoder_class='ordinal')  # @TODO: maybe turn into OHE encoder?
+            self._normalizer = CatNormalizer(encoder_class='ordinal')  # maybe turn into OHE encoder?
         else:
-            self._normalizer = MinMaxNormalizer()  # @TODO: maybe turn into numerical encoder?
+            self._normalizer = MinMaxNormalizer()  # maybe turn into numerical encoder?
 
         if isinstance(priming_data, pd.Series):
             priming_data = priming_data.values
