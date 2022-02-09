@@ -184,21 +184,6 @@ class BoostedAbsErrorErrFunc(RegressionErrFunc):
         return np.vstack([nc[border], nc[border]])
 
 
-class ArrayBoostedAbsErrorErrFunc(BoostedAbsErrorErrFunc):
-    # Leaving this here for when (if) we aim to support ICP for non-TS array outputs
-    def __init__(self):
-        super(ArrayBoostedAbsErrorErrFunc, self).__init__()
-
-    def apply(self, prediction, y):
-        err = []
-        for row in range(y.shape[0]):
-            suberr = []
-            for t, p in zip(y[row], prediction[row]):
-                suberr.append(np.abs(p - t))
-            err.append(np.mean(suberr))
-        return np.array(err)
-
-
 class SignErrorErrFunc(RegressionErrFunc):
     """Calculates signed error nonconformity for regression problems.
 

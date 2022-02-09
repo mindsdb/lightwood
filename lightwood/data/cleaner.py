@@ -197,7 +197,7 @@ def _standardize_num_array(element: object) -> Optional[Union[List[float], float
 
 def _standardize_cat_array(element: List) -> Optional[List[str]]:
     """
-    Given an array of labels in the form ``['a', 'a', 'b', 'c']``, replace None/nan with <UNK> tokens.
+    Given an array, replace non-string with string casted (or, failing that, None) tokens. None values are kept.
 
     :param element: An array-like element in a sequence
     :returns: standardized array OR label IF edge case
@@ -210,7 +210,14 @@ def _standardize_cat_array(element: List) -> Optional[List[str]]:
     if len(element) == 1:
         return element[0]
     else:
-        element = [e if e else '<UNK>' for e in element]
+        new_element = []
+        for sub_elt in element:
+            try:
+                new_sub_elt = str(sub_elt) if sub_elt else None
+                new_element.append(new_sub_elt)
+            except TypeError:
+                new_element.append(None)
+        element = new_element
 
     return element
 
