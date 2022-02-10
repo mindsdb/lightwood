@@ -55,34 +55,17 @@ def evaluate_accuracy(data: pd.DataFrame,
     score_dict = {}
 
     for accuracy_function_str in accuracy_functions:
-        if accuracy_function_str == 'evaluate_num_array_accuracy':
-            if ts_analysis is None or not ts_analysis['tss'].is_timeseries:
-                # normal array, needs to be expanded
-                cols = [target]
-                true_values = data[cols].apply(lambda x: pd.Series(x[target]), axis=1)
-            else:
-                horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
-                gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
-                cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
-                true_values = data[cols]
+        if 'evaluate_array_accuracy' in accuracy_function_str:
+            horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
+            gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
+            cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
+            true_values = data[cols]
             predictions = predictions.apply(pd.Series)
-            score_dict[accuracy_function_str] = evaluate_num_array_accuracy(true_values,
-                                                                            predictions,
-                                                                            data=data[cols],
-                                                                            ts_analysis=ts_analysis)
-        elif accuracy_function_str == 'evaluate_cat_array_accuracy':
-            if ts_analysis is None or not ts_analysis['tss'].is_timeseries:
-                cols = [target]
-                true_values = data[cols].apply(lambda x: pd.Series(x[target]), axis=1)
+            if accuracy_function_str == 'evaluate_array_accuracy':
+                acc_fn = evaluate_array_accuracy
             else:
-                horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
-                gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
-                cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
-                true_values = data[cols]
-            predictions = predictions.apply(pd.Series)
-            score_dict[accuracy_function_str] = evaluate_cat_array_accuracy(true_values,
-                                                                            predictions,
-                                                                            ts_analysis=ts_analysis)
+                acc_fn = bounded_evaluate_array_accuracy
+            score_dict[accuracy_function_str] = acc_fn(true_values, predictions, data[cols], ts_analysis=ts_analysis)
         else:
             true_values = data[target].tolist()
             if hasattr(importlib.import_module('lightwood.helpers.accuracy'), accuracy_function_str):
@@ -229,6 +212,31 @@ def evaluate_cat_array_accuracy(
                                    predictions,
                                    ts_analysis=ts_analysis,
                                    base_acc_fn=balanced_accuracy_score)
+
+
+def bounded_evaluate_array_accuracy(
+        true_values: pd.Series,
+        predictions: pd.Series,
+        data: pd.DataFrame,
+        **kwargs
+) -> float:
+    """
+    The normal MASE accuracy inside ``evaluate_array_accuracy`` has a break point of 1.0: smaller values mean a naive forecast is better, and bigger values imply the forecast is better than a naive one. It is upper-bounded by 1e4.
+
+    This 0-1 bounded MASE variant scores the 1.0 breakpoint to be equal to 0.5.
+    For worse-than-naive, it scales linearly (with a factor).
+    For better-than-naive, we fix 10 as 0.99, and scaled-logarithms (with 10 and 1e4 cutoffs as respective bases) are used to squash all remaining preimages to values between 0.5 and 1.0.
+    """  # noqa
+    result = evaluate_array_accuracy(true_values, predictions, data, **kwargs)
+
+    if 10 < result <= 1e4:
+        step_base = 0.99
+        return step_base + (np.log(result) / np.log(1e4)) * (1 - step_base)
+    elif 1 <= result <= 10:
+        step_base = 0.5
+        return step_base + (np.log(result) / np.log(10)) * (0.99 - step_base)
+    else:
+        return result / 2  # worse than naive
 
 
 # ------------------------- #

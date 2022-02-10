@@ -471,6 +471,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     """
     problem_definition = json_ai.problem_definition
     tss = problem_definition.timeseries_settings
+    is_ts = tss.is_timeseries
 
     # Add implicit arguments
     # @TODO: Consider removing once we have a proper editor in studio
@@ -586,6 +587,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "target": "$target",
                 "dtype_dict": "$dtype_dict",
                 "analysis_blocks": "$analysis_blocks",
+                "ts_analysis": "$ts_analysis" if is_ts else None,
             },
         },
         "explainer": {
@@ -598,7 +600,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "encoded_data": "encoded_data",
                 "predictions": "df",
                 "analysis": "$runtime_analyzer",
-                "ts_analysis": "$ts_analysis" if tss.is_timeseries else None,
+                "ts_analysis": "$ts_analysis" if is_ts else None,
                 "target_name": "$target",
                 "target_dtype": "$dtype_dict[self.target]",
                 "explainer_blocks": "$analysis_blocks",

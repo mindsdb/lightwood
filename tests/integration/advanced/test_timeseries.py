@@ -3,6 +3,8 @@ import unittest
 import numpy as np
 import pandas as pd
 from typing import List
+from scipy import signal
+from sklearn.metrics import r2_score
 from lightwood.api.types import ProblemDefinition
 from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
@@ -24,6 +26,7 @@ class TestTimeseries(unittest.TestCase):
 
             for oby in orders:
                 assert len(row[f'order_{oby}']) == horizon
+                assert not any(pd.isna(row[f'order_{oby}']))
 
             for t in range(horizon):
                 assert lower[t] <= prediction[t] <= upper[t]
@@ -111,6 +114,7 @@ class TestTimeseries(unittest.TestCase):
         assert pred.pred_args.anomaly_cooldown == 100
 
     def test_1_time_series_regression(self):
+        np.random.seed(0)
         data = pd.read_csv('tests/data/arrivals.csv')
         train_df, test_df = self.split_arrivals(data, grouped=False)
         target = 'Traffic'
@@ -127,6 +131,11 @@ class TestTimeseries(unittest.TestCase):
                                                                        'order_by': [order_by],
                                                                        'window': window}
                                                                    }))
+
+        # add a few invalid datetime values to test cleaning procedures
+        for idx in list(np.where(np.random.random((len(train_df),)) > 0.98)[0]):
+            train_df.at[idx, 'T'] = pd.NaT
+
         pred.learn(train_df)
         preds = pred.predict(data.sample(frac=1)[0:10])
         self.assertTrue('original_index' in preds.columns)
@@ -232,15 +241,6 @@ class TestTimeseries(unittest.TestCase):
         This test also compares against manual use of sktime to ensure equal results.
         """  # noqa
 
-        from sklearn.metrics import r2_score
-        from scipy import signal
-        from lightwood.api.high_level import (
-            ProblemDefinition,
-            json_ai_from_problem,
-            code_from_json_ai,
-            predictor_from_code,
-        )
-
         # synth square wave
         tsteps = 100
         target = 'Value'
@@ -295,3 +295,43 @@ class TestTimeseries(unittest.TestCase):
             manual_preds = forecaster.predict(fh[1:horizon + 1]).tolist()
             lw_preds = [p[0] for p in ps['prediction']]
             assert np.allclose(manual_preds, lw_preds, atol=1)
+
+    def test_6_irregular_series(self):
+        """
+        Even though the suggestion is to feed regularly sampled series into predictors, this test can still help us
+        catch undesired behavior when the recommendation is not followed.
+        """  # noqa
+
+        # synth square wave
+        tsteps = 100
+        target = 'Value'
+        horizon = 20
+        # added random noise for irregular sampling
+        np.random.seed(0)
+        t = np.linspace(0, 1, tsteps, endpoint=False) + np.random.uniform(size=(tsteps,), low=-0.005, high=0.005)
+        ts = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * t, width=0.5))]
+        df = pd.DataFrame(columns=['Time', target])
+        df['Time'] = t
+        df[target] = ts
+        df[f'{target}_2x'] = [2 * elt for elt in ts]
+
+        train = df[:int(len(df) * 0.8)]
+        test = df[int(len(df) * 0.8):]
+
+        pdef = ProblemDefinition.from_dict({'target': target,
+                                            'time_aim': 200,
+                                            'timeseries_settings': {
+                                                'order_by': ['Time'],
+                                                'window': 5,
+                                                'horizon': horizon,
+                                                'historical_columns': [f'{target}_2x']
+                                            }})
+
+        json_ai = json_ai_from_problem(df, problem_definition=pdef)
+        code = code_from_json_ai(json_ai)
+        predictor = predictor_from_code(code)
+
+        train_and_check_time_aim(predictor, train)  # Test with a longer time aim
+
+        test['__mdb_make_predictions'] = False
+        predictor.predict(test)
