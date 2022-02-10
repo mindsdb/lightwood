@@ -55,14 +55,24 @@ def evaluate_accuracy(data: pd.DataFrame,
     score_dict = {}
 
     for accuracy_function_str in accuracy_functions:
-        if 'evaluate_array_accuracy' in accuracy_function_str:
-            horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
-            gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
-            cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
-            true_values = data[cols]
+        if 'array_accuracy' in accuracy_function_str:
+            if ts_analysis is None or not ts_analysis['tss'].is_timeseries:
+                # normal array, needs to be expanded
+                cols = [target]
+                true_values = data[cols].apply(lambda x: pd.Series(x[target]), axis=1)
+            else:
+                horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
+                gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
+                cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
+                true_values = data[cols]
             predictions = predictions.apply(pd.Series)
+
             if accuracy_function_str == 'evaluate_array_accuracy':
                 acc_fn = evaluate_array_accuracy
+            elif accuracy_function_str == 'evaluate_num_array_accuracy':
+                acc_fn = evaluate_num_array_accuracy
+            elif accuracy_function_str == 'evaluate_cat_array_accuracy':
+                acc_fn = evaluate_cat_array_accuracy
             else:
                 acc_fn = bounded_evaluate_array_accuracy
             score_dict[accuracy_function_str] = acc_fn(true_values, predictions, data[cols], ts_analysis=ts_analysis)
