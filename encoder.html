@@ -123,6 +123,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#encoder.BinaryEncoder.prepare">prepare</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#encoder.CatArrayEncoder">CatArrayEncoder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#encoder.CatArrayEncoder.decode">decode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#encoder.CatArrayEncoder.prepare">prepare</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#encoder.CategoricalAutoEncoder">CategoricalAutoEncoder</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.CategoricalAutoEncoder.decode">decode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.CategoricalAutoEncoder.encode">encode</a></li>
@@ -156,6 +161,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#encoder.MultiHotEncoder.prepare">prepare</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#encoder.NumArrayEncoder">NumArrayEncoder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#encoder.NumericEncoder">NumericEncoder</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.NumericEncoder.decode">decode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.NumericEncoder.encode">encode</a></li>
@@ -195,6 +201,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#encoder.TsArrayNumericEncoder.encode">encode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.TsArrayNumericEncoder.encode_one">encode_one</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.TsArrayNumericEncoder.prepare">prepare</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#encoder.TsCatArrayEncoder">TsCatArrayEncoder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#encoder.TsCatArrayEncoder.decode">decode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#encoder.TsCatArrayEncoder.decode_one">decode_one</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#encoder.TsCatArrayEncoder.encode">encode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#encoder.TsCatArrayEncoder.encode_one">encode_one</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#encoder.TsCatArrayEncoder.prepare">prepare</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#encoder.TsNumericEncoder">TsNumericEncoder</a><ul>
@@ -524,6 +538,47 @@ The input to <cite>decode</cite> makes no presumption on whether the data is alr
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="encoder.CatArrayEncoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">CatArrayEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/array.html#CatArrayEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CatArrayEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
+<li><p><strong>window</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – expected length of array data.</p></li>
+<li><p><strong>original_type</strong> – element-wise data type</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.CatArrayEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/array.html#CatArrayEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CatArrayEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts data as a list of arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – Encoded data prepared by this array encoder</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of iterable sequences in the original data space</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.CatArrayEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/array.html#CatArrayEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CatArrayEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare the array encoder for sequence data.
+:type train_priming_data: <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]
+:param train_priming_data: Training data of sequences
+:type dev_priming_data: <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]
+:param dev_priming_data: Dev data of sequences</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="encoder.CategoricalAutoEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">CategoricalAutoEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_encoded_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
@@ -781,6 +836,20 @@ The input to <cite>decode</cite> makes no presumption on whether the data is alr
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="encoder.NumArrayEncoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">NumArrayEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/array.html#NumArrayEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.NumArrayEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
+<li><p><strong>window</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – expected length of array data.</p></li>
+<li><p><strong>original_type</strong> – element-wise data type</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">
@@ -1123,7 +1192,7 @@ When None, it will be set automatically based on is_target:
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.TsArrayNumericEncoder">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">TsArrayNumericEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timesteps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouped_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/ts_array_numeric.html#TsArrayNumericEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">TsArrayNumericEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timesteps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouped_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_num_array.html#TsArrayNumericEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder" title="Permalink to this definition">¶</a></dt>
 <dd><p>This encoder handles arrays of numerical time series data by wrapping the numerical encoder with behavior specific to time series tasks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1137,7 +1206,7 @@ When None, it will be set automatically based on is_target:
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TsArrayNumericEncoder.decode">
-<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/ts_array_numeric.html#TsArrayNumericEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_num_array.html#TsArrayNumericEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder.decode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decodes a list of encoded arrays into values in their original domains.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1157,7 +1226,7 @@ When None, it will be set automatically based on is_target:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TsArrayNumericEncoder.decode_one">
-<span class="sig-name descname"><span class="pre">decode_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/ts_array_numeric.html#TsArrayNumericEncoder.decode_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder.decode_one" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">decode_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_num_array.html#TsArrayNumericEncoder.decode_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder.decode_one" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decodes a single window of a time series into its original domain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1177,7 +1246,7 @@ When None, it will be set automatically based on is_target:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TsArrayNumericEncoder.encode">
-<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/ts_array_numeric.html#TsArrayNumericEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_num_array.html#TsArrayNumericEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder.encode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Encodes a list of time series arrays using the underlying time series numerical encoder.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1197,7 +1266,7 @@ When None, it will be set automatically based on is_target:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TsArrayNumericEncoder.encode_one">
-<span class="sig-name descname"><span class="pre">encode_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/ts_array_numeric.html#TsArrayNumericEncoder.encode_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder.encode_one" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">encode_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_num_array.html#TsArrayNumericEncoder.encode_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder.encode_one" title="Permalink to this definition">¶</a></dt>
 <dd><p>Encodes a single windowed slice of any given time series.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1218,7 +1287,106 @@ When None, it will be set automatically based on is_target:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.TsArrayNumericEncoder.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/numeric/ts_array_numeric.html#TsArrayNumericEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_num_array.html#TsArrayNumericEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsArrayNumericEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method prepares the underlying time series numerical encoder.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="encoder.TsCatArrayEncoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">TsCatArrayEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timesteps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouped_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_cat_array.html#TsCatArrayEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsCatArrayEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>This encoder handles arrays of categorical time series data by wrapping the OHE encoder with behavior specific to time series tasks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timesteps</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – length of forecasting horizon, as defined by TimeseriesSettings.window.</p></li>
+<li><p><strong>is_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether this encoder corresponds to the target column.</p></li>
+<li><p><strong>grouped_by</strong> – what columns, if any, are considered to group the original column and yield multiple time series.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.TsCatArrayEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_cat_array.html#TsCatArrayEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsCatArrayEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes a list of encoded arrays into values in their original domains.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoded_values</strong> – encoded slices of numerical time series.</p></li>
+<li><p><strong>dependency_data</strong> – used to determine the correct normalizer for the input.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a list of decoded time series arrays.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.TsCatArrayEncoder.decode_one">
+<span class="sig-name descname"><span class="pre">decode_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_cat_array.html#TsCatArrayEncoder.decode_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsCatArrayEncoder.decode_one" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes a single window of a time series into its original domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoded_value</strong> – encoded slice of a numerical time series.</p></li>
+<li><p><strong>dependency_data</strong> – used to determine the correct normalizer for the input.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a list of length TimeseriesSettings.window with decoded values for the forecasted time series.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.TsCatArrayEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_cat_array.html#TsCatArrayEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsCatArrayEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a list of time series arrays using the underlying time series numerical encoder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>]) – list of numerical values to encode. Its length is determined by the tss.window parameter, and all data points belong to the same time series.</p></li>
+<li><p><strong>dependency_data</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – dict with values of each group_by column for the time series, used to retrieve the correct normalizer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of encoded time series arrays. Tensor is (len(data), N x K)-shaped, where N: self.data_window and K: sub-encoder # of output features.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.TsCatArrayEncoder.encode_one">
+<span class="sig-name descname"><span class="pre">encode_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_cat_array.html#TsCatArrayEncoder.encode_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsCatArrayEncoder.encode_one" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a single windowed slice of any given time series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>) – windowed slice of a numerical time series.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>an encoded time series array, as per the underlying <cite>TsNumericEncoder</cite> object.</p>
+</dd>
+</dl>
+<p>The output of this encoder for all time steps is concatenated, so the final shape of the tensor is (1, NxK), where N: self.data_window and K: sub-encoder # of output features.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.TsCatArrayEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/array/ts_cat_array.html#TsCatArrayEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.TsCatArrayEncoder.prepare" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method prepares the underlying time series numerical encoder.</p>
 </dd></dl>
 

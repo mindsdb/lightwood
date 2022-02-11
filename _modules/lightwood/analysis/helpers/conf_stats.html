@@ -202,6 +202,8 @@
             <span class="n">task_type</span> <span class="o">=</span> <span class="s1">&#39;numerical&#39;</span>
         <span class="k">elif</span> <span class="n">ns</span><span class="o">.</span><span class="n">is_multi_ts</span><span class="p">:</span>
             <span class="n">task_type</span> <span class="o">=</span> <span class="s1">&#39;multi_ts&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">info</span>
 
         <span class="n">ces</span><span class="p">,</span> <span class="n">ece</span><span class="p">,</span> <span class="n">mce</span><span class="p">,</span> <span class="n">gscore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stats</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;result_df&#39;</span><span class="p">],</span>
                                                 <span class="n">ns</span><span class="o">.</span><span class="n">normal_predictions</span><span class="p">,</span>

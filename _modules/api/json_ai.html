@@ -265,10 +265,12 @@
         <span class="n">dtype</span><span class="o">.</span><span class="n">image</span><span class="p">:</span> <span class="s2">&quot;Img2VecEncoder&quot;</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">:</span> <span class="s2">&quot;PretrainedLangEncoder&quot;</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">.</span><span class="n">short_text</span><span class="p">:</span> <span class="s2">&quot;CategoricalAutoEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">:</span> <span class="s2">&quot;ArrayEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">tsarray</span><span class="p">:</span> <span class="s2">&quot;TimeSeriesEncoder&quot;</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">:</span> <span class="s2">&quot;NumericEncoder&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">.</span><span class="n">audio</span><span class="p">:</span> <span class="s2">&quot;MFCCEncoder&quot;</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">audio</span><span class="p">:</span> <span class="s2">&quot;MFCCEncoder&quot;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">num_array</span><span class="p">:</span> <span class="s2">&quot;NumArrayEncoder&quot;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">cat_array</span><span class="p">:</span> <span class="s2">&quot;CatArrayEncoder&quot;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">num_tsarray</span><span class="p">:</span> <span class="s2">&quot;TimeSeriesEncoder&quot;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">.</span><span class="n">cat_tsarray</span><span class="p">:</span> <span class="s2">&quot;TimeSeriesEncoder&quot;</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="c1"># If column is a target, only specific feature representations are allowed that enable supervised tasks</span>
@@ -297,7 +299,7 @@
                     <span class="s2">&quot;target_weights&quot;</span>
                 <span class="p">]</span> <span class="o">=</span> <span class="n">problem_defintion</span><span class="o">.</span><span class="n">target_weights</span>
 
-        <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tsarray</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">num_array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">num_tsarray</span><span class="p">):</span>
             <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span>
                 <span class="s2">&quot;positive_domain&quot;</span>
             <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;$statistical_analysis.positive_domain&quot;</span>
@@ -320,7 +322,10 @@
             <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;grouped_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">gby</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;timesteps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">horizon</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;TsArrayNumericEncoder&quot;</span>
+                <span class="k">if</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">num_tsarray</span><span class="p">]:</span>
+                    <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;TsArrayNumericEncoder&quot;</span>
+                <span class="k">elif</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">cat_tsarray</span><span class="p">]:</span>
+                    <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;TsCatArrayEncoder&quot;</span>
 
         <span class="k">if</span> <span class="s2">&quot;__mdb_ts_previous&quot;</span> <span class="ow">in</span> <span class="n">col_name</span> <span class="ow">or</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">:</span>
             <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;TimeSeriesEncoder&quot;</span>
@@ -407,7 +412,7 @@
             <span class="p">}</span>
         <span class="p">]</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">or</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">or</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">num_array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">cat_array</span><span class="p">):</span>
             <span class="n">submodels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="p">{</span>
@@ -425,7 +430,7 @@
                     <span class="p">},</span>
                 <span class="p">]</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">and</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">submodels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="p">{</span>
@@ -439,7 +444,7 @@
                 <span class="p">]</span>
             <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span> <span class="ow">and</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">):</span>
                 <span class="n">submodels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                     <span class="p">[</span>
                         <span class="p">{</span>
@@ -463,7 +468,10 @@
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">and</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tsarray</span>
+        <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">):</span>
+            <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">num_tsarray</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">cat_tsarray</span>
 
     <span class="n">encoders</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">target</span><span class="p">:</span> <span class="n">lookup_encoder</span><span class="p">(</span>
@@ -498,8 +506,10 @@
         <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;r2_score&quot;</span><span class="p">]</span>
     <span class="k">elif</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">]:</span>
         <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;balanced_accuracy_score&quot;</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tsarray</span><span class="p">):</span>
-        <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;evaluate_array_accuracy&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">num_array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">num_tsarray</span><span class="p">):</span>
+        <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;evaluate_num_array_accuracy&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">cat_array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">cat_tsarray</span><span class="p">):</span>
+        <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;evaluate_cat_array_accuracy&quot;</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Please specify a custom accuracy function for output type </span><span class="si">{</span><span class="n">output_dtype</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -508,7 +518,7 @@
     <span class="c1"># special dispatch for t+1 time series forecasters</span>
     <span class="k">if</span> <span class="n">is_ts</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">]:</span>
-            <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;evaluate_array_accuracy&quot;</span><span class="p">]</span>
+            <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;evaluate_num_array_accuracy&quot;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># 5 days</span>
@@ -975,7 +985,7 @@
 
 <span class="s2"># Prepare encoders that do not require learned strategies</span>
 <span class="s2">for col_name, encoder in self.encoders.items():</span>
-<span class="s2">    if not encoder.is_trainable_encoder:</span>
+<span class="s2">    if col_name != self.target and not encoder.is_trainable_encoder:</span>
 <span class="s2">        encoder_prepping_dict[col_name] = [encoder, concatenated_train_dev[col_name], &#39;prepare&#39;]</span>
 <span class="s2">        log.info(f&#39;Encoder prepping dict length of: </span><span class="se">{{</span><span class="s2">len(encoder_prepping_dict)</span><span class="se">}}</span><span class="s2">&#39;)</span>
 
@@ -993,7 +1003,7 @@
 
 <span class="s2"># Prepare any non-target encoders that are learned</span>
 <span class="s2">for col_name, encoder in self.encoders.items():</span>
-<span class="s2">    if encoder.is_trainable_encoder:</span>
+<span class="s2">    if col_name != self.target and encoder.is_trainable_encoder:</span>
 <span class="s2">        priming_data = pd.concat([data[&#39;train&#39;], data[&#39;dev&#39;]])</span>
 <span class="s2">        kwargs = </span><span class="se">{{}}</span><span class="s2"></span>
 <span class="s2">        if self.dependencies[col_name]:</span>
@@ -1007,7 +1017,7 @@
 
 <span class="s2">        # If an encoder representation requires the target, provide priming data</span>
 <span class="s2">        if hasattr(encoder, &#39;uses_target&#39;):</span>
-<span class="s2">            kwargs[&#39;encoded_target_values&#39;] = parallel_prepped_encoders[self.target].encode(priming_data[self.target])</span>
+<span class="s2">            kwargs[&#39;encoded_target_values&#39;] = self.encoders[self.target].encode(priming_data[self.target])</span>
 
 <span class="s2">        encoder.prepare(data[&#39;train&#39;][col_name], data[&#39;dev&#39;][col_name], **kwargs)</span>
 

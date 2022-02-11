@@ -181,7 +181,7 @@
 <span class="sd">    - **Date/Time**: Time-series data that is temporal/sequential. Currently ``date``, and ``datetime`` are supported.</span>
 <span class="sd">    - **Text**: Data that can be considered as language information.  Currently ``short_text``, and ``rich_text`` are supported. Short text has a small vocabulary (~ 100 words) and is generally a limited number of characters. Rich text is anything with greater complexity.</span>
 <span class="sd">    - **Complex**: Data types that require custom techniques. Currently ``audio``, ``video`` and ``image`` are available, but highly experimental.</span>
-<span class="sd">    - **Array**: Data in the form of a sequence where order must be preserved. Currently ``array`` is the supported type.</span>
+<span class="sd">    - **Array**: Data in the form of a sequence where order must be preserved. ``tsarray`` dtypes are for &quot;normal&quot; columns that will be transformed to arrays at a row-level because they will be treated as time series.</span>
 <span class="sd">    - **Miscellaneous**: Miscellaneous data descriptors include ``empty``, an explicitly unknown value versus ``invalid``, a data type not currently supported.</span>
 <span class="sd">    </span>
 <span class="sd">    Custom data types may be implemented here as a flag for subsequent treatment and processing. You are welcome to include your own definitions, so long as they do not override the existing type names (alternatively, if you do, please edit subsequent parts of the preprocessing pipeline to correctly indicate how you want to deal with these data types).</span>
@@ -211,8 +211,10 @@
     <span class="n">video</span> <span class="o">=</span> <span class="s2">&quot;video&quot;</span>
 
     <span class="c1"># Series/Sequences</span>
-    <span class="n">array</span> <span class="o">=</span> <span class="s2">&quot;array&quot;</span>
-    <span class="n">tsarray</span> <span class="o">=</span> <span class="s1">&#39;tsarray&#39;</span>
+    <span class="n">num_array</span> <span class="o">=</span> <span class="s2">&quot;num_array&quot;</span>
+    <span class="n">cat_array</span> <span class="o">=</span> <span class="s2">&quot;cat_array&quot;</span>
+    <span class="n">num_tsarray</span> <span class="o">=</span> <span class="s1">&#39;num_tsarray&#39;</span>
+    <span class="n">cat_tsarray</span> <span class="o">=</span> <span class="s1">&#39;cat_tsarray&#39;</span>
 
     <span class="c1"># Misc (Unk/NaNs)</span>
     <span class="n">empty</span> <span class="o">=</span> <span class="s2">&quot;empty&quot;</span>

@@ -204,7 +204,7 @@
 <dd class="field-odd"><p>22.2.1.1</p>
 </dd>
 <dt class="field-even">Date</dt>
-<dd class="field-even"><p>Feb 08, 2022</p>
+<dd class="field-even"><p>Feb 11, 2022</p>
 </dd>
 </dl>
 <div class="line-block">
@@ -513,6 +513,11 @@
 <li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.BinaryEncoder.prepare">prepare</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="encoder.html#encoder.CatArrayEncoder">CatArrayEncoder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.CatArrayEncoder.decode">decode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.CatArrayEncoder.prepare">prepare</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="encoder.html#encoder.CategoricalAutoEncoder">CategoricalAutoEncoder</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.CategoricalAutoEncoder.decode">decode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.CategoricalAutoEncoder.encode">encode</a></li>
@@ -546,6 +551,7 @@
 <li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.MultiHotEncoder.prepare">prepare</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="encoder.html#encoder.NumArrayEncoder">NumArrayEncoder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="encoder.html#encoder.NumericEncoder">NumericEncoder</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.NumericEncoder.decode">decode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.NumericEncoder.encode">encode</a></li>
@@ -585,6 +591,14 @@
 <li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.TsArrayNumericEncoder.encode">encode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.TsArrayNumericEncoder.encode_one">encode_one</a></li>
 <li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.TsArrayNumericEncoder.prepare">prepare</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="encoder.html#encoder.TsCatArrayEncoder">TsCatArrayEncoder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.TsCatArrayEncoder.decode">decode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.TsCatArrayEncoder.decode_one">decode_one</a></li>
+<li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.TsCatArrayEncoder.encode">encode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.TsCatArrayEncoder.encode_one">encode_one</a></li>
+<li class="toctree-l3"><a class="reference internal" href="encoder.html#encoder.TsCatArrayEncoder.prepare">prepare</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="encoder.html#encoder.TsNumericEncoder">TsNumericEncoder</a><ul>
@@ -682,11 +696,13 @@
 <li class="toctree-l1"><a class="reference internal" href="helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.LightwoodAutocast">LightwoodAutocast</a></li>
 <li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.analyze_sentences">analyze_sentences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.bounded_evaluate_array_accuracy">bounded_evaluate_array_accuracy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.cast_string_to_python_type">cast_string_to_python_type</a></li>
 <li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.evaluate_accuracy">evaluate_accuracy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.evaluate_array_accuracy">evaluate_array_accuracy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.evaluate_array_r2_accuracy">evaluate_array_r2_accuracy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.evaluate_cat_array_accuracy">evaluate_cat_array_accuracy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.evaluate_multilabel_accuracy">evaluate_multilabel_accuracy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.evaluate_num_array_accuracy">evaluate_num_array_accuracy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.evaluate_regression_accuracy">evaluate_regression_accuracy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.gen_chars">gen_chars</a></li>
 <li class="toctree-l2"><a class="reference internal" href="helpers.html#helpers.get_group_matches">get_group_matches</a></li>

@@ -285,6 +285,8 @@
 </li>
       <li><a href="encoder.html#encoder.BinaryEncoder">BinaryEncoder (class in encoder)</a>
 </li>
+      <li><a href="helpers.html#helpers.bounded_evaluate_array_accuracy">bounded_evaluate_array_accuracy() (in module helpers)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -292,6 +294,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="helpers.html#helpers.cast_string_to_python_type">cast_string_to_python_type() (in module helpers)</a>
+</li>
+      <li><a href="encoder.html#encoder.CatArrayEncoder">CatArrayEncoder (class in encoder)</a>
 </li>
       <li><a href="encoder.html#encoder.CategoricalAutoEncoder">CategoricalAutoEncoder (class in encoder)</a>
 </li>
@@ -345,6 +349,8 @@
 </li>
         <li><a href="encoder.html#encoder.BinaryEncoder.decode">(encoder.BinaryEncoder method)</a>
 </li>
+        <li><a href="encoder.html#encoder.CatArrayEncoder.decode">(encoder.CatArrayEncoder method)</a>
+</li>
         <li><a href="encoder.html#encoder.CategoricalAutoEncoder.decode">(encoder.CategoricalAutoEncoder method)</a>
 </li>
         <li><a href="encoder.html#encoder.DatetimeEncoder.decode">(encoder.DatetimeEncoder method)</a>
@@ -367,6 +373,8 @@
 </li>
         <li><a href="encoder.html#encoder.TsArrayNumericEncoder.decode">(encoder.TsArrayNumericEncoder method)</a>
 </li>
+        <li><a href="encoder.html#encoder.TsCatArrayEncoder.decode">(encoder.TsCatArrayEncoder method)</a>
+</li>
         <li><a href="encoder.html#encoder.TsNumericEncoder.decode">(encoder.TsNumericEncoder method)</a>
 </li>
         <li><a href="encoder.html#encoder.VocabularyEncoder.decode">(encoder.VocabularyEncoder method)</a>
@@ -375,7 +383,11 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="encoder.html#encoder.TsArrayNumericEncoder.decode_one">decode_one() (encoder.TsArrayNumericEncoder method)</a>
+
+      <ul>
+        <li><a href="encoder.html#encoder.TsCatArrayEncoder.decode_one">(encoder.TsCatArrayEncoder method)</a>
 </li>
+      </ul></li>
       <li><a href="encoder.html#encoder.BinaryEncoder.decode_probabilities">decode_probabilities() (encoder.BinaryEncoder method)</a>
 
       <ul>
@@ -419,13 +431,13 @@
 </li>
         <li><a href="encoder.html#encoder.TsArrayNumericEncoder.encode">(encoder.TsArrayNumericEncoder method)</a>
 </li>
+        <li><a href="encoder.html#encoder.TsCatArrayEncoder.encode">(encoder.TsCatArrayEncoder method)</a>
+</li>
         <li><a href="encoder.html#encoder.TsNumericEncoder.encode">(encoder.TsNumericEncoder method)</a>
 </li>
         <li><a href="encoder.html#encoder.VocabularyEncoder.encode">(encoder.VocabularyEncoder method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="encoder.html#encoder.DatetimeEncoder.encode_one">encode_one() (encoder.DatetimeEncoder method)</a>
 
       <ul>
@@ -433,7 +445,11 @@
 </li>
         <li><a href="encoder.html#encoder.TsArrayNumericEncoder.encode_one">(encoder.TsArrayNumericEncoder method)</a>
 </li>
+        <li><a href="encoder.html#encoder.TsCatArrayEncoder.encode_one">(encoder.TsCatArrayEncoder method)</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="data.html#data.EncodedDs">EncodedDs (class in data)</a>
 </li>
       <li>
@@ -454,9 +470,11 @@
 </li>
       <li><a href="helpers.html#helpers.evaluate_array_accuracy">evaluate_array_accuracy() (in module helpers)</a>
 </li>
-      <li><a href="helpers.html#helpers.evaluate_array_r2_accuracy">evaluate_array_r2_accuracy() (in module helpers)</a>
+      <li><a href="helpers.html#helpers.evaluate_cat_array_accuracy">evaluate_cat_array_accuracy() (in module helpers)</a>
 </li>
       <li><a href="helpers.html#helpers.evaluate_multilabel_accuracy">evaluate_multilabel_accuracy() (in module helpers)</a>
+</li>
+      <li><a href="helpers.html#helpers.evaluate_num_array_accuracy">evaluate_num_array_accuracy() (in module helpers)</a>
 </li>
       <li><a href="helpers.html#helpers.evaluate_regression_accuracy">evaluate_regression_accuracy() (in module helpers)</a>
 </li>
@@ -673,6 +691,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="encoder.html#encoder.NumArrayEncoder">NumArrayEncoder (class in encoder)</a>
+</li>
       <li><a href="encoder.html#encoder.NumericEncoder">NumericEncoder (class in encoder)</a>
 </li>
   </ul></td>
@@ -728,6 +748,8 @@
 </li>
         <li><a href="encoder.html#encoder.BinaryEncoder.prepare">(encoder.BinaryEncoder method)</a>
 </li>
+        <li><a href="encoder.html#encoder.CatArrayEncoder.prepare">(encoder.CatArrayEncoder method)</a>
+</li>
         <li><a href="encoder.html#encoder.CategoricalAutoEncoder.prepare">(encoder.CategoricalAutoEncoder method)</a>
 </li>
         <li><a href="encoder.html#encoder.DatetimeEncoder.prepare">(encoder.DatetimeEncoder method)</a>
@@ -747,6 +769,8 @@
         <li><a href="encoder.html#encoder.ShortTextEncoder.prepare">(encoder.ShortTextEncoder method)</a>
 </li>
         <li><a href="encoder.html#encoder.TsArrayNumericEncoder.prepare">(encoder.TsArrayNumericEncoder method)</a>
+</li>
+        <li><a href="encoder.html#encoder.TsCatArrayEncoder.prepare">(encoder.TsCatArrayEncoder method)</a>
 </li>
         <li><a href="encoder.html#encoder.VocabularyEncoder.prepare">(encoder.VocabularyEncoder method)</a>
 </li>
@@ -838,6 +862,8 @@
       <li><a href="data.html#data.transform_timeseries">transform_timeseries() (in module data)</a>
 </li>
       <li><a href="encoder.html#encoder.TsArrayNumericEncoder">TsArrayNumericEncoder (class in encoder)</a>
+</li>
+      <li><a href="encoder.html#encoder.TsCatArrayEncoder">TsCatArrayEncoder (class in encoder)</a>
 </li>
       <li><a href="encoder.html#encoder.TsNumericEncoder">TsNumericEncoder (class in encoder)</a>
 </li>
