@@ -13,6 +13,8 @@ class BaseImputer:
         
         Note that if access to other columns is required, this can be specified with the `dependencies` parameter.
 
+        Also note, by default some Lightwood encoders (e.g. categorical) are able to cope with missing data, so having imputers as a general rule is not required but can be a nice to have.
+
         :param target: Column that the imputer will modify.
         :param dependencies: Any additional columns (other than the target) that will be needed inside `impute()`.
         """  # noqa
@@ -27,8 +29,6 @@ class NumericalImputer(BaseImputer):
     def __init__(self, target: str, dependencies: List[str] = [], value: str = 'zero', typecast: str = None):
         """
         Imputer for numerical columns. Supports a handful of different approaches to define the imputation value.
-        
-        String to invoke this class from the cleaner is "numerical.$value", with "value" one of the valid options defined below.
         
         :param value: The value to impute. One of 'mean', 'median', 'zero', 'mode'.
         :param typecast: Used to cast the column into either 'int' or 'float' (`None` skips forced casting).
@@ -65,13 +65,11 @@ class NumericalImputer(BaseImputer):
 
 
 class CategoricalImputer(BaseImputer):
-    def __init__(self, target: str, dependencies: List[str] = [], value: str = 'zero'):
+    def __init__(self, target: str, dependencies: List[str] = [], value: str = 'mode'):
         """
         Imputer for categorical columns.
         
-        String to invoke this class from the cleaner is "categorical.$value", with "value" one of the valid options defined below.
-        
-        :param value: One of 'mode', 'unk'. The former replaces missing data with the most common label, and the latter with an "UNK" string.
+        :param value: Type of imputation. Currently, only `mode` is supported, and replaces missing data with the observed mode.
         """  # noqa
         self.value = value
         super().__init__(target, dependencies)
@@ -82,8 +80,6 @@ class CategoricalImputer(BaseImputer):
 
         if self.value == 'mode':
             value = data[col].dropna().mode().iloc[0]
-        else:
-            value = 'UNK'
 
         data[col] = data[col].fillna(value=value)
         return data

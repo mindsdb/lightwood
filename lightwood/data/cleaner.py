@@ -54,12 +54,12 @@ def cleaner(
         # If you want to customize the cleaner, it's likely you can to modify ``get_cleaning_func``
         data[col] = data[col].apply(get_cleaning_func(dtype_dict[col], custom_cleaning_functions))
 
+    if timeseries_settings.is_timeseries:
+        data = clean_timeseries(data, timeseries_settings)
+
     for col, imputer in imputers.items():
         cols = [col] + [col for col in imputer.dependencies]
         data[col] = imputer.impute(data[cols])
-    
-    if timeseries_settings.is_timeseries:
-        data = clean_timeseries(data, timeseries_settings)
 
     return data
 
