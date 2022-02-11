@@ -65,7 +65,7 @@ def evaluate_accuracy(data: pd.DataFrame,
                 gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
                 cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
                 true_values = data[cols]
-            predictions = predictions.apply(pd.Series)
+            predictions = predictions.apply(pd.Series)  # split array cells into columns
 
             if accuracy_function_str == 'evaluate_array_accuracy':
                 acc_fn = evaluate_array_accuracy
@@ -75,7 +75,10 @@ def evaluate_accuracy(data: pd.DataFrame,
                 acc_fn = evaluate_cat_array_accuracy
             else:
                 acc_fn = bounded_evaluate_array_accuracy
-            score_dict[accuracy_function_str] = acc_fn(true_values, predictions, data[cols], ts_analysis=ts_analysis)
+            score_dict[accuracy_function_str] = acc_fn(true_values,
+                                                       predictions,
+                                                       data=data[cols],
+                                                       ts_analysis=ts_analysis)
         else:
             true_values = data[target].tolist()
             if hasattr(importlib.import_module('lightwood.helpers.accuracy'), accuracy_function_str):
@@ -122,7 +125,6 @@ def evaluate_multilabel_accuracy(true_values, predictions, **kwargs):
 def evaluate_num_array_accuracy(
         true_values: pd.Series,
         predictions: pd.Series,
-        data: pd.DataFrame,
         **kwargs
 ) -> float:
     """
@@ -139,8 +141,8 @@ def evaluate_num_array_accuracy(
     else:
         naive_errors = ts_analysis.get('ts_naive_mae', {})
         wrapped_data = {
-            'data': data.reset_index(drop=True),
-            'group_info': {gcol: data[gcol].tolist()
+            'data': kwargs['data'].reset_index(drop=True),
+            'group_info': {gcol: kwargs['data'][gcol].tolist()
                            for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
         }
 
@@ -227,7 +229,6 @@ def evaluate_cat_array_accuracy(
 def bounded_evaluate_array_accuracy(
         true_values: pd.Series,
         predictions: pd.Series,
-        data: pd.DataFrame,
         **kwargs
 ) -> float:
     """
@@ -237,8 +238,9 @@ def bounded_evaluate_array_accuracy(
     For worse-than-naive, it scales linearly (with a factor).
     For better-than-naive, we fix 10 as 0.99, and scaled-logarithms (with 10 and 1e4 cutoffs as respective bases) are used to squash all remaining preimages to values between 0.5 and 1.0.
     """  # noqa
-    result = evaluate_array_accuracy(true_values, predictions, data, **kwargs)
-
+    result = evaluate_array_accuracy(np.array(true_values),
+                                     np.array(predictions),
+                                     **kwargs)
     if 10 < result <= 1e4:
         step_base = 0.99
         return step_base + (np.log(result) / np.log(1e4)) * (1 - step_base)
