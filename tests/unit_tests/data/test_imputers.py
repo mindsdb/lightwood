@@ -37,7 +37,7 @@ class TestImputers(unittest.TestCase):
 
         target = 'Development Index'
         df = self._load_df(cols_to_cat=[target])
-        for value, expected in zip(('mode', 'unk'), (df[target].dropna().mode().iloc[0], 'UNK')):
+        for value, expected in zip(('mode', ), (df[target].dropna().mode().iloc[0], )):
             imp = CategoricalImputer(target=target, value=value)
             ndf = imp.impute(df)
 
