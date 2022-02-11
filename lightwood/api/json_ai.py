@@ -40,6 +40,7 @@ from lightwood.helpers.device import *
 from lightwood.helpers.general import *
 from lightwood.helpers.log import *
 from lightwood.helpers.numeric import *
+from lightwood.helpers.imputers import *
 from lightwood.helpers.parallelism import *
 from lightwood.helpers.seed import *
 from lightwood.helpers.text import *
@@ -558,6 +559,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "dtype_dict": "$dtype_dict",
                 "target": "$target",
                 "mode": "$mode",
+                "imputers": "$imputers",
                 "timeseries_settings": "$problem_definition.timeseries_settings",
                 "anomaly_detection": "$problem_definition.anomaly_detection",
             },
@@ -674,6 +676,14 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         if json_ai.dtype_dict[k] not in (dtype.invalid, dtype.empty):
             dtype_dict[k] = json_ai.dtype_dict[k]
 
+    # Populate imputers
+    imputer_dict = {}
+    if json_ai.imputers:
+        for imputer in json_ai.imputers:
+            imputer_dict[imputer['args']['target'].replace('\'', '').replace('\"', '')] = call(imputer)
+    json_ai.imputers = imputer_dict
+    imputers = inline_dict(json_ai.imputers)
+
     # Populate encoders
     encoder_dict = {}
     for col_name, encoder in json_ai.encoders.items():
@@ -762,6 +772,7 @@ self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_bl
 
     clean_body = f"""
 log.info('Cleaning the data')
+self.imputers = {imputers}
 data = {call(json_ai.cleaner)}
 
 # Time-series blocks

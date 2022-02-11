@@ -10,6 +10,7 @@ import pandas as pd
 from lightwood.api.dtype import dtype
 from lightwood.helpers import text
 from lightwood.helpers.log import log
+from lightwood.helpers.imputers import BaseImputer
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.numeric import is_nan_numeric
 
@@ -23,10 +24,11 @@ def cleaner(
     mode: str,
     timeseries_settings: TimeseriesSettings,
     anomaly_detection: bool,
+    imputers: Dict[str, BaseImputer] = {},
     custom_cleaning_functions: Dict[str, str] = {}
 ) -> pd.DataFrame:
     """
-    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``
+    The cleaner is a function which takes in the raw data, plus additional information about it's types and about the problem. Based on this it generates a "clean" representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``. Optionally, these ``None`` values can be replaced with imputers.
 
     :param data: The raw data
     :param dtype_dict: Type information for each column
@@ -34,6 +36,7 @@ def cleaner(
     :param identifiers: A dict containing all identifier typed columns
     :param target: The target columns
     :param mode: Can be "predict" or "train"
+    :param imputers: The key corresponds to the single input column that will be imputed by the object. Refer to the imputer documentation for more details.
     :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object
     :param anomaly_detection: Are we detecting anomalies with this predictor?
 
@@ -53,6 +56,10 @@ def cleaner(
 
     if timeseries_settings.is_timeseries:
         data = clean_timeseries(data, timeseries_settings)
+
+    for col, imputer in imputers.items():
+        cols = [col] + [col for col in imputer.dependencies]
+        data[col] = imputer.impute(data[cols])
 
     return data
 
@@ -263,8 +270,13 @@ def _clean_quantity(element: object) -> Optional[float]:
 # ------------------------- #
 # Text
 # ------------------------- #
-def _clean_text(element: object) -> str:
-    return str(element)
+def _clean_text(element: object) -> Union[str, None]:
+    if isinstance(element, str):
+        return element
+    elif element is None or element != element:
+        return None
+    else:
+        return str(element)
 
 
 # ------------------------- #
