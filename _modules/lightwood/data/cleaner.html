@@ -183,6 +183,7 @@
 <span class="kn">from</span> <span class="nn">lightwood.api.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers</span> <span class="kn">import</span> <span class="n">text</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.imputers</span> <span class="kn">import</span> <span class="n">BaseImputer</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.numeric</span> <span class="kn">import</span> <span class="n">is_nan_numeric</span>
 
@@ -196,10 +197,11 @@
     <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span>
     <span class="n">anomaly_detection</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">imputers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseImputer</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
     <span class="n">custom_cleaning_functions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The cleaner is a function which takes in the raw data, plus additional information about it&#39;s types and about the problem. Based on this it generates a &quot;clean&quot; representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``</span>
+<span class="sd">    The cleaner is a function which takes in the raw data, plus additional information about it&#39;s types and about the problem. Based on this it generates a &quot;clean&quot; representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``. Optionally, these ``None`` values can be replaced with imputers.</span>
 
 <span class="sd">    :param data: The raw data</span>
 <span class="sd">    :param dtype_dict: Type information for each column</span>
@@ -207,6 +209,7 @@
 <span class="sd">    :param identifiers: A dict containing all identifier typed columns</span>
 <span class="sd">    :param target: The target columns</span>
 <span class="sd">    :param mode: Can be &quot;predict&quot; or &quot;train&quot;</span>
+<span class="sd">    :param imputers: The key corresponds to the single input column that will be imputed by the object. Refer to the imputer documentation for more details.</span>
 <span class="sd">    :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object</span>
 <span class="sd">    :param anomaly_detection: Are we detecting anomalies with this predictor?</span>
 
@@ -226,6 +229,10 @@
 
     <span class="k">if</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">clean_timeseries</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">timeseries_settings</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">imputer</span> <span class="ow">in</span> <span class="n">imputers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">imputer</span><span class="o">.</span><span class="n">dependencies</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">imputer</span><span class="o">.</span><span class="n">impute</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
 
@@ -436,8 +443,13 @@
 <span class="c1"># ------------------------- #</span>
 <span class="c1"># Text</span>
 <span class="c1"># ------------------------- #</span>
-<span class="k">def</span> <span class="nf">_clean_text</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_clean_text</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">element</span>
+    <span class="k">elif</span> <span class="n">element</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">element</span> <span class="o">!=</span> <span class="n">element</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
 
 
 <span class="c1"># ------------------------- #</span>

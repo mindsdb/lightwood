@@ -523,6 +523,7 @@
 <span class="sd">    :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data.</span>
 <span class="sd">    :param analyzer: The Analyzer object is used to evaluate how well a model performed on the predictive task.</span>
 <span class="sd">    :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.</span>
+<span class="sd">    :param imputers: A list of objects that will impute missing data on each column. They are called inside the cleaner.</span>
 <span class="sd">    :param analysis_blocks: The blocks that get used in both analysis and inference inside the analyzer and explainer blocks.</span>
 <span class="sd">    :param timeseries_transformer: Procedure used to transform any timeseries task dataframe into the format that lightwood expects for the rest of the pipeline.  </span>
 <span class="sd">    :param timeseries_analyzer: Procedure that extracts key insights from any timeseries in the data (e.g. measurement frequency, target distribution, etc).</span>
@@ -539,6 +540,7 @@
     <span class="n">splitter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">analyzer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">explainer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">imputers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Module</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">analysis_blocks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Module</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">timeseries_transformer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">timeseries_analyzer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -559,6 +561,7 @@
         <span class="n">splitter</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;splitter&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">analyzer</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;analyzer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">explainer</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;explainer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">imputers</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;imputers&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">analysis_blocks</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;analysis_blocks&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">timeseries_transformer</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timeseries_transformer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">timeseries_analyzer</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timeseries_analyzer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -575,6 +578,7 @@
             <span class="n">splitter</span><span class="o">=</span><span class="n">splitter</span><span class="p">,</span>
             <span class="n">analyzer</span><span class="o">=</span><span class="n">analyzer</span><span class="p">,</span>
             <span class="n">explainer</span><span class="o">=</span><span class="n">explainer</span><span class="p">,</span>
+            <span class="n">imputers</span><span class="o">=</span><span class="n">imputers</span><span class="p">,</span>
             <span class="n">analysis_blocks</span><span class="o">=</span><span class="n">analysis_blocks</span><span class="p">,</span>
             <span class="n">timeseries_transformer</span><span class="o">=</span><span class="n">timeseries_transformer</span><span class="p">,</span>
             <span class="n">timeseries_analyzer</span><span class="o">=</span><span class="n">timeseries_analyzer</span><span class="p">,</span>
