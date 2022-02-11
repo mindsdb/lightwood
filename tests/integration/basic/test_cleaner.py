@@ -18,13 +18,12 @@ class TestCleaner(unittest.TestCase):
 
         # define columns to impute
         cat_mode_impute_col = 'Infant mortality '
-        cat_unk_impute_col = 'Literacy'
         num_mean_impute_col = 'Population'
         num_mode_impute_col = 'GDP'
         num_zero_impute_col = 'Pop. Density '
         num_median_impute_col = 'Area'
         cols = [num_mean_impute_col, num_mode_impute_col, num_zero_impute_col, num_median_impute_col,
-                cat_mode_impute_col, cat_unk_impute_col]
+                cat_mode_impute_col]
 
         # replace first row values with nans
         for col in cols:
@@ -35,7 +34,6 @@ class TestCleaner(unittest.TestCase):
         num_median_target_value = df[num_median_impute_col].iloc[1:].median()
         num_zero_target_value = 0.0
         cat_mode_target_value = df[cat_mode_impute_col].iloc[1:].mode().iloc[0]
-        cat_unk_target_value = 'UNK'
 
         jai.imputers = [
             {"module": "NumericalImputer", "args": {"value": "'mean'", "target": f"'{num_mean_impute_col}'"}},
@@ -43,7 +41,6 @@ class TestCleaner(unittest.TestCase):
             {"module": "NumericalImputer", "args": {"value": "'median'", "target": f"'{num_median_impute_col}'"}},
             {"module": "NumericalImputer", "args": {"value": "'zero'", "target": f"'{num_zero_impute_col}'"}},
             {"module": "CategoricalImputer", "args": {"value": "'mode'", "target": f"'{cat_mode_impute_col}'"}},
-            {"module": "CategoricalImputer", "args": {"value": "'unk'", "target": f"'{cat_unk_impute_col}'"}},
         ]
         predictor = predictor_from_json_ai(jai)
         cleaned_data = predictor.preprocess(df)
@@ -58,4 +55,3 @@ class TestCleaner(unittest.TestCase):
         assert cleaned_data[num_zero_impute_col].iloc[0] == num_zero_target_value
         assert cleaned_data[num_median_impute_col].iloc[0] == num_median_target_value
         assert cleaned_data[cat_mode_impute_col].iloc[0] == cat_mode_target_value
-        assert cleaned_data[cat_unk_impute_col].iloc[0] == cat_unk_target_value

@@ -670,8 +670,9 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
     imputer_dict = {}
     if json_ai.imputers:
         for imputer in json_ai.imputers:
-            imputer_dict[imputer['args']['target']] = call(imputer)
+            imputer_dict[imputer['args']['target'].replace('\'', '').replace('\"', '')] = call(imputer)
     json_ai.imputers = imputer_dict
+    imputers = inline_dict(json_ai.imputers)
 
     # Populate encoders
     encoder_dict = {}
@@ -758,11 +759,6 @@ self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_bl
     # ----------------- #
     # Pre-processing Body
     # ----------------- #
-
-    imputers = ""
-    for target_col, imputer in json_ai.imputers.items():
-        imputers += f"{target_col}: {imputer},"
-    imputers = "{" + imputers + "}"
 
     clean_body = f"""
 log.info('Cleaning the data')

@@ -80,6 +80,6 @@ class CategoricalImputer(BaseImputer):
 
         if self.value == 'mode':
             value = data[col].dropna().mode().iloc[0]
+            data[col] = data[col].fillna(value=value)
 
-        data[col] = data[col].fillna(value=value)
         return data
