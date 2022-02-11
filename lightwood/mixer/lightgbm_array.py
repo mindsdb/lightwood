@@ -4,7 +4,6 @@ from typing import Dict, List, Union
 import numpy as np
 import pandas as pd
 
-from lightwood.api import dtype
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.mixer.base import BaseMixer
@@ -28,7 +27,7 @@ class LightGBMArray(BaseMixer):
         super().__init__(stop_after)
         self.submodel_stop_after = stop_after / n_ts_predictions
         self.target = target
-        dtype_dict[target] = dtype.float
+        # dtype_dict[target] = dtype.float  @TODO: figure out if this can be removed
         self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev,
                                 False, target_encoder)
                        for _ in range(n_ts_predictions)]
@@ -79,7 +78,7 @@ class LightGBMArray(BaseMixer):
                            columns=[f'prediction_{i}' for i in range(self.n_ts_predictions)])
 
         for timestep in range(self.n_ts_predictions):
-            ydf[f'prediction_{timestep}'] = self.models[timestep](ds, args)
+            ydf[f'prediction_{timestep}'] = self.models[timestep](ds, args)['prediction']
 
         ydf['prediction'] = ydf.values.tolist()
         return ydf[['prediction']]

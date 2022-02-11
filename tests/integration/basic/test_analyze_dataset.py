@@ -15,7 +15,7 @@ from tests.utils.data_generation import (
 
 
 class TestInferTypes(unittest.TestCase):
-    def test_analyze_home_rentlas(self):
+    def test_analyze_home_rentals(self):
         df = pd.read_csv(
             "https://raw.githubusercontent.com/mindsdb/mindsdb-examples/master/classics/home_rentals/dataset/train.csv"
         )
@@ -75,7 +75,7 @@ class TestInferTypes(unittest.TestCase):
                 ],
                 "categorical_int": [next(categories_cycle) for i in range(n_points)],
                 "categorical_binary": [0, 1] * (n_points // 2),
-                "sequential_array": [f"1,2,3,4,5,{i}" for i in range(n_points)],
+                "sequential_numeric_array": [f"1,2,3,4,5,{i}" for i in range(n_points)],
                 "multiple_categories_array_str": [
                     ",".join(
                         [
@@ -101,7 +101,7 @@ class TestInferTypes(unittest.TestCase):
 
         stats = analysis.statistical_analysis
         for k in stats.histograms:
-            if k != 'sequential_array':
+            if k != 'sequential_numeric_array':
                 assert np.sum(stats.histograms[k]['y']) == n_points
 
         assert set(stats.histograms['short_text']['x']) == set(['Unknown'])

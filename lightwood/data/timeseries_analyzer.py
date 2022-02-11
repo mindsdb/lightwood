@@ -41,7 +41,7 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     # @TODO: maybe normalizers should fit using only the training subsets??
     new_data = generate_target_group_normalizers(info)
 
-    if dtype_dict[target] in (dtype.integer, dtype.float, dtype.tsarray):
+    if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
         naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(info, new_data['group_combinations'])
     else:
         naive_forecast_residuals, scale_factor = {}, {}
@@ -123,6 +123,7 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
 
     :return: (list of naive residuals, average residual value)
     """  # noqa
+    # @TODO: support categorical series as well
     residuals = target_data.rolling(window=m + 1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:].values.flatten()
     scale_factor = np.average(residuals)
     return residuals.tolist(), scale_factor

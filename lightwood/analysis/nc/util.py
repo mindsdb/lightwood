@@ -57,7 +57,7 @@ def set_conf_range(
     :return: set confidence plus predictions regions (for numerical tasks) or pvalues (for categorical tasks).
     """  # noqa
     # numerical
-    if target_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray, dtype.quantity):
+    if target_type in (dtype.integer, dtype.float, dtype.num_array, dtype.num_tsarray, dtype.quantity):
 
         # ICP gets all possible bounds (shape: (B, 2, 99))
         all_ranges = icp.predict(X.values)
@@ -85,7 +85,7 @@ def set_conf_range(
                 return 0.9901, ranges
 
     # categorical
-    elif target_type in (dtype.binary, dtype.categorical):
+    elif target_type in (dtype.binary, dtype.categorical, dtype.cat_array, dtype.cat_tsarray):
         pvals = icp.predict(X.values)  # p-values at which each class is included in the predicted set
         conf = get_categorical_conf(pvals)
         return conf, pvals
