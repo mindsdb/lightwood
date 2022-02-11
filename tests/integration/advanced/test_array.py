@@ -8,14 +8,7 @@ np.random.seed(0)
 
 
 class TestArrayTarget(unittest.TestCase):
-    def test_0_num_array(self):
-        """ Tests numerical array input and output. """
-        # task: learn to emit next `arr_len` numbers given any numerical array input of length `arr_len`
-        df = pd.DataFrame()
-        arr_len = 4
-        df['input'] = [[row + i for i in range(arr_len)] for row in range(200)]
-        df['output'] = [[row + i + arr_len for i in range(arr_len)] for row in range(200)]
-
+    def _test_array(self, df):
         train_idxs = np.random.rand(len(df)) < 0.8
         train = df[train_idxs]
         test = df[~train_idxs]
@@ -26,6 +19,15 @@ class TestArrayTarget(unittest.TestCase):
                                                                         }))
         predictor.learn(train)
         predictor.predict(test)
+
+    def test_0_num_array(self):
+        """ Tests numerical array input and output. """
+        # task: learn to emit next `arr_len` numbers given any numerical array input of length `arr_len`
+        df = pd.DataFrame()
+        arr_len = 4
+        df['input'] = [[row + i for i in range(arr_len)] for row in range(200)]
+        df['output'] = [[row + i + arr_len for i in range(arr_len)] for row in range(200)]
+        self._test_array(df)
 
     def test_1_cat_array(self):
         """ Tests categorical array input and output. """
@@ -34,14 +36,4 @@ class TestArrayTarget(unittest.TestCase):
         arr_len = 4
         df['input'] = [[chr(65 + i + row % 4) for i in range(arr_len)] for row in range(200)]
         df['output'] = [[chr(65 + i + row % 4) for i in range(arr_len)][::-1] for row in range(200)]
-
-        train_idxs = np.random.rand(len(df)) < 0.8
-        train = df[train_idxs]
-        test = df[~train_idxs]
-
-        predictor = predictor_from_problem(df,
-                                           ProblemDefinition.from_dict({'target': 'output',
-                                                                        'time_aim': 80,
-                                                                        }))
-        predictor.learn(train)
-        predictor.predict(test)
+        self._test_array(df)
