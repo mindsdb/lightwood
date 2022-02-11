@@ -93,11 +93,11 @@ def statistical_analysis(data: pd.DataFrame,
     target = problem_definition.target
     positive_domain = False
     # get train std, used in analysis
-    if dtypes[target] in [dtype.float, dtype.integer, dtype.tsarray, dtype.quantity]:
+    if dtypes[target] in [dtype.float, dtype.integer, dtype.num_tsarray, dtype.quantity]:
         df_std = df[target].astype(float).std()
         if min(df[target]) >= 0:
             positive_domain = True
-    elif dtypes[target] in [dtype.array]:
+    elif dtypes[target] in [dtype.num_array]:
         try:
             all_vals = []
             for x in df[target]:
@@ -124,11 +124,12 @@ def statistical_analysis(data: pd.DataFrame,
                 'y': list(hist.values())
             }
             buckets[col] = histograms[col]['x']
-        elif dtypes[col] in (dtype.integer, dtype.float, dtype.array, dtype.tsarray, dtype.quantity):
+        elif dtypes[col] in (dtype.integer, dtype.float, dtype.num_tsarray, dtype.quantity):
             histograms[col] = get_numeric_histogram(filter_nan_and_none(df[col]), dtypes[col], 50)
             buckets[col] = histograms[col]['x']
         elif dtypes[col] in (dtype.date, dtype.datetime):
             histograms[col] = get_datetime_histogram(filter_nan_and_none(df[col]), 50)
+        # @TODO: case for num_ and cat_ arrays
         else:
             histograms[col] = {'x': ['Unknown'], 'y': [len(df[col])]}
             buckets[col] = []
@@ -136,7 +137,7 @@ def statistical_analysis(data: pd.DataFrame,
     # get observed classes, used in analysis
     target_class_distribution = None
     target_weights = None
-    if dtypes[target] in (dtype.categorical, dtype.binary):
+    if dtypes[target] in (dtype.categorical, dtype.binary, dtype.cat_tsarray):
         target_class_distribution = dict(df[target].value_counts().apply(lambda x: x / len(df[target])))
         target_weights = {}
         for k in target_class_distribution:

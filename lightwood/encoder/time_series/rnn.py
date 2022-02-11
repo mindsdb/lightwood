@@ -78,8 +78,8 @@ class TimeSeriesEncoder(BaseEncoder):
                 if dep_name in self.grouped_by:
                     continue  # we only use group column for indexing and selecting rows
 
-                assert dep['original_type'] in (dtype.categorical, dtype.binary,
-                                                dtype.integer, dtype.float, dtype.tsarray)
+                assert dep['original_type'] in (dtype.categorical, dtype.binary, dtype.cat_tsarray,
+                                                dtype.integer, dtype.float, dtype.num_tsarray)
 
                 if f'__mdb_ts_previous_{self.target}' == dep_name:
                     self.dep_norms[dep_name] = ts_analysis['target_normalizers']
@@ -99,7 +99,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 # add descriptor size to the total encoder output dimensionality
                 if dep['original_type'] in (dtype.categorical, dtype.binary):
                     total_dims += len(self.dep_norms[dep_name]['__default'].scaler.categories_[0])
-                elif dep['original_type'] in (dtype.integer, dtype.float, dtype.tsarray):
+                elif dep['original_type'] in (dtype.integer, dtype.float, dtype.num_tsarray, dtype.cat_tsarray):
                     total_dims += 1
 
         if self.encoder_class == EncoderRNNNumerical:
@@ -365,7 +365,7 @@ class TimeSeriesEncoder(BaseEncoder):
                 if dep in self.grouped_by:
                     continue
                 # normalize numerical target per group-by
-                if self._target_type in (dtype.integer, dtype.float, dtype.tsarray):
+                if self._target_type in (dtype.integer, dtype.float, dtype.num_tsarray):
                     dep_info = {
                         'group_info': {group: dependency_data[group] for group in self.grouped_by},
                         'data': dep_data

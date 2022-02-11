@@ -96,8 +96,13 @@ class ICP(BaseAnalysisBlock):
                 if ns.predictor.supports_proba:
                     icp.nc_function.model.prediction_cache = ns.normal_predictions[all_cat_cols].values
                 else:
-                    predicted_classes = pd.get_dummies(
-                        ns.normal_predictions['prediction']).values  # inflate to one-hot enc
+                    if ns.is_multi_ts:
+                        icp.nc_function.model.prediction_cache = np.array(
+                            [p[0] for p in ns.normal_predictions['prediction']])
+                        preds = icp.nc_function.model.prediction_cache
+                    else:
+                        preds = ns.normal_predictions['prediction']
+                    predicted_classes = pd.get_dummies(preds).values  # inflate to one-hot enc
                     icp.nc_function.model.prediction_cache = predicted_classes
 
             elif ns.is_multi_ts:
@@ -225,9 +230,9 @@ class ICP(BaseAnalysisBlock):
 
             icp_X[ns.target_name] = preds
 
-            is_categorical = ns.target_dtype in (dtype.binary, dtype.categorical, dtype.array)
-            is_numerical = ns.target_dtype in [dtype.integer, dtype.float,
-                                               dtype.quantity] or ns.target_dtype in (dtype.array, dtype.tsarray)
+            is_categorical = ns.target_dtype in (dtype.binary, dtype.categorical, dtype.cat_array, dtype.cat_tsarray)
+            is_numerical = ns.target_dtype in (dtype.integer, dtype.float,
+                                               dtype.quantity, dtype.num_array, dtype.num_tsarray)
             is_anomaly_task = is_numerical and ns.tss.is_timeseries and ns.anomaly_detection
 
             if (is_numerical or is_categorical) and ns.analysis['icp'].get('__mdb_active', False):
@@ -256,12 +261,11 @@ class ICP(BaseAnalysisBlock):
                 if ns.tss.is_timeseries and ns.tss.horizon > 1 and is_numerical:
 
                     # bounds in time series are only given for the first forecast
-                    base_icp.nc_function.model.prediction_cache = \
-                        [p[0] for p in ns.predictions['prediction']]
+                    base_icp.nc_function.model.prediction_cache = preds
                     all_confs = base_icp.predict(icp_values)
 
                 elif is_numerical:
-                    base_icp.nc_function.model.prediction_cache = ns.predictions['prediction']
+                    base_icp.nc_function.model.prediction_cache = preds
                     all_confs = base_icp.predict(icp_values)
 
                 # categorical
@@ -274,7 +278,7 @@ class ICP(BaseAnalysisBlock):
                         for icol, cat_col in enumerate(all_cat_cols):
                             row_insights.loc[X.index, cat_col] = class_dists[:, icol]
                     else:
-                        class_dists = pd.get_dummies(ns.predictions['prediction']).values
+                        class_dists = pd.get_dummies(preds).values
 
                     base_icp.nc_function.model.prediction_cache = class_dists
 

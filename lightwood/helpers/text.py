@@ -211,7 +211,10 @@ def get_identifier_description_mp(arg_tup):
 
 def get_identifier_description(data: Iterable, column_name: str, data_dtype: dtype):
     data = list(data)
-    nr_unique = len(set(data))
+    if isinstance(data[0], list):
+        nr_unique = len(set(tuple(x) for x in data))
+    else:
+        nr_unique = len(set(data))
 
     if nr_unique == 1:
         return 'No Information'
@@ -233,7 +236,7 @@ def get_identifier_description(data: Iterable, column_name: str, data_dtype: dty
     all_uuid_charset = all(set(str(x)).issubset(uuid_charset) for x in data)
     is_uuid = all_uuid_charset and all_same_length
 
-    if all_same_length and len(data) == len(set(data)) and data_dtype not in (dtype.integer, dtype.float):
+    if all_same_length and len(data) == nr_unique and data_dtype not in (dtype.integer, dtype.float):
         str_data = [str(x) for x in data]
         randomness_per_index = []
         for i, _ in enumerate(str_data[0]):
