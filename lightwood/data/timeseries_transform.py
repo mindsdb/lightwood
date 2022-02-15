@@ -330,7 +330,7 @@ def _ts_add_future_target(df, target, horizon, data_dtype, mode):
     """  # noqa
     if target not in df:
         return df
-    if data_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
+    if data_dtype in (dtype.integer, dtype.float, dtype.num_array, dtype.num_tsarray):
         df[target] = df[target].astype(float)
 
     for timestep_index in range(1, horizon):

@@ -1,7 +1,8 @@
 from lightwood.helpers.accuracy import to_binary, f1_score, recall_score, precision_score, r2_score
 from lightwood.helpers.device import is_cuda_compatible, get_devices
-from lightwood.helpers.general import get_group_matches, mase, is_none, evaluate_accuracy, evaluate_array_accuracy,\
-    evaluate_array_r2_accuracy, evaluate_multilabel_accuracy, evaluate_regression_accuracy
+from lightwood.helpers.general import get_group_matches, mase, is_none, evaluate_accuracy, evaluate_num_array_accuracy,\
+    evaluate_array_accuracy, evaluate_multilabel_accuracy, evaluate_regression_accuracy, evaluate_cat_array_accuracy, \
+    bounded_evaluate_array_accuracy
 from lightwood.helpers.io import read_from_path_or_url
 from lightwood.helpers.parallelism import get_nr_procs, mut_method_call, run_mut_method
 from lightwood.helpers.numeric import is_nan_numeric, filter_nan_and_none
@@ -13,8 +14,8 @@ from lightwood.helpers.torch import average_vectors, concat_vectors_and_pad, Lig
 
 
 __all__ = ['to_binary', 'f1_score', 'recall_score', 'precision_score', 'r2_score', 'is_cuda_compatible', 'get_devices',
-           'get_group_matches', 'mase', 'is_none', 'evaluate_accuracy', 'evaluate_array_accuracy',
-           'evaluate_array_r2_accuracy',
+           'get_group_matches', 'mase', 'is_none', 'evaluate_accuracy', 'evaluate_num_array_accuracy',
+           'evaluate_array_accuracy', 'evaluate_cat_array_accuracy', 'bounded_evaluate_array_accuracy',
            'evaluate_multilabel_accuracy', 'evaluate_regression_accuracy', 'read_from_path_or_url', 'get_nr_procs',
            'mut_method_call', 'run_mut_method', 'tokenize_text', 'analyze_sentences', 'decontracted', 'contains_alnum',
            'get_identifier_description', 'get_identifier_description_mp', 'get_pct_auto_increment',

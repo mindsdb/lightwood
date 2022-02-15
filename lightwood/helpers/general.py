@@ -2,7 +2,7 @@ import importlib
 from typing import List, Dict, Optional
 import numpy as np
 import pandas as pd
-from sklearn.metrics import r2_score, f1_score, mean_absolute_error
+from sklearn.metrics import r2_score, f1_score, mean_absolute_error, balanced_accuracy_score
 from lightwood.helpers.numeric import is_nan_numeric
 
 
@@ -55,17 +55,30 @@ def evaluate_accuracy(data: pd.DataFrame,
     score_dict = {}
 
     for accuracy_function_str in accuracy_functions:
-        if 'evaluate_array_accuracy' in accuracy_function_str:
-            horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
-            gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
-            cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
-            true_values = data[cols]
-            predictions = predictions.apply(pd.Series)
+        if 'array_accuracy' in accuracy_function_str:
+            if ts_analysis is None or not ts_analysis['tss'].is_timeseries:
+                # normal array, needs to be expanded
+                cols = [target]
+                true_values = data[cols].apply(lambda x: pd.Series(x[target]), axis=1)
+            else:
+                horizon = 1 if not isinstance(predictions.iloc[0], list) else len(predictions.iloc[0])
+                gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
+                cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
+                true_values = data[cols]
+            predictions = predictions.apply(pd.Series)  # split array cells into columns
+
             if accuracy_function_str == 'evaluate_array_accuracy':
                 acc_fn = evaluate_array_accuracy
+            elif accuracy_function_str == 'evaluate_num_array_accuracy':
+                acc_fn = evaluate_num_array_accuracy
+            elif accuracy_function_str == 'evaluate_cat_array_accuracy':
+                acc_fn = evaluate_cat_array_accuracy
             else:
                 acc_fn = bounded_evaluate_array_accuracy
-            score_dict[accuracy_function_str] = acc_fn(true_values, predictions, data[cols], ts_analysis=ts_analysis)
+            score_dict[accuracy_function_str] = acc_fn(true_values,
+                                                       predictions,
+                                                       data=data[cols],
+                                                       ts_analysis=ts_analysis)
         else:
             true_values = data[target].tolist()
             if hasattr(importlib.import_module('lightwood.helpers.accuracy'), accuracy_function_str):
@@ -109,10 +122,9 @@ def evaluate_multilabel_accuracy(true_values, predictions, **kwargs):
     return f1_score(true_values, pred_values, average='weighted')
 
 
-def evaluate_array_accuracy(
+def evaluate_num_array_accuracy(
         true_values: pd.Series,
         predictions: pd.Series,
-        data: pd.DataFrame,
         **kwargs
 ) -> float:
     """
@@ -124,22 +136,28 @@ def evaluate_array_accuracy(
     and the final accuracy is the reciprocal of the average score through all timesteps.
     """
     ts_analysis = kwargs.get('ts_analysis', {})
-    naive_errors = ts_analysis.get('ts_naive_mae', {})
-    wrapped_data = {
-        'data': data.reset_index(drop=True),
-        'group_info': {gcol: data[gcol].tolist()
-                       for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
-    }
+    if not ts_analysis:
+        naive_errors = None
+    else:
+        naive_errors = ts_analysis.get('ts_naive_mae', {})
+        wrapped_data = {
+            'data': kwargs['data'].reset_index(drop=True),
+            'group_info': {gcol: kwargs['data'][gcol].tolist()
+                           for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
+        }
 
-    if ts_analysis['tss'].group_by:
-        [true_values.pop(gby_col) for gby_col in ts_analysis['tss'].group_by]
+        if ts_analysis['tss'].group_by:
+            [true_values.pop(gby_col) for gby_col in ts_analysis['tss'].group_by]
 
     true_values = np.array(true_values)
     predictions = np.array(predictions)
 
     if not naive_errors:
         # use mean R2 method if naive errors are not available
-        return evaluate_array_r2_accuracy(true_values, predictions, ts_analysis=ts_analysis)
+        nan_mask = (~np.isnan(true_values)).astype(int)
+        predictions *= nan_mask
+        true_values = np.nan_to_num(true_values, 0.0)
+        return evaluate_array_accuracy(true_values, predictions, ts_analysis=ts_analysis)
 
     mases = []
     for group in ts_analysis['group_combinations']:
@@ -157,25 +175,21 @@ def evaluate_array_accuracy(
     return 1 / max(np.average(mases), 1e-4)  # reciprocal to respect "larger -> better" convention
 
 
-def evaluate_array_r2_accuracy(
+def evaluate_array_accuracy(
         true_values: np.ndarray,
         predictions: np.ndarray,
         **kwargs
 ) -> float:
     """
     Default time series forecasting accuracy method.
-    Returns mean R2 score over all timesteps in the forecasting horizon.
-    """
+    Returns mean score over all timesteps in the forecasting horizon, as determined by the `base_acc_fn` (R2 score by default).
+    """  # noqa
     base_acc_fn = kwargs.get('base_acc_fn', lambda t, p: max(0, r2_score(t, p)))
 
-    nan_mask = (~np.isnan(true_values)).astype(int)
-    predictions *= nan_mask
-    true_values = np.nan_to_num(true_values, 0.0)
+    fh = true_values.shape[1]
+    ts_analysis = kwargs.get('ts_analysis', None)
 
-    fh = kwargs.get('ts_analysis', {}).get('tss', None)
-    fh = fh.horizon if fh is not None else 1
-
-    if kwargs.get('ts_analysis', {}).get('tss', False) and not kwargs['ts_analysis']['tss'].eval_cold_start:
+    if ts_analysis and ts_analysis.get('tss', False) and not kwargs['ts_analysis']['tss'].eval_cold_start:
         # only evaluate accuracy for rows with complete historical context
         true_values = true_values[kwargs['ts_analysis']['tss'].window:]
         predictions = predictions[kwargs['ts_analysis']['tss'].window:]
@@ -187,10 +201,34 @@ def evaluate_array_r2_accuracy(
     return aggregate / fh
 
 
+def evaluate_cat_array_accuracy(
+        true_values: pd.Series,
+        predictions: pd.Series,
+        **kwargs
+) -> float:
+    """
+    Evaluate accuracy in categorical time series forecasting tasks.
+
+    Balanced accuracy is computed for each timestep (as determined by `timeseries_settings.horizon`),
+    and the final accuracy is the reciprocal of the average score through all timesteps.
+    """
+    ts_analysis = kwargs.get('ts_analysis', {})
+
+    if ts_analysis and ts_analysis['tss'].group_by:
+        [true_values.pop(gby_col) for gby_col in ts_analysis['tss'].group_by]
+
+    true_values = np.array(true_values)
+    predictions = np.array(predictions)
+
+    return evaluate_array_accuracy(true_values,
+                                   predictions,
+                                   ts_analysis=ts_analysis,
+                                   base_acc_fn=balanced_accuracy_score)
+
+
 def bounded_evaluate_array_accuracy(
         true_values: pd.Series,
         predictions: pd.Series,
-        data: pd.DataFrame,
         **kwargs
 ) -> float:
     """
@@ -200,8 +238,9 @@ def bounded_evaluate_array_accuracy(
     For worse-than-naive, it scales linearly (with a factor).
     For better-than-naive, we fix 10 as 0.99, and scaled-logarithms (with 10 and 1e4 cutoffs as respective bases) are used to squash all remaining preimages to values between 0.5 and 1.0.
     """  # noqa
-    result = evaluate_array_accuracy(true_values, predictions, data, **kwargs)
-
+    result = evaluate_array_accuracy(np.array(true_values),
+                                     np.array(predictions),
+                                     **kwargs)
     if 10 < result <= 1e4:
         step_base = 0.99
         return step_base + (np.log(result) / np.log(1e4)) * (1 - step_base)
