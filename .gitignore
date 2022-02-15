@@ -60,10 +60,11 @@ AI2.json
 assert.sh
 docssrc/build
 docssrc/build/*
-docssrc/source/tutorials/*.html
-docssrc/source/tutorials/*.pickle
-docssrc/source/tutorials/*.py
+docssrc/source/tutorials/**.html
+docssrc/source/tutorials/**.pickle
+docssrc/source/tutorials/**.py
 docs
 docs/*
 *.zip
 docs/*
+ docssrc/source/tutorials/custom_cleaner/
