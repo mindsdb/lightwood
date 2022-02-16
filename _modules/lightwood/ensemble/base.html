@@ -177,7 +177,7 @@
 
 <span class="kn">from</span> <span class="nn">lightwood.mixer.base</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span><span class="p">,</span> <span class="n">SubmodelData</span>
 
 
 <div class="viewcode-block" id="BaseEnsemble"><a class="viewcode-back" href="../../../ensemble.html#ensemble.BaseEnsemble">[docs]</a><span class="k">class</span> <span class="nc">BaseEnsemble</span><span class="p">:</span>
@@ -199,12 +199,14 @@
     <span class="n">mixers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseMixer</span><span class="p">]</span>
     <span class="n">best_index</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># @TODO: maybe only applicable to BestOf</span>
     <span class="n">supports_proba</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">submodel_data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SubmodelData</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseMixer</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mixers</span> <span class="o">=</span> <span class="n">mixers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_index</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">submodel_data</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>

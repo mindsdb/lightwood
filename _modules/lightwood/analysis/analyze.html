@@ -267,7 +267,8 @@
         <span class="n">confusion_matrix</span><span class="o">=</span><span class="n">runtime_analyzer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cm&#39;</span><span class="p">,</span> <span class="p">[]),</span>
         <span class="n">column_importances</span><span class="o">=</span><span class="n">runtime_analyzer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;column_importances&#39;</span><span class="p">,</span> <span class="p">{}),</span>
         <span class="n">histograms</span><span class="o">=</span><span class="n">stats_info</span><span class="o">.</span><span class="n">histograms</span><span class="p">,</span>
-        <span class="n">dtypes</span><span class="o">=</span><span class="n">dtype_dict</span>
+        <span class="n">dtypes</span><span class="o">=</span><span class="n">dtype_dict</span><span class="p">,</span>
+        <span class="n">submodel_data</span><span class="o">=</span><span class="n">predictor</span><span class="o">.</span><span class="n">submodel_data</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">model_analysis</span><span class="p">,</span> <span class="n">runtime_analyzer</span></div>

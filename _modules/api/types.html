@@ -618,6 +618,14 @@
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="SubmodelData"><a class="viewcode-back" href="../../api/types.html#api.types.SubmodelData">[docs]</a><span class="nd">@dataclass_json</span>
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">SubmodelData</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">accuracy</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">is_best</span><span class="p">:</span> <span class="nb">bool</span></div>
+
+
 <div class="viewcode-block" id="ModelAnalysis"><a class="viewcode-back" href="../../api/types.html#api.types.ModelAnalysis">[docs]</a><span class="nd">@dataclass_json</span>
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">ModelAnalysis</span><span class="p">:</span>
@@ -645,7 +653,8 @@
     <span class="n">column_importances</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
     <span class="n">confusion_matrix</span><span class="p">:</span> <span class="nb">object</span>
     <span class="n">histograms</span><span class="p">:</span> <span class="nb">object</span>
-    <span class="n">dtypes</span><span class="p">:</span> <span class="nb">object</span></div>
+    <span class="n">dtypes</span><span class="p">:</span> <span class="nb">object</span>
+    <span class="n">submodel_data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SubmodelData</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="PredictionArguments"><a class="viewcode-back" href="../../api/types.html#api.types.PredictionArguments">[docs]</a><span class="nd">@dataclass</span>
