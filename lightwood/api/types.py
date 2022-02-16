@@ -447,6 +447,14 @@ class JsonAI:
 
 @dataclass_json
 @dataclass
+class SubmodelData:
+    name: str
+    accuracy: float
+    is_best: bool
+
+
+@dataclass_json
+@dataclass
 class ModelAnalysis:
     """
     The ``ModelAnalysis`` class stores useful information to describe a model and understand its predictive performance on a validation dataset.
@@ -473,6 +481,7 @@ class ModelAnalysis:
     confusion_matrix: object
     histograms: object
     dtypes: object
+    submodel_data: List[SubmodelData]
 
 
 @dataclass
