@@ -34,7 +34,7 @@ class TimeSeriesEncoder(ArrayEncoder):
 
         base_encode = super().encode(column_data)
 
-        if self.original_type in (dtype.integer, dtype.float, dtype.quantity, dtype.tsarray):
+        if self.original_type in (dtype.integer, dtype.float, dtype.quantity, dtype.num_tsarray):
             mavgs = []
             for offset in range(self.max_mavg_offset):
                 ma = torch.mean(base_encode[:, self.max_mavg_offset - (offset + 1):self.max_mavg_offset], 1)

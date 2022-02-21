@@ -103,20 +103,27 @@ def get_numeric_type(element: object) -> str:
 def type_check_sequence(element: object) -> str:
     dtype_guess = None
 
-    for sep_char in [',', '\t', '|', ' ']:
-        all_nr = True
-        if '[' in element:
-            ele_arr = element.rstrip(']').lstrip('[').split(sep_char)
+    if isinstance(element, List):
+        all_nr = all([get_numeric_type(ele) for ele in element])
+        if all_nr:
+            dtype_guess = dtype.num_array
         else:
-            ele_arr = element.rstrip(')').lstrip('(').split(sep_char)
+            dtype_guess = dtype.cat_array
+    else:
+        for sep_char in [',', '\t', '|', ' ']:
+            all_nr = True
+            if '[' in element:
+                ele_arr = element.rstrip(']').lstrip('[').split(sep_char)
+            else:
+                ele_arr = element.rstrip(')').lstrip('(').split(sep_char)
 
-        for ele in ele_arr:
-            if not get_numeric_type(ele):
-                all_nr = False
-                break
+            for ele in ele_arr:
+                if not get_numeric_type(ele):
+                    all_nr = False
+                    break
 
-        if len(ele_arr) > 1 and all_nr:
-            dtype_guess = dtype.array
+            if len(ele_arr) > 1 and all_nr:
+                dtype_guess = dtype.num_array
 
     return dtype_guess
 
@@ -216,7 +223,7 @@ def get_column_data_type(arg_tup):
             }
 
     # Check for Tags subtype
-    if curr_dtype not in (dtype.quantity, dtype.array):
+    if curr_dtype not in (dtype.quantity, dtype.num_array):
         lengths = []
         unique_tokens = set()
 
@@ -229,14 +236,14 @@ def get_column_data_type(arg_tup):
                 lengths.append(len(item_tags))
                 unique_tokens = unique_tokens.union(set(item_tags))
 
-        # If more than 30% of the samples contain more than 1 category and there's more than 6 of them and they are shared between the various cells # noqa
+        # If more than 30% of the samples contain more than 1 category and there's more than 6 and less than 30 of them and they are shared between the various cells # noqa
         if (can_be_tags and np.mean(lengths) > 1.3 and
-                len(unique_tokens) >= 6 and
+                6 <= len(unique_tokens) <= 30 and
                 len(unique_tokens) / np.mean(lengths) < (len(data) / 4)):
             curr_dtype = dtype.tags
 
     # Categorical based on unique values
-    if curr_dtype not in (dtype.date, dtype.datetime, dtype.tags):
+    if curr_dtype not in (dtype.date, dtype.datetime, dtype.tags, dtype.cat_array):
         if curr_dtype in (dtype.integer, dtype.float):
             is_categorical = nr_distinct_vals < 10
         else:
@@ -272,7 +279,7 @@ def get_column_data_type(arg_tup):
 
                 return curr_dtype, {curr_dtype: len(data)}, additional_info, warn, info
 
-    if curr_dtype in [dtype.categorical, dtype.rich_text, dtype.short_text]:
+    if curr_dtype in [dtype.categorical, dtype.rich_text, dtype.short_text, dtype.cat_array]:
         known_dtype_dist = {curr_dtype: len(data)}
 
     if nr_distinct_vals < 3 and curr_dtype == dtype.categorical:

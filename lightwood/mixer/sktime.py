@@ -14,7 +14,6 @@ from sktime.transformations.series.detrend import Detrender
 from sktime.forecasting.base import ForecastingHorizon, BaseForecaster
 from sktime.performance_metrics.forecasting import MeanAbsolutePercentageError
 
-from lightwood.api import dtype
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
@@ -65,7 +64,7 @@ class SkTime(BaseMixer):
         self.prepared = False
         self.supports_proba = False
         self.target = target
-        dtype_dict[target] = dtype.float
+        # dtype_dict[target] = dtype.float  # @TODO: this should be removed
 
         self.ts_analysis = ts_analysis
         self.n_ts_predictions = n_ts_predictions

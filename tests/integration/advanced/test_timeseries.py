@@ -1,3 +1,4 @@
+import random
 import unittest
 import numpy as np
 import pandas as pd
@@ -155,8 +156,8 @@ class TestTimeseries(unittest.TestCase):
             for timestamp in row[f'order_{order_by}']:
                 assert timestamp > latest_timestamp
 
-    def test_2_time_series_classification(self):
-        df = pd.read_csv('tests/data/arrivals.csv')
+    def test_2_time_series_classification_short_horizon_binary(self):
+        df = pd.read_csv('tests/data/arrivals.csv')[:127]
         target = 'Traffic'
         df[target] = df[target] > 100000
 
@@ -178,7 +179,59 @@ class TestTimeseries(unittest.TestCase):
         predictor.learn(train)
         predictor.predict(test)
 
-    def test_3_time_series_sktime_mixer(self):
+    def test_3_time_series_classification_long_horizon_binary(self):
+        df = pd.read_csv('tests/data/arrivals.csv')[:127]
+        target = 'Traffic'
+        df[target] = df[target] > 100000
+
+        train_idxs = np.random.rand(len(df)) < 0.8
+        train = df[train_idxs]
+        test = df[~train_idxs]
+
+        predictor = predictor_from_problem(df,
+                                           ProblemDefinition.from_dict({'target': target,
+                                                                        'time_aim': 80,
+                                                                        'anomaly_detection': False,
+                                                                        'timeseries_settings': {
+                                                                            'order_by': ['T'],
+                                                                            'use_previous_target': True,
+                                                                            'window': 5,
+                                                                            'horizon': 2
+                                                                        },
+                                                                        }))
+
+        predictor.learn(train)
+        predictor.predict(test)
+
+    def test_4_time_series_classification_long_horizon_multiclass(self):
+        df = pd.read_csv('tests/data/arrivals.csv')[:127]  # enforce "Country" to be "No information"
+        target = 'Traffic'
+        df[target] = df[target].apply(lambda x: chr(65 + int(str(x / 10000)[0])))  # multiclass time series target
+
+        # test array columns as additional input
+        df['test_num_array'] = [[random.choice([1, 2, 3, 4]) for __ in range(4)] for _ in range(df.shape[0])]
+        df['test_cat_array'] = [[random.choice(['a', 'b', 'c', 'd']) for __ in range(4)] for _ in range(df.shape[0])]
+
+        train_idxs = np.random.rand(len(df)) < 0.8
+        train = df[train_idxs]
+        test = df[~train_idxs]
+
+        predictor = predictor_from_problem(df,
+                                           ProblemDefinition.from_dict({'target': target,
+                                                                        'time_aim': 80,
+                                                                        'anomaly_detection': False,
+                                                                        'timeseries_settings': {
+                                                                            'order_by': ['T'],
+                                                                            'use_previous_target': True,
+                                                                            'window': 5,
+                                                                            'horizon': 2
+                                                                        },
+                                                                        }))
+
+        predictor.learn(train)
+        predictor.predict(test)
+
+    def test_5_time_series_sktime_mixer(self):
         """
         Tests `sktime` mixer individually, as it has a special notion of
         timestamps that we need to ensure are being used correctly. In

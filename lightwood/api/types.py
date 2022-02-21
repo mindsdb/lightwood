@@ -350,6 +350,7 @@ class JsonAI:
     :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data.
     :param analyzer: The Analyzer object is used to evaluate how well a model performed on the predictive task.
     :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.
+    :param imputers: A list of objects that will impute missing data on each column. They are called inside the cleaner.
     :param analysis_blocks: The blocks that get used in both analysis and inference inside the analyzer and explainer blocks.
     :param timeseries_transformer: Procedure used to transform any timeseries task dataframe into the format that lightwood expects for the rest of the pipeline.  
     :param timeseries_analyzer: Procedure that extracts key insights from any timeseries in the data (e.g. measurement frequency, target distribution, etc).
@@ -366,6 +367,7 @@ class JsonAI:
     splitter: Optional[Module] = None
     analyzer: Optional[Module] = None
     explainer: Optional[Module] = None
+    imputers: Optional[List[Module]] = None
     analysis_blocks: Optional[List[Module]] = None
     timeseries_transformer: Optional[Module] = None
     timeseries_analyzer: Optional[Module] = None
@@ -386,6 +388,7 @@ class JsonAI:
         splitter = obj.get("splitter", None)
         analyzer = obj.get("analyzer", None)
         explainer = obj.get("explainer", None)
+        imputers = obj.get("imputers", None)
         analysis_blocks = obj.get("analysis_blocks", None)
         timeseries_transformer = obj.get("timeseries_transformer", None)
         timeseries_analyzer = obj.get("timeseries_analyzer", None)
@@ -402,6 +405,7 @@ class JsonAI:
             splitter=splitter,
             analyzer=analyzer,
             explainer=explainer,
+            imputers=imputers,
             analysis_blocks=analysis_blocks,
             timeseries_transformer=timeseries_transformer,
             timeseries_analyzer=timeseries_analyzer,
@@ -443,6 +447,14 @@ class JsonAI:
 
 @dataclass_json
 @dataclass
+class SubmodelData:
+    name: str
+    accuracy: float
+    is_best: bool
+
+
+@dataclass_json
+@dataclass
 class ModelAnalysis:
     """
     The ``ModelAnalysis`` class stores useful information to describe a model and understand its predictive performance on a validation dataset.
@@ -469,6 +481,7 @@ class ModelAnalysis:
     confusion_matrix: object
     histograms: object
     dtypes: object
+    submodel_data: List[SubmodelData]
 
 
 @dataclass
