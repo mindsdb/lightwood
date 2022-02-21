@@ -236,9 +236,9 @@ def get_column_data_type(arg_tup):
                 lengths.append(len(item_tags))
                 unique_tokens = unique_tokens.union(set(item_tags))
 
-        # If more than 30% of the samples contain more than 1 category and there's more than 6 of them and they are shared between the various cells # noqa
+        # If more than 30% of the samples contain more than 1 category and there's more than 6 and less than 30 of them and they are shared between the various cells # noqa
         if (can_be_tags and np.mean(lengths) > 1.3 and
-                len(unique_tokens) >= 6 and
+                6 <= len(unique_tokens) <= 30 and
                 len(unique_tokens) / np.mean(lengths) < (len(data) / 4)):
             curr_dtype = dtype.tags
 
