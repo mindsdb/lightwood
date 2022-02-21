@@ -28,10 +28,10 @@
    "id": "interim-discussion",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-02-16T11:33:00.047309Z",
-     "iopub.status.busy": "2022-02-16T11:33:00.046982Z",
-     "iopub.status.idle": "2022-02-16T11:33:04.646761Z",
-     "shell.execute_reply": "2022-02-16T11:33:04.645891Z"
+     "iopub.execute_input": "2022-02-21T19:33:06.853922Z",
+     "iopub.status.busy": "2022-02-21T19:33:06.853562Z",
+     "iopub.status.idle": "2022-02-21T19:33:11.340696Z",
+     "shell.execute_reply": "2022-02-21T19:33:11.340055Z"
     }
    },
    "outputs": [
@@ -41,8 +41,8 @@
      "text": [
       "[nltk_data] Downloading package punkt to /home/runner/nltk_data...\n",
       "[nltk_data]   Unzipping tokenizers/punkt.zip.\n",
-      "\u001b[32mINFO:lightwood-2124:No torchvision detected, image helpers not supported.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2123:No torchvision detected, image helpers not supported.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
      ]
     }
    ],
@@ -83,10 +83,10 @@
    "id": "foreign-orchestra",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-02-16T11:33:04.650864Z",
-     "iopub.status.busy": "2022-02-16T11:33:04.650647Z",
-     "iopub.status.idle": "2022-02-16T11:33:11.861517Z",
-     "shell.execute_reply": "2022-02-16T11:33:11.860902Z"
+     "iopub.execute_input": "2022-02-21T19:33:11.344594Z",
+     "iopub.status.busy": "2022-02-21T19:33:11.344379Z",
+     "iopub.status.idle": "2022-02-21T19:33:18.531888Z",
+     "shell.execute_reply": "2022-02-21T19:33:18.531167Z"
     }
    },
    "outputs": [
@@ -312,10 +312,10 @@
    "id": "cathedral-mills",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-02-16T11:33:11.864173Z",
-     "iopub.status.busy": "2022-02-16T11:33:11.863981Z",
-     "iopub.status.idle": "2022-02-16T11:33:12.320973Z",
-     "shell.execute_reply": "2022-02-16T11:33:12.320326Z"
+     "iopub.execute_input": "2022-02-21T19:33:18.536243Z",
+     "iopub.status.busy": "2022-02-21T19:33:18.535002Z",
+     "iopub.status.idle": "2022-02-21T19:33:18.909719Z",
+     "shell.execute_reply": "2022-02-21T19:33:18.909018Z"
     }
    },
    "outputs": [
@@ -372,10 +372,10 @@
    "id": "medieval-zambia",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-02-16T11:33:12.323937Z",
-     "iopub.status.busy": "2022-02-16T11:33:12.323740Z",
-     "iopub.status.idle": "2022-02-16T11:34:31.519246Z",
-     "shell.execute_reply": "2022-02-16T11:34:31.518489Z"
+     "iopub.execute_input": "2022-02-21T19:33:18.912762Z",
+     "iopub.status.busy": "2022-02-21T19:33:18.912426Z",
+     "iopub.status.idle": "2022-02-21T19:34:28.281665Z",
+     "shell.execute_reply": "2022-02-21T19:34:28.281082Z"
     }
    },
    "outputs": [
@@ -383,74 +383,74 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2124:Dropping features: []\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Analyzing a sample of 18424\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:from a total population of 284807, this is equivalent to 6.5% of your data.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: Time\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column Time has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V1\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V1 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V2\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V2 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V3\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V3 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V4\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V4 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V5\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V5 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V6\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V6 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V7\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V7 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V8\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V8 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V9\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V9 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V10\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V10 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V11\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V11 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V12\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V12 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V13\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V13 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V14\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V14 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V15\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V15 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V16\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V16 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V17\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V17 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V18\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V18 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V19\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V19 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V20\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V20 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V21\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V21 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V22\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V22 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V23\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V23 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V24\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V24 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V25\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V25 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V26\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V26 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V27\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V27 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: V28\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column V28 has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: Amount\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column Amount has data type float\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Infering type for: Class\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Column Class has data type binary\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Dropping features: []\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2123:Dropping features: []\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Analyzing a sample of 18424\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:from a total population of 284807, this is equivalent to 6.5% of your data.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: Time\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column Time has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V1\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V1 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V2\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V2 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V3\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V3 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V4\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V4 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V5\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V5 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V6\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V6 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V7\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V7 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V8\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V8 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V9\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V9 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V10\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V10 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V11\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V11 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V12\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V12 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V13\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V13 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V14\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V14 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V15\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V15 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V16\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V16 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V17\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V17 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V18\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V18 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V19\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V19 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V20\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V20 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V21\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V21 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V22\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V22 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V23\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V23 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V24\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V24 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V25\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V25 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V26\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V26 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V27\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V27 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: V28\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column V28 has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: Amount\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column Amount has data type float\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Infering type for: Class\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Column Class has data type binary\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Dropping features: []\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Finished statistical analysis\u001b[0m\n"
      ]
     }
    ],
@@ -504,10 +504,10 @@
    "id": "4411ee53",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-02-16T11:34:31.522552Z",
-     "iopub.status.busy": "2022-02-16T11:34:31.522332Z",
-     "iopub.status.idle": "2022-02-16T11:34:31.530456Z",
-     "shell.execute_reply": "2022-02-16T11:34:31.529799Z"
+     "iopub.execute_input": "2022-02-21T19:34:28.285179Z",
+     "iopub.status.busy": "2022-02-21T19:34:28.284865Z",
+     "iopub.status.idle": "2022-02-21T19:34:28.290434Z",
+     "shell.execute_reply": "2022-02-21T19:34:28.289874Z"
     }
    },
    "outputs": [
@@ -599,10 +599,10 @@
    "id": "34092d12",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-02-16T11:34:31.533279Z",
-     "iopub.status.busy": "2022-02-16T11:34:31.533079Z",
-     "iopub.status.idle": "2022-02-16T11:34:31.538213Z",
-     "shell.execute_reply": "2022-02-16T11:34:31.537588Z"
+     "iopub.execute_input": "2022-02-21T19:34:28.294032Z",
+     "iopub.status.busy": "2022-02-21T19:34:28.293754Z",
+     "iopub.status.idle": "2022-02-21T19:34:28.296910Z",
+     "shell.execute_reply": "2022-02-21T19:34:28.296397Z"
     }
    },
    "outputs": [],
@@ -658,10 +658,10 @@
    "id": "alleged-concentrate",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-02-16T11:34:31.542197Z",
-     "iopub.status.busy": "2022-02-16T11:34:31.541871Z",
-     "iopub.status.idle": "2022-02-16T11:34:31.891559Z",
-     "shell.execute_reply": "2022-02-16T11:34:31.890897Z"
+     "iopub.execute_input": "2022-02-21T19:34:28.299633Z",
+     "iopub.status.busy": "2022-02-21T19:34:28.299288Z",
+     "iopub.status.idle": "2022-02-21T19:34:28.658797Z",
+     "shell.execute_reply": "2022-02-21T19:34:28.658074Z"
     }
    },
    "outputs": [
@@ -669,7 +669,7 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2124:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2123:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
      ]
     },
     {
@@ -740,7 +740,7 @@
       "                \"unbias_target\": True,\n",
       "                \"seconds_per_mixer\": 57024.0,\n",
       "                \"seconds_per_encoder\": None,\n",
-      "                \"expected_additional_time\": 79.16047716140747,\n",
+      "                \"expected_additional_time\": 69.33725476264954,\n",
       "                \"time_aim\": 259200,\n",
       "                \"target_weights\": None,\n",
       "                \"positive_domain\": False,\n",
@@ -1340,10 +1340,10 @@
    "id": "organic-london",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-02-16T11:34:31.894739Z",
-     "iopub.status.busy": "2022-02-16T11:34:31.894518Z",
-     "iopub.status.idle": "2022-02-16T11:34:31.902748Z",
-     "shell.execute_reply": "2022-02-16T11:34:31.902101Z"
+     "iopub.execute_input": "2022-02-21T19:34:28.661765Z",
+     "iopub.status.busy": "2022-02-21T19:34:28.661464Z",
+     "iopub.status.idle": "2022-02-21T19:34:28.669088Z",
+     "shell.execute_reply": "2022-02-21T19:34:28.668597Z"
     }
    },
    "outputs": [],
@@ -1358,10 +1358,10 @@
    "id": "fabulous-prime",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-02-16T11:34:31.905303Z",
-     "iopub.status.busy": "2022-02-16T11:34:31.905109Z",
-     "iopub.status.idle": "2022-02-16T11:34:49.111618Z",
-     "shell.execute_reply": "2022-02-16T11:34:49.110845Z"
+     "iopub.execute_input": "2022-02-21T19:34:28.671864Z",
+     "iopub.status.busy": "2022-02-21T19:34:28.671586Z",
+     "iopub.status.idle": "2022-02-21T19:34:45.639773Z",
+     "shell.execute_reply": "2022-02-21T19:34:45.639181Z"
     }
    },
    "outputs": [
@@ -1369,11 +1369,11 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2124:Cleaning the data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Dropping features: []\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2124: `preprocess` runtime: 14.89 seconds\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2124:Splitting the data into train/test\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2124: `split` runtime: 2.31 seconds\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2123:Cleaning the data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Dropping features: []\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2123: `preprocess` runtime: 14.22 seconds\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2123:Splitting the data into train/test\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2123: `split` runtime: 2.74 seconds\u001b[0m\n"
      ]
     }
    ],
@@ -1389,10 +1389,10 @@
    "id": "suspended-biography",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-02-16T11:34:49.114748Z",
-     "iopub.status.busy": "2022-02-16T11:34:49.114518Z",
-     "iopub.status.idle": "2022-02-16T11:34:50.545433Z",
-     "shell.execute_reply": "2022-02-16T11:34:50.544792Z"
+     "iopub.execute_input": "2022-02-21T19:34:45.642751Z",
+     "iopub.status.busy": "2022-02-21T19:34:45.642448Z",
+     "iopub.status.idle": "2022-02-21T19:34:46.834560Z",
+     "shell.execute_reply": "2022-02-21T19:34:46.834008Z"
     }
    },
    "outputs": [

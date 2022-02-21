@@ -174,7 +174,7 @@
 <span></span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">softmax</span>
-<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LinearRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">Ridge</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
@@ -186,8 +186,8 @@
 
 <div class="viewcode-block" id="Regression"><a class="viewcode-back" href="../../../mixer.html#mixer.Regression">[docs]</a><span class="k">class</span> <span class="nc">Regression</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The `Regression` mixer inherits from scikit-learn&#39;s `LinearRegression` class</span>
-<span class="sd">    (https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html)</span>
+<span class="sd">    The `Regression` mixer inherits from scikit-learn&#39;s `Ridge` class</span>
+<span class="sd">    (https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html)</span>
 <span class="sd">    </span>
 <span class="sd">    This class performs Ordinary Least-squares Regression (OLS) under the hood; </span>
 <span class="sd">    this means it fits a set of coefficients (w_1, w_2, ..., w_N) for an N-length feature vector, that minimize the difference</span>
@@ -195,7 +195,7 @@
 <span class="sd">  </span>
 <span class="sd">    This mixer intakes featurized (encoded) data to predict the target. It deploys if the target data-type is considered numerical/integer.</span>
 <span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
-    <span class="n">model</span><span class="p">:</span> <span class="n">LinearRegression</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Ridge</span>
     <span class="n">label_map</span><span class="p">:</span> <span class="nb">dict</span>
     <span class="n">supports_proba</span><span class="p">:</span> <span class="nb">bool</span>
 
@@ -216,7 +216,7 @@
 
 <div class="viewcode-block" id="Regression.fit"><a class="viewcode-back" href="../../../mixer.html#mixer.Regression.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Fits `LinearRegression` model on input feature data to provide predictions.</span>
+<span class="sd">        Fits `Ridge` model on input feature data to provide predictions.</span>
 
 <span class="sd">        :param train_data: Regression if fit on this</span>
 <span class="sd">        :param dev_data: This just gets concatenated to the ``train_data``</span>
@@ -237,7 +237,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">label_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span><span class="o">.</span><span class="n">rev_map</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Regression based correlation of: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Regression.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.Regression.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
