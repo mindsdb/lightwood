@@ -1078,7 +1078,7 @@
 <span class="s2">trained_mixers = []</span>
 <span class="s2">for mixer in self.mixers:</span>
 <span class="s2">    try:</span>
-<span class="s2">        mixer.fit(encoded_train_data, encoded_dev_data)</span>
+<span class="s2">        self.fit_mixer(mixer, encoded_train_data, encoded_dev_data)</span>
 <span class="s2">        trained_mixers.append(mixer)</span>
 <span class="s2">    except Exception as e:</span>
 <span class="s2">        log.warning(f&#39;Exception: </span><span class="se">{{</span><span class="s2">e</span><span class="se">}}</span><span class="s2"> when training mixer: </span><span class="se">{{</span><span class="s2">mixer</span><span class="se">}}</span><span class="s2">&#39;)</span>
@@ -1287,6 +1287,10 @@
 <span class="s2">    def fit(self, enc_data: Dict[str, pd.DataFrame]) -&gt; None:</span>
 <span class="s2">        # Fit predictors to estimate target</span>
 <span class="si">{</span><span class="n">fit_body</span><span class="si">}</span><span class="s2"></span>
+
+<span class="s2">    @timed</span>
+<span class="s2">    def fit_mixer(self, mixer, encoded_train_data, encoded_dev_data) -&gt; None:</span>
+<span class="s2">        mixer.fit(encoded_train_data, encoded_dev_data)</span>
 
 <span class="s2">    @timed</span>
 <span class="s2">    def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -&gt; None:</span>
