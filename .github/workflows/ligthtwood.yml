@@ -28,14 +28,6 @@ jobs:
         pip install -r requirements_image.txt
         pip install flake8
         pip install -r tests/requirements.txt
-    - name: Install dependencies Windows
-      run: |
-        if [ "$RUNNER_OS" == "Windows" ]; then
-          pip install torch==1.7.0+cpu torchvision==0.8.1+cpu -f https://download.pytorch.org/whl/torch_stable.html;
-        fi
-      shell: bash
-      env:
-        CHECK_FOR_UPDATES: False
     - name: Install dependencies OSX
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
