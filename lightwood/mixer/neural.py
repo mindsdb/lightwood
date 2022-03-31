@@ -354,8 +354,7 @@ class Neural(BaseMixer):
             ydf = pd.DataFrame({'prediction': decoded_predictions})
 
             if args.predict_proba and self.supports_proba:
-                # remove 2th dimention
-                raw_predictions = np.array(all_probs)[:, 0, :]
+                raw_predictions = np.array(all_probs).squeeze(axis=1)
 
                 for idx, label in enumerate(rev_map.values()):
                     ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]
