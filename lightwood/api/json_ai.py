@@ -905,7 +905,7 @@ self.mixers = [{', '.join([call(x) for x in json_ai.model["args"]["submodels"]])
 trained_mixers = []
 for mixer in self.mixers:
     try:
-        mixer.fit(encoded_train_data, encoded_dev_data)
+        self.fit_mixer(mixer, encoded_train_data, encoded_dev_data)
         trained_mixers.append(mixer)
     except Exception as e:
         log.warning(f'Exception: {{e}} when training mixer: {{mixer}}')
@@ -1114,6 +1114,10 @@ class Predictor(PredictorInterface):
     def fit(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         # Fit predictors to estimate target
 {fit_body}
+
+    @timed
+    def fit_mixer(self, mixer, encoded_train_data, encoded_dev_data) -> None:
+        mixer.fit(encoded_train_data, encoded_dev_data)
 
     @timed
     def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -> None:
