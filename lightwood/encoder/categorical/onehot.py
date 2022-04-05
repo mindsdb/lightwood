@@ -1,11 +1,13 @@
+from copy import deepcopy
+from typing import Dict, List, Iterable, Tuple
+
 import torch
 import numpy as np
+from scipy.special import softmax
+
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.constants import _UNCOMMON_WORD
-from copy import deepcopy
-
-from typing import Dict, List, Iterable, Tuple
 
 
 class OneHotEncoder(BaseEncoder):
@@ -173,11 +175,8 @@ class OneHotEncoder(BaseEncoder):
     @staticmethod
     def _norm_vec(vec: List[float]):
         """
-        Given a vector, normalizes so that the sum of elements is 1.
+        Given a vector, normalizes so that the sum of elements is 1, using softmax.
 
         :param vec: Assigned weights for each category
         """
-        total = sum(vec)
-        if total == 0:
-            return vec
-        return [i / total for i in vec]
+        return softmax(vec)
