@@ -6,7 +6,7 @@ from typing import Dict, Union
 import optuna
 import numpy as np
 import pandas as pd
-from sktime.forecasting.arima import AutoARIMA
+from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
 from sktime.forecasting.trend import PolynomialTrendForecaster
 from sktime.forecasting.compose import TransformedTargetForecaster
 from sktime.transformations.series.detrend import ConditionalDeseasonalizer
