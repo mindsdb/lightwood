@@ -31,7 +31,8 @@ class SkTime(BaseMixer):
 
     def __init__(
             self, stop_after: float, target: str, dtype_dict: Dict[str, str],
-            n_ts_predictions: int, ts_analysis: Dict, model_path: str = 'statsforecast.StatsForecastAutoARIMA', auto_size: bool = True,
+            n_ts_predictions: int, ts_analysis: Dict,
+            model_path: str = 'statsforecast.StatsForecastAutoARIMA', auto_size: bool = True,
             hyperparam_search: bool = False, target_transforms: Dict[str, Union[int, str]] = {}):
         """
         This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
