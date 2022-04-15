@@ -13,20 +13,25 @@ def t_softmax(x, t=1.0, axis=1):
     return softmax(torch.Tensor(x) / t, dim=axis).numpy()
 
 
-def clean_df(df, target, is_classification, label_encoders):
+def clean_df(df, namespace, label_encoders):
     """ Returns cleaned DF for nonconformist calibration """
     # @TODO: reevaluate whether this can be streamlined
     enc = label_encoders
+    ns = namespace
+    target = ns.target
 
-    y = df.pop(target).values
-
-    if is_classification:
+    if ns.is_classification:
+        y = df.pop(target).values
         if enc and isinstance(enc.categories_[0][0], str):
             cats = enc.categories_[0].tolist()
             # the last element is "__mdb_unknown_cat"
             y = np.array([cats.index(i) if i in cats else len(cats) - 1 for i in y])
         y = y.clip(-pow(2, 63), pow(2, 63)).astype(int)
+    elif ns.is_multi_ts:
+        target_cols = [ns.target] + [f'{ns.target}_timestep_{i}' for i in range(1, ns.tss.horizon)]
+        y = np.transpose(np.array([df.pop(col) for col in target_cols]))
     else:
+        y = df.pop(target).values
         y = y.astype(float)
 
     return df, y
@@ -57,7 +62,7 @@ def set_conf_range(
     :return: set confidence plus predictions regions (for numerical tasks) or pvalues (for categorical tasks).
     """  # noqa
     # numerical
-    if target_type in (dtype.integer, dtype.float, dtype.num_array, dtype.num_tsarray, dtype.quantity):
+    if target_type in (dtype.integer, dtype.float, dtype.quantity):
 
         # ICP gets all possible bounds (shape: (B, 2, 99))
         all_ranges = icp.predict(X.values)
@@ -83,6 +88,10 @@ def set_conf_range(
                 if positive_domain:
                     ranges[ranges < 0] = 0
                 return 0.9901, ranges
+
+    # time series
+    elif target_type in (dtype.num_array, dtype.num_tsarray):
+        pass
 
     # categorical
     elif target_type in (dtype.binary, dtype.categorical, dtype.cat_array, dtype.cat_tsarray):

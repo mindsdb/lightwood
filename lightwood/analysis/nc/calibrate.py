@@ -1,3 +1,4 @@
+import inspect
 from copy import deepcopy
 from itertools import product
 from typing import Dict, Tuple
@@ -14,9 +15,10 @@ from lightwood.helpers.ts import add_tn_conf_bounds
 from lightwood.data import EncodedDs
 from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.analysis.nc.norm import Normalizer
-from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier
-from lightwood.analysis.nc.base import CachedRegressorAdapter, CachedClassifierAdapter
-from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc, RegressorNc, ClassifierNc, MarginErrFunc
+from lightwood.analysis.nc.icp import IcpRegressor, IcpClassifier, IcpTSRegressor
+from lightwood.analysis.nc.base import CachedRegressorAdapter, CachedClassifierAdapter, CachedTSAdapter
+from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc, RegressorNc, ClassifierNc, MarginErrFunc, TSNc, \
+    TSAbsErrorErrFunc
 from lightwood.analysis.nc.util import clean_df, set_conf_range, get_numeric_conf_range, \
     get_categorical_conf, get_anomalies
 
@@ -64,7 +66,11 @@ class ICP(BaseAnalysisBlock):
             nc_function = MarginErrFunc()
             nc_class = ClassifierNc
             icp_class = IcpClassifier
-
+        elif ns.is_multi_ts:
+            adapter = CachedTSAdapter
+            nc_function = TSAbsErrorErrFunc(horizon_length=ns.tss.horizon)
+            nc_class = TSNc
+            icp_class = IcpTSRegressor
         else:
             adapter = CachedRegressorAdapter
             nc_function = BoostedAbsErrorErrFunc()
@@ -87,7 +93,10 @@ class ICP(BaseAnalysisBlock):
 
             # instance the ICP
             nc = nc_class(model, nc_function, normalizer=normalizer)
-            icp = icp_class(nc, cal_size=self.validation_size)
+            if 'horizon_length' in inspect.signature(icp_class).parameters:
+                icp = icp_class(nc, horizon_length=ns.tss.horizon, cal_size=self.validation_size)
+            else:
+                icp = icp_class(nc, cal_size=self.validation_size)
 
             output['icp']['__default'] = icp
 
@@ -98,7 +107,7 @@ class ICP(BaseAnalysisBlock):
                 else:
                     if ns.is_multi_ts:
                         icp.nc_function.model.prediction_cache = np.array(
-                            [p[0] for p in ns.normal_predictions['prediction']])
+                            [np.array(p) for p in ns.normal_predictions['prediction']])
                         preds = icp.nc_function.model.prediction_cache
                     else:
                         preds = ns.normal_predictions['prediction']
@@ -106,8 +115,8 @@ class ICP(BaseAnalysisBlock):
                     icp.nc_function.model.prediction_cache = predicted_classes
 
             elif ns.is_multi_ts:
-                # we fit ICPs for time series confidence bounds only at t+1 forecast
-                icp.nc_function.model.prediction_cache = np.array([p[0] for p in ns.normal_predictions['prediction']])
+                icp.nc_function.model.prediction_cache = np.array(
+                    [np.array(p) for p in ns.normal_predictions['prediction']])
             else:
                 icp.nc_function.model.prediction_cache = np.array(ns.normal_predictions['prediction'])
 
@@ -128,7 +137,7 @@ class ICP(BaseAnalysisBlock):
 
             # calibrate ICP
             icp_df = deepcopy(ns.data)
-            icp_df, y = clean_df(icp_df, ns.target, ns.is_classification, output.get('label_encoders', None))
+            icp_df, y = clean_df(icp_df, ns, output.get('label_encoders', None))
             output['icp']['__default'].index = icp_df.columns
             output['icp']['__default'].calibrate(icp_df.values, y)
 
@@ -153,7 +162,8 @@ class ICP(BaseAnalysisBlock):
                 # add all predictions to DF
                 icps_df = deepcopy(ns.data)
                 if ns.is_multi_ts:
-                    icps_df[f'__predicted_{ns.target}'] = [p[0] for p in ns.normal_predictions['prediction']]
+                    icps_df[f'__predicted_{ns.target}'] = np.array(
+                        [np.array(p) for p in ns.normal_predictions['prediction']])
                 else:
                     icps_df[f'__predicted_{ns.target}'] = ns.normal_predictions['prediction']
 
@@ -175,7 +185,7 @@ class ICP(BaseAnalysisBlock):
                     # save relevant predictions in the caches, then calibrate the ICP
                     pred_cache = icp_df.pop(f'__predicted_{ns.target}').values
                     icps[frozenset(group)].nc_function.model.prediction_cache = pred_cache
-                    icp_df, y = clean_df(icp_df, ns.target, ns.is_classification, output.get('label_encoders', None))
+                    icp_df, y = clean_df(icp_df, ns, output.get('label_encoders', None))
                     if icps[frozenset(group)].nc_function.normalizer is not None:
                         icps[frozenset(group)].nc_function.normalizer.prediction_cache = icp_df.pop(
                             f'__norm_{ns.target}').values
@@ -222,7 +232,7 @@ class ICP(BaseAnalysisBlock):
             # replace observed data w/predictions
             preds = ns.predictions['prediction']
             if ns.tss.is_timeseries and ns.tss.horizon > 1:
-                preds = [p[0] for p in preds]
+                preds = np.array([np.array(p) for p in preds])
 
                 for col in [f'timestep_{i}' for i in range(1, ns.tss.horizon)]:
                     if col in icp_X.columns:

@@ -92,6 +92,55 @@ class RegressionErrFunc(object):
         pass
 
 
+class TSErrFunc(object):
+    """Base class for time series model error functions.
+    """ # noqa
+
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self):
+        super(TSErrFunc, self).__init__()
+
+    @abc.abstractmethod
+    def apply(self, prediction, y):
+        """Apply the nonconformity function.
+
+        Parameters
+        ----------
+        prediction : numpy array of shape [n_samples, horizon_length]
+            Forecasts for each sample.
+
+        y : numpy array of shape [n_samples, horizon_length]
+            True output series for each sample.
+
+        Returns
+        -------
+        nc : numpy array of shape [n_samples, horizon_length]
+            Nonconformity scores of the samples.
+        """ # noqa
+        pass
+
+    @abc.abstractmethod
+    def apply_inverse(self, nc, significance):  # , norm=None, beta=0):
+        """Apply the inverse of the nonconformity function (i.e.,
+        calculate prediction interval).
+
+        Parameters
+        ----------
+        nc : numpy array of shape [n_calibration_samples, horizon_length]
+            Nonconformity scores obtained for conformal predictor.
+
+        significance : float
+            Significance level (0, 1).
+
+        Returns
+        -------
+        interval : numpy array of shape [n_samples, horizon_length, 2]
+            Minimum and maximum interval boundaries for each step of the forecast.
+        """ # noqa
+        pass
+
+
 class InverseProbabilityErrFunc(ClassificationErrFunc):
     """Calculates the probability of not predicting the correct class.
 
@@ -215,6 +264,36 @@ class SignErrorErrFunc(RegressionErrFunc):
         return np.vstack([-nc[lower], nc[upper]])
 
 
+class TSAbsErrorErrFunc(TSErrFunc):
+    """Calculates absolute error nonconformity for time series problems.
+
+        For each forecasted step ``y_h`` for h \in 1..horizon, nonconformity is defined as
+
+        .. math::
+            | y_ni - hat{y}_ni |
+            
+        Following Stankeviciute, K. (2021). Conformal Time-Series Forecasting, we perform a 
+        Bonferroni correction over the nonoconformity scores when applying the inverse function.
+    """ # noqa
+
+    def __init__(self, horizon_length):
+        super(TSAbsErrorErrFunc, self).__init__()
+        self.horizon_length = horizon_length
+
+    def apply(self, prediction, y):
+        """ calculate absolute error, eq. (6) in the paper """  # noqa
+        return np.abs(prediction - y)
+
+    def apply_inverse(self, nc, significance):
+        significance /= self.horizon_length  # perform Bonferroni correction, eq. (7) in the paper
+        print(nc.shape)
+        nc = np.sort(nc)[::-1]
+        print(nc.shape)
+        border = int(np.floor(significance * (nc.size + 1))) - 1
+        border = min(max(border, 0), nc.size - 1)
+        return np.vstack([nc[border], nc[border]])
+
+
 # -----------------------------------------------------------------------------
 # Base nonconformity scorer
 # -----------------------------------------------------------------------------
@@ -257,11 +336,11 @@ class BaseModelNc(BaseScorer):
 
     Parameters
     ----------
-    model : ClassifierAdapter or RegressorAdapter
+    model : ClassifierAdapter or RegressorAdapter or TSAdapter
         Underlying classification model used for calculating nonconformity
         scores.
 
-    err_func : ClassificationErrFunc or RegressionErrFunc
+    err_func : ClassificationErrFunc or RegressionErrFunc or TSErrFunc
         Error function object.
 
     normalizer : BaseScorer
@@ -495,5 +574,110 @@ class RegressorNc(BaseModelNc):
 
                 intervals[:, 0, i] = prediction - err_dist[0, :]
                 intervals[:, 1, i] = prediction + err_dist[0, :]
+
+            return intervals
+
+
+# -----------------------------------------------------------------------------
+# Time series nonconformity scorers
+# -----------------------------------------------------------------------------
+class TSNc(BaseModelNc):
+    """Nonconformity scorer using an underlying time series model.
+
+    Parameters
+    ----------
+    model : TSAdapter
+        Underlying regression model used for calculating nonconformity scores.
+
+    err_func : TSErrFunc
+        Error function object.
+
+    normalizer : BaseScorer
+        Normalization model.
+
+    beta : float
+        Normalization smoothing parameter. As the beta-value increases,
+        the normalized nonconformity function approaches a non-normalized
+        equivalent.
+
+    Attributes
+    ----------
+    model : TSAdapter
+        Underlying model object.
+
+    err_func : TSErrFunc
+        Scorer function used to calculate nonconformity scores.
+    """ # noqa
+
+    def __init__(self,
+                 model,
+                 err_func=TSAbsErrorErrFunc(horizon_length=1),
+                 normalizer=None,
+                 beta=0):
+        super(TSNc, self).__init__(model,
+                                   err_func,
+                                   normalizer,
+                                   beta)
+
+    def predict(self, x, nc, significance=None):
+        """Constructs forecast intervals for a set of test examples.
+
+        Predicts the output of each test pattern using the underlying model,
+        and applies the (partial) inverse nonconformity function to each
+        step of the forecast, resulting in a prediction interval for each 
+        step of the test pattern.
+
+        Parameters
+        ----------
+        x : numpy array of shape [n_samples, n_features]
+            Inputs of patters for which to predict output values.
+
+        significance : float
+            Significance level (maximum allowed error rate) of predictions.
+            Should be a float between 0 and 1. If ``None``, then intervals for
+            all significance levels (0.01, 0.02, ..., 0.99) are output in a
+            3d-matrix.
+
+        Returns
+        -------
+        p : numpy array of shape [n_samples, horizon_length, 2] or [n_samples, horizon_length, 2, 99]
+            If significance is ``None``, then p contains the interval (minimum
+            and maximum boundaries) for each step of the test pattern, and each 
+            significance level (0.01, 0.02, ..., 0.99). If significance is a 
+            float between 0 and 1, then p contains the prediction intervals 
+            (minimum and maximum boundaries) for the all steps of the test 
+            patterns at the chosen significance level.
+        """ # noqa
+        n_test = x.shape[0]
+        prediction = self.model.predict(x)
+
+        norm = 1
+        if self.normalizer is not None:
+            try:
+                norm = self.normalizer.score(x) + self.beta
+            except Exception:
+                pass
+
+        if significance:
+            err_dist = self.err_func.apply_inverse(nc, significance)
+            err_dist = np.hstack([err_dist] * n_test)
+            err_dist *= norm
+
+            intervals = np.zeros((x.shape[0], 2))
+            intervals[:, 0] = prediction - err_dist[0, :]
+            intervals[:, 1] = prediction + err_dist[1, :]
+
+            return intervals
+        else:
+            significance = np.arange(0.01, 1.0, 0.01)
+            intervals = np.zeros((x.shape[0], self.err_func.horizon_length, 2, significance.size))
+
+            for i, s in enumerate(significance):
+                err_dist = self.err_func.apply_inverse(nc, s)
+                err_dist = np.hstack([err_dist] * n_test)
+                err_dist *= norm
+
+                intervals[:, :, 0, i] = prediction - err_dist[0, :]
+                intervals[:, :, 1, i] = prediction + err_dist[0, :]
 
             return intervals
