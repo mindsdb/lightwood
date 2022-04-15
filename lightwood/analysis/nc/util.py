@@ -123,8 +123,6 @@ def get_numeric_conf_range(
     
     :return: array with confidence for each data instance, along with lower and upper bounds for each prediction.
     """  # noqa
-    if not isinstance(fixed_conf, float):
-        error_rate = None
 
     if fixed_conf is None:
         significances = []
@@ -161,6 +159,31 @@ def get_numeric_conf_range(
     if positive_domain:
         conf_ranges[conf_ranges < 0] = 0
     return np.array(significances), conf_ranges
+
+
+def get_ts_conf_range(
+        all_confs: np.ndarray,
+        df_target_stddev: dict = {},
+        positive_domain: bool = False,
+        std_tol: int = 1,
+        group: Optional[str] = '__default',
+        fixed_conf: float = None
+):
+    all_significances = []
+    all_conf_ranges = []
+    for timestep in range(all_confs.shape[1]):
+        sigs, confs = get_numeric_conf_range(
+            all_confs[:, timestep, :, :],
+            df_target_stddev,
+            positive_domain,
+            std_tol,
+            group,
+            fixed_conf
+        )
+        all_significances.append(sigs)
+        all_conf_ranges.append(confs)
+
+    return np.vstack(all_significances).T, np.stack(all_conf_ranges).swapaxes(0, 1)
 
 
 def get_categorical_conf(raw_confs: np.ndarray):

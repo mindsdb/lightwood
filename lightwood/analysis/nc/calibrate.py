@@ -10,7 +10,6 @@ from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.api.dtype import dtype
 from lightwood.api.types import PredictionArguments
-from lightwood.helpers.ts import add_tn_conf_bounds
 
 from lightwood.data import EncodedDs
 from lightwood.analysis.base import BaseAnalysisBlock
@@ -20,7 +19,7 @@ from lightwood.analysis.nc.base import CachedRegressorAdapter, CachedClassifierA
 from lightwood.analysis.nc.nc import BoostedAbsErrorErrFunc, RegressorNc, ClassifierNc, MarginErrFunc, TSNc, \
     TSAbsErrorErrFunc
 from lightwood.analysis.nc.util import clean_df, set_conf_range, get_numeric_conf_range, \
-    get_categorical_conf, get_anomalies
+    get_categorical_conf, get_anomalies, get_ts_conf_range
 
 
 class ICP(BaseAnalysisBlock):
@@ -238,11 +237,15 @@ class ICP(BaseAnalysisBlock):
                     if col in icp_X.columns:
                         icp_X.pop(col)  # erase ignorable columns
 
-            icp_X[ns.target_name] = preds
+                target_cols = [ns.target_name] + [f'{ns.target_name}_timestep_{i}' for i in range(1, ns.tss.horizon)]
+                icp_X[target_cols] = preds
+            else:
+                icp_X[ns.target_name] = preds
 
             is_categorical = ns.target_dtype in (dtype.binary, dtype.categorical, dtype.cat_array, dtype.cat_tsarray)
             is_numerical = ns.target_dtype in (dtype.integer, dtype.float,
                                                dtype.quantity, dtype.num_array, dtype.num_tsarray)
+            is_multi_ts = ns.tss.is_timeseries and ns.tss.horizon > 1
             is_anomaly_task = is_numerical and ns.tss.is_timeseries and ns.anomaly_detection
 
             if (is_numerical or is_categorical) and ns.analysis['icp'].get('__mdb_active', False):
@@ -259,7 +262,15 @@ class ICP(BaseAnalysisBlock):
                     icp_X['__mdb_selfaware_scores'] = normalizer.prediction_cache
 
                 # get ICP predictions
-                result_cols = ['lower', 'upper', 'significance'] if is_numerical else ['significance']
+                if is_multi_ts:
+                    result_cols = ['significance', 'lower', 'upper', ] + \
+                                  [f'lower_timestep_{i}' for i in range(1, ns.tss.horizon)] + \
+                                  [f'upper_timestep_{i}' for i in range(1, ns.tss.horizon)] + \
+                                  [f'significance_timestep_{i}' for i in range(1, ns.tss.horizon)]
+                elif is_numerical:
+                    result_cols = ['lower', 'upper', 'significance']
+                else:
+                    result_cols = ['significance']
                 result = pd.DataFrame(index=icp_X.index, columns=result_cols)
 
                 # base ICP
@@ -268,13 +279,7 @@ class ICP(BaseAnalysisBlock):
                 icp_values = X.values
 
                 # get all possible ranges
-                if ns.tss.is_timeseries and ns.tss.horizon > 1 and is_numerical:
-
-                    # bounds in time series are only given for the first forecast
-                    base_icp.nc_function.model.prediction_cache = preds
-                    all_confs = base_icp.predict(icp_values)
-
-                elif is_numerical:
+                if is_numerical or is_multi_ts:
                     base_icp.nc_function.model.prediction_cache = preds
                     all_confs = base_icp.predict(icp_values)
 
@@ -296,17 +301,40 @@ class ICP(BaseAnalysisBlock):
                     all_confs = np.swapaxes(np.swapaxes(all_ranges, 0, 2), 0, 1)
 
                 # convert (B, 2, 99) into (B, 2) given width or error rate constraints
-                if is_numerical:
+                if is_multi_ts:
+                    significances, confs = get_ts_conf_range(all_confs,
+                                                             df_target_stddev=ns.analysis['df_target_stddev'],
+                                                             positive_domain=self.positive_domain,
+                                                             fixed_conf=ns.pred_args.fixed_confidence)
+
+                    result.loc[X.index, 'lower'] = confs[:, 0, 0]
+                    result.loc[X.index, 'upper'] = confs[:, 0, 1]
+                    result.loc[X.index, 'significance'] = significances[:, 0]
+                    for timestep in range(1, ns.tss.horizon):
+                        result.loc[X.index, f'lower_timestep_{timestep}'] = confs[:, timestep, 0]
+                        result.loc[X.index, f'upper_timestep_{timestep}'] = confs[:, timestep, 1]
+                        result.loc[X.index, f'significance_timestep_{timestep}'] = significances[:, timestep]
+
+                    if is_multi_ts:
+                        # merge all significances, lower and upper bounds into a single column
+                        for base_col in ['significance', 'lower', 'upper']:
+                            added_cols = [f'{base_col}_timestep_{t}' for t in range(1, ns.tss.horizon)]
+                            cols = [base_col] + added_cols
+                            result[base_col] = result[cols].values.tolist()
+                            [result.pop(c) for c in added_cols]
+
+                elif is_numerical:
                     significances, confs = get_numeric_conf_range(all_confs,
                                                                   df_target_stddev=ns.analysis['df_target_stddev'],
                                                                   positive_domain=self.positive_domain,
                                                                   fixed_conf=ns.pred_args.fixed_confidence)
                     result.loc[X.index, 'lower'] = confs[:, 0]
                     result.loc[X.index, 'upper'] = confs[:, 1]
+                    result.loc[X.index, 'significance'] = significances
+
                 else:
                     significances = get_categorical_conf(all_confs.squeeze())
-
-                result.loc[X.index, 'significance'] = significances
+                    result.loc[X.index, 'significance'] = significances
 
                 # grouped time series, we replace bounds in rows that have a trained ICP
                 if ns.analysis['icp'].get('__mdb_groups', False):
@@ -360,11 +388,11 @@ class ICP(BaseAnalysisBlock):
                                     significances = get_categorical_conf(all_confs)
                                     result.loc[X.index, 'significance'] = significances
 
-                row_insights['confidence'] = result['significance'].astype(float).tolist()
+                row_insights['confidence'] = result['significance']
 
                 if is_numerical:
-                    row_insights['lower'] = result['lower'].astype(float)
-                    row_insights['upper'] = result['upper'].astype(float)
+                    row_insights['lower'] = result['lower']
+                    row_insights['upper'] = result['upper']
 
                 # anomaly detection
                 if is_anomaly_task:
@@ -372,9 +400,6 @@ class ICP(BaseAnalysisBlock):
                                               ns.data[ns.target_name],
                                               cooldown=ns.pred_args.anomaly_cooldown)
                     row_insights['anomaly'] = anomalies
-
-            if ns.tss.is_timeseries and ns.tss.horizon > 1 and is_numerical:
-                row_insights = add_tn_conf_bounds(row_insights, ns.tss)
 
             # clip bounds if necessary
             if is_numerical:
@@ -390,11 +415,7 @@ class ICP(BaseAnalysisBlock):
                                              for row in row_insights['lower']]
 
             # Make sure the target and real values are of an appropriate type
-            if ns.tss.is_timeseries and ns.tss.horizon > 1:
-                # Array output that are not of type <array> originally are odd and I'm not sure how to handle them
-                # Or if they even need handling yet
-                pass
-            elif ns.target_dtype in (dtype.integer):
+            if ns.target_dtype in (dtype.integer, ):
                 row_insights['prediction'] = row_insights['prediction'].astype(int)
                 row_insights['upper'] = row_insights['upper'].astype(int)
                 row_insights['lower'] = row_insights['lower'].astype(int)

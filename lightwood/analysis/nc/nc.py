@@ -286,12 +286,10 @@ class TSAbsErrorErrFunc(TSErrFunc):
 
     def apply_inverse(self, nc, significance):
         significance /= self.horizon_length  # perform Bonferroni correction, eq. (7) in the paper
-        print(nc.shape)
-        nc = np.sort(nc)[::-1]
-        print(nc.shape)
-        border = int(np.floor(significance * (nc.size + 1))) - 1
-        border = min(max(border, 0), nc.size - 1)
-        return np.vstack([nc[border], nc[border]])
+        nc = np.sort(nc, axis=0)[::-1]
+        border = int(np.floor(significance * (nc.shape[0] + 1))) - 1
+        border = min(max(border, 0), nc.shape[0] - 1)
+        return nc[border]
 
 
 # -----------------------------------------------------------------------------
@@ -674,7 +672,7 @@ class TSNc(BaseModelNc):
 
             for i, s in enumerate(significance):
                 err_dist = self.err_func.apply_inverse(nc, s)
-                err_dist = np.hstack([err_dist] * n_test)
+                err_dist = np.vstack([err_dist] * n_test)
                 err_dist *= norm
 
                 intervals[:, :, 0, i] = prediction - err_dist[0, :]

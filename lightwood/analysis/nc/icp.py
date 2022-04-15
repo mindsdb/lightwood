@@ -375,6 +375,20 @@ class IcpTSRegressor(BaseIcp, TSMixin):
         super(IcpTSRegressor, self).__init__(nc_function, condition, cal_size)
         self.horizon_length = horizon_length
 
+    def calibrate(self, x, y, increment=False):
+        """ 
+        After calibration, check for NaN values (expected for samples with incomplete target info.) 
+        and impute with mean of closest scores.
+        """  # noqa
+        super(IcpTSRegressor, self).calibrate(x, y, increment)
+        for k, v in self.cal_scores.items():
+            missing_idxs = [(a, b) for a, b in np.argwhere(np.isnan(self.cal_scores[0]))]
+            sorted_v = np.sort(v, axis=0)[::-1]
+            for (w, z), (a, _) in zip(np.argwhere(np.isnan(sorted_v)), missing_idxs):
+                closest_scores = list(np.clip((w - 1, w + 1), 0, self.cal_scores[0].shape[0]))
+                closest_scores = list(filter(lambda p: p != w, closest_scores))
+                v[a, z] = np.average(sorted_v[closest_scores, z])
+
     def predict(self, x: np.array, significance: bool = None) -> np.array:
         """Predict the output values for a set of input patterns.
 
