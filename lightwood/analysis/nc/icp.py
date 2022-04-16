@@ -416,7 +416,7 @@ class IcpTSRegressor(BaseIcp, TSMixin):
         n_significance = (99 if significance is None else np.array(significance).size)
 
         if n_significance > 1:
-            prediction = np.zeros((x.shape[0], 2, self.horizon_length, n_significance))
+            prediction = np.zeros((x.shape[0], self.horizon_length, 2, n_significance))
         else:
             prediction = np.zeros((x.shape[0], self.horizon_length, 2))
 

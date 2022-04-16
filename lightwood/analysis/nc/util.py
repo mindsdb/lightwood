@@ -225,7 +225,10 @@ def get_anomalies(insights: pd.DataFrame, observed_series: Union[pd.Series, list
 
     for (l, u), t in zip(zip(lower_bounds, upper_bounds), observed_series):
         if t is not None:
-            anomaly = not (l <= t <= u)
+            if isinstance(l, list):
+                anomaly = not (l[0] <= t <= u[0])
+            else:
+                anomaly = not (l <= t <= u)
 
             if anomaly and (counter == 0 or counter >= cooldown):
                 anomalies.append(anomaly)  # new anomaly event triggers, reset counter
