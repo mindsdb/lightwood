@@ -32,7 +32,8 @@ class SkTime(BaseMixer):
     def __init__(
             self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             n_ts_predictions: int, ts_analysis: Dict,
-            model_path: str = 'statsforecast.StatsForecastAutoARIMA', auto_size: bool = True,
+            model_path: str = 'fbprophet.Prophet',  # 'statsforecast.StatsForecastAutoARIMA',
+            auto_size: bool = True,
             hyperparam_search: bool = False, target_transforms: Dict[str, Union[int, str]] = {}):
         """
         This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
@@ -85,7 +86,7 @@ class SkTime(BaseMixer):
         self.model_path = model_path
         self.hyperparam_search = hyperparam_search
         self.trial_error_fn = MeanAbsolutePercentageError(symmetric=True)
-        self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
+        self.possible_models = ['fbprophet.Prophet']  # 'ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
         self.n_trials = len(self.possible_models)
 
         # sktime forecast horizon object is made relative to the end of the latest data point seen at training time
@@ -175,6 +176,9 @@ class SkTime(BaseMixer):
                 series = series.reset_index(drop=True)
                 series = series.loc[~pd.isnull(series.values)]  # remove NaN  # @TODO: benchmark imputation vs this?
 
+                if self.model_path == 'fbprophet.Prophet':
+                    series = self._transform_index_to_datetime(series)
+
                 # if data is huge, filter out old records for quicker fitting
                 if self.auto_size:
                     cutoff = min(len(series), max(500, options['sp'] * self.cutoff_factor))
@@ -236,6 +240,10 @@ class SkTime(BaseMixer):
                     log.warning(f"Applying default forecaster for novel group {group}. Performance might not be optimal.")  # noqa
                     forecaster = self.models['__default']
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
+
+                if self.model_path == 'fbprophet.Prophet':
+                    series = self._transform_index_to_datetime(series)
+
                 ydf = self._call_groupmodel(ydf, forecaster, series, offset=args.forecast_offset)
                 pending_idxs -= set(series_idxs)
 
@@ -308,3 +316,7 @@ class SkTime(BaseMixer):
             kwargs[key] = value
 
         return kwargs
+
+    def _transform_index_to_datetime(self, series):
+        series.index = series.index.astype('datetime64[ns]')
+        return series

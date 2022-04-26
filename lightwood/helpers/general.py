@@ -152,6 +152,9 @@ def evaluate_num_array_accuracy(
     true_values = np.array(true_values)
     predictions = np.array(predictions)
 
+    print(true_values.shape)
+    print(predictions.shape)
+
     if not naive_errors:
         # use mean R2 method if naive errors are not available
         nan_mask = (~np.isnan(true_values)).astype(int)
