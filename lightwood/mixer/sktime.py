@@ -1,5 +1,6 @@
 import inspect
 import importlib
+from datetime import datetime
 from itertools import product
 from typing import Dict, Union
 
@@ -88,6 +89,7 @@ class SkTime(BaseMixer):
         self.trial_error_fn = MeanAbsolutePercentageError(symmetric=True)
         self.possible_models = ['fbprophet.Prophet']  # 'ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
         self.n_trials = len(self.possible_models)
+        self.freq = self._get_freq(self.ts_analysis['deltas']['__default'][self.ts_analysis['tss'].order_by[0]])
 
         # sktime forecast horizon object is made relative to the end of the latest data point seen at training time
         # the default assumption is to forecast the next `self.n_ts_predictions` after said data point
@@ -117,7 +119,7 @@ class SkTime(BaseMixer):
         Internal method that fits forecasters to a given dataframe.
         """
         df = data.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
-        data = {'data': df[self.target],
+        data = {'data': df,
                 'group_info': {gcol: df[gcol].tolist()
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
@@ -144,6 +146,8 @@ class SkTime(BaseMixer):
                 'suppress_warnings': True,                                  # ignore warnings if possible
                 'error_action': 'raise',                                    # avoids fit() failing silently
             }
+            if self.model_path == 'fbprophet.Prophet':
+                options['freq'] = self.freq
 
             for k, v in options.items():
                 kwargs = self._add_forecaster_kwarg(model_class, kwargs, k, v)
@@ -164,11 +168,17 @@ class SkTime(BaseMixer):
 
             self.models[group] = TransformedTargetForecaster(model_pipeline)
 
+            oby_col = self.ts_analysis['tss'].order_by[0]
             if self.grouped_by == ['__default']:
-                series_idxs = data['data'].index
-                series_data = data['data'].values
+                series_idxs = data['data'][self.target].index
+                series_data = data['data'][self.target].values
+                series_oby = data['data'][oby_col].values
             else:
+                target_idx = data['data'].columns.tolist().index(self.target)
+                oby_idx = data['data'].columns.tolist().index(oby_col)
                 series_idxs, series_data = get_group_matches(data, group)
+                series_oby = series_data[:, oby_idx]
+                series_data = series_data[:, target_idx]
 
             if series_data.size > self.ts_analysis['tss'].window:
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
@@ -177,7 +187,7 @@ class SkTime(BaseMixer):
                 series = series.loc[~pd.isnull(series.values)]  # remove NaN  # @TODO: benchmark imputation vs this?
 
                 if self.model_path == 'fbprophet.Prophet':
-                    series = self._transform_index_to_datetime(series)
+                    series = self._transform_index_to_datetime(series, series_oby, options['freq'])
 
                 # if data is huge, filter out old records for quicker fitting
                 if self.auto_size:
@@ -188,6 +198,7 @@ class SkTime(BaseMixer):
                 except Exception:
                     self.models[group] = model_class()  # with default options (i.e. no seasonality, among others)
                     self.models[group].fit(series, fh=self.fh)
+                _ = self.models[group].predict(np.arange(1, self.n_ts_predictions))
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
@@ -222,9 +233,14 @@ class SkTime(BaseMixer):
                            columns=['prediction'],
                            dtype=object)
 
-        data = {'data': ds.data_frame[self.target],
+        data = {'data': ds.data_frame,
                 'group_info': {gcol: ds.data_frame[gcol].tolist()
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
+
+        data['data'].reset_index(drop=True, inplace=True)  # @TODO: is this a problem downstream? it does rewrite inside DS too
+        oby_col = self.ts_analysis['tss'].order_by[0]
+        target_idx = data['data'].columns.tolist().index(self.target)
+        oby_idx = data['data'].columns.tolist().index(oby_col)
 
         pending_idxs = set(range(length))
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
@@ -232,6 +248,9 @@ class SkTime(BaseMixer):
             series_idxs, series_data = get_group_matches(data, group)
 
             if series_data.size > 0:
+                series_oby = series_data[:, oby_idx]
+                series_data = series_data[:, target_idx]
+
                 group = frozenset(group)
                 series_idxs = sorted(series_idxs)
                 if self.models.get(group, False) and self.models[group].is_fitted:
@@ -242,14 +261,16 @@ class SkTime(BaseMixer):
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
 
                 if self.model_path == 'fbprophet.Prophet':
-                    series = self._transform_index_to_datetime(series)
+                    series = self._transform_index_to_datetime(series, series_oby, self.freq)
 
                 ydf = self._call_groupmodel(ydf, forecaster, series, offset=args.forecast_offset)
                 pending_idxs -= set(series_idxs)
 
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
-            series = pd.Series(data['data'][list(pending_idxs)].squeeze(), index=sorted(list(pending_idxs)))
+            series = data['data'].values
+            series = series[:, target_idx]
+            series = pd.Series(series[list(pending_idxs)].squeeze(), index=sorted(list(pending_idxs)))
             ydf = self._call_groupmodel(ydf, self.models['__default'], series, offset=args.forecast_offset)
 
         return ydf[['prediction']]
@@ -317,6 +338,15 @@ class SkTime(BaseMixer):
 
         return kwargs
 
-    def _transform_index_to_datetime(self, series):
-        series.index = series.index.astype('datetime64[ns]')
+    def _transform_index_to_datetime(self, series, series_oby, freq):
+        # series.index = series.index.astype('datetime64[ns]')
+        series_oby = np.array([np.array(lst) for lst in series_oby])
+        start = datetime.utcfromtimestamp(np.min(series_oby[series_oby != np.min(series_oby)]))
+        series.index = pd.date_range(start=start, freq=freq, normalize=False, periods=series.shape[0])
         return series
+
+    def _get_freq(self, delta):
+        secs = [1, 60, 3600, 86400, 604800, 2419200, 7257600, 29030400]
+        labels = ['S', 'T', 'H', 'D', 'W', 'M', 'Q', 'Y']
+        min_diff = np.argmin(np.abs(np.array(secs) - delta))
+        return labels[min_diff]
