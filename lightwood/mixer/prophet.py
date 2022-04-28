@@ -3,8 +3,6 @@ from typing import Dict, Union
 
 import numpy as np
 import pandas as pd
-from sktime.forecasting.base import BaseForecaster
-from sktime.forecasting.compose import TransformedTargetForecaster
 
 from lightwood.helpers.log import log
 from lightwood.mixer.sktime import SkTime
