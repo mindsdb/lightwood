@@ -266,7 +266,7 @@ def generate_json_ai(
                         "args": {
                             "fit_on_dev": True,
                             "stop_after": "$problem_definition.seconds_per_mixer",
-                            "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
+                            "horizon": "$problem_definition.timeseries_settings.horizon",
                         },
                     }
                 ]
@@ -279,7 +279,7 @@ def generate_json_ai(
                             "module": "SkTime",
                             "args": {
                                 "stop_after": "$problem_definition.seconds_per_mixer",
-                                "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
+                                "horizon": "$problem_definition.timeseries_settings.horizon",
                             },
                         }
                     ]
@@ -480,6 +480,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     for i in range(len(mixers)):
         if mixers[i]["module"] == "Unit":
             pass
+
         elif mixers[i]["module"] == "Neural":
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
@@ -510,6 +511,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "target_encoder", "$encoders[self.target]"
             )
             mixers[i]["args"]["use_optuna"] = True
+
         elif mixers[i]["module"] == "Regression":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
@@ -518,6 +520,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
+
         elif mixers[i]["module"] == "LightGBMArray":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
@@ -529,6 +532,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
+
         elif mixers[i]["module"] in ("SkTime", "ProphetMixer"):
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
@@ -539,6 +543,14 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             )
             # enforce fit_on_all if this mixer is specified
             problem_definition.fit_on_all = True
+
+        if is_ts:
+            if "horizon" not in mixers[i]["args"]:
+                mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
+
+        if "stop_after" not in mixers[i]["args"]:
+            mixers[i]["args"]["stop_after"] = "$problem_definition.seconds_per_mixer"
+
 
     json_ai.model["args"]["target"] = json_ai.model["args"].get("target", "$target")
     json_ai.model["args"]["data"] = json_ai.model["args"].get("data", "encoded_test_data")
