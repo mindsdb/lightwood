@@ -532,6 +532,8 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
+            if "horizon" not in mixers[i]["args"]:
+                mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
 
         elif mixers[i]["module"] in ("SkTime", "ProphetMixer"):
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
@@ -541,12 +543,11 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
                 "ts_analysis", "$ts_analysis"
             )
-            # enforce fit_on_all if this mixer is specified
-            problem_definition.fit_on_all = True
-
-        if is_ts:
             if "horizon" not in mixers[i]["args"]:
                 mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
+
+            # enforce fit_on_all if this mixer is specified
+            problem_definition.fit_on_all = True
 
         if "stop_after" not in mixers[i]["args"]:
             mixers[i]["args"]["stop_after"] = "$problem_definition.seconds_per_mixer"
