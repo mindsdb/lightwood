@@ -33,7 +33,7 @@ class SkTime(BaseMixer):
     def __init__(
             self, stop_after: float, target: str, dtype_dict: Dict[str, str],
             n_ts_predictions: int, ts_analysis: Dict,
-            model_path: str = 'fbprophet.Prophet',  # 'statsforecast.StatsForecastAutoARIMA',
+            model_path: str = 'statsforecast.StatsForecastAutoARIMA',
             auto_size: bool = True,
             hyperparam_search: bool = False, target_transforms: Dict[str, Union[int, str]] = {}):
         """
@@ -67,7 +67,6 @@ class SkTime(BaseMixer):
         self.prepared = False
         self.supports_proba = False
         self.target = target
-        # dtype_dict[target] = dtype.float  # @TODO: this should be removed
 
         self.ts_analysis = ts_analysis
         self.n_ts_predictions = n_ts_predictions
@@ -170,7 +169,7 @@ class SkTime(BaseMixer):
 
             oby_col = self.ts_analysis['tss'].order_by[0]
             if self.grouped_by == ['__default']:
-                series_idxs = data['data'][self.target].index
+                series_idxs = data['data'][f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}']
                 series_data = data['data'][self.target].values
                 series_oby = data['data'][oby_col].values
             else:
@@ -327,7 +326,6 @@ class SkTime(BaseMixer):
         return kwargs
 
     def _transform_index_to_datetime(self, series, series_oby, freq):
-        # series.index = series.index.astype('datetime64[ns]')
         series_oby = np.array([np.array(lst) for lst in series_oby])
         start = datetime.utcfromtimestamp(np.min(series_oby[series_oby != np.min(series_oby)]))
         series.index = pd.date_range(start=start, freq=freq, normalize=False, periods=series.shape[0])
