@@ -529,7 +529,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
-        elif mixers[i]["module"] == "SkTime":
+        elif mixers[i]["module"] in ("SkTime", "ProphetMixer"):
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
                 "dtype_dict", "$dtype_dict"

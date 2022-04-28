@@ -87,7 +87,7 @@ class SkTime(BaseMixer):
         self.model_path = model_path
         self.hyperparam_search = hyperparam_search
         self.trial_error_fn = MeanAbsolutePercentageError(symmetric=True)
-        self.possible_models = ['fbprophet.Prophet']  # 'ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
+        self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
         self.n_trials = len(self.possible_models)
         self.freq = self._get_freq(self.ts_analysis['deltas']['__default'][self.ts_analysis['tss'].order_by[0]])
 
@@ -198,7 +198,6 @@ class SkTime(BaseMixer):
                 except Exception:
                     self.models[group] = model_class()  # with default options (i.e. no seasonality, among others)
                     self.models[group].fit(series, fh=self.fh)
-                _ = self.models[group].predict(np.arange(1, self.n_ts_predictions))
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
@@ -233,13 +232,9 @@ class SkTime(BaseMixer):
                            columns=['prediction'],
                            dtype=object)
 
-        data = {'data': ds.data_frame,
+        data = {'data': ds.data_frame[self.target],
                 'group_info': {gcol: ds.data_frame[gcol].tolist()
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
-
-        # @TODO: is this a problem downstream? it does rewrite inside DS too
-        data['data'].reset_index(drop=True, inplace=True)
-        target_idx = data['data'].columns.tolist().index(self.target)
 
         pending_idxs = set(range(length))
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
@@ -247,8 +242,6 @@ class SkTime(BaseMixer):
             series_idxs, series_data = get_group_matches(data, group)
 
             if series_data.size > 0:
-                series_data = series_data[:, target_idx]
-
                 group = frozenset(group)
                 series_idxs = sorted(series_idxs)
                 if self.models.get(group, False) and self.models[group].is_fitted:
@@ -263,9 +256,7 @@ class SkTime(BaseMixer):
 
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
-            series = data['data'].values
-            series = series[:, target_idx]
-            series = pd.Series(series[list(pending_idxs)].squeeze(), index=sorted(list(pending_idxs)))
+            series = pd.Series(data['data'][list(pending_idxs)].squeeze(), index=sorted(list(pending_idxs)))
             ydf = self._call_groupmodel(ydf, self.models['__default'], series, offset=args.forecast_offset)
 
         return ydf[['prediction']]
