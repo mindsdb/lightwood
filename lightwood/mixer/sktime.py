@@ -260,9 +260,6 @@ class SkTime(BaseMixer):
                     forecaster = self.models['__default']
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
 
-                if self.model_path == 'fbprophet.Prophet':
-                    series = self._transform_index_to_datetime(series, series_oby, self.freq)
-
                 ydf = self._call_groupmodel(ydf, forecaster, series, offset=args.forecast_offset)
                 pending_idxs -= set(series_idxs)
 
@@ -343,7 +340,7 @@ class SkTime(BaseMixer):
         series_oby = np.array([np.array(lst) for lst in series_oby])
         start = datetime.utcfromtimestamp(np.min(series_oby[series_oby != np.min(series_oby)]))
         series.index = pd.date_range(start=start, freq=freq, normalize=False, periods=series.shape[0])
-        return series
+        return series.astype(float)
 
     def _get_freq(self, delta):
         secs = [1, 60, 3600, 86400, 604800, 2419200, 7257600, 29030400]
