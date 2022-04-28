@@ -551,7 +551,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
         if "stop_after" not in mixers[i]["args"]:
             mixers[i]["args"]["stop_after"] = "$problem_definition.seconds_per_mixer"
 
-
     json_ai.model["args"]["target"] = json_ai.model["args"].get("target", "$target")
     json_ai.model["args"]["data"] = json_ai.model["args"].get("data", "encoded_test_data")
     json_ai.model["args"]["mixers"] = json_ai.model["args"].get("mixers", "$mixers")
