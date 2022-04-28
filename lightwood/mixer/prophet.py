@@ -47,9 +47,8 @@ class ProphetMixer(SkTime):
                 'group_info': {gcol: ds.data_frame[gcol].tolist()
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
-        # @TODO: is this a problem downstream? it does rewrite inside DS too
+        # @TODO: is this a problem downstream? it does rewrite inside DS too. instead, rewrite .index = np.arange()
         data['data'].reset_index(drop=True, inplace=True)
-        target_idx = data['data'].columns.tolist().index(self.target)
 
         pending_idxs = set(range(length))
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
@@ -57,7 +56,7 @@ class ProphetMixer(SkTime):
             series_idxs, series_data = get_group_matches(data, group)
 
             if series_data.size > 0:
-                series_data = series_data[:, target_idx]
+                series_data = series_data[:, 0]
 
                 group = frozenset(group)
                 series_idxs = sorted(series_idxs)
@@ -75,40 +74,8 @@ class ProphetMixer(SkTime):
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
             series = data['data'].values
-            series = series[:, target_idx]
+            series = series[:, 0]
             series = pd.Series(series[list(pending_idxs)].squeeze(), index=sorted(list(pending_idxs)))
             ydf = self._call_groupmodel(ydf, self.models['__default'], series, offset=args.forecast_offset)
 
         return ydf[['prediction']]
-
-    def _call_groupmodel(self,
-                         ydf: pd.DataFrame,
-                         model: BaseForecaster,
-                         series: pd.Series,
-                         offset: int = 0):
-        """
-        Inner method that calls a `sktime.BaseForecaster`.
-
-        :param offset: indicates relative offset to the latest data point seen during model training. Cannot be less than the number of training data points + the amount of diffences applied internally by the model.
-        """  # noqa
-        original_index = series.index
-        series = series.reset_index(drop=True)
-
-        if isinstance(model, TransformedTargetForecaster):
-            submodel = model.steps_[-1][-1]
-        else:
-            submodel = model
-
-        if hasattr(submodel, '_cutoff') and hasattr(submodel, 'd'):
-            model_d = 0 if submodel.d is None else submodel.d
-            min_offset = -submodel._cutoff + model_d + 1
-        else:
-            min_offset = -np.inf
-
-        for idx, _ in enumerate(series.iteritems()):
-            # displace by 1 according to sktime ForecastHorizon usage
-            start_idx = max(1 + idx + offset, min_offset)
-            end_idx = 1 + idx + offset + self.n_ts_predictions
-            ydf['prediction'].iloc[original_index[idx]] = model.predict(np.arange(start_idx, end_idx)).tolist()
-
-        return ydf

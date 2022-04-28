@@ -285,12 +285,14 @@ class SkTime(BaseMixer):
         else:
             min_offset = -np.inf
 
-        for idx, _ in enumerate(series.iteritems()):
-            # displace by 1 according to sktime ForecastHorizon usage
-            start_idx = max(1 + idx + offset, min_offset)
-            end_idx = 1 + idx + offset + self.n_ts_predictions
-            ydf['prediction'].iloc[original_index[idx]] = model.predict(np.arange(start_idx, end_idx)).tolist()
+        start = max(1 + offset, min_offset)
+        end = 1 + series.shape[0] + offset + self.n_ts_predictions
+        all_preds = model.predict(np.arange(start, end)).tolist()
 
+        for idx, _ in enumerate(series.iteritems()):
+            start_idx = idx
+            end_idx = idx + self.n_ts_predictions  # TODO: # displace by 1 according to sktime ForecastHorizon usage?
+            ydf['prediction'].iloc[original_index[idx]] = all_preds[start_idx:end_idx]
         return ydf
 
     def _get_best_model(self, trial, train_data, test_data):
