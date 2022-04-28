@@ -29,11 +29,13 @@ class ProphetMixer(BaseMixer):
         print("Will try to fit now")
         # TODO: add groups support
         data = ConcatedEncodedDs([train_data, dev_data])
-        df = self._preprocess_df(data.data_frame[[f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}', data.target]])
+        df = self._preprocess_df(data.data_frame[[f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}',
+                                                  data.target]])
         self.model.fit(df)
         self.prepared = True
 
-    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
+    def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs], args: PredictionArguments = PredictionArguments()) \
+            -> pd.DataFrame:
         print("Will try to predict now")
         # df = self._preprocess_df(ds.data_frame[[f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}', ds.target]])
         df = self.model.make_future_dataframe(periods=self.horizon, include_history=False)

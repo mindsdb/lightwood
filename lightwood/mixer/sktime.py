@@ -237,10 +237,9 @@ class SkTime(BaseMixer):
                 'group_info': {gcol: ds.data_frame[gcol].tolist()
                                for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
 
-        data['data'].reset_index(drop=True, inplace=True)  # @TODO: is this a problem downstream? it does rewrite inside DS too
-        oby_col = self.ts_analysis['tss'].order_by[0]
+        # @TODO: is this a problem downstream? it does rewrite inside DS too
+        data['data'].reset_index(drop=True, inplace=True)
         target_idx = data['data'].columns.tolist().index(self.target)
-        oby_idx = data['data'].columns.tolist().index(oby_col)
 
         pending_idxs = set(range(length))
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
@@ -248,7 +247,6 @@ class SkTime(BaseMixer):
             series_idxs, series_data = get_group_matches(data, group)
 
             if series_data.size > 0:
-                series_oby = series_data[:, oby_idx]
                 series_data = series_data[:, target_idx]
 
                 group = frozenset(group)
