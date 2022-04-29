@@ -17,9 +17,9 @@ langdetect >=1.0.0,<=1.0.9
 dataclasses_json >=0.5.4
 autopep8 >=1.5.7
 dill ==0.3.4
-sktime >=0.11.0,<0.12.0
-statsforecast >=0.5.3,<0.6.0
+sktime >=0.5.0,<=0.8.0
 torch_optimizer ==0.1.0
+pmdarima >=1.8.0,<=1.8.3
 black >=21.9b0
 typing_extensions
 colorlog ==6.5.0
