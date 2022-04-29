@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.json_ai &mdash; lightwood 22.4.1.0 documentation</title>
+  <title>api.json_ai &mdash; lightwood 22.4.4.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                22.4.1.0
+                22.4.4.0
               </div>
             
           
@@ -366,7 +366,8 @@
     <span class="n">tss</span> <span class="o">=</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span>
     <span class="n">dtype_dict</span> <span class="o">=</span> <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">type_information</span><span class="o">.</span><span class="n">identifiers</span><span class="p">:</span>
-        <span class="k">del</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">and</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
     <span class="n">dependency_dict</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="n">dtype_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
