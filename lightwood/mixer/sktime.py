@@ -188,6 +188,8 @@ class SkTime(BaseMixer):
                 if self.model_path == 'fbprophet.Prophet':
                     series = self._transform_index_to_datetime(series, series_oby, options['freq'])
 
+                series = series.astype(float)
+
                 # if data is huge, filter out old records for quicker fitting
                 if self.auto_size:
                     cutoff = min(len(series), max(500, options['sp'] * self.cutoff_factor))
@@ -329,7 +331,7 @@ class SkTime(BaseMixer):
         series_oby = np.array([np.array(lst) for lst in series_oby])
         start = datetime.utcfromtimestamp(np.min(series_oby[series_oby != np.min(series_oby)]))
         series.index = pd.date_range(start=start, freq=freq, normalize=False, periods=series.shape[0])
-        return series.astype(float)
+        return series
 
     def _get_freq(self, delta):
         secs = [1, 60, 3600, 86400, 604800, 2419200, 7257600, 29030400]
