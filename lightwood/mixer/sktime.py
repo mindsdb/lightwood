@@ -6,13 +6,16 @@ from typing import Dict, Union
 import optuna
 import numpy as np
 import pandas as pd
-from sktime.forecasting.arima import AutoARIMA
 from sktime.forecasting.trend import PolynomialTrendForecaster
 from sktime.forecasting.compose import TransformedTargetForecaster
 from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 from sktime.transformations.series.detrend import Detrender
 from sktime.forecasting.base import ForecastingHorizon, BaseForecaster
 from sktime.performance_metrics.forecasting import MeanAbsolutePercentageError
+try:
+    from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
+except ModuleNotFoundError:
+    from sktime.forecasting.arima import AutoARIMA
 
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
@@ -30,9 +33,16 @@ class SkTime(BaseMixer):
     hyperparam_search: bool
 
     def __init__(
-            self, stop_after: float, target: str, dtype_dict: Dict[str, str],
-            n_ts_predictions: int, ts_analysis: Dict, model_path: str = 'arima.AutoARIMA', auto_size: bool = True,
-            hyperparam_search: bool = False, target_transforms: Dict[str, Union[int, str]] = {}):
+            self,
+            stop_after: float,
+            target: str,
+            dtype_dict: Dict[str, str],
+            n_ts_predictions: int,
+            ts_analysis: Dict,
+            model_path: str = 'arima.AutoARIMA',
+            auto_size: bool = True,
+            hyperparam_search: bool = False,
+            target_transforms: Dict[str, Union[int, str]] = {}):
         """
         This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
         to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with
