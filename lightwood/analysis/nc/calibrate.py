@@ -161,8 +161,7 @@ class ICP(BaseAnalysisBlock):
                 # add all predictions to DF
                 icps_df = deepcopy(ns.data)
                 if ns.is_multi_ts:
-                    icps_df[f'__predicted_{ns.target}'] = np.array(
-                        [np.array(p) for p in ns.normal_predictions['prediction']])
+                    icps_df[f'__predicted_{ns.target}'] = [np.array(p) for p in ns.normal_predictions['prediction']]
                 else:
                     icps_df[f'__predicted_{ns.target}'] = ns.normal_predictions['prediction']
 
@@ -183,6 +182,8 @@ class ICP(BaseAnalysisBlock):
 
                     # save relevant predictions in the caches, then calibrate the ICP
                     pred_cache = icp_df.pop(f'__predicted_{ns.target}').values
+                    if ns.is_multi_ts:
+                        pred_cache = np.array([np.array(p) for p in pred_cache])
                     icps[frozenset(group)].nc_function.model.prediction_cache = pred_cache
                     icp_df, y = clean_df(icp_df, ns, output.get('label_encoders', None))
                     if icps[frozenset(group)].nc_function.normalizer is not None:
@@ -252,7 +253,12 @@ class ICP(BaseAnalysisBlock):
                 base_icp = ns.analysis['icp']['__default']
                 # reorder DF index
                 index = base_icp.index.values
-                index = np.append(index, ns.target_name) if ns.target_name not in index else index
+                if ns.target_name not in index:
+                    if is_multi_ts:
+                        index = np.array(list(index) + [ns.target_name] +
+                                         [f'{ns.target_name}_timestep_{i}' for i in range(1, ns.tss.horizon)])
+                    else:
+                        index = np.append(index, ns.target_name)
                 icp_X = icp_X.reindex(columns=index)  # important, else bounds can be invalid
 
                 # only one normalizer, even if it's a grouped time series task
@@ -302,6 +308,7 @@ class ICP(BaseAnalysisBlock):
 
                 # convert (B, 2, 99) into (B, 2) given width or error rate constraints
                 if is_multi_ts:
+                    # @TODO: should be a function
                     significances, confs = get_ts_conf_range(all_confs,
                                                              df_target_stddev=ns.analysis['df_target_stddev'],
                                                              positive_domain=self.positive_domain,
@@ -315,13 +322,12 @@ class ICP(BaseAnalysisBlock):
                         result.loc[X.index, f'upper_timestep_{timestep}'] = confs[:, timestep, 1]
                         result.loc[X.index, f'significance_timestep_{timestep}'] = significances[:, timestep]
 
-                    if is_multi_ts:
-                        # merge all significances, lower and upper bounds into a single column
-                        for base_col in ['significance', 'lower', 'upper']:
-                            added_cols = [f'{base_col}_timestep_{t}' for t in range(1, ns.tss.horizon)]
-                            cols = [base_col] + added_cols
-                            result[base_col] = result[cols].values.tolist()
-                            [result.pop(c) for c in added_cols]
+                    # merge all significances, lower and upper bounds into a single column
+                    for base_col in ['significance', 'lower', 'upper']:
+                        added_cols = [f'{base_col}_timestep_{t}' for t in range(1, ns.tss.horizon)]
+                        cols = [base_col] + added_cols
+                        result[base_col] = result[cols].values.tolist()
+                        # [result.pop(c) for c in added_cols]
 
                 elif is_numerical:
                     significances, confs = get_numeric_conf_range(all_confs,
@@ -354,12 +360,46 @@ class ICP(BaseAnalysisBlock):
 
                             if X.size > 0:
                                 # set ICP caches
-                                icp.nc_function.model.prediction_cache = X.pop(ns.target_name).values
+                                if is_multi_ts:
+                                    target_cols = [ns.target_name] + [f'{ns.target_name}_timestep_{i}'
+                                                                      for i in range(1, ns.tss.horizon)]
+                                    icp.nc_function.model.prediction_cache = X[target_cols].values
+                                    [X.pop(col) for col in target_cols]
+                                else:
+                                    icp.nc_function.model.prediction_cache = X.pop(ns.target_name).values
                                 if icp.nc_function.normalizer:
                                     icp.nc_function.normalizer.prediction_cache = X.pop('__mdb_selfaware_scores').values
 
                                 # predict and get confidence level given width or error rate constraints
-                                if is_numerical:
+                                if is_multi_ts:
+                                    all_confs = icp.predict(X.values)
+                                    fixed_conf = ns.pred_args.fixed_confidence
+                                    significances, confs = get_ts_conf_range(
+                                        all_confs,
+                                        df_target_stddev=ns.analysis['df_target_stddev'],
+                                        positive_domain=self.positive_domain,
+                                        group=frozenset(group),
+                                        fixed_conf=fixed_conf
+                                    )
+
+                                    # TODO: should be a function
+                                    result.loc[X.index, 'lower'] = confs[:, 0, 0]
+                                    result.loc[X.index, 'upper'] = confs[:, 0, 1]
+                                    result.loc[X.index, 'significance'] = significances[:, 0]
+                                    for timestep in range(1, ns.tss.horizon):
+                                        result.loc[X.index, f'lower_timestep_{timestep}'] = confs[:, timestep, 0]
+                                        result.loc[X.index, f'upper_timestep_{timestep}'] = confs[:, timestep, 1]
+                                        result.loc[X.index,
+                                                   f'significance_timestep_{timestep}'] = significances[:, timestep]
+                                    # TODO: only if tighter
+                                    # merge all significances, lower and upper bounds into a single column
+                                    for base_col in ['significance', 'lower', 'upper']:
+                                        added_cols = [f'{base_col}_timestep_{t}' for t in range(1, ns.tss.horizon)]
+                                        cols = [base_col] + added_cols
+                                        result.loc[X.index, base_col] = result.loc[X.index, cols].values.tolist()
+                                        # [result.pop(c) for c in added_cols]
+
+                                elif is_numerical:
                                     all_confs = icp.predict(X.values)
                                     fixed_conf = ns.pred_args.fixed_confidence
                                     significances, confs = get_numeric_conf_range(

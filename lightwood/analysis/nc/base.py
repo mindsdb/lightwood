@@ -122,6 +122,7 @@ class RegressorAdapter(BaseModelAdapter):
     def _underlying_predict(self, x: np.array) -> np.array:
         return self.model.predict(x)
 
+
 class TSAdapter(BaseModelAdapter):
     def __init__(self, model: object, fit_params: Dict[str, object] = None) -> None:
         super(TSAdapter, self).__init__(model, fit_params)
