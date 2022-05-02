@@ -210,6 +210,7 @@ def generate_json_ai(
 
     is_target_predicting_encoder = False
     is_ts = problem_definition.timeseries_settings.is_timeseries
+    imputers = []
 
     # Single text column classification
     if (
@@ -344,10 +345,22 @@ def generate_json_ai(
             f"Please specify a custom accuracy function for output type {output_dtype}"
         )
 
-    # special dispatch for t+1 time series forecasters
     if is_ts:
         if output_dtype in [dtype.integer, dtype.float]:
-            accuracy_functions = ["evaluate_num_array_accuracy"]
+            accuracy_functions = ["evaluate_num_array_accuracy"]  # forces this acc fn for t+1 time series forecasters
+
+        if output_dtype in (dtype.integer, dtype.float, dtype.num_tsarray):
+            imputers.append({"module": "NumericalImputer",
+                             "args": {
+                                 "value": "'zero'",
+                                 "target": f"'{target}'"}}
+                            )
+        elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary, dtype.cat_tsarray]:
+            imputers.append({"module": "CategoricalImputer",
+                             "args": {
+                                 "value": "'mode'",
+                                 "target": f"'{target}'"}}
+                            )
 
     if problem_definition.time_aim is None:
         # 5 days
@@ -379,6 +392,7 @@ def generate_json_ai(
         analyzer=None,
         explainer=None,
         encoders=encoders,
+        imputers=imputers,
         dtype_dict=dtype_dict,
         dependency_dict=dependency_dict,
         model=model,
