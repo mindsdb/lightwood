@@ -377,11 +377,14 @@ class IcpTSRegressor(BaseIcp, TSMixin):
 
     def calibrate(self, x, y, increment=False):
         """ 
-        After calibration, drop rows with incomplete target information (hence, NaNs).
+        After calibration, handles incomplete target information by imputing the row-wise mean.
         """  # noqa
         super(IcpTSRegressor, self).calibrate(x, y, increment)
         for k, v in self.cal_scores.items():
-            self.cal_scores[k] = v[~np.isnan(v).any(axis=1), :]
+            row_mean = np.nanmean(v, axis=1)
+            idxs = np.where(np.isnan(v))
+            v[idxs] = np.take(row_mean, idxs[0])
+            self.cal_scores[k] = v
 
     def predict(self, x: np.array, significance: bool = None) -> np.array:
         """Predict the output values for a set of input patterns.
