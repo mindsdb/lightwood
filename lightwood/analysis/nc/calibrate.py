@@ -106,7 +106,7 @@ class ICP(BaseAnalysisBlock):
                 else:
                     if ns.is_multi_ts:
                         icp.nc_function.model.prediction_cache = np.array(
-                            [np.array(p) for p in ns.normal_predictions['prediction']])
+                            [p[0] for p in ns.normal_predictions['prediction']])
                         preds = icp.nc_function.model.prediction_cache
                     else:
                         preds = ns.normal_predictions['prediction']
@@ -229,9 +229,15 @@ class ICP(BaseAnalysisBlock):
         if ns.analysis['icp']['__mdb_active']:
             icp_X = deepcopy(ns.data)
 
+            is_categorical = ns.target_dtype in (dtype.binary, dtype.categorical, dtype.cat_array, dtype.cat_tsarray)
+            is_numerical = ns.target_dtype in (dtype.integer, dtype.float,
+                                               dtype.quantity, dtype.num_array, dtype.num_tsarray)
+            is_multi_ts = ns.tss.is_timeseries and ns.tss.horizon > 1
+            is_anomaly_task = is_numerical and ns.tss.is_timeseries and ns.anomaly_detection
+
             # replace observed data w/predictions
             preds = ns.predictions['prediction']
-            if ns.tss.is_timeseries and ns.tss.horizon > 1:
+            if is_multi_ts and is_numerical:
                 preds = np.array([np.array(p) for p in preds])
 
                 for col in [f'timestep_{i}' for i in range(1, ns.tss.horizon)]:
@@ -240,14 +246,11 @@ class ICP(BaseAnalysisBlock):
 
                 target_cols = [ns.target_name] + [f'{ns.target_name}_timestep_{i}' for i in range(1, ns.tss.horizon)]
                 icp_X[target_cols] = preds
+            elif is_multi_ts and is_categorical:
+                preds = [p[0] for p in preds]
+                icp_X[ns.target_name] = preds
             else:
                 icp_X[ns.target_name] = preds
-
-            is_categorical = ns.target_dtype in (dtype.binary, dtype.categorical, dtype.cat_array, dtype.cat_tsarray)
-            is_numerical = ns.target_dtype in (dtype.integer, dtype.float,
-                                               dtype.quantity, dtype.num_array, dtype.num_tsarray)
-            is_multi_ts = ns.tss.is_timeseries and ns.tss.horizon > 1
-            is_anomaly_task = is_numerical and ns.tss.is_timeseries and ns.anomaly_detection
 
             if (is_numerical or is_categorical) and ns.analysis['icp'].get('__mdb_active', False):
                 base_icp = ns.analysis['icp']['__default']
@@ -285,7 +288,7 @@ class ICP(BaseAnalysisBlock):
                 icp_values = X.values
 
                 # get all possible ranges
-                if is_numerical or is_multi_ts:
+                if is_multi_ts and is_numerical:
                     base_icp.nc_function.model.prediction_cache = preds
                     all_confs = base_icp.predict(icp_values)
 
@@ -307,7 +310,7 @@ class ICP(BaseAnalysisBlock):
                     all_confs = np.swapaxes(np.swapaxes(all_ranges, 0, 2), 0, 1)
 
                 # convert (B, 2, 99) into (B, 2) given width or error rate constraints
-                if is_multi_ts:
+                if is_multi_ts and is_numerical:
                     # @TODO: should be a function
                     significances, confs = get_ts_conf_range(all_confs,
                                                              df_target_stddev=ns.analysis['df_target_stddev'],
@@ -360,7 +363,7 @@ class ICP(BaseAnalysisBlock):
 
                             if X.size > 0:
                                 # set ICP caches
-                                if is_multi_ts:
+                                if is_multi_ts and is_numerical:
                                     target_cols = [ns.target_name] + [f'{ns.target_name}_timestep_{i}'
                                                                       for i in range(1, ns.tss.horizon)]
                                     icp.nc_function.model.prediction_cache = X[target_cols].values
@@ -371,7 +374,7 @@ class ICP(BaseAnalysisBlock):
                                     icp.nc_function.normalizer.prediction_cache = X.pop('__mdb_selfaware_scores').values
 
                                 # predict and get confidence level given width or error rate constraints
-                                if is_multi_ts:
+                                if is_multi_ts and is_numerical:
                                     all_confs = icp.predict(X.values)
                                     fixed_conf = ns.pred_args.fixed_confidence
                                     significances, confs = get_ts_conf_range(
