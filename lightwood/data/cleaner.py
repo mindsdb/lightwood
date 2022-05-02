@@ -58,8 +58,9 @@ def cleaner(
         data = clean_timeseries(data, timeseries_settings)
 
     for col, imputer in imputers.items():
-        cols = [col] + [col for col in imputer.dependencies]
-        data[col] = imputer.impute(data[cols])
+        if col in data.columns:
+            cols = [col] + [col for col in imputer.dependencies]
+            data[col] = imputer.impute(data[cols])
 
     return data
 
