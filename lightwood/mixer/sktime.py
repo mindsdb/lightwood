@@ -299,8 +299,8 @@ class SkTime(BaseMixer):
         all_preds = model.predict(np.arange(start, end)).tolist()
 
         for idx, _ in enumerate(series.iteritems()):
-            start_idx = idx
-            end_idx = idx + self.horizon  # TODO: # displace by 1 according to sktime ForecastHorizon usage?
+            start_idx = 0 if max(1 + idx + offset, min_offset) < 0 else idx
+            end_idx = start_idx + self.horizon
             ydf['prediction'].iloc[original_index[idx]] = all_preds[start_idx:end_idx]
         return ydf
 
@@ -342,7 +342,15 @@ class SkTime(BaseMixer):
         return series
 
     def _get_freq(self, delta):
-        secs = [1, 60, 3600, 86400, 604800, 2419200, 7257600, 29030400]
         labels = ['S', 'T', 'H', 'D', 'W', 'M', 'Q', 'Y']
+        secs = [1,
+                60,
+                60 * 60,
+                60 * 60 * 24,
+                60 * 60 * 24 * 7,
+                60 * 60 * 24 * 7 * 4,
+                60 * 60 * 24 * 7 * 4,
+                60 * 60 * 24 * 7 * 4 * 3,
+                60 * 60 * 24 * 7 * 4 * 12]
         min_diff = np.argmin(np.abs(np.array(secs) - delta))
         return labels[min_diff]
