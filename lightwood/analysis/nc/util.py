@@ -195,8 +195,12 @@ def get_categorical_conf(raw_confs: np.ndarray):
     """
     if len(raw_confs.shape) == 1:
         raw_confs = np.expand_dims(raw_confs, axis=0)
-    second_p = np.sort(raw_confs, axis=1)[:, -2]
-    confs = np.clip(np.subtract(1, second_p), 0.0001, 0.9999)
+    if raw_confs.shape[-1] == 1:
+        # single-class edge case (only happens if predictor sees just one known label at calibration)
+        confs = np.clip(raw_confs[:, 0], 0.0001, 0.9999)
+    else:
+        second_p = np.sort(raw_confs, axis=1)[:, -2]
+        confs = np.clip(np.subtract(1, second_p), 0.0001, 0.9999)
     return confs
 
 
