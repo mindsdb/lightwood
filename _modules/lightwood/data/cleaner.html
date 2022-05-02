@@ -231,8 +231,9 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">clean_timeseries</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">timeseries_settings</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">imputer</span> <span class="ow">in</span> <span class="n">imputers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">imputer</span><span class="o">.</span><span class="n">dependencies</span><span class="p">]</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">imputer</span><span class="o">.</span><span class="n">impute</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">imputer</span><span class="o">.</span><span class="n">dependencies</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">imputer</span><span class="o">.</span><span class="n">impute</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
 

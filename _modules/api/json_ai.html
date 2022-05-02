@@ -383,6 +383,7 @@
 
     <span class="n">is_target_predicting_encoder</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">is_ts</span> <span class="o">=</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span>
+    <span class="n">imputers</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Single text column classification</span>
     <span class="k">if</span> <span class="p">(</span>
@@ -517,10 +518,22 @@
             <span class="sa">f</span><span class="s2">&quot;Please specify a custom accuracy function for output type </span><span class="si">{</span><span class="n">output_dtype</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
-    <span class="c1"># special dispatch for t+1 time series forecasters</span>
     <span class="k">if</span> <span class="n">is_ts</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">]:</span>
-            <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;evaluate_num_array_accuracy&quot;</span><span class="p">]</span>
+            <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;evaluate_num_array_accuracy&quot;</span><span class="p">]</span>  <span class="c1"># forces this acc fn for t+1 time series forecasters</span>
+
+        <span class="k">if</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">num_tsarray</span><span class="p">):</span>
+            <span class="n">imputers</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;NumericalImputer&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                 <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;&#39;zero&#39;&quot;</span><span class="p">,</span>
+                                 <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">}}</span>
+                            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">cat_tsarray</span><span class="p">]:</span>
+            <span class="n">imputers</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;CategoricalImputer&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                 <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;&#39;mode&#39;&quot;</span><span class="p">,</span>
+                                 <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">}}</span>
+                            <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">time_aim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># 5 days</span>
@@ -552,6 +565,7 @@
         <span class="n">analyzer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">explainer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">encoders</span><span class="o">=</span><span class="n">encoders</span><span class="p">,</span>
+        <span class="n">imputers</span><span class="o">=</span><span class="n">imputers</span><span class="p">,</span>
         <span class="n">dtype_dict</span><span class="o">=</span><span class="n">dtype_dict</span><span class="p">,</span>
         <span class="n">dependency_dict</span><span class="o">=</span><span class="n">dependency_dict</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
