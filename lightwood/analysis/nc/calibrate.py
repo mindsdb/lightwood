@@ -288,7 +288,7 @@ class ICP(BaseAnalysisBlock):
                 icp_values = X.values
 
                 # get all possible ranges
-                if is_multi_ts and is_numerical:
+                if is_numerical:
                     base_icp.nc_function.model.prediction_cache = preds
                     all_confs = base_icp.predict(icp_values)
 
@@ -330,7 +330,6 @@ class ICP(BaseAnalysisBlock):
                         added_cols = [f'{base_col}_timestep_{t}' for t in range(1, ns.tss.horizon)]
                         cols = [base_col] + added_cols
                         result[base_col] = result[cols].values.tolist()
-                        # [result.pop(c) for c in added_cols]
 
                 elif is_numerical:
                     significances, confs = get_numeric_conf_range(all_confs,
