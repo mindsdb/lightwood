@@ -374,7 +374,7 @@ class TimeSeriesEncoder(BaseEncoder):
                     all_idxs = set(range(len(dep_data)))
 
                     for combination in [c for c in self._group_combinations if c != '__default']:
-                        normalizer = self.dep_norms[dep].get(frozenset(combination), None)
+                        normalizer = self.dep_norms[dep].get(tuple(combination), None)
                         if normalizer is None:
                             normalizer = self.dep_norms[dep]['__default']
                         idxs, subset = get_group_matches(dep_info, normalizer.combination)

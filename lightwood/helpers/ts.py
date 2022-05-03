@@ -13,7 +13,7 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss: Times
 
         if tss.group_by:
             try:
-                series_delta = deltas[frozenset(row[gby].tolist())][col]
+                series_delta = deltas[tuple(row[gby].tolist())][col]
             except KeyError:
                 series_delta = deltas['__default'][col]
         else:

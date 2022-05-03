@@ -28,7 +28,7 @@ def generate_target_group_normalizers(data):
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
         for combination in all_group_combinations:
             if combination != ():
-                combination = frozenset(combination)  # freeze so that we can hash with it
+                combination = tuple(combination)
                 _, subset = get_group_matches(data, combination)
                 if subset.size > 0:
                     normalizers[combination] = MinMaxNormalizer(combination=combination)
