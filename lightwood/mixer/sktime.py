@@ -237,7 +237,7 @@ class SkTime(BaseMixer):
             series_idxs, series_data = get_group_matches(data, group)
 
             if series_data.size > 0:
-                group = frozenset(group)
+                group = tuple(group)
                 series_idxs = sorted(series_idxs)
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     forecaster = self.models[group]

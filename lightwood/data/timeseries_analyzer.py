@@ -77,6 +77,15 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
     :return:
     Dictionary with group combination tuples as keys. Values are dictionaries with the inferred delta for each series, for each `order_col`.
     """  # noqa
+    def _most_popular(sorted_keys: pd.Index):
+        idx = 0
+        while sorted_keys[idx] == 0:
+            if idx == len(sorted_keys) - 1:
+                break
+            else:
+                idx += 1
+        return sorted_keys[idx]
+
     deltas = {"__default": {}}
 
     # get default delta for all data
@@ -84,7 +93,7 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
         series = pd.Series([x[-1] for x in df[col]])
         series = series.drop_duplicates()  # by this point df is ordered so duplicate timestamps are either because of non-handled groups or repeated data that, for mode delta estimation, should be ignored  # noqa
         rolling_diff = series.rolling(window=2).apply(lambda x: x.iloc[1] - x.iloc[0])
-        delta = rolling_diff.value_counts(ascending=False).keys()[0]  # pick most popular
+        delta = _most_popular(rolling_diff.value_counts(ascending=False).keys())  # pick most popular
         deltas["__default"][col] = delta
 
     # get group-wise deltas (if applicable)
@@ -100,7 +109,7 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
                             subset.squeeze()).rolling(
                             window=2).apply(
                             lambda x: x.iloc[1] - x.iloc[0])
-                        delta = rolling_diff.value_counts(ascending=False).keys()[0]
+                        delta = _most_popular(rolling_diff.value_counts(ascending=False).keys())
                         if group in deltas:
                             deltas[group][col] = delta
                         else:
