@@ -27,7 +27,6 @@ class LightGBMArray(BaseMixer):
         super().__init__(stop_after)
         self.submodel_stop_after = stop_after / horizon
         self.target = target
-        # dtype_dict[target] = dtype.float  @TODO: figure out if this can be removed
         self.models = [LightGBM(self.submodel_stop_after, target, dtype_dict, input_cols, fit_on_dev,
                                 False, target_encoder)
                        for _ in range(horizon)]
