@@ -210,6 +210,7 @@ def generate_json_ai(
 
     is_target_predicting_encoder = False
     is_ts = problem_definition.timeseries_settings.is_timeseries
+    imputers = []
 
     # Single text column classification
     if (
@@ -267,7 +268,7 @@ def generate_json_ai(
                         "args": {
                             "fit_on_dev": True,
                             "stop_after": "$problem_definition.seconds_per_mixer",
-                            "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
+                            "horizon": "$problem_definition.timeseries_settings.horizon",
                         },
                     }
                 ]
@@ -280,7 +281,7 @@ def generate_json_ai(
                             "module": "SkTime",
                             "args": {
                                 "stop_after": "$problem_definition.seconds_per_mixer",
-                                "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
+                                "horizon": "$problem_definition.timeseries_settings.horizon",
                             },
                         }
                     ]
@@ -344,10 +345,22 @@ def generate_json_ai(
             f"Please specify a custom accuracy function for output type {output_dtype}"
         )
 
-    # special dispatch for t+1 time series forecasters
     if is_ts:
         if output_dtype in [dtype.integer, dtype.float]:
-            accuracy_functions = ["evaluate_num_array_accuracy"]
+            accuracy_functions = ["evaluate_num_array_accuracy"]  # forces this acc fn for t+1 time series forecasters
+
+        if output_dtype in (dtype.integer, dtype.float, dtype.num_tsarray):
+            imputers.append({"module": "NumericalImputer",
+                             "args": {
+                                 "value": "'zero'",
+                                 "target": f"'{target}'"}}
+                            )
+        elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary, dtype.cat_tsarray]:
+            imputers.append({"module": "CategoricalImputer",
+                             "args": {
+                                 "value": "'mode'",
+                                 "target": f"'{target}'"}}
+                            )
 
     if problem_definition.time_aim is None:
         # 5 days
@@ -379,6 +392,7 @@ def generate_json_ai(
         analyzer=None,
         explainer=None,
         encoders=encoders,
+        imputers=imputers,
         dtype_dict=dtype_dict,
         dependency_dict=dependency_dict,
         model=model,
@@ -481,6 +495,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     for i in range(len(mixers)):
         if mixers[i]["module"] == "Unit":
             pass
+
         elif mixers[i]["module"] == "Neural":
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
@@ -511,6 +526,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "target_encoder", "$encoders[self.target]"
             )
             mixers[i]["args"]["use_optuna"] = True
+
         elif mixers[i]["module"] == "Regression":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
@@ -519,6 +535,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
+
         elif mixers[i]["module"] == "LightGBMArray":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
@@ -530,7 +547,10 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
-        elif mixers[i]["module"] == "SkTime":
+            if "horizon" not in mixers[i]["args"]:
+                mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
+
+        elif mixers[i]["module"] in ("SkTime", "ProphetMixer"):
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
                 "dtype_dict", "$dtype_dict"
@@ -538,8 +558,14 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
                 "ts_analysis", "$ts_analysis"
             )
+            if "horizon" not in mixers[i]["args"]:
+                mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
+
             # enforce fit_on_all if this mixer is specified
             problem_definition.fit_on_all = True
+
+        if "stop_after" not in mixers[i]["args"]:
+            mixers[i]["args"]["stop_after"] = "$problem_definition.seconds_per_mixer"
 
     json_ai.model["args"]["target"] = json_ai.model["args"].get("target", "$target")
     json_ai.model["args"]["data"] = json_ai.model["args"].get("data", "encoded_test_data")

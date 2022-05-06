@@ -82,7 +82,7 @@ class TestTimeseries(unittest.TestCase):
             "module": "SkTime",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
-                "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
+                "horizon": "$problem_definition.timeseries_settings.horizon",
                 "model_path": "'trend.TrendForecaster'",  # use a cheap forecaster
                 "hyperparam_search": False,  # disable this as it's expensive and covered in test #3
             },
@@ -273,7 +273,7 @@ class TestTimeseries(unittest.TestCase):
             "module": "SkTime",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
-                "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
+                "horizon": "$problem_definition.timeseries_settings.horizon",
             }}]
 
         code = code_from_json_ai(json_ai)
