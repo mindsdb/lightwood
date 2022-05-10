@@ -1159,14 +1159,24 @@
 <span class="s2"># --------------- #</span>
 <span class="s2"># Prepare data</span>
 <span class="s2"># --------------- #</span>
-<span class="s2">if old_data is None:</span>
-<span class="s2">    old_data = pd.DataFrame()</span>
+<span class="s2">if dev_data is None:</span>
+<span class="s2">    data = train_data if isinstance(train_data, pd.DataFrame) else train_data.data_frame</span>
+<span class="s2">    split = splitter(data,</span>
+<span class="s2">        self.problem_definition.timeseries_settings,</span>
+<span class="s2">        self.dtype_dict,</span>
+<span class="s2">        self.problem_definition.seed_nr,</span>
+<span class="s2">        pct_train=0.8,</span>
+<span class="s2">        pct_dev=0.2,</span>
+<span class="s2">        pct_test=0,</span>
+<span class="s2">        target=self.target)</span>
+<span class="s2">    train_data = split[&#39;train&#39;]</span>
+<span class="s2">    dev_data = split[&#39;dev&#39;]</span>
 
-<span class="s2">if isinstance(old_data, pd.DataFrame):</span>
-<span class="s2">    old_data = EncodedDs(self.encoders, old_data, self.target)</span>
+<span class="s2">if isinstance(dev_data, pd.DataFrame):</span>
+<span class="s2">    dev_data = EncodedDs(self.encoders, dev_data, self.target)</span>
 
-<span class="s2">if isinstance(new_data, pd.DataFrame):</span>
-<span class="s2">    new_data = EncodedDs(self.encoders, new_data, self.target)</span>
+<span class="s2">if isinstance(train_data, pd.DataFrame):</span>
+<span class="s2">    train_data = EncodedDs(self.encoders, train_data, self.target)</span>
 
 <span class="s2"># --------------- #</span>
 <span class="s2"># Update/Adjust Mixers</span>
@@ -1174,7 +1184,7 @@
 <span class="s2">log.info(&#39;Updating the mixers&#39;)</span>
 
 <span class="s2">for mixer in self.mixers:</span>
-<span class="s2">    mixer.partial_fit(new_data, old_data)</span>
+<span class="s2">    mixer.partial_fit(train_data, dev_data)</span>
 <span class="s2">&quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="n">adjust_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">adjust_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -1331,8 +1341,8 @@
 <span class="si">{</span><span class="n">learn_body</span><span class="si">}</span><span class="s2"></span>
 
 <span class="s2">    @timed</span>
-<span class="s2">    def adjust(self, new_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],</span>
-<span class="s2">        old_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None) -&gt; None:</span>
+<span class="s2">    def adjust(self, train_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],</span>
+<span class="s2">        dev_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None) -&gt; None:</span>
 <span class="s2">        # Update mixers with new information</span>
 <span class="si">{</span><span class="n">adjust_body</span><span class="si">}</span><span class="s2"></span>
 
