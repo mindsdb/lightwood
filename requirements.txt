@@ -23,6 +23,6 @@ pmdarima >=1.8.0,<=1.8.3
 black >=21.9b0
 typing_extensions
 colorlog ==6.5.0
-pip install pystan==2.19.1.1
+pystan==2.19.1.1
 fbprophet
 
