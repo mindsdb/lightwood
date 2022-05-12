@@ -12,7 +12,7 @@ scipy >=1.5.4,<=1.7.1
 psutil >=5.7.0
 setuptools >=21.2.1
 wheel >=0.32.2
-scikit-learn <=0.24.2
+scikit-learn <=1.0.2
 langdetect >=1.0.0,<=1.0.9
 dataclasses_json >=0.5.4
 autopep8 >=1.5.7
