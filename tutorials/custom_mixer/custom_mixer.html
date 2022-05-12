@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Tutorial - Implementing a custom mixer in Lightwood &mdash; lightwood 22.5.1.0 documentation</title>
+  <title>Tutorial - Implementing a custom mixer in Lightwood &mdash; lightwood 22.5.2.0 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                22.5.1.0
+                22.5.2.0
               </div>
             
           
@@ -566,42 +566,42 @@ Writing random_forest_mixer.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2391:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:No torchvision/pillow detected, image encoder not supported</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Analyzing a sample of 298</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:from a total population of 303, this is equivalent to 98.3% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: age</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column age has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: sex</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column sex has data type binary</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: cp</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column cp has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: trestbps</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column trestbps has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: chol</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column chol has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: fbs</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column fbs has data type binary</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: restecg</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column restecg has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: thalach</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column thalach has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: exang</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column exang has data type binary</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: oldpeak</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column oldpeak has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: slope</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column slope has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: ca</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column ca has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: thal</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column thal has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Column target has data type binary</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Analyzing a sample of 298</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:from a total population of 303, this is equivalent to 98.3% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: age</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column age has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: sex</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column sex has data type binary</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: cp</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column cp has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: trestbps</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column trestbps has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: chol</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column chol has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: fbs</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column fbs has data type binary</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: restecg</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column restecg has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: thalach</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column thalach has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: exang</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column exang has data type binary</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: oldpeak</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column oldpeak has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: slope</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column slope has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: ca</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column ca has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: thal</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column thal has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Column target has data type binary</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -725,7 +725,7 @@ Writing random_forest_mixer.py
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 57024.0,
         &#34;seconds_per_encoder&#34;: null,
-        &#34;expected_additional_time&#34;: 0.0742795467376709,
+        &#34;expected_additional_time&#34;: 0.06130099296569824,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -792,7 +792,7 @@ Writing random_forest_mixer.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2391:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -808,67 +808,67 @@ Writing random_forest_mixer.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2391:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Performing statistical analysis on data</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `analyze_data` runtime: 0.03 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Dropping features: []</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `preprocess` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `split` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Preparing the encoders</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 2</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 3</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 4</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 5</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 6</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 7</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 8</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 9</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 10</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 11</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 12</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoder prepping dict length of: 13</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: age</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: sex</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: cp</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: trestbps</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: chol</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: fbs</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: restecg</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: thalach</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: exang</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: oldpeak</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: slope</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: ca</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Done running for: thal</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `prepare` runtime: 0.11 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `featurize` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Training the mixers</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `fit_mixer` runtime: 2.39 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Ensembling the mixer</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Mixer: RandomForestMixer got accuracy: 0.8348214285714286</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Picked best mixer: RandomForestMixer</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `fit` runtime: 2.65 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Analyzing the ensemble of mixers</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:The block ICP is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:The block AccStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:The block ConfStats is now running its analyze() method</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `analyze_ensemble` runtime: 0.03 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Adjustment on validation requested.</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Updating the mixers</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `adjust` runtime: 0.0 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `learn` runtime: 2.86 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Performing statistical analysis on data</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `analyze_data` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Dropping features: []</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `preprocess` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `split` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Preparing the encoders</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 2</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 3</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 4</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 5</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 6</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 7</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 8</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 9</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 10</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 11</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 12</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoder prepping dict length of: 13</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: age</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: sex</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: cp</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: trestbps</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: chol</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: fbs</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: restecg</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: thalach</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: exang</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: oldpeak</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: slope</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: ca</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Done running for: thal</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `prepare` runtime: 0.09 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `featurize` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Training the mixers</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `fit_mixer` runtime: 2.14 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Ensembling the mixer</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Mixer: RandomForestMixer got accuracy: 0.8348214285714286</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Picked best mixer: RandomForestMixer</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `fit` runtime: 2.38 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Analyzing the ensemble of mixers</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:The block ICP is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:The block AccStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:The block ConfStats is now running its analyze() method</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `analyze_ensemble` runtime: 0.03 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Adjustment on validation requested.</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Updating the mixers</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `adjust` runtime: 0.0 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `learn` runtime: 2.57 seconds</span>
 </pre></div></div>
 </div>
 <p>Finally, we can use the trained predictor to make some predictions, or save it to a pickle for later use</p>
@@ -892,18 +892,18 @@ Writing random_forest_mixer.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2391:Dropping features: []</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Dropping features: []</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `preprocess` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `featurize` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:The block ICP is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:The block AccStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:The block ConfStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2391:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2391: `predict` runtime: 0.06 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Dropping features: []</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Dropping features: []</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `preprocess` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `featurize` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:The block ConfStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2763:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2763: `predict` runtime: 0.06 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
