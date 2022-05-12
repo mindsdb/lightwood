@@ -32,6 +32,9 @@ jobs:
         pip install -r requirements_image.txt
         pip install flake8
         pip install -r tests/requirements.txt
+        if [ "$RUNNER_OS" != "Windows" ]; then
+            pip install -r requirements_prophet.txt
+        fi
     - name: Install dependencies OSX
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
