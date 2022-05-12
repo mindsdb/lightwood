@@ -349,7 +349,6 @@ class SkTime(BaseMixer):
                 60 * 60 * 24,
                 60 * 60 * 24 * 7,
                 60 * 60 * 24 * 7 * 4,
-                60 * 60 * 24 * 7 * 4,
                 60 * 60 * 24 * 7 * 4 * 3,
                 60 * 60 * 24 * 7 * 4 * 12]
         min_diff = np.argmin(np.abs(np.array(secs) - delta))
