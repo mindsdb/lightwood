@@ -128,7 +128,8 @@ class SkTime(BaseMixer):
         df = data.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
         data = {'data': df,
                 'group_info': {gcol: df[gcol].tolist()
-                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
+                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by
+                else {'': ['__default' for _ in range(df.shape[0])]}}
 
         if not self.hyperparam_search and not self.study:
             module_name = self.model_path
@@ -173,17 +174,19 @@ class SkTime(BaseMixer):
                 model_pipeline.insert(0, ("detrender",
                                           Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))))
 
-            if group == '__default':
-                continue
-
             self.models[group] = TransformedTargetForecaster(model_pipeline)
 
             oby_col = self.ts_analysis['tss'].order_by[0]
-            target_idx = data['data'].columns.tolist().index(self.target)
-            oby_idx = data['data'].columns.tolist().index(oby_col)
-            series_idxs, series_data = get_group_matches(data, group)
-            series_oby = series_data[:, oby_idx]
-            series_data = series_data[:, target_idx]
+            if self.grouped_by == ['__default']:
+                series_idxs = data['data'][f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}']
+                series_data = data['data'][self.target].values
+                series_oby = data['data'][oby_col].values
+            else:
+                target_idx = data['data'].columns.tolist().index(self.target)
+                oby_idx = data['data'].columns.tolist().index(oby_col)
+                series_idxs, series_data = get_group_matches(data, group)
+                series_oby = series_data[:, oby_idx]
+                series_data = series_data[:, target_idx]
 
             if series_data.size > self.ts_analysis['tss'].window:
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
@@ -241,15 +244,17 @@ class SkTime(BaseMixer):
 
         data = {'data': ds.data_frame[self.target],
                 'group_info': {gcol: ds.data_frame[gcol].tolist()
-                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
+                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by
+                else {'': ['__default' for _ in range(length)]}}
 
         pending_idxs = set(range(length))
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
         for group in all_group_combinations:
+            group = tuple(group)
+            group = '__default' if group[0] == '__default' else group
             series_idxs, series_data = get_group_matches(data, group)
 
             if series_data.size > 0:
-                group = tuple(group)
                 series_idxs = sorted(series_idxs)
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     forecaster = self.models[group]
