@@ -262,8 +262,8 @@ class SkTime(BaseMixer):
 
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
-            series = pd.Series(data['data'][list(pending_idxs)].squeeze(), index=sorted(list(pending_idxs)))
-            ydf = self._call_groupmodel(ydf, self.models['__default'], series, offset=args.forecast_offset)
+            series = data['data'][list(pending_idxs)].squeeze()
+            ydf = self._call_default(ydf, series, list(pending_idxs))
 
         return ydf[['prediction']]
 
