@@ -8,6 +8,7 @@ import optuna
 import numpy as np
 import pandas as pd
 from sktime.forecasting.trend import PolynomialTrendForecaster
+from sktime.forecasting.naive import NaiveForecaster
 from sktime.forecasting.compose import TransformedTargetForecaster
 from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 from sktime.transformations.series.detrend import Detrender
@@ -173,6 +174,9 @@ class SkTime(BaseMixer):
                 model_pipeline.insert(0, ("detrender",
                                           Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))))
 
+            if group == '__default':
+                model_pipeline = [("forecaster", NaiveForecaster(strategy='last'))]
+
             self.models[group] = TransformedTargetForecaster(model_pipeline)
 
             oby_col = self.ts_analysis['tss'].order_by[0]
@@ -255,10 +259,11 @@ class SkTime(BaseMixer):
                 series_idxs = sorted(series_idxs)
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     forecaster = self.models[group]
+                    series = pd.Series(series_data.squeeze(), index=series_idxs)
                 else:
-                    log.warning(f"Applying default forecaster for novel group {group}. Performance might not be optimal.")  # noqa
+                    log.warning(f"Applying naive forecaster for novel group {group}. Performance might not be optimal.")
+                    series = pd.Series([0]+list(data['data'].flatten()))  # last value from each window equals shifted target (by 1)  # noqa
                     forecaster = self.models['__default']
-                series = pd.Series(series_data.squeeze(), index=series_idxs)
 
                 ydf = self._call_groupmodel(ydf, forecaster, series, offset=args.forecast_offset)
                 pending_idxs -= set(series_idxs)
@@ -287,6 +292,9 @@ class SkTime(BaseMixer):
             submodel = model.steps_[-1][-1]
         else:
             submodel = model
+
+        if isinstance(submodel, NaiveForecaster):
+            ydf['prediction'] = data['data']
 
         if hasattr(submodel, '_cutoff') and hasattr(submodel, 'd'):
             model_d = 0 if submodel.d is None else submodel.d
