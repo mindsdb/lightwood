@@ -781,7 +781,6 @@ if encoder.is_target:
     # ----------------- #
 
     analyze_data_body = f"""
-log.info("Performing statistical analysis on data")
 self.statistical_analysis = lightwood.data.statistical_analysis(data,
                                                                 self.dtype_dict,
                                                                 {json_ai.identifiers},
@@ -844,15 +843,12 @@ self.encoders = {inline_dict(encoder_dict)}
 # Prepare the training + dev data
 concatenated_train_dev = pd.concat([data['train'], data['dev']])
 
-log.info('Preparing the encoders')
-
 encoder_prepping_dict = {{}}
 
 # Prepare encoders that do not require learned strategies
 for col_name, encoder in self.encoders.items():
     if col_name != self.target and not encoder.is_trainable_encoder:
         encoder_prepping_dict[col_name] = [encoder, concatenated_train_dev[col_name], 'prepare']
-        log.info(f'Encoder prepping dict length of: {{len(encoder_prepping_dict)}}')
 
 # Setup parallelization
 parallel_prepped_encoders = mut_method_call(encoder_prepping_dict)
@@ -1022,26 +1018,34 @@ for mixer in self.mixers:
 
     learn_body = """
 self.mode = 'train'
+n_phases = 8 if self.problem_definition.fit_on_all else 7
 
 # Perform stats analysis
+log.info(f'[Learn phase 1/{n_phases}] - Statistical analysis')
 self.analyze_data(data)
 
 # Pre-process the data
+log.info(f'[Learn phase 2/{n_phases}] - Data preprocessing')
 data = self.preprocess(data)
 
 # Create train/test (dev) split
+log.info(f'[Learn phase 3/{n_phases}] - Data splitting')
 train_dev_test = self.split(data)
 
 # Prepare encoders
+log.info(f'[Learn phase 4/{n_phases}] - Preparing encoders')
 self.prepare(train_dev_test)
 
 # Create feature vectors from data
+log.info(f'[Learn phase 5/{n_phases}] - Feature generation')
 enc_train_test = self.featurize(train_dev_test)
 
 # Prepare mixers
+log.info(f'[Learn phase 6/{n_phases}] - Mixer training')
 self.fit(enc_train_test)
 
 # Analyze the ensemble
+log.info(f'[Learn phase 7/{n_phases}] - Ensemble analysis')
 self.analyze_ensemble(enc_train_test)
 
 # ------------------------ #
@@ -1052,7 +1056,7 @@ self.analyze_ensemble(enc_train_test)
 # Update the mixers with partial fit
 if self.problem_definition.fit_on_all:
 
-    log.info("Adjustment on validation requested.")
+    log.info(f'[Learn phase 8/{n_phases}] - Adjustment on validation requested')
     self.adjust(enc_train_test["test"], ConcatedEncodedDs([enc_train_test["train"], enc_train_test["dev"]]))
 
 """
@@ -1063,13 +1067,15 @@ if self.problem_definition.fit_on_all:
 
     predict_body = f"""
 self.mode = 'predict'
+n_phases = 3 if self.pred_args.all_mixers else 4
 
 if len(data) == 0:
     raise Exception("Empty input, aborting prediction. Please try again with some input data.")
 
-# Remove columns that user specifies to ignore
-log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
+log.info(f'[Predict phase 1/{{n_phases}}] - Data preprocessing')
+if self.problem_definition.ignore_features:
+    log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
+    data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 for col in self.input_cols:
     if col not in data.columns:
         data[col] = [None] * len(data)
@@ -1078,15 +1084,18 @@ for col in self.input_cols:
 data = self.preprocess(data)
 
 # Featurize the data
+log.info(f'[Predict phase 2/{{n_phases}}] - Feature generation')
 encoded_ds = self.featurize({{"predict_data": data}})["predict_data"]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
+log.info(f'[Predict phase 3/{{n_phases}}] - Calling ensemble')
 self.pred_args = PredictionArguments.from_dict(args)
 df = self.ensemble(encoded_ds, args=self.pred_args)
 
 if self.pred_args.all_mixers:
     return df
 else:
+    log.info(f'[Predict phase 4/{{n_phases}}] - Analyzing output')
     insights, global_insights = {call(json_ai.explainer)}
     return insights
 """
@@ -1163,8 +1172,9 @@ class Predictor(PredictorInterface):
 
     @timed
     def learn(self, data: pd.DataFrame) -> None:
-        log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
-        data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
+        if self.problem_definition.ignore_features:
+            log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
+            data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 {learn_body}
 
     @timed
