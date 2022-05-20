@@ -8,7 +8,6 @@ import optuna
 import numpy as np
 import pandas as pd
 from sktime.forecasting.trend import PolynomialTrendForecaster
-from sktime.forecasting.naive import NaiveForecaster
 from sktime.forecasting.compose import TransformedTargetForecaster
 from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 from sktime.transformations.series.detrend import Detrender
@@ -175,21 +174,16 @@ class SkTime(BaseMixer):
                                           Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))))
 
             if group == '__default':
-                model_pipeline = [("forecaster", NaiveForecaster(strategy='last'))]
+                continue
 
             self.models[group] = TransformedTargetForecaster(model_pipeline)
 
             oby_col = self.ts_analysis['tss'].order_by[0]
-            if self.grouped_by == ['__default']:
-                series_idxs = data['data'][f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}']
-                series_data = data['data'][self.target].values
-                series_oby = data['data'][oby_col].values
-            else:
-                target_idx = data['data'].columns.tolist().index(self.target)
-                oby_idx = data['data'].columns.tolist().index(oby_col)
-                series_idxs, series_data = get_group_matches(data, group)
-                series_oby = series_data[:, oby_idx]
-                series_data = series_data[:, target_idx]
+            target_idx = data['data'].columns.tolist().index(self.target)
+            oby_idx = data['data'].columns.tolist().index(oby_col)
+            series_idxs, series_data = get_group_matches(data, group)
+            series_oby = series_data[:, oby_idx]
+            series_data = series_data[:, target_idx]
 
             if series_data.size > self.ts_analysis['tss'].window:
                 series = pd.Series(series_data.squeeze(), index=series_idxs)
@@ -260,12 +254,10 @@ class SkTime(BaseMixer):
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     forecaster = self.models[group]
                     series = pd.Series(series_data.squeeze(), index=series_idxs)
+                    ydf = self._call_groupmodel(ydf, forecaster, series, offset=args.forecast_offset)
                 else:
                     log.warning(f"Applying naive forecaster for novel group {group}. Performance might not be optimal.")
-                    series = pd.Series([0]+list(data['data'].flatten()))  # last value from each window equals shifted target (by 1)  # noqa
-                    forecaster = self.models['__default']
-
-                ydf = self._call_groupmodel(ydf, forecaster, series, offset=args.forecast_offset)
+                    ydf = self._call_default(ydf, series_data, series_idxs)
                 pending_idxs -= set(series_idxs)
 
         # apply default model in all remaining novel-group rows
@@ -293,9 +285,6 @@ class SkTime(BaseMixer):
         else:
             submodel = model
 
-        if isinstance(submodel, NaiveForecaster):
-            ydf['prediction'] = data['data']
-
         if hasattr(submodel, '_cutoff') and hasattr(submodel, 'd'):
             model_d = 0 if submodel.d is None else submodel.d
             min_offset = -submodel._cutoff + model_d + 1
@@ -310,6 +299,13 @@ class SkTime(BaseMixer):
             start_idx = 0 if max(1 + idx + offset, min_offset) < 0 else idx
             end_idx = start_idx + self.horizon
             ydf['prediction'].iloc[original_index[idx]] = all_preds[start_idx:end_idx]
+        return ydf
+
+    def _call_default(self, ydf, data, idxs):
+        # last value from each window equals shifted target (by 1)  # noqa
+        series = np.array([0] + list(data.flatten())[:-1])
+        all_preds = [[value for _ in range(self.horizon)] for value in series]
+        ydf['prediction'].iloc[idxs] = all_preds
         return ydf
 
     def _get_best_model(self, trial, train_data, test_data):
