@@ -204,8 +204,13 @@ def get_column_data_type(arg_tup):
     )
 
     actual_pct_invalid = 100 * (len(data) - max_known_dtype_count) / len(data)
-    if max_known_dtype is None or max_known_dtype == dtype.invalid or actual_pct_invalid > pct_invalid:
+    if max_known_dtype is None or max_known_dtype == dtype.invalid:
         curr_dtype = None
+    elif actual_pct_invalid > pct_invalid:
+        if max_known_dtype in (dtype.integer, dtype.float) and actual_pct_invalid <= 5 * pct_invalid:
+            curr_dtype = max_known_dtype
+        else:
+            curr_dtype = None
     else:
         curr_dtype = max_known_dtype
 

@@ -105,7 +105,7 @@ def clean_float(val):
     val = val.replace(',', '.')
     val = val.rstrip('"').lstrip('"')
 
-    if val == '' or val == 'None' or val == 'nan':
+    if val in ('', '.', 'None', 'nan'):
         return None
 
     return float(val)
@@ -118,7 +118,7 @@ def gen_chars(length, character):
     :param character:
     :return:
     """
-    return ''.join([character for i in range(length)])
+    return ''.join([character for _ in range(length)])
 
 
 def cast_string_to_python_type(string):

@@ -27,7 +27,7 @@ def get_group_matches(data, combination):
         for val, key in zip(combination, keys):
             all_sets.append(set([i for i, elt in enumerate(data['group_info'][key]) if elt == val]))
         if all_sets:
-            idxs = list(set.intersection(*all_sets))
+            idxs = sorted(list(set.intersection(*all_sets)))
             return idxs, np.array(data['data'])[idxs, :]
 
         else:

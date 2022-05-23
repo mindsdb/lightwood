@@ -8,7 +8,11 @@ from sklearn.metrics import r2_score
 from lightwood.api.types import ProblemDefinition
 from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
-from sktime.forecasting.arima import AutoARIMA
+try:
+    from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
+except ModuleNotFoundError:
+    from sktime.forecasting.arima import AutoARIMA
+
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
 from lightwood.mixer.sktime import SkTime
 
@@ -78,7 +82,7 @@ class TestTimeseries(unittest.TestCase):
             "module": "SkTime",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
-                "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
+                "horizon": "$problem_definition.timeseries_settings.horizon",
                 "model_path": "'trend.TrendForecaster'",  # use a cheap forecaster
                 "hyperparam_search": False,  # disable this as it's expensive and covered in test #3
             },
@@ -269,7 +273,7 @@ class TestTimeseries(unittest.TestCase):
             "module": "SkTime",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
-                "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
+                "horizon": "$problem_definition.timeseries_settings.horizon",
             }}]
 
         code = code_from_json_ai(json_ai)

@@ -58,8 +58,9 @@ def cleaner(
         data = clean_timeseries(data, timeseries_settings)
 
     for col, imputer in imputers.items():
-        cols = [col] + [col for col in imputer.dependencies]
-        data[col] = imputer.impute(data[cols])
+        if col in data.columns:
+            cols = [col] + [col for col in imputer.dependencies]
+            data[col] = imputer.impute(data[cols])
 
     return data
 
@@ -334,8 +335,10 @@ def _remove_columns(data: pd.DataFrame, identifiers: Dict[str, object], target: 
         exceptions += timeseries_settings.group_by
 
     to_drop = [x for x in to_drop if x in data.columns and x not in exceptions]
-    log.info(f'Dropping features: {to_drop}')
-    data = data.drop(columns=to_drop)
+
+    if to_drop:
+        log.info(f'Dropping features: {to_drop}')
+        data = data.drop(columns=to_drop)
 
     if mode == "train":
         data = _rm_rows_w_empty_targets(data, target)

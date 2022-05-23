@@ -42,7 +42,7 @@ class TsNumericEncoder(NumericEncoder):
                 vector = [0] * 2
                 if group is not None and self.normalizers is not None:
                     try:
-                        mean = self.normalizers[frozenset(group)].abs_mean
+                        mean = self.normalizers[tuple(group)].abs_mean
                     except KeyError:
                         # novel group-by, we use default normalizer mean
                         mean = self.normalizers['__default'].abs_mean
@@ -99,7 +99,7 @@ class TsNumericEncoder(NumericEncoder):
                     else:
                         if group is not None and self.normalizers is not None:
                             try:
-                                mean = self.normalizers[frozenset(group)].abs_mean
+                                mean = self.normalizers[tuple(group)].abs_mean
                             except KeyError:
                                 # decode new group with default normalizer
                                 mean = self.normalizers['__default'].abs_mean
