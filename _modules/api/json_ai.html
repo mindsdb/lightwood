@@ -954,7 +954,6 @@
     <span class="c1"># ----------------- #</span>
 
     <span class="n">analyze_data_body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">log.info(&quot;Performing statistical analysis on data&quot;)</span>
 <span class="s2">self.statistical_analysis = lightwood.data.statistical_analysis(data,</span>
 <span class="s2">                                                                self.dtype_dict,</span>
 <span class="s2">                                                                </span><span class="si">{</span><span class="n">json_ai</span><span class="o">.</span><span class="n">identifiers</span><span class="si">}</span><span class="s2">,</span>
@@ -1017,15 +1016,12 @@
 <span class="s2"># Prepare the training + dev data</span>
 <span class="s2">concatenated_train_dev = pd.concat([data[&#39;train&#39;], data[&#39;dev&#39;]])</span>
 
-<span class="s2">log.info(&#39;Preparing the encoders&#39;)</span>
-
 <span class="s2">encoder_prepping_dict = </span><span class="se">{{}}</span><span class="s2"></span>
 
 <span class="s2"># Prepare encoders that do not require learned strategies</span>
 <span class="s2">for col_name, encoder in self.encoders.items():</span>
 <span class="s2">    if col_name != self.target and not encoder.is_trainable_encoder:</span>
 <span class="s2">        encoder_prepping_dict[col_name] = [encoder, concatenated_train_dev[col_name], &#39;prepare&#39;]</span>
-<span class="s2">        log.info(f&#39;Encoder prepping dict length of: </span><span class="se">{{</span><span class="s2">len(encoder_prepping_dict)</span><span class="se">}}</span><span class="s2">&#39;)</span>
 
 <span class="s2"># Setup parallelization</span>
 <span class="s2">parallel_prepped_encoders = mut_method_call(encoder_prepping_dict)</span>
@@ -1195,26 +1191,34 @@
 
     <span class="n">learn_body</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">self.mode = &#39;train&#39;</span>
+<span class="s2">n_phases = 8 if self.problem_definition.fit_on_all else 7</span>
 
 <span class="s2"># Perform stats analysis</span>
+<span class="s2">log.info(f&#39;[Learn phase 1/</span><span class="si">{n_phases}</span><span class="s2">] - Statistical analysis&#39;)</span>
 <span class="s2">self.analyze_data(data)</span>
 
 <span class="s2"># Pre-process the data</span>
+<span class="s2">log.info(f&#39;[Learn phase 2/</span><span class="si">{n_phases}</span><span class="s2">] - Data preprocessing&#39;)</span>
 <span class="s2">data = self.preprocess(data)</span>
 
 <span class="s2"># Create train/test (dev) split</span>
+<span class="s2">log.info(f&#39;[Learn phase 3/</span><span class="si">{n_phases}</span><span class="s2">] - Data splitting&#39;)</span>
 <span class="s2">train_dev_test = self.split(data)</span>
 
 <span class="s2"># Prepare encoders</span>
+<span class="s2">log.info(f&#39;[Learn phase 4/</span><span class="si">{n_phases}</span><span class="s2">] - Preparing encoders&#39;)</span>
 <span class="s2">self.prepare(train_dev_test)</span>
 
 <span class="s2"># Create feature vectors from data</span>
+<span class="s2">log.info(f&#39;[Learn phase 5/</span><span class="si">{n_phases}</span><span class="s2">] - Feature generation&#39;)</span>
 <span class="s2">enc_train_test = self.featurize(train_dev_test)</span>
 
 <span class="s2"># Prepare mixers</span>
+<span class="s2">log.info(f&#39;[Learn phase 6/</span><span class="si">{n_phases}</span><span class="s2">] - Mixer training&#39;)</span>
 <span class="s2">self.fit(enc_train_test)</span>
 
 <span class="s2"># Analyze the ensemble</span>
+<span class="s2">log.info(f&#39;[Learn phase 7/</span><span class="si">{n_phases}</span><span class="s2">] - Ensemble analysis&#39;)</span>
 <span class="s2">self.analyze_ensemble(enc_train_test)</span>
 
 <span class="s2"># ------------------------ #</span>
@@ -1225,7 +1229,7 @@
 <span class="s2"># Update the mixers with partial fit</span>
 <span class="s2">if self.problem_definition.fit_on_all:</span>
 
-<span class="s2">    log.info(&quot;Adjustment on validation requested.&quot;)</span>
+<span class="s2">    log.info(f&#39;[Learn phase 8/</span><span class="si">{n_phases}</span><span class="s2">] - Adjustment on validation requested&#39;)</span>
 <span class="s2">    self.adjust(enc_train_test[&quot;test&quot;], ConcatedEncodedDs([enc_train_test[&quot;train&quot;], enc_train_test[&quot;dev&quot;]]))</span>
 
 <span class="s2">&quot;&quot;&quot;</span>
@@ -1236,13 +1240,15 @@
 
     <span class="n">predict_body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">self.mode = &#39;predict&#39;</span>
+<span class="s2">n_phases = 3 if self.pred_args.all_mixers else 4</span>
 
 <span class="s2">if len(data) == 0:</span>
 <span class="s2">    raise Exception(&quot;Empty input, aborting prediction. Please try again with some input data.&quot;)</span>
 
-<span class="s2"># Remove columns that user specifies to ignore</span>
-<span class="s2">log.info(f&#39;Dropping features: </span><span class="se">{{</span><span class="s2">self.problem_definition.ignore_features</span><span class="se">}}</span><span class="s2">&#39;)</span>
-<span class="s2">data = data.drop(columns=self.problem_definition.ignore_features, errors=&#39;ignore&#39;)</span>
+<span class="s2">log.info(f&#39;[Predict phase 1/</span><span class="se">{{</span><span class="s2">n_phases</span><span class="se">}}</span><span class="s2">] - Data preprocessing&#39;)</span>
+<span class="s2">if self.problem_definition.ignore_features:</span>
+<span class="s2">    log.info(f&#39;Dropping features: </span><span class="se">{{</span><span class="s2">self.problem_definition.ignore_features</span><span class="se">}}</span><span class="s2">&#39;)</span>
+<span class="s2">    data = data.drop(columns=self.problem_definition.ignore_features, errors=&#39;ignore&#39;)</span>
 <span class="s2">for col in self.input_cols:</span>
 <span class="s2">    if col not in data.columns:</span>
 <span class="s2">        data[col] = [None] * len(data)</span>
@@ -1251,15 +1257,18 @@
 <span class="s2">data = self.preprocess(data)</span>
 
 <span class="s2"># Featurize the data</span>
+<span class="s2">log.info(f&#39;[Predict phase 2/</span><span class="se">{{</span><span class="s2">n_phases</span><span class="se">}}</span><span class="s2">] - Feature generation&#39;)</span>
 <span class="s2">encoded_ds = self.featurize(</span><span class="se">{{</span><span class="s2">&quot;predict_data&quot;: data</span><span class="se">}}</span><span class="s2">)[&quot;predict_data&quot;]</span>
 <span class="s2">encoded_data = encoded_ds.get_encoded_data(include_target=False)</span>
 
+<span class="s2">log.info(f&#39;[Predict phase 3/</span><span class="se">{{</span><span class="s2">n_phases</span><span class="se">}}</span><span class="s2">] - Calling ensemble&#39;)</span>
 <span class="s2">self.pred_args = PredictionArguments.from_dict(args)</span>
 <span class="s2">df = self.ensemble(encoded_ds, args=self.pred_args)</span>
 
 <span class="s2">if self.pred_args.all_mixers:</span>
 <span class="s2">    return df</span>
 <span class="s2">else:</span>
+<span class="s2">    log.info(f&#39;[Predict phase 4/</span><span class="se">{{</span><span class="s2">n_phases</span><span class="se">}}</span><span class="s2">] - Analyzing output&#39;)</span>
 <span class="s2">    insights, global_insights = </span><span class="si">{</span><span class="n">call</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">explainer</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">    return insights</span>
 <span class="s2">&quot;&quot;&quot;</span>
@@ -1336,8 +1345,9 @@
 
 <span class="s2">    @timed</span>
 <span class="s2">    def learn(self, data: pd.DataFrame) -&gt; None:</span>
-<span class="s2">        log.info(f&#39;Dropping features: </span><span class="se">{{</span><span class="s2">self.problem_definition.ignore_features</span><span class="se">}}</span><span class="s2">&#39;)</span>
-<span class="s2">        data = data.drop(columns=self.problem_definition.ignore_features, errors=&#39;ignore&#39;)</span>
+<span class="s2">        if self.problem_definition.ignore_features:</span>
+<span class="s2">            log.info(f&#39;Dropping features: </span><span class="se">{{</span><span class="s2">self.problem_definition.ignore_features</span><span class="se">}}</span><span class="s2">&#39;)</span>
+<span class="s2">            data = data.drop(columns=self.problem_definition.ignore_features, errors=&#39;ignore&#39;)</span>
 <span class="si">{</span><span class="n">learn_body</span><span class="si">}</span><span class="s2"></span>
 
 <span class="s2">    @timed</span>
