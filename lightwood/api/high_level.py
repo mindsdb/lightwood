@@ -44,8 +44,9 @@ def predictor_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDe
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
-    log.info(f'Dropping features: {problem_definition.ignore_features}')
-    df = df.drop(columns=problem_definition.ignore_features)
+    if problem_definition.ignore_features:
+        log.info(f'Dropping features: {problem_definition.ignore_features}')
+        df = df.drop(columns=problem_definition.ignore_features)
 
     predictor_class_str = code_from_problem(df, problem_definition)
     return predictor_from_code(predictor_class_str)
@@ -65,8 +66,9 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
 
     started = time.time()
 
-    log.info(f'Dropping features: {problem_definition.ignore_features}')
-    df = df.drop(columns=problem_definition.ignore_features)
+    if problem_definition.ignore_features:
+        log.info(f'Dropping features: {problem_definition.ignore_features}')
+        df = df.drop(columns=problem_definition.ignore_features)
 
     type_information = infer_types(df, problem_definition.pct_invalid)
     stats = statistical_analysis(
@@ -142,8 +144,10 @@ def code_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinit
     if not isinstance(problem_definition, ProblemDefinition):
         problem_definition = ProblemDefinition.from_dict(problem_definition)
 
-    log.info(f'Dropping features: {problem_definition.ignore_features}')
-    df = df.drop(columns=problem_definition.ignore_features)
+    if problem_definition.ignore_features:
+        log.info(f'Dropping features: {problem_definition.ignore_features}')
+        df = df.drop(columns=problem_definition.ignore_features)
+
     json_ai = json_ai_from_problem(df, problem_definition)
     predictor_code = code_from_json_ai(json_ai)
     return predictor_code

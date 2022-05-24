@@ -128,7 +128,8 @@ class SkTime(BaseMixer):
         df = data.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
         data = {'data': df,
                 'group_info': {gcol: df[gcol].tolist()
-                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
+                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by
+                else {'': ['__default' for _ in range(df.shape[0])]}}
 
         if not self.hyperparam_search and not self.study:
             module_name = self.model_path
@@ -243,30 +244,31 @@ class SkTime(BaseMixer):
 
         data = {'data': ds.data_frame[self.target],
                 'group_info': {gcol: ds.data_frame[gcol].tolist()
-                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by else {}}
+                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by
+                else {'': ['__default' for _ in range(length)]}}
 
         pending_idxs = set(range(length))
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
         for group in all_group_combinations:
+            group = tuple(group)
+            group = '__default' if group[0] == '__default' else group
             series_idxs, series_data = get_group_matches(data, group)
 
             if series_data.size > 0:
-                group = tuple(group)
                 series_idxs = sorted(series_idxs)
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     forecaster = self.models[group]
+                    series = pd.Series(series_data.squeeze(), index=series_idxs)
+                    ydf = self._call_groupmodel(ydf, forecaster, series, offset=args.forecast_offset)
                 else:
-                    log.warning(f"Applying default forecaster for novel group {group}. Performance might not be optimal.")  # noqa
-                    forecaster = self.models['__default']
-                series = pd.Series(series_data.squeeze(), index=series_idxs)
-
-                ydf = self._call_groupmodel(ydf, forecaster, series, offset=args.forecast_offset)
+                    log.warning(f"Applying naive forecaster for novel group {group}. Performance might not be optimal.")
+                    ydf = self._call_default(ydf, series_data, series_idxs)
                 pending_idxs -= set(series_idxs)
 
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
-            series = pd.Series(data['data'][list(pending_idxs)].squeeze(), index=sorted(list(pending_idxs)))
-            ydf = self._call_groupmodel(ydf, self.models['__default'], series, offset=args.forecast_offset)
+            series = data['data'][list(pending_idxs)].squeeze()
+            ydf = self._call_default(ydf, series, list(pending_idxs))
 
         return ydf[['prediction']]
 
@@ -302,6 +304,13 @@ class SkTime(BaseMixer):
             start_idx = 0 if max(1 + idx + offset, min_offset) < 0 else idx
             end_idx = start_idx + self.horizon
             ydf['prediction'].iloc[original_index[idx]] = all_preds[start_idx:end_idx]
+        return ydf
+
+    def _call_default(self, ydf, data, idxs):
+        # last value from each window equals shifted target (by 1)  # noqa
+        series = np.array([0] + list(data.flatten())[:-1])
+        all_preds = [[value for _ in range(self.horizon)] for value in series]
+        ydf['prediction'].iloc[idxs] = all_preds
         return ydf
 
     def _get_best_model(self, trial, train_data, test_data):
