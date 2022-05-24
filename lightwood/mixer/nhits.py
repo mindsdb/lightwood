@@ -1,4 +1,3 @@
-from itertools import product
 from typing import Dict, Union
 
 import numpy as np
@@ -6,11 +5,9 @@ import pandas as pd
 from hyperopt import hp
 import neuralforecast as nf
 
-
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
-from lightwood.helpers.general import get_group_matches
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
@@ -163,7 +160,7 @@ class NHitsMixer(BaseMixer):
 
         input_df = self._make_initial_df(ds.data_frame)  # TODO make it so that it's horizon worth of data in each row
         for i in range(input_df.shape[0]):
-            ydf.iloc[i]['prediction'] = self.model.forecast(input_df.iloc[i:i+1])['y'].tolist()
+            ydf.iloc[i]['prediction'] = self.model.forecast(input_df.iloc[i:i + 1])['y'].tolist()
 
         return ydf[['prediction']]
 
