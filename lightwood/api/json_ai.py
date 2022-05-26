@@ -596,7 +596,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             "args": {
                 "tss": "$problem_definition.timeseries_settings",
                 "data": "data",
-                "seed": 1,
+                "seed": "$problem_definition.seed_nr",
                 "target": "$target",
                 "dtype_dict": "$dtype_dict",
                 "pct_train": 0.8,
