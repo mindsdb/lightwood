@@ -23,11 +23,6 @@ class NHitsMixer(BaseMixer):
         'mode': 'simple',
         'activation': 'SELU',
 
-        'n_time_in': 24 * 3,
-        'n_time_out': 24,
-        'n_x_hidden': 8,
-        'n_s_hidden': 0,
-
         'stack_types': ['identity', 'identity', 'identity'],
         'constant_n_blocks': 1,
         'constant_n_layers': 2,
@@ -95,6 +90,11 @@ class NHitsMixer(BaseMixer):
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.model = None
 
+        self.config['n_time_in'] = self.ts_analysis['tss'].window
+        self.config['n_time_out'] = self.horizon
+        self.config['n_x_hidden'] = 0  # 8
+        self.config['n_s_hidden'] = 0
+
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
         Fits the N-HITS model.
@@ -125,12 +125,12 @@ class NHitsMixer(BaseMixer):
                        hyperopt_steps=5,
                        n_ts_val=n_ts_val,
                        n_ts_test=n_ts_test,
-                       results_dir='./results/autonhits',
+                       results_dir='./results/autonhits',  # TODO: change this
                        save_trials=True,
                        loss_function_val=nf.losses.numpy.mae,
                        loss_functions_test={'mae': nf.losses.numpy.mae,
                                             'mse': nf.losses.numpy.mse},
-                       return_test_forecast=True,
+                       return_test_forecast=True,  # False
                        verbose=False)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
