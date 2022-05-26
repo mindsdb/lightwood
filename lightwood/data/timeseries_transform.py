@@ -21,7 +21,7 @@ def transform_timeseries(
     The main transformations performed by this block are:
       - Type casting (e.g. to numerical for `order_by` columns).
       - Windowing functions for historical context based on `TimeseriesSettings.window` parameter.
-      - Explicitly add target columns according to the `TimeseriesSettings.nr_predictions` parameter.
+      - Explicitly add target columns according to the `TimeseriesSettings.horizon` parameter.
       - Flag all rows that are "predictable" based on all `TimeseriesSettings`.
       - Plus, handle all logic for the streaming use case (where forecasts are only emitted for the last observed data point).
     
@@ -73,11 +73,11 @@ def transform_timeseries(
             secondary_type_dict[col] = dtype_dict[col]
 
     # Convert order_by columns to numbers (note, rows are references to mutable rows in `original_df`)
-    for _, row in original_df.iterrows():
+    for i, row in original_df.iterrows():
         for col in ob_arr:
             # @TODO: Remove if the TS encoder can handle `None`
             if row[col] is None or pd.isna(row[col]):
-                row[col] = 0.0
+                original_df.at[i, col] = 0.0
             else:
                 if dtype_dict[col] == dtype.date:
                     try:
@@ -106,7 +106,7 @@ def transform_timeseries(
             df_arr.append(df.sort_values(by=ob_arr))
             group_lengths.append(len(df))
     else:
-        df_arr = [original_df]
+        df_arr = [original_df.sort_values(by=ob_arr)]
         group_lengths.append(len(original_df))
 
     n_groups = len(df_arr)
@@ -131,7 +131,7 @@ def transform_timeseries(
                 _ts_add_previous_rows, order_cols=ob_arr + tss.historical_columns, window=window),
             df_arr)
 
-        df_arr = pool.map(partial(_ts_add_future_target, target=target, nr_predictions=tss.nr_predictions,
+        df_arr = pool.map(partial(_ts_add_future_target, target=target, horizon=tss.horizon,
                                   data_dtype=tss.target_type, mode=mode),
                           df_arr)
 
@@ -147,7 +147,7 @@ def transform_timeseries(
             df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], order_cols=ob_arr + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i],
                                               order_cols=ob_arr + tss.historical_columns, window=window)
-            df_arr[i] = _ts_add_future_target(df_arr[i], target=target, nr_predictions=tss.nr_predictions,
+            df_arr[i] = _ts_add_future_target(df_arr[i], target=target, horizon=tss.horizon,
                                               data_dtype=tss.target_type, mode=mode)
             if tss.use_previous_target:
                 df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, window=tss.window)
@@ -162,7 +162,7 @@ def transform_timeseries(
         if tss.allow_incomplete_history:
             log.warning("Forecasting with incomplete historical context, predictions might be subpar")
         else:
-            raise Exception(f'Not enough historical context to make a timeseries prediction. Please provide a number of rows greater or equal to the window size - currently (number_rows, window_size) = ({min(group_lengths)}, {tss.window}). If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` timeseries setting to `True`, but this might lead to subpar predictions depending on the mixer.') # noqa
+            raise Exception(f'Not enough historical context to make a timeseries prediction (`allow_incomplete_history` is set to False). Please provide a number of rows greater or equal to the window size - currently (number_rows, window_size) = ({min(group_lengths)}, {tss.window}). If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` timeseries setting to `True`, but this might lead to subpar predictions depending on the mixer.') # noqa
 
     df_gb_map = None
     if n_groups > 1:
@@ -316,24 +316,24 @@ def _ts_add_previous_target(df: pd.DataFrame, target: str, window: int) -> pd.Da
     return df
 
 
-def _ts_add_future_target(df, target, nr_predictions, data_dtype, mode):
+def _ts_add_future_target(df, target, horizon, data_dtype, mode):
     """
-    Adds as many columns to the input dataframe as the forecasting horizon asks for (as determined by `TimeseriesSettings.nr_predictions`).
+    Adds as many columns to the input dataframe as the forecasting horizon asks for (as determined by `TimeseriesSettings.horizon`).
 
     :param df: Input dataframe.
     :param target: target column name.
-    :param nr_predictions: value of `TimeseriesSettings.nr_predictions` parameter.
+    :param horizon: value of `TimeseriesSettings.horizon` parameter.
     :param data_dtype: dictionary with types of all input columns
     :param mode: either "train" or "predict". `Train` will drop rows with incomplet target info. `Predict` has no effect, for now.
 
-    :return: Dataframe with new `{target}_timestep_{i}'` columns that contains target labels at timestep `i` of a total `TimeseriesSettings.nr_predictions`.
+    :return: Dataframe with new `{target}_timestep_{i}'` columns that contains target labels at timestep `i` of a total `TimeseriesSettings.horizon`.
     """  # noqa
     if target not in df:
         return df
-    if data_dtype in (dtype.integer, dtype.float, dtype.array, dtype.tsarray):
+    if data_dtype in (dtype.integer, dtype.float, dtype.num_array, dtype.num_tsarray):
         df[target] = df[target].astype(float)
 
-    for timestep_index in range(1, nr_predictions):
+    for timestep_index in range(1, horizon):
         next_target_value_arr = list(df[target])
         for del_index in range(0, min(timestep_index, len(next_target_value_arr))):
             del next_target_value_arr[0]

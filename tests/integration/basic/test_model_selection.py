@@ -10,7 +10,7 @@ class TestMixerSelection(unittest.TestCase):
         prob_kwargs = {'target': target, 'time_aim': 15} if not prob_kwargs else {'target': target, **prob_kwargs}
         prdb = ProblemDefinition.from_dict(prob_kwargs)
         json_ai = json_ai_from_problem(df, prdb).to_dict()
-        mixers = [mixer['module'] for mixer in json_ai['outputs'][target]['mixers']]
+        mixers = [mixer['module'] for mixer in json_ai['model']['args']['submodels']]
         return mixers
 
     def test_0_regression_task(self):
@@ -48,7 +48,7 @@ class TestMixerSelection(unittest.TestCase):
             'timeseries_settings': {
                 'time_aim': 15,
                 'group_by': ['Country'],
-                'nr_predictions': 1,
+                'horizon': 1,
                 'order_by': ['T'],
                 'window': 5
             }
@@ -64,7 +64,7 @@ class TestMixerSelection(unittest.TestCase):
             'time_aim': 15,
             'timeseries_settings': {
                 'group_by': ['Country'],
-                'nr_predictions': 3,
+                'horizon': 3,
                 'order_by': ['T'],
                 'window': 5
             }

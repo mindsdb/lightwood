@@ -42,6 +42,8 @@ if sys_platform in ['win32', 'cygwin', 'windows']:
     # These have to be installed manually or via the installers in windows
     requirements = remove_requirements(requirements, 'torch')
     requirements = remove_requirements(requirements, 'torchvision')
+    requirements = remove_requirements(requirements, 'pystan')  # needs to be compiled from source in windows
+    requirements = remove_requirements(requirements, 'fbprophet')
 
 setuptools.setup(
     name=about['__title__'],

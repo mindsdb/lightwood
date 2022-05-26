@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 import torch
-from lightwood.encoder.time_series import TimeSeriesEncoder
+from lightwood.encoder.time_series.rnn import TimeSeriesEncoder
 from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
 import pandas as pd
 
@@ -30,7 +30,7 @@ class TestRnnEncoder(unittest.TestCase):
         normalizer.prepare(data)
         encoded = normalizer.encode(data)
         self.assertTrue(encoded_target, encoded)
-        dec = normalizer.decode(encoded)
+        dec = [normalizer.decode(e).squeeze().tolist() for e in encoded]
         self.assertTrue(dec[-1][-1] == normalizer.unk)
         dec[-1][-1] = None
         self.assertTrue(data == dec)

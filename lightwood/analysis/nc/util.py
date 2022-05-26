@@ -57,7 +57,7 @@ def set_conf_range(
     :return: set confidence plus predictions regions (for numerical tasks) or pvalues (for categorical tasks).
     """  # noqa
     # numerical
-    if target_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray, dtype.quantity):
+    if target_type in (dtype.integer, dtype.float, dtype.num_array, dtype.num_tsarray, dtype.quantity):
 
         # ICP gets all possible bounds (shape: (B, 2, 99))
         all_ranges = icp.predict(X.values)
@@ -85,9 +85,9 @@ def set_conf_range(
                 return 0.9901, ranges
 
     # categorical
-    elif target_type in (dtype.binary, dtype.categorical):
+    elif target_type in (dtype.binary, dtype.categorical, dtype.cat_array, dtype.cat_tsarray):
         pvals = icp.predict(X.values)  # p-values at which each class is included in the predicted set
-        conf = np.subtract(1, pvals.min(axis=1))
+        conf = get_categorical_conf(pvals)
         return conf, pvals
 
     # default
@@ -100,7 +100,7 @@ def get_numeric_conf_range(
         positive_domain: bool = False,
         std_tol: int = 1,
         group: Optional[str] = '__default',
-        error_rate: float = None
+        fixed_conf: float = None
 ):
     """
     Gets prediction bounds for numerical targets, based on ICP estimation and width tolerance.
@@ -110,14 +110,14 @@ def get_numeric_conf_range(
     :param positive_domain: Flag that indicates whether target is expected to be a positive number.
     :param std_tol: Tolerance for automatic confidence level selection; bigger tolerance means higher confidence, in general.
     :param group: For tasks with multiple different target groups (where each may have a different std_dev), indicates what group is being considered.
-    :param error_rate: Pre-determined error rate for the ICP, 0-1 bounded. Can be specified to bypass automatic confidence/bound detection, or to adjust the threshold sensitivity in anomaly detection tasks.
+    :param fixed_conf: Pre-determined confidence for the ICP, 0-1 bounded. Can be specified to bypass automatic confidence/bound detection, or to adjust the threshold sensitivity in anomaly detection tasks.
     
     :return: array with confidence for each data instance, along with lower and upper bounds for each prediction.
     """  # noqa
-    if not isinstance(error_rate, float):
+    if not isinstance(fixed_conf, float):
         error_rate = None
 
-    if error_rate is None:
+    if fixed_conf is None:
         significances = []
         conf_ranges = []
         std_dev = df_target_stddev[group]
@@ -143,8 +143,8 @@ def get_numeric_conf_range(
         conf_ranges = np.array(conf_ranges)
     else:
         # fixed error rate
-        error_rate = max(0.01, min(1.0, error_rate))
-        conf = 1 - error_rate
+        conf = max(0.01, min(1.0, fixed_conf))
+        error_rate = 1 - conf
         conf_idx = int(100 * error_rate) - 1
         conf_ranges = all_confs[:, :, conf_idx]
         significances = [conf for _ in range(conf_ranges.shape[0])]
@@ -154,27 +154,22 @@ def get_numeric_conf_range(
     return np.array(significances), conf_ranges
 
 
-def get_categorical_conf(all_confs: np.ndarray, conf_candidates: list):
+def get_categorical_conf(raw_confs: np.ndarray):
     """
-    Gets ICP confidence estimation for categorical targets.
-    Prediction set is always unitary and includes only the predicted label.
-
-    :param all_confs: all possible label sets depending on confidence level
-    :param conf_candidates: includes preset confidence levels to check
-
-    :return: confidence for each data instance
+    ICP confidence estimation for categorical targets from raw p-values:
+        1.0 minus 2nd highest p-value yields confidence for predicted label.
+    :param all_confs: p-value for each class per data point
+    :return: confidence for each data point
     """
-    significances = []
-    for sample_idx in range(all_confs.shape[0]):
-        sample = all_confs[sample_idx, :, :]
-        for idx in range(sample.shape[1]):
-            conf = (99 - conf_candidates[idx]) / 100
-            if np.sum(sample[:, idx]) == 1:
-                significances.append(conf)
-                break
-        else:
-            significances.append(0.005)  # default: not confident label is the predicted one
-    return significances
+    if len(raw_confs.shape) == 1:
+        raw_confs = np.expand_dims(raw_confs, axis=0)
+    if raw_confs.shape[-1] == 1:
+        # single-class edge case (only happens if predictor sees just one known label at calibration)
+        confs = np.clip(raw_confs[:, 0], 0.0001, 0.9999)
+    else:
+        second_p = np.sort(raw_confs, axis=1)[:, -2]
+        confs = np.clip(np.subtract(1, second_p), 0.0001, 0.9999)
+    return confs
 
 
 def get_anomalies(insights: pd.DataFrame, observed_series: Union[pd.Series, list], cooldown: int = 1):

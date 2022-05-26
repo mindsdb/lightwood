@@ -15,20 +15,20 @@ def generate_target_group_normalizers(data):
     group_combinations = []
 
     # categorical normalizers
-    if data['original_type'] in [dtype.categorical, dtype.binary]:
+    if data['original_type'] in (dtype.categorical, dtype.binary, dtype.cat_tsarray):
         normalizers['__default'] = CatNormalizer()
         normalizers['__default'].prepare(data['data'])
         group_combinations.append('__default')
 
     # numerical normalizers, here we spawn one per each group combination
     else:
-        if data['original_type'] == dtype.tsarray:
+        if data['original_type'] == dtype.num_tsarray:
             data['data'] = data['data'].reshape(-1, 1).astype(float)
 
         all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
         for combination in all_group_combinations:
             if combination != ():
-                combination = frozenset(combination)  # freeze so that we can hash with it
+                combination = tuple(combination)
                 _, subset = get_group_matches(data, combination)
                 if subset.size > 0:
                     normalizers[combination] = MinMaxNormalizer(combination=combination)

@@ -18,6 +18,7 @@ def model_analyzer(
     tss: TimeseriesSettings,
     dtype_dict: Dict[str, str],
     accuracy_functions,
+    ts_analysis: Dict,
     analysis_blocks: Optional[List[BaseAnalysisBlock]] = []
 ) -> Tuple[ModelAnalysis, Dict[str, object]]:
     """
@@ -44,9 +45,9 @@ def model_analyzer(
     input_cols = list([col for col in data.columns if col != target])
 
     # predictive task
-    is_numerical = data_type in (dtype.integer, dtype.float, dtype.array, dtype.tsarray, dtype.quantity)
-    is_classification = data_type in (dtype.categorical, dtype.binary)
-    is_multi_ts = tss.is_timeseries and tss.nr_predictions > 1
+    is_numerical = data_type in (dtype.integer, dtype.float, dtype.num_tsarray, dtype.quantity)
+    is_classification = data_type in (dtype.categorical, dtype.binary, dtype.cat_tsarray)
+    is_multi_ts = tss.is_timeseries and tss.horizon > 1
     has_pretrained_text_enc = any([isinstance(enc, PretrainedLangEncoder)
                                    for enc in encoded_train_data.encoders.values()])
 
@@ -72,6 +73,7 @@ def model_analyzer(
         'is_multi_ts': is_multi_ts,
         'stats_info': stats_info,
         'tss': tss,
+        'ts_analysis': ts_analysis,
         'accuracy_functions': accuracy_functions,
         'has_pretrained_text_enc': has_pretrained_text_enc
     }
@@ -89,10 +91,11 @@ def model_analyzer(
         accuracy_samples=runtime_analyzer.get('acc_samples', {}),
         train_sample_size=len(encoded_train_data),
         test_sample_size=len(encoded_val_data),
-        confusion_matrix=runtime_analyzer['cm'],
+        confusion_matrix=runtime_analyzer.get('cm', []),
         column_importances=runtime_analyzer.get('column_importances', {}),
         histograms=stats_info.histograms,
-        dtypes=dtype_dict
+        dtypes=dtype_dict,
+        submodel_data=predictor.submodel_data
     )
 
     return model_analysis, runtime_analyzer

@@ -90,12 +90,14 @@ class Neural(BaseMixer):
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
             criterion = TransformCrossEntropyLoss(weight=self.target_encoder.index_weights.to(self.model.device))
-        elif self.dtype_dict[self.target] in (dtype.tags):
+        elif self.dtype_dict[self.target] in (dtype.tags, dtype.cat_tsarray):
             criterion = nn.BCEWithLogitsLoss()
-        elif (self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.tsarray, dtype.quantity)
+        elif self.dtype_dict[self.target] in (dtype.cat_array, ):
+            criterion = nn.L1Loss()
+        elif (self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.num_tsarray, dtype.quantity)
                 and self.timeseries_settings.is_timeseries):
             criterion = nn.L1Loss()
-        elif self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.quantity):
+        elif self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.quantity, dtype.num_array):
             criterion = MSELoss()
         else:
             criterion = MSELoss()
@@ -352,7 +354,8 @@ class Neural(BaseMixer):
             ydf = pd.DataFrame({'prediction': decoded_predictions})
 
             if args.predict_proba and self.supports_proba:
-                raw_predictions = np.array(all_probs).squeeze()
+                raw_predictions = np.array(all_probs).squeeze(axis=1)
+
                 for idx, label in enumerate(rev_map.values()):
                     ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]
 

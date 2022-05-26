@@ -11,7 +11,7 @@
 import sys
 import os
 import datetime
-import sphinx_rtd_theme
+
 
 # ----------------- #
 # Project information

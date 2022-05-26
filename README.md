@@ -122,7 +122,7 @@ However, we recommend creating a python virtual environment.
 #### Setting up a dev environment
 
 - Clone lightwood
-- `cd lightwood && pip install -r requirements.txt`
+- `cd lightwood && pip install -r requirements.txt && pip install -r requirements_image.txt`
 - Add it to your python path (e.g. by adding `export PYTHONPATH='/where/you/cloned/lightwood':$PYTHONPATH` as a newline at the end of your `~/.bashrc` file)
 - Check that the `unittest`s are passing by going into the directory where you cloned lightwood and running: `python -m unittest discover tests` 
 
@@ -189,42 +189,6 @@ If you have additional questions or you want to chat with MindsDB core team, you
 To get updates on Lightwood and MindsDB’s latest announcements, releases, and events, sign up for our [Monthly Community Newsletter](https://mindsdb.com/newsletter/?utm_medium=community&utm_source=github&utm_campaign=lightwood%20repo).
 
 Join our mission of democratizing machine learning and allowing developers to become data scientists!
-
-## Hacktoberfest 2021
-
-We are very excited that Lightwood is participating in this year's Hacktoberfest 2021 event. This month-long event through October gives you the chance to contribute to the Open Source codebase of Lightwood and MindsDB!
-
-The Lightwood core team has prepared several issues of different types that are ideal for first-time contributors and will be posted throughout the month. It's entirely up to you what you choose to work on and if you have your own great idea, feel free to suggest it by reaching out to us via our Slack community or by posting an issue with the `discussion` tag.
-
-**Our Major Incentive and SWAG!** 
-
-Make contributions and enter into the draw for a [Deep Learning Laptop](https://lambdalabs.com/deep-learning/laptops/tensorbook) **powered by the NVIDIA RTX 3080 Max-Q GPU**. Pre-installed with TensorFlow, PyTorch, CUDA, cuDNN and more.
-
-<p align="center">
-<img src="/assets/laptop.jpeg" alt="Tensorbook" width="400"/>
-</p>
-
-Also, we’d love to send you a special MindsDB SWAG :sunglasses: gift pack:
-
-<p align="center">
-<img src="/assets/swag.png" alt="MindsDB Swag" width="400"/>
-</p>
-
-
-Please make sure to read the [contributions guidelines](#Contribute-to-Lightwood) first.
-
-#### How to participate
-
-1. Contribute by making pull requests to any of our open issues labeled with the `hacktoberfest` tag during October. All hacktoberfest issues will specify how many points a successfully merged PR is worth.
-2. Have a total score of at least 5 points in order to enter the big prize draw.
-3. Complete the form with links to all your completed PR’s so we know where to ship the gift pack to!
-
-Entries close at midnight (PST) Sunday, 31 October 2021 with the prize draw winner announced at an online event on Monday, 1st of November.
-
-Please check https://mindsdb.com/hacktoberfest for more details.
-
->**Remember:**  if you wish to contribute with something that is *not currently flagged* as a hacktoberfest issue, make an issue (or make a comment if an issue already exists), and let one of the core Lightwood team researchers approve it.
-
 
 ## Contributor Code of Conduct
 Please note that this project is released with a [Contributor Code of Conduct](https://github.com/mindsdb/lightwood/blob/stable/CODE_OF_CONDUCT.md). By participating in this project, you agree to abide by its terms.

@@ -8,6 +8,7 @@ from sklearn.metrics import confusion_matrix
 from lightwood.api.dtype import dtype
 from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.helpers.general import evaluate_accuracy
+from lightwood.helpers.log import log
 
 
 class AccStats(BaseAnalysisBlock):
@@ -19,11 +20,16 @@ class AccStats(BaseAnalysisBlock):
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
 
-        # @TODO: maybe pass ts_analysis to trigger group-wise MASE instead of R2 mean, though it wouldn't be 0-1 bounded
-        info['score_dict'] = evaluate_accuracy(ns.data, ns.normal_predictions['prediction'],
-                                               ns.target, ns.accuracy_functions, ts_analysis={'tss': ns.tss})
-        info['normal_accuracy'] = np.mean(list(info['score_dict'].values()))
+        if ns.accuracy_functions == ['evaluate_array_accuracy'] and ns.ts_analysis.get('ts_naive_mae', {}):
+            accuracy_functions = ['bounded_evaluate_array_accuracy']
+            log.info("AccStats will bound the array accuracy for reporting purposes. Check `bounded_evaluate_array_accuracy` for a description of the bounding procedure.")  # noqa
+        else:
+            accuracy_functions = ns.accuracy_functions
 
+        info['score_dict'] = evaluate_accuracy(ns.data, ns.normal_predictions['prediction'],
+                                               ns.target, accuracy_functions, ts_analysis=ns.ts_analysis)
+
+        info['normal_accuracy'] = np.mean(list(info['score_dict'].values()))
         self.fit(ns, info['result_df'])
         info['val_overall_acc'], info['acc_histogram'], info['cm'], info['acc_samples'] = self.get_accuracy_stats()
         return info
@@ -31,24 +37,12 @@ class AccStats(BaseAnalysisBlock):
     def fit(self, ns: SimpleNamespace, conf=Optional[np.ndarray]):
         self.col_stats = ns.dtype_dict
         self.target = ns.target
-        self.input_cols = list(ns.dtype_dict.keys())
+        self.input_cols = ns.input_cols
         self.buckets = ns.stats_info.buckets if ns.stats_info.buckets else {}
 
         self.normal_predictions_bucketized = []
         self.real_values_bucketized = []
         self.numerical_samples_arr = []
-
-        column_indexes = {}
-        for i, col in enumerate(self.input_cols):
-            column_indexes[col] = i
-
-        real_present_inputs_arr = []
-        for _, row in ns.data.iterrows():
-            present_inputs = [1] * len(self.input_cols)
-            for i, col in enumerate(self.input_cols):
-                if str(row[col]) in ('None', 'nan', '', 'Nan', 'NAN', 'NaN'):
-                    present_inputs[i] = 0
-            real_present_inputs_arr.append(present_inputs)
 
         for n in range(len(ns.normal_predictions)):
             row = ns.data.iloc[n]

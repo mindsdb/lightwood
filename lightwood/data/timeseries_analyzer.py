@@ -41,7 +41,7 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     # @TODO: maybe normalizers should fit using only the training subsets??
     new_data = generate_target_group_normalizers(info)
 
-    if dtype_dict[target] in (dtype.integer, dtype.float, dtype.tsarray):
+    if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
         naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(info, new_data['group_combinations'])
     else:
         naive_forecast_residuals, scale_factor = {}, {}
@@ -77,13 +77,23 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
     :return:
     Dictionary with group combination tuples as keys. Values are dictionaries with the inferred delta for each series, for each `order_col`.
     """  # noqa
+    def _most_popular(sorted_keys: pd.Index):
+        idx = 0
+        while sorted_keys[idx] == 0:
+            if idx == len(sorted_keys) - 1:
+                break
+            else:
+                idx += 1
+        return sorted_keys[idx]
+
     deltas = {"__default": {}}
 
     # get default delta for all data
     for col in order_cols:
         series = pd.Series([x[-1] for x in df[col]])
+        series = series.drop_duplicates()  # by this point df is ordered so duplicate timestamps are either because of non-handled groups or repeated data that, for mode delta estimation, should be ignored  # noqa
         rolling_diff = series.rolling(window=2).apply(lambda x: x.iloc[1] - x.iloc[0])
-        delta = rolling_diff.value_counts(ascending=False).keys()[0]  # pick most popular
+        delta = _most_popular(rolling_diff.value_counts(ascending=False).keys())  # pick most popular
         deltas["__default"][col] = delta
 
     # get group-wise deltas (if applicable)
@@ -91,7 +101,6 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
         original_data = ts_info['data']
         for group in group_combinations:
             if group != "__default":
-                deltas[group] = {}
                 for col in order_cols:
                     ts_info['data'] = pd.Series([x[-1] for x in df[col]])
                     _, subset = get_group_matches(ts_info, group)
@@ -100,8 +109,11 @@ def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_c
                             subset.squeeze()).rolling(
                             window=2).apply(
                             lambda x: x.iloc[1] - x.iloc[0])
-                        delta = rolling_diff.value_counts(ascending=False).keys()[0]
-                        deltas[group][col] = delta
+                        delta = _most_popular(rolling_diff.value_counts(ascending=False).keys())
+                        if group in deltas:
+                            deltas[group][col] = delta
+                        else:
+                            deltas[group] = {col: delta}
         ts_info['data'] = original_data
 
     return deltas
@@ -120,6 +132,7 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
 
     :return: (list of naive residuals, average residual value)
     """  # noqa
+    # @TODO: support categorical series as well
     residuals = target_data.rolling(window=m + 1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:].values.flatten()
     scale_factor = np.average(residuals)
     return residuals.tolist(), scale_factor

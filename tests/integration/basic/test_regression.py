@@ -7,7 +7,7 @@ from lightwood.api.types import ProblemDefinition
 
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
-        from lightwood.api.high_level import predictor_from_problem
+        from lightwood.api.high_level import json_ai_from_problem, predictor_from_json_ai
 
         df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
         # Mess with the names to also test if lightwood can deal /w weird names
@@ -19,8 +19,24 @@ class TestBasic(unittest.TestCase):
         # Make this a quantity
         df[target] = [f'{x}$' for x in df[target]]
         pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 80})
+        jai = json_ai_from_problem(df, pdef)
+        jai.analysis_blocks = [{
+            "module": "ICP",
+            "args": {
+                "fixed_significance": None,
+                "confidence_normalizer": True,  # explicitly test the ICP normalizer in an integration test
+                "positive_domain": "$statistical_analysis.positive_domain",
+            }},
+            {
+                "module": "AccStats",
+                "args": {"deps": ["ICP"]}
+        },
+            {
+                "module": "ConfStats",
+                "args": {"deps": ["ICP"]}
+        }]
 
-        predictor = predictor_from_problem(df, pdef)
+        predictor = predictor_from_json_ai(jai)
         predictor.learn(df)
 
         assert predictor.model_analysis.dtypes[target] == dtype.quantity
@@ -37,3 +53,8 @@ class TestBasic(unittest.TestCase):
         fixed_predictions = predictor.predict(df, {'fixed_confidence': fixed_conf})
 
         assert all([v == fixed_conf for v in fixed_predictions['confidence'].values])
+
+        # test empty dataframe handling
+        with self.assertRaises(Exception) as ctx:
+            predictor.predict(pd.DataFrame())
+        self.assertTrue('Empty input' in str(ctx.exception))
