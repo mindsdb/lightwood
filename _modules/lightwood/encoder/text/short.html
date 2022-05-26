@@ -260,7 +260,7 @@
 <div class="viewcode-block" id="ShortTextEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.ShortTextEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vectors</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s1">&#39;concat&#39;</span><span class="p">:</span>
 
-            <span class="n">vec_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cae</span><span class="o">.</span><span class="n">max_encoded_length</span>
+            <span class="n">vec_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cae</span><span class="o">.</span><span class="n">output_size</span>
 
             <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">vectors</span><span class="p">:</span>

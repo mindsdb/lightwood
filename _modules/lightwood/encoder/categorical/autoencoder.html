@@ -183,88 +183,99 @@
 <span class="kn">from</span> <span class="nn">lightwood.mixer.helpers.default_net</span> <span class="kn">import</span> <span class="n">DefaultNet</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+
 
 <div class="viewcode-block" id="CategoricalAutoEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder">[docs]</a><span class="k">class</span> <span class="nc">CategoricalAutoEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trains an autoencoder (AE) to represent categorical information with over 100 categories. This is used to ensure that feature vectors for categorical data with many categories are not excessively large.</span>
+
+<span class="sd">    The AE defaults to a vector sized 100 but can be adjusted to user preference. It is highly advised NOT to use this encoder to feature engineer your target, as reconstruction accuracy will determine your AE&#39;s ability to decode properly.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
     <span class="n">is_trainable_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">max_encoded_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">,</span>
+        <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">max_encoded_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">desired_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param stop_after: Stops training with provided time limit (sec)</span>
+<span class="sd">        :param is_target: Encoder represents target class (NOT recommended)</span>
+<span class="sd">        :param max_encoded_length: Maximum length of vector represented</span>
+<span class="sd">        :param desired_error: Threshold for reconstruction accuracy error</span>
+<span class="sd">        :param batch_size: Minimum batch size while training</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Categorical Autoencoder&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="n">max_encoded_length</span>
+
+        <span class="c1"># Model details</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">is_target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">desired_error</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+        <span class="c1"># Training details</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_error</span> <span class="o">=</span> <span class="n">desired_error</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span> <span class="o">=</span> <span class="n">stop_after</span>
-        <span class="c1"># @TODO stop using instead of ONEHOT !!!@!</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_encoded_length</span> <span class="o">=</span> <span class="n">max_encoded_length</span>
 
-    <span class="k">def</span> <span class="nf">_encoder_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="n">oh_encoded_categories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="n">oh_encoded_categories</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-        <span class="n">target_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">target</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">targets_c</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">(</span><span class="n">target_indexes</span><span class="p">)</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">targets_c</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">labels</span>
+<div class="viewcode-block" id="CategoricalAutoEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates inputs and prepares a categorical autoencoder (CatAE) for input data. Currently, does not support a dev set; inputs for train and dev are concatenated together to train an autoencoder.</span>
 
-<div class="viewcode-block" id="CategoricalAutoEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_priming_data</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">):</span>
-        <span class="n">priming_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">train_priming_data</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">])</span>
-        <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">priming_data</span><span class="p">))</span>
-
+<span class="sd">        :param train_priming_data: Input training data</span>
+<span class="sd">        :param dev_priming_data: Input dev data (Not supported currently)</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You can only call &quot;prepare&quot; once for a given encoder.&#39;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">priming_data</span><span class="p">)</span>
-
-        <span class="n">input_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">output_size</span>
-
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;You are trying to use an autoencoder for the target value! </span><span class="se">\</span>
-<span class="s1">            This is very likely a bad idea&#39;</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Preparing a categorical autoencoder, this might take a while&#39;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;You are trying to use an autoencoder for the target value! </span><span class="se">\</span>
+<span class="s1">            This is very likely a bad idea&#39;</span>
+            <span class="p">)</span>
 
-        <span class="n">embeddings_layer_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_encoded_length</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;Preparing a categorical autoencoder, this may take up to &#39;</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot; seconds.&quot;</span>
+        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">DefaultNet</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">input_len</span><span class="p">,</span> <span class="n">embeddings_layer_len</span><span class="p">,</span> <span class="n">input_len</span><span class="p">])</span>
+        <span class="n">train_loader</span><span class="p">,</span> <span class="n">dev_loader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_AE_input</span><span class="p">(</span>
+            <span class="n">train_priming_data</span><span class="p">,</span> <span class="n">dev_priming_data</span>
+        <span class="p">)</span>
 
-        <span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
-        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Ranger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-
-        <span class="n">gym</span> <span class="o">=</span> <span class="n">Gym</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loss_criterion</span><span class="o">=</span><span class="n">criterion</span><span class="p">,</span>
-                  <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">input_encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">,</span>
-                  <span class="n">output_encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoder_targets</span><span class="p">)</span>
-
-        <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">priming_data</span><span class="p">)</span> <span class="o">/</span> <span class="mi">50</span><span class="p">))</span>
-
-        <span class="n">priming_data_str</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">priming_data</span><span class="p">]</span>
-        <span class="n">train_data_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
-            <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">priming_data_str</span><span class="p">,</span> <span class="n">priming_data_str</span><span class="p">)),</span>
-            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="n">test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="n">best_model</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_data_loader</span><span class="p">,</span>
-                                   <span class="n">test_data_loader</span><span class="p">,</span>
-                                   <span class="n">desired_error</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_error</span><span class="p">,</span>
-                                   <span class="n">max_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span><span class="p">,</span>
-                                   <span class="n">eval_every_x_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                   <span class="n">max_unimproving_models</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-
+        <span class="n">best_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_catae</span><span class="p">(</span><span class="n">train_loader</span><span class="p">,</span> <span class="n">dev_loader</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">best_model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
-        <span class="n">modules</span> <span class="o">=</span> <span class="p">[</span><span class="n">module</span> <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">modules</span><span class="p">()</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span>
-            <span class="n">module</span><span class="p">)</span> <span class="o">!=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">)</span> <span class="o">!=</span> <span class="n">DefaultNet</span><span class="p">]</span>
+        <span class="n">modules</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">module</span>
+            <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">modules</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">)</span> <span class="o">!=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">)</span> <span class="o">!=</span> <span class="n">DefaultNet</span>
+        <span class="p">]</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">modules</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">modules</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Categorical autoencoder ready&#39;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">output_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_encoded_length</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="CategoricalAutoEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">):</span>
+<div class="viewcode-block" id="CategoricalAutoEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encodes categorical information in column as the compressed vector from the CatAE.</span>
+
+<span class="sd">        :param column_data: An iterable of category samples from a column</span>
+
+<span class="sd">        :returns: An embedding for each sample in original input</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="n">oh_encoded_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">column_data</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
@@ -272,12 +283,101 @@
             <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">oh_encoded_tensor</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CategoricalAutoEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">):</span>
+<div class="viewcode-block" id="CategoricalAutoEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decodes from the embedding space, the original categories.</span>
+
+<span class="sd">        ..warning If your reconstruction accuracy is not 100%, the CatAE may not return the correct category.</span>
+
+<span class="sd">        :param encoded_data: A torch tensor of embeddings for category predictions</span>
+
+<span class="sd">        :returns: A list of &#39;translated&#39; categories for each embedding</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
             <span class="n">encoded_data</span> <span class="o">=</span> <span class="n">encoded_data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
             <span class="n">oh_encoded_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoded_data</span><span class="p">)</span>
             <span class="n">oh_encoded_tensor</span> <span class="o">=</span> <span class="n">oh_encoded_tensor</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">oh_encoded_tensor</span><span class="p">)</span></div></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">oh_encoded_tensor</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_prepare_AE_input</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">train_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">DataLoader</span><span class="p">,</span> <span class="n">DataLoader</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates the data loaders for the CatAE model inputs. Expected inputs are generally of form `pd.Series`</span>
+
+<span class="sd">        Currently does not use &#39;dev&#39;; concatenates both inputs together.</span>
+
+<span class="sd">        Input to the `DataLoader` must be an Iterable[str] (ideally List[str])</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dev_priming_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">priming_data</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">train_priming_data</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">priming_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">train_priming_data</span><span class="p">]</span>
+
+        <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">priming_data</span><span class="p">))</span>
+
+        <span class="c1"># Prepare a one-hot encoder for CatAE inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">priming_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">priming_data</span><span class="p">)</span> <span class="o">/</span> <span class="mi">50</span><span class="p">))</span>
+
+        <span class="n">train_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+            <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">priming_data</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">)),</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># TODO; make `Gym` compatible with a dev set</span>
+        <span class="n">dev_loader</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">dev_loader</span>
+
+    <span class="k">def</span> <span class="nf">_prepare_catae</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">dev_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trains the CatAE using Lightwood&#39;s `Gym` class.</span>
+
+<span class="sd">        :param train_loader: Training dataset Loader</span>
+<span class="sd">        :param dev_loader: Validation set DataLoader</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+        <span class="n">input_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">output_size</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">DefaultNet</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">input_len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span> <span class="n">input_len</span><span class="p">])</span>
+
+        <span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Ranger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+
+        <span class="n">gym</span> <span class="o">=</span> <span class="n">Gym</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="p">,</span>
+            <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+            <span class="n">scheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">loss_criterion</span><span class="o">=</span><span class="n">criterion</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">input_encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">,</span>
+            <span class="n">output_encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoder_targets</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">best_model</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">train_loader</span><span class="p">,</span>
+            <span class="n">dev_loader</span><span class="p">,</span>
+            <span class="n">desired_error</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_error</span><span class="p">,</span>
+            <span class="n">max_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span><span class="p">,</span>
+            <span class="n">eval_every_x_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">max_unimproving_models</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">best_model</span>
+
+    <span class="k">def</span> <span class="nf">_encoder_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">oh_encoded_categories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">oh_encoded_categories</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="n">target_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">target</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">targets_c</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">(</span><span class="n">target_indexes</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">targets_c</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">labels</span></div>
 </pre></div>
 
            </div>

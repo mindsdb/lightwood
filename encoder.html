@@ -580,17 +580,34 @@ The input to <cite>decode</cite> makes no presumption on whether the data is alr
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.CategoricalAutoEncoder">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">CategoricalAutoEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_encoded_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="encoder.CategoricalAutoEncoder.decode">
-<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder.decode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given an encoded representation, returns the decoded value. Decoded values may not exist for all encoders (ex: rich text, audio, etc.)</p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">CategoricalAutoEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_encoded_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desired_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains an autoencoder (AE) to represent categorical information with over 100 categories. This is used to ensure that feature vectors for categorical data with many categories are not excessively large.</p>
+<p>The AE defaults to a vector sized 100 but can be adjusted to user preference. It is highly advised NOT to use this encoder to feature engineer your target, as reconstruction accuracy will determine your AE’s ability to decode properly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>encoded_data</strong> – The input representation in encoded format</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Stops training with provided time limit (sec)</p></li>
+<li><p><strong>is_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Encoder represents target class (NOT recommended)</p></li>
+<li><p><strong>max_encoded_length</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Maximum length of vector represented</p></li>
+<li><p><strong>desired_error</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Threshold for reconstruction accuracy error</p></li>
+<li><p><strong>batch_size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Minimum batch size while training</p></li>
+</ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The decoded representation of data, per column, in the original data-type presented.</p>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.CategoricalAutoEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes from the embedding space, the original categories.</p>
+<p>..warning If your reconstruction accuracy is not 100%, the CatAE may not return the correct category.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>encoded_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – A torch tensor of embeddings for category predictions</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of ‘translated’ categories for each embedding</p>
 </dd>
 </dl>
 </dd></dl>
@@ -598,14 +615,16 @@ The input to <cite>decode</cite> makes no presumption on whether the data is alr
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.CategoricalAutoEncoder.encode">
 <span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder.encode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given the approach defined in <cite>prepare()</cite>, encodes column data into a numerical representation to form part of the feature vector.</p>
-<p>After all columns are featurized, each encoded vector is concatenated to form a feature vector per row in the dataset.</p>
+<dd><p>Encodes categorical information in column as the compressed vector from the CatAE.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>column_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+<dd class="field-odd"><p><strong>column_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – An iterable of category samples from a column</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The encoded representation of data, per column</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An embedding for each sample in original input</p>
 </dd>
 </dl>
 </dd></dl>
@@ -613,10 +632,13 @@ The input to <cite>decode</cite> makes no presumption on whether the data is alr
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.CategoricalAutoEncoder.prepare">
 <span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder.prepare" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given ‘priming_data’ (i.e. training data), prepares encoders either through a rule-based (ex: one-hot encoding) or learned (ex: DistilBERT for text) model. This works explicitly on only training data.</p>
+<dd><p>Creates inputs and prepares a categorical autoencoder (CatAE) for input data. Currently, does not support a dev set; inputs for train and dev are concatenated together to train an autoencoder.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>priming_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code>) – Input training data</p></li>
+<li><p><strong>dev_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code>) – Input dev data (Not supported currently)</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
