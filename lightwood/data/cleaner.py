@@ -264,7 +264,9 @@ def _clean_quantity(element: object) -> Optional[float]:
     """
     Given a quantity, clean and convert it into float numeric format. If element is NaN, or inf, then returns None.
     """
-    element = float(re.sub("[^0-9.,]", "", str(element)).replace(",", "."))
+    no_symbols = re.sub("[^0-9.,]", "", str(element)).replace(",", ".")
+    no_symbols = '0' if no_symbols == '' else no_symbols
+    element = float(no_symbols)
     return _clean_float(element)
 
 
