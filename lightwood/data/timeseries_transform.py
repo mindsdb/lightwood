@@ -47,22 +47,27 @@ def transform_timeseries(
         if hcol not in data.columns or data[hcol].isna().any():
             raise Exception(f"Cannot transform. Missing values in historical column {hcol}.")
 
-    if '__mdb_make_predictions' in original_df.columns:
-        index = original_df[original_df['__mdb_make_predictions'].map(
-            {'True': True, 'False': False, True: True, False: False}).isin([True])]
-        infer_mode = index.shape[0] == 0  # condition to trigger: __mdb_make_predictions is set to False everywhere
-        # @TODO: dont drop and use instead of original_index?
+    if '__mdb_forecast_offset' in original_df.columns:
+        # trigger if __mdb_forecast_offset constant and different from None
+        index = original_df[~original_df['__mdb_forecast_offset'].isin([None])]
+        offset_available = index.shape[0] == len(original_df) and original_df['__mdb_forecast_offset'].nunique() == 1
+        offset = int(original_df['__mdb_forecast_offset'].unique()[0])
+        infer_mode = offset_available and int(offset) == 1
         original_df = original_df.reset_index(drop=True) if infer_mode else original_df
     else:
+        offset_available = False
+        offset = 0
         infer_mode = False
 
     original_index_list = []
     idx = 0
     for row in original_df.itertuples():
         if _make_pred(row) or infer_mode:
+            original_df.at[row.Index, '__make_predictions'] = True
             original_index_list.append(idx)
             idx += 1
         else:
+            original_df.at[row.Index, '__make_predictions'] = False
             original_index_list.append(None)
 
     original_df['original_index'] = original_index_list
@@ -112,10 +117,16 @@ def transform_timeseries(
     n_groups = len(df_arr)
     last_index = original_df['original_index'].max()
     for i, subdf in enumerate(df_arr):
-        if '__mdb_make_predictions' in subdf.columns and mode == 'predict':
+        if '__mdb_forecast_offset' in subdf.columns and mode == 'predict':
             if infer_mode:
                 df_arr[i] = _ts_infer_next_row(subdf, ob_arr, last_index)
                 last_index += 1
+            elif offset_available:
+                # truncate to forecast up until some len(df) - offset
+                new_index = df_arr[i].index[:len(df_arr[i].index) - offset]
+                make_preds = [False for _ in range(max(0, len(new_index) - 1))] + [True]
+                df_arr[i] = df_arr[i].loc[new_index]
+                df_arr[i]['__make_predictions'] = make_preds
 
     if len(original_df) > 500:
         # @TODO: restore possibility to override this with args
@@ -154,9 +165,10 @@ def transform_timeseries(
 
     combined_df = pd.concat(df_arr)
 
-    if '__mdb_make_predictions' in combined_df.columns:
-        combined_df = pd.DataFrame(combined_df[combined_df['__mdb_make_predictions'].astype(bool).isin([True])])
-        del combined_df['__mdb_make_predictions']
+    if '__mdb_forecast_offset' in combined_df.columns:
+        combined_df = pd.DataFrame(combined_df[combined_df['__make_predictions']])  # filters by True only
+        del combined_df['__mdb_forecast_offset']
+        del combined_df['__make_predictions']
 
     if not infer_mode and any([i < tss.window for i in group_lengths]):
         if tss.allow_incomplete_history:
@@ -218,7 +230,6 @@ def _ts_infer_next_row(df: pd.DataFrame, ob: str, last_index: int) -> pd.DataFra
         delta = 1
     last_row.original_index = None
     last_row.index = [last_index + 1]
-    last_row['__mdb_make_predictions'] = True
     last_row['__mdb_ts_inferred'] = True
     last_row[ob] += delta
     return df.append(last_row)
@@ -228,7 +239,7 @@ def _make_pred(row) -> bool:
     """
     Indicates whether a prediction should be made for `row` or not.
     """
-    return not hasattr(row, '__mdb_make_predictions') or row.make_predictions
+    return not hasattr(row, '__mdb_forecast_offset') or row.make_predictions
 
 
 def _ts_to_obj(df: pd.DataFrame, historical_columns: list) -> pd.DataFrame:
