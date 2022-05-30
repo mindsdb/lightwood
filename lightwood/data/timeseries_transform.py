@@ -58,7 +58,7 @@ def transform_timeseries(
         index = original_df[~original_df['__mdb_forecast_offset'].isin([None])]
         offset_available = index.shape[0] == len(original_df) and original_df['__mdb_forecast_offset'].nunique() == 1
         offset = int(original_df['__mdb_forecast_offset'].unique()[0])
-        infer_mode = offset_available and int(offset) == 1
+        infer_mode = offset_available and offset == 1
         original_df = original_df.reset_index(drop=True) if infer_mode else original_df
     else:
         offset_available = False
@@ -126,13 +126,16 @@ def transform_timeseries(
         if '__mdb_forecast_offset' in subdf.columns and mode == 'predict':
             if infer_mode:
                 df_arr[i] = _ts_infer_next_row(subdf, ob_arr, last_index)
+                make_preds = [False for _ in range(max(0, len(df_arr[i]) - 1))] + [True]
                 last_index += 1
             elif offset_available:
                 # truncate to forecast up until some len(df) - offset
                 new_index = df_arr[i].index[:len(df_arr[i].index) - offset]
                 make_preds = [False for _ in range(max(0, len(new_index) - 1))] + [True]
                 df_arr[i] = df_arr[i].loc[new_index]
-                df_arr[i]['__make_predictions'] = make_preds
+            else:
+                make_preds = [True for _ in range(len(df_arr[i]))]
+            df_arr[i]['__make_predictions'] = make_preds
 
     if len(original_df) > 500:
         # @TODO: restore possibility to override this with args

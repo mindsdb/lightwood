@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 import unittest
 import numpy as np
 import pandas as pd
@@ -100,19 +101,18 @@ class TestTimeseries(unittest.TestCase):
         preds = pred.predict(test[:window - 1])
         self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        # test inferring mode
-        test['__mdb_make_predictions'] = False
+        # test inferring mode, check timestamps are further into the future than test dates
+        test['__mdb_forecast_offset'] = 1
         preds = pred.predict(test)
         self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        # Additionally, check timestamps are further into the future than test dates
         latest_timestamp = pd.to_datetime(test[order_by]).max().timestamp()
         for idx, row in preds.iterrows():
             for timestamp in row[f'order_{order_by}']:
                 assert timestamp > latest_timestamp
 
         # Check custom ICP params
-        test.pop('__mdb_make_predictions')
+        test.pop('__mdb_forecast_offset')
         preds = pred.predict(test, {'fixed_confidence': 0.01, 'anomaly_cooldown': 100})
         assert all([all([v == 0.01 for v in f]) for f in preds['confidence'].values])
         assert pred.pred_args.anomaly_cooldown == 100
@@ -148,17 +148,25 @@ class TestTimeseries(unittest.TestCase):
         # test incomplete history, should not be possible
         self.assertRaises(Exception, pred.predict, test_df[:window - 1])
 
-        # test inferring mode
-        test_df['__mdb_make_predictions'] = False
+        # test inferring mode, check timestamps are further into the future than test dates
+        test_df['__mdb_forecast_offset'] = 1
         test_df = test_df.sample(frac=1)  # shuffle to test internal ordering logic
         preds = pred.predict(test_df)
         self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        # Additionally, check timestamps are further into the future than test dates
         latest_timestamp = pd.to_datetime(test_df[order_by]).max().timestamp()
         for idx, row in preds.iterrows():
             for timestamp in row[f'order_{order_by}']:
                 assert timestamp > latest_timestamp
+
+        # test null offset mode
+        test_df['__mdb_forecast_offset'] = 0
+        preds = pred.predict(test_df)
+        self.check_ts_prediction_df(preds, horizon, [order_by])
+        assert preds.shape[0] == 1
+        last_dt = datetime.utcfromtimestamp(preds[f'order_{order_by}'].values[0][0])
+        formatted = str(last_dt.year) + '-' + str(last_dt.month)
+        assert formatted == test_df.sort_values(by=order_by).iloc[-1][order_by]
 
     def test_2_time_series_classification_short_horizon_binary(self):
         df = pd.read_csv('tests/data/arrivals.csv')[:127]
@@ -337,5 +345,5 @@ class TestTimeseries(unittest.TestCase):
 
         train_and_check_time_aim(predictor, train)  # Test with a longer time aim
 
-        test['__mdb_make_predictions'] = False
+        test['__mdb_forecast_offset'] = 1
         predictor.predict(test)
