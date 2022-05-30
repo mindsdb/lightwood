@@ -48,6 +48,12 @@ def transform_timeseries(
             raise Exception(f"Cannot transform. Missing values in historical column {hcol}.")
 
     if '__mdb_forecast_offset' in original_df.columns:
+        """ This special column can be either None or an integer. If this column is passed, then the TS transformation will react to the values within:
+
+        * If all rows = `None`, proceed as usual. This ends up generating one HORIZON-length forecast for each row in the DF.
+        * If all rows have the same value `N <= 0`, then cutoff the dataframe latest `-N` rows after TS shaping and prime the DF (with `__make_predictions` column) so that a forecast is generated only for the last row (thus more efficient). This enables `WHERE T = LATEST - K` with `0 <= K < WINDOW` syntax upstream in MindsDB.
+        * If all rows have the same value `N = 1`, then activate streaming inference mode where a single forecast will be emitted for the timestamp inferred by the `_ts_infer_next_row` method. This enables the (already supported) `WHERE T > LATEST` syntax.
+        """  # noqa
         # trigger if __mdb_forecast_offset constant and different from None
         index = original_df[~original_df['__mdb_forecast_offset'].isin([None])]
         offset_available = index.shape[0] == len(original_df) and original_df['__mdb_forecast_offset'].nunique() == 1
