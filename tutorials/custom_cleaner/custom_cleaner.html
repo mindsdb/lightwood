@@ -481,8 +481,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2708:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <div class="section" id="1)-Load-your-data">
@@ -606,20 +606,20 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2708:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Analyzing a sample of 2478</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Doing text detection for column: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Column id has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Infering type for: excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Doing text detection for column: excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Column target has data type float</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2708:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2854:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -703,7 +703,7 @@ div.rendered_html tbody tr:hover {
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 28512.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 38.88480520248413,
+        &#34;expected_additional_time&#34;: 59.02229452133179,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -939,7 +939,7 @@ Writing MyCustomCleaner.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2708:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1011,7 +1011,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 28512.0,
                 &#34;seconds_per_encoder&#34;: 85536.0,
-                &#34;expected_additional_time&#34;: 38.88480520248413,
+                &#34;expected_additional_time&#34;: 59.02229452133179,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -1511,16 +1511,16 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2708:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2708: `analyze_data` runtime: 0.05 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Cleaning column =excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Cleaning column =target</span>
-<span class="ansi-green-fg">INFO:lightwood-2708:Converted target into strictly non-negative</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2708: `preprocess` runtime: 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2854: `analyze_data` runtime: 0.07 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2854:Converted target into strictly non-negative</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2854: `preprocess` runtime: 0.13 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

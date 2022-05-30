@@ -437,7 +437,9 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a quantity, clean and convert it into float numeric format. If element is NaN, or inf, then returns None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">element</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;[^0-9.,]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">))</span>
+    <span class="n">no_symbols</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;[^0-9.,]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">no_symbols</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span> <span class="k">if</span> <span class="n">no_symbols</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="n">no_symbols</span>
+    <span class="n">element</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">no_symbols</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_clean_float</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
 
 
