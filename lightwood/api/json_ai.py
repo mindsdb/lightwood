@@ -297,11 +297,15 @@ def generate_json_ai(
         }
     }
 
+    num_ts_dtypes = (dtype.integer, dtype.float, dtype.quantity)
     if tss.is_timeseries and tss.horizon > 1:
-        if dtype_dict[target] in (dtype.integer, dtype.float, dtype.quantity):
+        if dtype_dict[target] in num_ts_dtypes:
             dtype_dict[target] = dtype.num_tsarray
+            problem_definition.anomaly_detection = True
         else:
             dtype_dict[target] = dtype.cat_tsarray
+    elif tss.is_timeseries and dtype_dict[target] in num_ts_dtypes:
+        problem_definition.anomaly_detection = True
 
     encoders = {
         target: lookup_encoder(
