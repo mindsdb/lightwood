@@ -27,23 +27,20 @@ with open('requirements.txt') as req_file:
 
 extra_requirements = {}
 for fn in os.listdir('.'):
-    if fn != 'requirements.txt' and fn.startswith('requirements') and fn.endswith('.txt'):
-        extra_name = fn.replace('requirements', '').replace('.txt', '')
+    if fn.startswith('requirements_') and fn.endswith('.txt'):
+        extra_name = fn.replace('requirements_', '').replace('.txt', '')
         with open(fn) as fp:
             extra = [req.strip() for req in fp.read().splitlines()]
         extra_requirements[extra_name] = extra
 full_requirements = []
 for v in extra_requirements.values():
     full_requirements += v
-extra_requirements['full'] = list(set(full_requirements))
+extra_requirements['all_extras'] = list(set(full_requirements))
 
 # Windows specific requirements
 if sys_platform in ['win32', 'cygwin', 'windows']:
     # These have to be installed manually or via the installers in windows
     requirements = remove_requirements(requirements, 'torch')
-    requirements = remove_requirements(requirements, 'torchvision')
-    requirements = remove_requirements(requirements, 'pystan')  # needs to be compiled from source in windows
-    requirements = remove_requirements(requirements, 'fbprophet')
 
 setuptools.setup(
     name=about['__title__'],
@@ -65,5 +62,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.6"
+    python_requires=">=3.7"
 )
