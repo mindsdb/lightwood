@@ -308,14 +308,6 @@ class TestTimeseries(unittest.TestCase):
         times1 = ps1['order_Time'].tolist()[0]
         values1 = ps1['prediction'].tolist()[0]
 
-        print(times_1)
-        print(times0)
-        print(times1)
-        print()
-        print(values_1)
-        print(values0)
-        print(values1)
-
         # due to the offset, these intermediate indexes should be equal
         self.assertTrue(times_1[1:] == times0[0:-1])
         self.assertTrue(times0[1:] == times1[0:-1])

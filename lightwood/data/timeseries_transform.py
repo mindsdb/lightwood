@@ -176,7 +176,6 @@ def transform_timeseries(
 
     if '__mdb_forecast_offset' in combined_df.columns:
         combined_df = pd.DataFrame(combined_df[combined_df['__make_predictions']])  # filters by True only
-        # del combined_df['__mdb_forecast_offset']
         del combined_df['__make_predictions']
 
     if not infer_mode and any([i < tss.window for i in group_lengths]):

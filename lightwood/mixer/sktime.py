@@ -240,7 +240,6 @@ class SkTime(BaseMixer):
         if '__mdb_forecast_offset' in ds.data_frame.columns:
             if ds.data_frame['__mdb_forecast_offset'].nunique() == 1:
                 forecast_offset = int(ds.data_frame['__mdb_forecast_offset'].unique()[0])
-                print(f'The forecast offset is {forecast_offset}')
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
