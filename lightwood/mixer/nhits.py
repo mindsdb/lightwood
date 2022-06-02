@@ -40,7 +40,7 @@ class NHitsMixer(BaseMixer):
         'n_windows': 32,
         'lr_decay': 0.5,
         'lr_decay_step_size': 2,
-        'max_epochs': 1,
+        'max_epochs': None,  # no limit for now
         'max_steps': None,
         'early_stop_patience': 20,
         'eval_freq': 500,
@@ -92,8 +92,10 @@ class NHitsMixer(BaseMixer):
 
         self.config['n_time_in'] = self.ts_analysis['tss'].window
         self.config['n_time_out'] = self.horizon
-        self.config['n_x_hidden'] = 0  # 8
+        self.config['n_x_hidden'] = 0  # TODO: what is it for?
+        # TODO: what is it for? with 4 and 0 for x, it collapses
         self.config['n_s_hidden'] = 0
+        self.config['frequency'] = self.ts_analysis['sample_freqs']['__default']
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
@@ -118,20 +120,24 @@ class NHitsMixer(BaseMixer):
         # train the model
         n_time_out = self.horizon
         self.model = nf.auto.NHITS(horizon=n_time_out)
-        self.model.space['max_steps'] = hp.choice('max_steps', [1000])
+        self.model.space['max_steps'] = hp.choice('max_steps', [5e4])
+        # self.model.space['max_epochs'] = hp.choice('max_epochs', [-1, 10])
+        # 4 & 4 works... theory is both need to be smaller than length of val and/or test idxs... 8&8 fails?
+        self.model.space['n_time_in'] = hp.choice('n_time_in', [self.ts_analysis['tss'].window-1])
+        self.model.space['n_time_out'] = hp.choice('n_time_out', [self.horizon])
+        self.model.space['n_windows'] = hp.choice('n_windows', [1])
         self.model.fit(Y_df=Y_df,
-                       X_df=None,  # Exogenous variables
-                       S_df=None,  # Static variables
+                       X_df=None,       # Exogenous variables
+                       S_df=None,       # Static variables
                        hyperopt_steps=5,
                        n_ts_val=n_ts_val,
                        n_ts_test=n_ts_test,
-                       results_dir='./results/autonhits',  # TODO: change this
-                       save_trials=True,
+                       results_dir='./results/autonhits',  # TODO: rm/change this to /tmp/lightwood/autonhits or similar
+                       save_trials=False,
                        loss_function_val=nf.losses.numpy.mae,
-                       loss_functions_test={'mae': nf.losses.numpy.mae,
-                                            'mse': nf.losses.numpy.mse},
-                       return_test_forecast=True,  # False
-                       verbose=False)
+                       loss_functions_test={'mse': nf.losses.numpy.mae},
+                       return_test_forecast=False,
+                       verbose=False)  # True
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
@@ -160,7 +166,9 @@ class NHitsMixer(BaseMixer):
 
         input_df = self._make_initial_df(ds.data_frame)  # TODO make it so that it's horizon worth of data in each row
         for i in range(input_df.shape[0]):
-            ydf.iloc[i]['prediction'] = self.model.forecast(input_df.iloc[i:i + 1])['y'].tolist()
+            ydf.iloc[i]['prediction'] = self.model.forecast(
+                Y_df=input_df.iloc[i:i + 1]
+            )['y'].tolist()
 
         return ydf[['prediction']]
 
@@ -169,5 +177,8 @@ class NHitsMixer(BaseMixer):
         Y_df = pd.DataFrame()
         Y_df['y'] = df[self.target]
         Y_df['ds'] = pd.to_datetime(df[f'__mdb_original_{oby_col}'], unit='s')
-        Y_df['unique_id'] = df[self.grouped_by].apply(lambda x: ','.join([elt for elt in x]), axis=1)
+        if self.grouped_by != ['__default']:
+            Y_df['unique_id'] = df[self.grouped_by].apply(lambda x: ','.join([elt for elt in x]), axis=1)
+        else:
+            Y_df['unique_id'] = ''
         return Y_df
