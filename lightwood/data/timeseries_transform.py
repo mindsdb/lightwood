@@ -57,7 +57,7 @@ def transform_timeseries(
         # trigger if __mdb_forecast_offset constant and different from None
         index = original_df[~original_df['__mdb_forecast_offset'].isin([None])]
         offset_available = index.shape[0] == len(original_df) and original_df['__mdb_forecast_offset'].nunique() == 1
-        offset = int(original_df['__mdb_forecast_offset'].unique()[0])
+        offset = min(int(original_df['__mdb_forecast_offset'].unique()[0]), 1)
         infer_mode = offset_available and offset == 1
         original_df = original_df.reset_index(drop=True) if infer_mode else original_df
     else:
@@ -129,8 +129,8 @@ def transform_timeseries(
                 make_preds = [False for _ in range(max(0, len(df_arr[i]) - 1))] + [True]
                 last_index += 1
             elif offset_available:
-                # truncate to forecast up until some len(df) - offset
-                new_index = df_arr[i].index[:len(df_arr[i].index) - offset]
+                # truncate to forecast up until some len(df) + offset (which is <= 0)
+                new_index = df_arr[i].index[:len(df_arr[i].index) + offset]
                 make_preds = [False for _ in range(max(0, len(new_index) - 1))] + [True]
                 df_arr[i] = df_arr[i].loc[new_index]
             else:
@@ -176,7 +176,7 @@ def transform_timeseries(
 
     if '__mdb_forecast_offset' in combined_df.columns:
         combined_df = pd.DataFrame(combined_df[combined_df['__make_predictions']])  # filters by True only
-        del combined_df['__mdb_forecast_offset']
+        # del combined_df['__mdb_forecast_offset']
         del combined_df['__make_predictions']
 
     if not infer_mode and any([i < tss.window for i in group_lengths]):

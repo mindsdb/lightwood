@@ -250,7 +250,9 @@ class TestTimeseries(unittest.TestCase):
         particular, given a train-dev-test split, any forecasts coming from a sktime
         mixer should start from the latest observed data in the entire dataset.
         
-        This test also compares against manual use of sktime to ensure equal results.
+        This test also compares:
+         - correct propagation of offset by K if the special `__mdb_forecast_offset` column is present
+         - results against manual use of sktime to ensure equal results.
         """  # noqa
 
         # synth square wave
@@ -291,6 +293,40 @@ class TestTimeseries(unittest.TestCase):
         train_and_check_time_aim(predictor, train)
         ps = predictor.predict(test)
         assert r2_score(test[target].values, ps['prediction'].iloc[0]) >= 0.95
+
+        # test offset for infer mode
+        test['__mdb_forecast_offset'] = 1  # one step after latest (inferred)
+        ps1 = predictor.predict(test)
+        test['__mdb_forecast_offset'] = 0  # at latest
+        ps0 = predictor.predict(test)
+        test['__mdb_forecast_offset'] = -1  # one step before latest
+        psm1 = predictor.predict(test)
+        times_1 = psm1['order_Time'].tolist()[0]
+        values_1 = psm1['prediction'].tolist()[0]
+        times0 = ps0['order_Time'].tolist()[0]
+        values0 = ps0['prediction'].tolist()[0]
+        times1 = ps1['order_Time'].tolist()[0]
+        values1 = ps1['prediction'].tolist()[0]
+
+        print(times_1)
+        print(times0)
+        print(times1)
+        print()
+        print(values_1)
+        print(values0)
+        print(values1)
+
+        # due to the offset, these intermediate indexes should be equal
+        self.assertTrue(times_1[1:] == times0[0:-1])
+        self.assertTrue(times0[1:] == times1[0:-1])
+        self.assertTrue(values_1[1:] == values0[0:-1])
+        self.assertTrue(values0[1:] == values1[0:-1])
+
+        # the rest should be different
+        self.assertTrue(times_1 != times0)
+        self.assertTrue(times0 != times1)
+        self.assertTrue(values_1 != values0)
+        self.assertTrue(values0 != values1)
 
         # test historical columns asserts
         test[f'{target}_2x'].iloc[0] = np.nan
