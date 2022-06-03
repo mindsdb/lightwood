@@ -6,7 +6,13 @@ from lightwood.helpers.log import log
 
 
 def get_nr_procs(df=None):
-    if os.name == 'nt':
+    if 'LIGHTWOOD_N_WORKERS' in os.environ:
+        try:
+            n = int(os.environ['LIGHTWOOD_N_WORKERS'])
+        except ValueError:
+            n = 1
+        return n
+    elif os.name == 'nt':
         return 1
     else:
         available_mem = psutil.virtual_memory().available
