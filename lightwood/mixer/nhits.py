@@ -91,10 +91,10 @@ class NHitsMixer(BaseMixer):
         self.pretrained = True  # todo: modifiable from JsonAI, plus option to finetune!
         self.base_url = 'https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/'
         self.model_names = {
-           'hourly': 'nhits_m4_hourly.ckpt',  # hourly (non-tiny)
-           'daily': 'nhits_m4_daily.ckpt',   # daily
-           'monthly': 'nhits_m4_monthyl.ckpt',  # monthly
-           'yearly': 'nhits_m4_hourly.ckpt',  # yearly
+            'hourly': 'nhits_m4_hourly.ckpt',  # hourly (non-tiny)
+            'daily': 'nhits_m4_daily.ckpt',   # daily
+            'monthly': 'nhits_m4_monthyl.ckpt',  # monthly
+            'yearly': 'nhits_m4_hourly.ckpt',  # yearly
         }
 
         self.ts_analysis = ts_analysis
@@ -144,7 +144,7 @@ class NHitsMixer(BaseMixer):
             self.model.space['max_epochs'] = hp.choice('max_epochs', [50])
             # self.model.space['max_epochs'] = hp.choice('max_epochs', [-1, 10])
             # 4 & 4 works... theory is both need to be smaller than length of val and/or test idxs... 8&8 fails?
-            self.model.space['n_time_in'] = hp.choice('n_time_in', [self.ts_analysis['tss'].window-1])
+            self.model.space['n_time_in'] = hp.choice('n_time_in', [self.ts_analysis['tss'].window - 1])
             self.model.space['n_time_out'] = hp.choice('n_time_out', [self.horizon])
             self.model.space['n_windows'] = hp.choice('n_windows', [1])
             self.model.fit(Y_df=Y_df,
@@ -153,7 +153,7 @@ class NHitsMixer(BaseMixer):
                            hyperopt_steps=5,
                            n_ts_val=n_ts_val,
                            n_ts_test=n_ts_test,
-                           results_dir='./results/autonhits',  # TODO: rm/change this to /tmp/lightwood/autonhits or similar
+                           results_dir='./results/autonhits',  # TODO: rm/change to /tmp/lightwood/autonhits or similar
                            save_trials=False,
                            loss_function_val=nf.losses.numpy.mae,
                            loss_functions_test={'mse': nf.losses.numpy.mae},
