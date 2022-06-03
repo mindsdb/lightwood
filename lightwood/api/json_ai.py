@@ -830,7 +830,7 @@ return train_test_data
     # Prepare features Body
     # ----------------- #
 
-    prepare_body = f"""
+    prepare_body = """
 self.mode = 'train'
 
 if self.statistical_analysis is None:
