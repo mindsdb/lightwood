@@ -808,11 +808,6 @@ data = {call(json_ai.cleaner)}
 # Time-series blocks
 {ts_transform_code}
 """
-    if ts_analyze_code is not None:
-        clean_body += f"""
-if self.mode != 'predict':
-{align(ts_analyze_code,1)}
-"""
 
     clean_body += '\nreturn data'
 
@@ -840,7 +835,14 @@ self.mode = 'train'
 
 if self.statistical_analysis is None:
     raise Exception("Please run analyze_data first")
+"""
+    if ts_analyze_code is not None:
+        prepare_body += f"""
+if self.mode != 'predict':
+    {align(ts_analyze_code, 1)}
+"""
 
+    prepare_body += f"""
 # Column to encoder mapping
 self.encoders = {inline_dict(encoder_dict)}
 

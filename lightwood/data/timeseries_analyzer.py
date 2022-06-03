@@ -31,10 +31,10 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     tss = timeseries_settings
     info = {
         'original_type': dtype_dict[target],
-        'data': data[target].values
+        'data': data['train'][target].values
     }
     if tss.group_by is not None:
-        info['group_info'] = {gcol: data[gcol] for gcol in tss.group_by}  # group col values
+        info['group_info'] = {gcol: data['train'][gcol] for gcol in tss.group_by}  # group col values
     else:
         info['group_info'] = {}
 
@@ -46,7 +46,7 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     else:
         naive_forecast_residuals, scale_factor = {}, {}
 
-    deltas = get_delta(data[tss.order_by],
+    deltas = get_delta(data['train'][tss.order_by],
                        info,
                        new_data['group_combinations'],
                        tss.order_by)
