@@ -87,7 +87,7 @@ class ShortTextEncoder(BaseEncoder):
     def decode(self, vectors):
         if self._mode == 'concat':
 
-            vec_size = self.cae.max_encoded_length
+            vec_size = self.cae.output_size
 
             output = []
             for vec in vectors:

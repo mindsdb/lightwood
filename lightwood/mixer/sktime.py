@@ -236,6 +236,11 @@ class SkTime(BaseMixer):
         if args.predict_proba:
             log.warning('This mixer does not output probability estimates')
 
+        forecast_offset = args.forecast_offset
+        if '__mdb_forecast_offset' in ds.data_frame.columns:
+            if ds.data_frame['__mdb_forecast_offset'].nunique() == 1:
+                forecast_offset = int(ds.data_frame['__mdb_forecast_offset'].unique()[0])
+
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),
@@ -259,7 +264,7 @@ class SkTime(BaseMixer):
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     forecaster = self.models[group]
                     series = pd.Series(series_data.squeeze(), index=series_idxs)
-                    ydf = self._call_groupmodel(ydf, forecaster, series, offset=args.forecast_offset)
+                    ydf = self._call_groupmodel(ydf, forecaster, series, offset=forecast_offset)
                 else:
                     log.warning(f"Applying naive forecaster for novel group {group}. Performance might not be optimal.")
                     ydf = self._call_default(ydf, series_data, series_idxs)
