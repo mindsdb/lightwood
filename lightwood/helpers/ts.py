@@ -1,5 +1,8 @@
+from typing import Union
+
 import numpy as np
 import pandas as pd
+
 from lightwood.api.types import TimeseriesSettings
 
 
@@ -48,3 +51,21 @@ def add_tn_conf_bounds(data: pd.DataFrame, tss_args: TimeseriesSettings):
         data['upper'].iloc[idx] = [pred + (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
 
     return data
+
+
+class Differencer:
+    def __init__(self):
+        self.initial_value = None
+
+    def fit(self, series: np.array) -> None:
+        self.initial_value = series[0]
+
+    def transform(self, series: np.array) -> pd.Series:
+        s = pd.Series(series)
+        return s.rolling(2).apply(np.diff)
+
+    def inverse_transform(self, series: pd.Series) -> pd.Series:
+        s = pd.Series(self.initial_value)
+        s = s.append(series).dropna()
+        return s.expanding().sum()
+

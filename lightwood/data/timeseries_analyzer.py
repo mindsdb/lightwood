@@ -6,6 +6,7 @@ import pandas as pd
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
+from lightwood.helpers.ts import Differencer
 from lightwood.helpers.general import get_group_matches
 
 
@@ -38,7 +39,6 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     else:
         info['group_info'] = {}
 
-    # @TODO: maybe normalizers should fit using only the training subsets??
     new_data = generate_target_group_normalizers(info)
 
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
@@ -54,6 +54,8 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     # detect period
     periods, freqs = detect_period(deltas, tss)
 
+    differencers = get_differencers(info, new_data['group_combinations'])
+
     return {'target_normalizers': new_data['target_normalizers'],
             'deltas': deltas,
             'tss': tss,
@@ -61,7 +63,8 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
             'ts_naive_residuals': naive_forecast_residuals,
             'ts_naive_mae': scale_factor,
             'periods': periods,
-            'sample_freqs': freqs
+            'sample_freqs': freqs,
+            'differencers': differencers
             }
 
 
@@ -206,3 +209,13 @@ def detect_period(deltas: dict, tss: TimeseriesSettings) -> (Dict[str, float], D
         freqs[group] = min_tag
 
     return periods, freqs
+
+
+def get_differencers(data: Dict, groups: List):
+    differencers = {}
+    for group in groups:
+        idxs, subset = get_group_matches(data, group)
+        differencer = Differencer()
+        differencer.fit(subset)
+        differencers[group] = differencer
+    return differencers
