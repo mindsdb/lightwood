@@ -54,9 +54,6 @@ class LightGBMArray(BaseMixer):
         original_target_train = deepcopy(train_data.data_frame[self.target])
         original_target_dev = deepcopy(dev_data.data_frame[self.target])
 
-        if self.ts_analysis.get('differencers', False):
-            train_data.data_frame[self.target]
-
         for timestep in range(self.horizon):
             if timestep > 0:
                 train_data.data_frame[self.target] = train_data.data_frame[f'{self.target}_timestep_{timestep}']
