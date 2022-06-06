@@ -45,7 +45,7 @@ class NHitsMixer(BaseMixer):
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
 
         # pretraining info
-        self.pretrained = True  # todo: modifiable from JsonAI, plus option to finetune!
+        self.pretrained = False  # todo: modifiable from JsonAI, plus option to finetune!
         self.base_url = 'https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/'
         self.freq_to_model_name = {
             'year': 'yearly',
@@ -94,7 +94,6 @@ class NHitsMixer(BaseMixer):
                                               None)
             model_name = self.model_names['hourly'] if model_name is None else model_name
             ckpt_url = self.base_url + model_name
-            print(ckpt_url)
             self.model = MQNHITS.load_from_checkpoint(ckpt_url)  # TODO use this when not pretraining for consistency
 
             # TODO: if self.finetune: ...
@@ -107,9 +106,7 @@ class NHitsMixer(BaseMixer):
             self.model.space['n_x_hidden'] = hp.choice('n_x_hidden', [0])
             self.model.space['n_s_hidden'] = hp.choice('n_s_hidden', [0])
             self.model.space['frequency'] = hp.choice('frequency', [self.ts_analysis['sample_freqs']['__default']])
-            # self.model.space['n_time_in'] = hp.choice('n_time_in', [self.ts_analysis['tss'].window - 1])
-            # self.model.space['n_time_out'] = hp.choice('n_time_out', [self.horizon])
-            # self.model.space['n_windows'] = hp.choice('n_windows', [1])
+            self.model.space['random_seed'] = hp.choice('random_seed', [1])
             self.model.fit(Y_df=Y_df,
                            X_df=None,       # Exogenous variables
                            S_df=None,       # Static variables
