@@ -45,21 +45,27 @@ class NHitsMixer(BaseMixer):
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
 
         # pretraining info
-        self.pretrained = False  # True  # todo: modifiable from JsonAI, plus option to finetune!
+        self.pretrained = True  # todo: modifiable from JsonAI, plus option to finetune!
         self.base_url = 'https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/'
+        self.freq_to_model_name = {
+            'year': 'yearly',
+            'semestral': 'yearly',
+            'quarter': 'monthly',
+            'bimonthly': 'monthly',
+            'monthly': 'monthly',
+            'weekly': 'daily',
+            'daily': 'daily',
+            'hourly': 'hourly',
+            'minute': 'hourly',  # todo other?
+            'second': 'hourly'  # todo other?
+        }
         self.model_names = {
             'hourly': 'nhits_m4_hourly.ckpt',  # hourly (non-tiny)
             'daily': 'nhits_m4_daily.ckpt',   # daily
-            'monthly': 'nhits_m4_monthyl.ckpt',  # monthly
-            'yearly': 'nhits_m4_hourly.ckpt',  # yearly
+            'monthly': 'nhits_m4_monthly.ckpt',  # monthly
+            'yearly': 'nhits_m4_yearly.ckpt',  # yearly
         }
         self.model = None
-        self.config = nf.auto.mqnhits_space(self.horizon)
-        self.config['n_time_in'] = self.ts_analysis['tss'].window
-        self.config['n_time_out'] = self.horizon
-        self.config['n_x_hidden'] = 0
-        self.config['n_s_hidden'] = 0
-        self.config['frequency'] = self.ts_analysis['sample_freqs']['__default']
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
@@ -84,25 +90,30 @@ class NHitsMixer(BaseMixer):
         # train the model
         n_time_out = self.horizon
         if self.pretrained:
-            model_name = self.model_names.get(self.ts_analysis['sample_freqs']['__default'], None)
+            model_name = self.model_names.get(self.freq_to_model_name[self.ts_analysis['sample_freqs']['__default']],
+                                              None)
             model_name = self.model_names['hourly'] if model_name is None else model_name
             ckpt_url = self.base_url + model_name
+            print(ckpt_url)
             self.model = MQNHITS.load_from_checkpoint(ckpt_url)  # TODO use this when not pretraining for consistency
 
             # TODO: if self.finetune: ...
         else:
             self.model = nf.auto.MQNHITS(horizon=n_time_out)
-            self.model.space['max_steps'] = hp.choice('max_steps', [5e4])
+            self.model.space['max_steps'] = hp.choice('max_steps', [1e4])
             self.model.space['max_epochs'] = hp.choice('max_epochs', [50])
-            # self.model.space['max_epochs'] = hp.choice('max_epochs', [-1, 10])
-            # 4 & 4 works... theory is both need to be smaller than length of val and/or test idxs... 8&8 fails?
-            self.model.space['n_time_in'] = hp.choice('n_time_in', [self.ts_analysis['tss'].window - 1])
+            self.model.space['n_time_in'] = hp.choice('n_time_in', [self.ts_analysis['tss'].window])
             self.model.space['n_time_out'] = hp.choice('n_time_out', [self.horizon])
-            self.model.space['n_windows'] = hp.choice('n_windows', [1])
+            self.model.space['n_x_hidden'] = hp.choice('n_x_hidden', [0])
+            self.model.space['n_s_hidden'] = hp.choice('n_s_hidden', [0])
+            self.model.space['frequency'] = hp.choice('frequency', [self.ts_analysis['sample_freqs']['__default']])
+            # self.model.space['n_time_in'] = hp.choice('n_time_in', [self.ts_analysis['tss'].window - 1])
+            # self.model.space['n_time_out'] = hp.choice('n_time_out', [self.horizon])
+            # self.model.space['n_windows'] = hp.choice('n_windows', [1])
             self.model.fit(Y_df=Y_df,
                            X_df=None,       # Exogenous variables
                            S_df=None,       # Static variables
-                           hyperopt_steps=5,
+                           hyperopt_steps=3,
                            n_ts_val=n_ts_val,
                            n_ts_test=n_ts_test,
                            results_dir='./results/autonhits',  # TODO: rm/change to /tmp/lightwood/autonhits or similar
