@@ -5,7 +5,6 @@ import pandas as pd
 from hyperopt import hp
 import neuralforecast as nf
 from neuralforecast.models.mqnhits.mqnhits import MQNHITS
-from neuralforecast.models.nhits.nhits import NHITS
 
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
@@ -19,51 +18,7 @@ class NHitsMixer(BaseMixer):
     supports_proba: bool
     model_path: str
     hyperparam_search: bool
-
-    default_config: dict = {
-        'model': 'n-hits',
-        'mode': 'simple',
-        'activation': 'SELU',
-
-        'stack_types': ['identity', 'identity', 'identity'],
-        'constant_n_blocks': 1,
-        'constant_n_layers': 2,
-        'constant_n_mlp_units': 256,
-        'n_pool_kernel_size': [4, 2, 1],
-        'n_freq_downsample': [24, 12, 1],
-        'pooling_mode': 'max',
-        'interpolation_mode': 'linear',
-        'shared_weights': False,
-
-        # Optimization and regularization parameters
-        'initialization': 'lecun_normal',
-        'learning_rate': 0.001,
-        'batch_size': 1,
-        'n_windows': 32,
-        'lr_decay': 0.5,
-        'lr_decay_step_size': 2,
-        'max_epochs': 50,
-        'max_steps': 1000,
-        'early_stop_patience': 20,
-        'eval_freq': 500,
-        'batch_normalization': False,
-        'dropout_prob_theta': 0.0,
-        'dropout_prob_exogenous': 0.0,
-        'weight_decay': 0,
-        'loss_train': 'MAE',
-        'loss_hypar': 0.5,
-        'loss_valid': 'MAE',
-        'random_seed': 1,
-
-        # Data Parameters
-        'idx_to_sample_freq': 1,
-        'val_idx_to_sample_freq': 1,
-        'n_val_weeks': 52,
-        'normalizer_y': None,
-        'normalizer_x': 'median',
-        'complete_windows': False,
-        'frequency': 'H',
-    }
+    default_config: dict
 
     def __init__(
             self,
@@ -85,10 +40,12 @@ class NHitsMixer(BaseMixer):
         self.prepared = False
         self.supports_proba = False
         self.target = target
-        self.config = NHitsMixer.default_config.copy()
+        self.horizon = horizon
+        self.ts_analysis = ts_analysis
+        self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
 
         # pretraining info
-        self.pretrained = True  # todo: modifiable from JsonAI, plus option to finetune!
+        self.pretrained = False  # True  # todo: modifiable from JsonAI, plus option to finetune!
         self.base_url = 'https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/'
         self.model_names = {
             'hourly': 'nhits_m4_hourly.ckpt',  # hourly (non-tiny)
@@ -96,16 +53,11 @@ class NHitsMixer(BaseMixer):
             'monthly': 'nhits_m4_monthyl.ckpt',  # monthly
             'yearly': 'nhits_m4_hourly.ckpt',  # yearly
         }
-
-        self.ts_analysis = ts_analysis
-        self.horizon = horizon
-        self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.model = None
-
+        self.config = nf.auto.mqnhits_space(self.horizon)
         self.config['n_time_in'] = self.ts_analysis['tss'].window
         self.config['n_time_out'] = self.horizon
-        self.config['n_x_hidden'] = 0  # TODO: what is it for?
-        # TODO: what is it for? with 4 and 0 for x, it collapses
+        self.config['n_x_hidden'] = 0
         self.config['n_s_hidden'] = 0
         self.config['frequency'] = self.ts_analysis['sample_freqs']['__default']
 
@@ -139,7 +91,7 @@ class NHitsMixer(BaseMixer):
 
             # TODO: if self.finetune: ...
         else:
-            self.model = nf.auto.NHITS(horizon=n_time_out)
+            self.model = nf.auto.MQNHITS(horizon=n_time_out)
             self.model.space['max_steps'] = hp.choice('max_steps', [5e4])
             self.model.space['max_epochs'] = hp.choice('max_epochs', [50])
             # self.model.space['max_epochs'] = hp.choice('max_epochs', [-1, 10])
@@ -155,8 +107,8 @@ class NHitsMixer(BaseMixer):
                            n_ts_test=n_ts_test,
                            results_dir='./results/autonhits',  # TODO: rm/change to /tmp/lightwood/autonhits or similar
                            save_trials=False,
-                           loss_function_val=nf.losses.numpy.mae,
-                           loss_functions_test={'mse': nf.losses.numpy.mae},
+                           loss_function_val=nf.losses.numpy.mqloss,
+                           loss_functions_test={'MQ': nf.losses.numpy.mqloss},
                            return_test_forecast=False,
                            verbose=True)  # False
 
@@ -186,7 +138,7 @@ class NHitsMixer(BaseMixer):
                            dtype=object)
 
         input_df = self._make_initial_df(ds.data_frame)  # TODO make it so that it's horizon worth of data in each row
-        pred_col = 'y' if isinstance(self.model, NHITS) else 'y_50'
+        pred_col = 'y_50'  # median == point prediction
         for i in range(input_df.shape[0]):
             fcst = self.model.forecast(Y_df=input_df.iloc[i:i + 1])
             ydf.iloc[i]['prediction'] = fcst[pred_col].tolist()[:self.horizon]
