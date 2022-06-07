@@ -53,17 +53,26 @@ def add_tn_conf_bounds(data: pd.DataFrame, tss_args: TimeseriesSettings):
 
 class Differencer:
     def __init__(self):
-        self.initial_value = None
+        self.original_train_series = None
+        self.diffed_train_series = None
+        self.first_train_value = None
+        self.last_train_value = None
+
+    def diff(self, series: np.array) -> pd.Series:
+        s = pd.Series(series)
+        return s.shift(-1) - s
 
     def fit(self, series: np.array) -> None:
-        self.initial_value = series[0]
+        self.first_train_value = series[0]
+        self.last_train_value = series[-1]
+        self.original_train_series = series
+        self.diffed_train_series = self.diff(series)
 
     def transform(self, series: np.array) -> pd.Series:
-        s = pd.Series(series)
-        return s.rolling(2).apply(np.diff)
+        return self.diff(series).shift(1)
 
-    def inverse_transform(self, series: pd.Series) -> pd.Series:
-        s = pd.Series(self.initial_value)
+    def inverse_transform(self, series: pd.Series, init=None) -> pd.Series:
+        origin = init if init else self.last_train_value
+        s = pd.Series(origin)
         s = s.append(series).dropna()
         return s.expanding().sum()
-
