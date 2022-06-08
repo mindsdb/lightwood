@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from lightwood.helpers.log import log
+from lightwood.helpers.general import get_group_matches
 from lightwood.encoder.base import BaseEncoder
 from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.lightgbm import LightGBM
@@ -59,7 +60,22 @@ class LightGBMArray(BaseMixer):
                 train_data.data_frame[self.target] = train_data.data_frame[f'{self.target}_timestep_{timestep}']
                 dev_data.data_frame[self.target] = dev_data.data_frame[f'{self.target}_timestep_{timestep}']
 
-            self.models[timestep].fit(train_data, dev_data)  # @TODO: this call could be parallelized
+            # differentiate
+            for split in [train_data, dev_data]:
+                for group in self.ts_analysis['group_combinations']:
+                    info = {'data': split.data_frame}
+                    if self.tss.group_by is not None:
+                        info['group_info'] = {gcol: info['data'][gcol] for gcol in self.tss.group_by}
+                    else:
+                        info['group_info'] = {}
+                    idxs, _ = get_group_matches(info, group)
+
+                    differencer = self.ts_analysis['differencers'][group]
+                    split.data_frame.iloc[idxs, split.data_frame.columns.get_loc(self.target)] = differencer.transform(
+                        split.data_frame.iloc[idxs][self.target]
+                    ).fillna(0)
+
+            self.models[timestep].fit(train_data, dev_data)
 
         # restore target
         train_data.data_frame[self.target] = original_target_train

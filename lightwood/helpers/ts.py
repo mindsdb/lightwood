@@ -59,16 +59,19 @@ class Differencer:
         self.last_train_value = None
 
     def diff(self, series: np.array) -> pd.Series:
+        series = self._flatten_series(series)
         s = pd.Series(series)
         return s.shift(-1) - s
 
     def fit(self, series: np.array) -> None:
+        series = self._flatten_series(series)
         self.first_train_value = series[0]
         self.last_train_value = series[-1]
         self.original_train_series = series
         self.diffed_train_series = self.diff(series)
 
     def transform(self, series: np.array) -> pd.Series:
+        series = self._flatten_series(series)
         return self.diff(series).shift(1)
 
     def inverse_transform(self, series: pd.Series, init=None) -> pd.Series:
@@ -76,3 +79,11 @@ class Differencer:
         s = pd.Series(origin)
         s = s.append(series).dropna()
         return s.expanding().sum()
+
+    @staticmethod
+    def _flatten_series(series: np.ndarray) -> np.ndarray:
+        if len(series.shape) > 2:
+            raise Exception(f"Input data should be shaped (A,) or (A, 1), got {series.shape}")
+        elif len(series.shape) == 2:
+            series = series.flatten()
+        return series
