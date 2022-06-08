@@ -96,7 +96,7 @@ class SkTime(BaseMixer):
         self.trial_error_fn = MeanAbsolutePercentageError(symmetric=True)
         self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
         self.n_trials = len(self.possible_models)
-        self.freq = self._get_freq(self.ts_analysis['deltas']['__default'][self.ts_analysis['tss'].order_by[0]])
+        self.freq = self._get_freq(self.ts_analysis['deltas']['__default'])
 
         # sktime forecast horizon object is made relative to the end of the latest data point seen at training time
         # the default assumption is to forecast the next `self.horizon` after said data point
@@ -184,7 +184,8 @@ class SkTime(BaseMixer):
             else:
                 target_idx = data['data'].columns.tolist().index(self.target)
                 oby_idx = data['data'].columns.tolist().index(oby_col)
-                series_idxs, series_data = get_group_matches(data, group)
+                series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
+                # TODO: repair this, now it's a df so it should be easier
                 series_oby = series_data[:, oby_idx]
                 series_data = series_data[:, target_idx]
 
@@ -257,7 +258,8 @@ class SkTime(BaseMixer):
         for group in all_group_combinations:
             group = tuple(group)
             group = '__default' if group[0] == '__default' else group
-            series_idxs, series_data = get_group_matches(data, group)
+            series_idxs, series_data = get_group_matches(ds.data_frame, group, self.grouped_by)
+            # TODO: as above, now it's a DF, change below logic
 
             if series_data.size > 0:
                 series_idxs = sorted(series_idxs)

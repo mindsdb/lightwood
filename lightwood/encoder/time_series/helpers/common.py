@@ -21,7 +21,7 @@ def generate_target_group_normalizers(
     normalizers = {}
     group_combinations = []
     target_dtype = dtype_dict[target]
-    group_values = {gcol: data[gcol].unique() for gcol in tss.group_by}
+    group_values = {gcol: data[gcol].unique() for gcol in tss.group_by} if tss.group_by else {}
 
     # categorical normalizers
     if target_dtype in (dtype.categorical, dtype.binary, dtype.cat_tsarray):

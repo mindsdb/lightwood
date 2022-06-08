@@ -38,11 +38,13 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
                                                                              target,
                                                                              tss,
                                                                              group_combinations)
+        differencers = get_differencers(data['train'], target, group_combinations, tss.group_by)
     else:
         naive_forecast_residuals, scale_factor = {}, {}
+        differencers = {}
 
     deltas, periods, freqs = get_delta(data['train'], group_combinations, tss)
-    differencers = get_differencers(data['train'], target, group_combinations, tss.group_by)
+
     # TODO: transform all data splits using differencers, but not here
     # TODO: must revert this analyzer to before the TS transform, because otherwise it's wasted compute to revert
     #  those array-transforms, differentiate, then put them  back together...

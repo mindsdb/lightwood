@@ -64,8 +64,9 @@ class LightGBMArray(BaseMixer):
             for split in [train_data, dev_data]:
                 for group in self.ts_analysis['group_combinations']:
                     idxs, subset = get_group_matches(split.data_frame, group, self.ts_analysis['tss'].group_by)
-                    differencer = self.ts_analysis['differencers'][group]
-                    split.data_frame.at[idxs, self.target] = differencer.transform(subset[self.target])
+                    differencer = self.ts_analysis['differencers'].get(group, False)
+                    if differencer:
+                        split.data_frame.at[idxs, self.target] = differencer.transform(subset[self.target])
 
             self.models[timestep].fit(train_data, dev_data)
 
