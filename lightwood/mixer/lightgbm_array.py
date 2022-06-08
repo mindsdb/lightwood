@@ -63,17 +63,9 @@ class LightGBMArray(BaseMixer):
             # differentiate
             for split in [train_data, dev_data]:
                 for group in self.ts_analysis['group_combinations']:
-                    info = {'data': split.data_frame}
-                    if self.tss.group_by is not None:
-                        info['group_info'] = {gcol: info['data'][gcol] for gcol in self.tss.group_by}
-                    else:
-                        info['group_info'] = {}
-                    idxs, _ = get_group_matches(info, group)
-
+                    idxs, subset = get_group_matches(split.data_frame, group, self.ts_analysis['tss'].group_by)
                     differencer = self.ts_analysis['differencers'][group]
-                    split.data_frame.iloc[idxs, split.data_frame.columns.get_loc(self.target)] = differencer.transform(
-                        split.data_frame.iloc[idxs][self.target]
-                    ).fillna(0)
+                    split.data_frame.at[idxs, self.target] = differencer.transform(subset[self.target])
 
             self.models[timestep].fit(train_data, dev_data)
 
@@ -99,6 +91,7 @@ class LightGBMArray(BaseMixer):
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
+        # TODO: difference the history input (set the last seen value so that we can invert transform predictions
         if args.predict_proba:
             log.warning('This model does not output probability estimates')
 

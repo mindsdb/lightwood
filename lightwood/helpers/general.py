@@ -136,12 +136,6 @@ def evaluate_num_array_accuracy(
         naive_errors = None
     else:
         naive_errors = ts_analysis.get('ts_naive_mae', {})
-        wrapped_data = {
-            'data': kwargs['data'].reset_index(drop=True),
-            'group_info': {gcol: kwargs['data'][gcol].tolist()
-                           for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
-        }
-
         if ts_analysis['tss'].group_by:
             [true_values.pop(gby_col) for gby_col in ts_analysis['tss'].group_by]
 
@@ -157,7 +151,7 @@ def evaluate_num_array_accuracy(
 
     mases = []
     for group in ts_analysis['group_combinations']:
-        g_idxs, _ = get_group_matches(wrapped_data, group)
+        g_idxs, _ = get_group_matches(kwargs['data'].reset_index(drop=True), group, ts_analysis['tss'].group_by)
 
         # only evaluate populated groups
         if g_idxs:

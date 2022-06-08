@@ -72,7 +72,7 @@ class Differencer:
 
     def transform(self, series: np.array) -> pd.Series:
         series = self._flatten_series(series)
-        return self.diff(series).shift(1)
+        return self.diff(series).shift(1).fillna(0)
 
     def inverse_transform(self, series: pd.Series, init=None) -> pd.Series:
         origin = init if init else self.last_train_value

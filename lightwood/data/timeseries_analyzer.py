@@ -34,7 +34,10 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     normalizers, group_combinations = generate_target_group_normalizers(data['train'], target, dtype_dict, tss)
 
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
-        naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'], tss, group_combinations)
+        naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'],
+                                                                             target,
+                                                                             tss,
+                                                                             group_combinations)
     else:
         naive_forecast_residuals, scale_factor = {}, {}
 
@@ -73,7 +76,6 @@ def get_delta(
     """  # noqa
     order_col = [f'__mdb_original_{tss.order_by[0]}']
     deltas = {"__default": df[order_col].rolling(window=2).apply(np.diff).value_counts().index[0][0]}
-    print(deltas)
     freq, period = detect_freq_period(deltas["__default"], tss)
     periods = {"__default": period}
     freqs = {"__default": freq}
@@ -112,6 +114,7 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
 
 def get_grouped_naive_residuals(
         info: pd.DataFrame,
+        target: str,
         tss: TimeseriesSettings,
         group_combinations: List) -> Tuple[Dict, Dict]:
     """
@@ -121,7 +124,7 @@ def get_grouped_naive_residuals(
     group_scale_factors = {}
     for group in group_combinations:
         idxs, subset = get_group_matches(info, group, tss.group_by)
-        residuals, scale_factor = get_naive_residuals(pd.DataFrame(subset))  # @TODO: pass m once we handle seasonality
+        residuals, scale_factor = get_naive_residuals(subset[target])  # @TODO: pass m once we handle seasonality
         group_residuals[group] = residuals
         group_scale_factors[group] = scale_factor
     return group_residuals, group_scale_factors
