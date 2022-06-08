@@ -50,6 +50,10 @@ class LightGBMArray(BaseMixer):
         self.supports_proba = False
         self.stable = True
 
+        if self.ts_analysis['differencers'].get('__default', False):
+            for model in self.models:
+                model.positive_domain = False  # when differencing, forecasts can be negative even if the domain is not
+
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         log.info('Started fitting LGBM models for array prediction')
         original_target_train = deepcopy(train_data.data_frame[self.target])
@@ -101,8 +105,24 @@ class LightGBMArray(BaseMixer):
                            index=np.arange(length),
                            columns=[f'prediction_{i}' for i in range(self.horizon)])
 
+        # TODO: test, enforce!
+        for i in range(len(self.models)):
+            self.models[i].positive_domain = False
+
         for timestep in range(self.horizon):
             ydf[f'prediction_{timestep}'] = self.models[timestep](ds, args)['prediction']
+
+        # consolidate if differenced
+        for group in self.ts_analysis['group_combinations']:
+            differencer = self.ts_analysis['differencers'].get(group, False)
+            if differencer:
+                idxs, subset = get_group_matches(ds.data_frame.reset_index(drop=True), group, self.ts_analysis['tss'].group_by)
+                if subset.size > 1:
+                    last_values = [t[-1] for t in subset[f'__mdb_ts_previous_{self.target}']]
+                    last_values = [0 if t is None else t for t in last_values]
+                    ydf.at[idxs, 'prediction_0'] = ydf.iloc[idxs][f'prediction_0'] + last_values  # TODO this should be call to inverse_transform instead
+                    for timestep in range(1, self.horizon):
+                        ydf.at[idxs, f'prediction_{timestep}'] = ydf.iloc[idxs][f'prediction_{timestep}'] + ydf.iloc[idxs][f'prediction_{timestep-1}']
 
         ydf['prediction'] = ydf.values.tolist()
         return ydf[['prediction']]
