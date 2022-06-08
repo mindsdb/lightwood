@@ -14,11 +14,11 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss: Times
 
         if tss.group_by:
             try:
-                series_delta = deltas[tuple(row[gby].tolist())][col]
+                series_delta = deltas[tuple(row[gby].tolist())]
             except KeyError:
-                series_delta = deltas['__default'][col]
+                series_delta = deltas['__default']
         else:
-            series_delta = deltas['__default'][col]
+            series_delta = deltas['__default']
         timestamps = [last + t * series_delta for t in range(horizon)]
 
         if tss.horizon == 1:
