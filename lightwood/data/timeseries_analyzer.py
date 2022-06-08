@@ -88,7 +88,7 @@ def get_delta(
                 _, subset = get_group_matches(df, group, tss.group_by)
                 if subset.size > 1:
                     deltas[group] = subset[order_col].rolling(window=2).apply(np.diff).value_counts().index[0][0]
-                    period, freq = detect_freq_period(deltas[group], tss)
+                    freq, period = detect_freq_period(deltas[group], tss)
                     periods[group] = period
                     freqs[group] = freq
 
