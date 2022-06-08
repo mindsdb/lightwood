@@ -39,7 +39,7 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
         naive_forecast_residuals, scale_factor = {}, {}
 
     deltas, periods, freqs = get_delta(data['train'], group_combinations, tss)
-    differencers = get_differencers(data['train'], group_combinations, tss.group_by)
+    differencers = get_differencers(data['train'], target, group_combinations, tss.group_by)
     # TODO: transform all data splits using differencers, but not here
     # TODO: must revert this analyzer to before the TS transform, because otherwise it's wasted compute to revert
     #  those array-transforms, differentiate, then put them  back together...
@@ -71,10 +71,6 @@ def get_delta(
     :return:
     Dictionary with group combination tuples as keys. Values are dictionaries with the inferred delta for each series.
     """  # noqa
-    # pd.to_datetime(df, unit='s', origin='unix')
-    # pd.infer_freq(pd.DatetimeIndex(pd.to_datetime(df, unit='s', origin='unix')), warn=True)
-
-    # delta compute
     order_col = [f'__mdb_original_{tss.order_by[0]}']
     deltas = {"__default": df[order_col].rolling(window=2).apply(np.diff).value_counts().index[0][0]}
     print(deltas)
@@ -93,47 +89,6 @@ def get_delta(
                     freqs[group] = freq
 
     return deltas, periods, freqs
-
-    # def _most_popular(sorted_keys: pd.Index):
-    #     idx = 0
-    #     while sorted_keys[idx] == 0:
-    #         if idx == len(sorted_keys) - 1:
-    #             break
-    #         else:
-    #             idx += 1
-    #     return sorted_keys[idx]
-    #
-    # deltas = {"__default": {}}
-    #
-    # # get default delta for all data
-    # for col in order_cols:
-    #     series = pd.Series([x[-1] for x in df[col]])
-    #     series = series.drop_duplicates()  # by this point df is ordered so duplicate timestamps are either because of non-handled groups or repeated data that, for mode delta estimation, should be ignored  # noqa
-    #     rolling_diff = series.rolling(window=2).apply(lambda x: x.iloc[1] - x.iloc[0])
-    #     delta = _most_popular(rolling_diff.value_counts(ascending=False).keys())  # pick most popular
-    #     deltas["__default"][col] = delta
-
-    # # get group-wise deltas (if applicable)
-    # if tss.group_by:
-    #     # original_data = ts_info['data']
-    #     for group in group_combinations:
-    #         if group != "__default":
-    #             for col in tss.order_by:
-    #                 ts_info['data'] = pd.Series([x[-1] for x in df[col]])
-    #                 _, subset = get_group_matches(ts_info, group)
-    #                 if subset.size > 1:
-    #                     rolling_diff = pd.Series(
-    #                         subset.squeeze()).rolling(
-    #                         window=2).apply(
-    #                         lambda x: x.iloc[1] - x.iloc[0])
-    #                     delta = _most_popular(rolling_diff.value_counts(ascending=False).keys())
-    #                     if group in deltas:
-    #                         deltas[group][col] = delta
-    #                     else:
-    #                         deltas[group] = {col: delta}
-    #     ts_info['data'] = original_data
-
-    # return deltas
 
 
 def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, float]:
@@ -219,11 +174,11 @@ def detect_freq_period(deltas: pd.DataFrame, tss: TimeseriesSettings) -> tuple:
     return freq, freq_to_period.get(freq, 1)
 
 
-def get_differencers(data: pd.DataFrame, groups: List, group_cols: List):
+def get_differencers(data: pd.DataFrame, target: str, groups: List, group_cols: List):
     differencers = {}
     for group in groups:
         idxs, subset = get_group_matches(data, group, group_cols)
         differencer = Differencer()
-        differencer.fit(subset)
+        differencer.fit(subset[target].values)
         differencers[group] = differencer
     return differencers
