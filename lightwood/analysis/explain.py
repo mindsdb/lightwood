@@ -37,6 +37,7 @@ def explain(data: pd.DataFrame,
     # Setup base insights
     # ------------------------- #
     data = data.reset_index(drop=True)
+    predictions = predictions.reset_index(drop=True)
 
     row_insights = pd.DataFrame()
     global_insights = {}

@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 from lightwood.api.types import TimeseriesSettings
 
 
@@ -13,11 +14,11 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss: Times
 
         if tss.group_by:
             try:
-                series_delta = deltas[tuple(row[gby].tolist())][col]
+                series_delta = deltas[tuple(row[gby].tolist())]
             except KeyError:
-                series_delta = deltas['__default'][col]
+                series_delta = deltas['__default']
         else:
-            series_delta = deltas['__default'][col]
+            series_delta = deltas['__default']
         timestamps = [last + t * series_delta for t in range(horizon)]
 
         if tss.horizon == 1:
@@ -48,3 +49,41 @@ def add_tn_conf_bounds(data: pd.DataFrame, tss_args: TimeseriesSettings):
         data['upper'].iloc[idx] = [pred + (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
 
     return data
+
+
+class Differencer:
+    def __init__(self):
+        self.original_train_series = None
+        self.diffed_train_series = None
+        self.first_train_value = None
+        self.last_train_value = None
+
+    def diff(self, series: np.array) -> pd.Series:
+        series = self._flatten_series(series)
+        s = pd.Series(series)
+        return s.shift(-1) - s
+
+    def fit(self, series: np.array) -> None:
+        series = self._flatten_series(series)
+        self.first_train_value = series[0]
+        self.last_train_value = series[-1]
+        self.original_train_series = series
+        self.diffed_train_series = self.diff(series)
+
+    def transform(self, series: np.array) -> pd.Series:
+        series = self._flatten_series(series)
+        return self.diff(series).shift(1).fillna(0)
+
+    def inverse_transform(self, series: pd.Series, init=None) -> pd.Series:
+        origin = init if init else self.last_train_value
+        s = pd.Series(origin)
+        s = s.append(series).dropna()
+        return s.expanding().sum()
+
+    @staticmethod
+    def _flatten_series(series: np.ndarray) -> np.ndarray:
+        if len(series.shape) > 2:
+            raise Exception(f"Input data should be shaped (A,) or (A, 1), got {series.shape}")
+        elif len(series.shape) == 2:
+            series = series.flatten()
+        return series
