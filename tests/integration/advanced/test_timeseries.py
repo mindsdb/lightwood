@@ -9,10 +9,7 @@ from sklearn.metrics import r2_score
 from lightwood.api.types import ProblemDefinition
 from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
-try:
-    from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
-except ModuleNotFoundError:
-    from sktime.forecasting.arima import AutoARIMA
+from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
 
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
 from lightwood.mixer.sktime import SkTime
