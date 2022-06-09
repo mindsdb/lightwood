@@ -96,7 +96,7 @@ class SkTime(BaseMixer):
         self.trial_error_fn = MeanAbsolutePercentageError(symmetric=True)
         self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
         self.n_trials = len(self.possible_models)
-        self.freq = self._get_freq(self.ts_analysis['deltas']['__default'][self.ts_analysis['tss'].order_by[0]])
+        self.freq = self._get_freq(self.ts_analysis['deltas']['__default'])
 
         # sktime forecast horizon object is made relative to the end of the latest data point seen at training time
         # the default assumption is to forecast the next `self.horizon` after said data point
@@ -126,10 +126,6 @@ class SkTime(BaseMixer):
         Internal method that fits forecasters to a given dataframe.
         """
         df = data.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
-        data = {'data': df,
-                'group_info': {gcol: df[gcol].tolist()
-                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by
-                else {'': ['__default' for _ in range(df.shape[0])]}}
 
         if not self.hyperparam_search and not self.study:
             module_name = self.model_path
@@ -178,18 +174,14 @@ class SkTime(BaseMixer):
 
             oby_col = self.ts_analysis['tss'].order_by[0]
             if self.grouped_by == ['__default']:
-                series_idxs = data['data'][f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}']
-                series_data = data['data'][self.target].values
-                series_oby = data['data'][oby_col].values
+                series_data = df
+                series_oby = df[oby_col]
             else:
-                target_idx = data['data'].columns.tolist().index(self.target)
-                oby_idx = data['data'].columns.tolist().index(oby_col)
-                series_idxs, series_data = get_group_matches(data, group)
-                series_oby = series_data[:, oby_idx]
-                series_data = series_data[:, target_idx]
+                series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
+                series_oby = series_data[oby_col]
 
+            series = series_data[self.target]
             if series_data.size > self.ts_analysis['tss'].window:
-                series = pd.Series(series_data.squeeze(), index=series_idxs)
                 series = series.sort_index(ascending=True)
                 series = series.reset_index(drop=True)
                 series = series.loc[~pd.isnull(series.values)]  # remove NaN  # @TODO: benchmark imputation vs this?
@@ -243,36 +235,35 @@ class SkTime(BaseMixer):
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
-                           index=np.arange(length),
+                           index=ds.data_frame.index,
                            columns=['prediction'],
                            dtype=object)
 
-        data = {'data': ds.data_frame[self.target],
-                'group_info': {gcol: ds.data_frame[gcol].tolist()
-                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by
-                else {'': ['__default' for _ in range(length)]}}
+        group_values = {gcol: ds.data_frame[gcol].tolist() for gcol in self.grouped_by} \
+            if self.ts_analysis['tss'].group_by \
+            else {'': ['__default' for _ in range(length)]}
 
-        pending_idxs = set(range(length))
-        all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
+        pending_idxs = set(ds.data_frame.index)
+        all_group_combinations = list(product(*[set(x) for x in group_values.values()]))
         for group in all_group_combinations:
             group = tuple(group)
             group = '__default' if group[0] == '__default' else group
-            series_idxs, series_data = get_group_matches(data, group)
+            series_idxs, series_data = get_group_matches(ds.data_frame, group, self.grouped_by)
+            series = series_data[self.target]
 
             if series_data.size > 0:
                 series_idxs = sorted(series_idxs)
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     forecaster = self.models[group]
-                    series = pd.Series(series_data.squeeze(), index=series_idxs)
                     ydf = self._call_groupmodel(ydf, forecaster, series, offset=forecast_offset)
                 else:
                     log.warning(f"Applying naive forecaster for novel group {group}. Performance might not be optimal.")
-                    ydf = self._call_default(ydf, series_data, series_idxs)
+                    ydf = self._call_default(ydf, series.values, series_idxs)
                 pending_idxs -= set(series_idxs)
 
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
-            series = data['data'][list(pending_idxs)].squeeze()
+            series = ds.data_frame[self.target][list(pending_idxs)].squeeze()
             ydf = self._call_default(ydf, series, list(pending_idxs))
 
         return ydf[['prediction']]
@@ -287,9 +278,6 @@ class SkTime(BaseMixer):
 
         :param offset: indicates relative offset to the latest data point seen during model training. Cannot be less than the number of training data points + the amount of diffences applied internally by the model.
         """  # noqa
-        original_index = series.index
-        series = series.reset_index(drop=True)
-
         if isinstance(model, TransformedTargetForecaster):
             submodel = model.steps_[-1][-1]
         else:
@@ -304,11 +292,10 @@ class SkTime(BaseMixer):
         start = max(1 + offset, min_offset)
         end = 1 + series.shape[0] + offset + self.horizon
         all_preds = model.predict(np.arange(start, end)).tolist()
-
-        for idx, _ in enumerate(series.iteritems()):
-            start_idx = 0 if max(1 + idx + offset, min_offset) < 0 else idx
+        for true_idx, (idx, _) in enumerate(series.items()):
+            start_idx = 0 if max(1 + true_idx + offset, min_offset) < 0 else true_idx
             end_idx = start_idx + self.horizon
-            ydf['prediction'].iloc[original_index[idx]] = all_preds[start_idx:end_idx]
+            ydf['prediction'].loc[idx] = all_preds[start_idx:end_idx]
         return ydf
 
     def _call_default(self, ydf, data, idxs):
