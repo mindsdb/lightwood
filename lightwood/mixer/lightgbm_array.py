@@ -67,10 +67,11 @@ class LightGBMArray(BaseMixer):
             # differentiate
             for split in [train_data, dev_data]:
                 for group in self.ts_analysis['group_combinations']:
-                    idxs, subset = get_group_matches(split.data_frame, group, self.ts_analysis['tss'].group_by)
-                    differencer = self.ts_analysis['differencers'].get(group, False)
-                    if differencer:
-                        split.data_frame.at[idxs, self.target] = differencer.transform(subset[self.target])
+                    if group != '__default':  # TODO: how to handle default if there ARE novel groups at inference?
+                        idxs, subset = get_group_matches(split.data_frame, group, self.ts_analysis['tss'].group_by)
+                        differencer = self.ts_analysis['differencers'].get(group, False)
+                        if differencer:
+                            split.data_frame.at[idxs, self.target] = differencer.transform(subset[self.target])
 
             self.models[timestep].fit(train_data, dev_data)
 
@@ -114,20 +115,21 @@ class LightGBMArray(BaseMixer):
 
         # consolidate if differenced
         for group in self.ts_analysis['group_combinations']:
-            differencer = self.ts_analysis['differencers'].get(group, False)
-            if differencer and self.ts_analysis['tss'].use_previous_target:
-                idxs, subset = get_group_matches(ds.data_frame.reset_index(drop=True),
-                                                 group,
-                                                 self.ts_analysis['tss'].group_by)
-                if subset.size > 1:
-                    last_values = [t[-1] for t in subset[f'__mdb_ts_previous_{self.target}']]
-                    last_values = [0 if t is None else t for t in last_values]
-                    # TODO this should be call to inverse_transform instead
-                    ydf.at[idxs, 'prediction_0'] = ydf.iloc[idxs]['prediction_0'] + last_values
-                    for timestep in range(1, self.horizon):
-                        updated = ydf.iloc[idxs][f'prediction_{timestep}'] + \
-                            ydf.iloc[idxs][f'prediction_{timestep-1}']
-                        ydf.at[idxs, f'prediction_{timestep}'] = updated
+            if group != '__default':
+                differencer = self.ts_analysis['differencers'].get(group, False)
+                if differencer and self.ts_analysis['tss'].use_previous_target:
+                    idxs, subset = get_group_matches(ds.data_frame.reset_index(drop=True),
+                                                     group,
+                                                     self.ts_analysis['tss'].group_by)
+                    if subset.size > 1:
+                        last_values = [t[-1] for t in subset[f'__mdb_ts_previous_{self.target}']]
+                        last_values = [0 if t is None else t for t in last_values]
+                        # TODO this should be call to inverse_transform instead
+                        ydf.at[idxs, 'prediction_0'] = ydf.iloc[idxs]['prediction_0'] + last_values
+                        for timestep in range(1, self.horizon):
+                            updated = ydf.iloc[idxs][f'prediction_{timestep}'] + \
+                                ydf.iloc[idxs][f'prediction_{timestep-1}']
+                            ydf.at[idxs, f'prediction_{timestep}'] = updated
 
         ydf['prediction'] = ydf.values.tolist()
         return ydf[['prediction']]
