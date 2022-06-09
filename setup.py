@@ -42,25 +42,27 @@ if sys_platform in ['win32', 'cygwin', 'windows']:
     # These have to be installed manually or via the installers in windows
     requirements = remove_requirements(requirements, 'torch')
 
-setuptools.setup(
-    name=about['__title__'],
-    version=about['__version__'],
-    url=about['__github__'],
-    download_url=about['__pypi__'],
-    license=about['__license__'],
-    author=about['__author__'],
-    author_email=about['__email__'],
-    description=about['__description__'],
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
-    package_data={'project': ['requirements.txt']},
-    install_requires=requirements,
-    extras_require=extra_requirements,
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-    ],
-    python_requires=">=3.6"
-)
+print(requirements)
+
+# setuptools.setup(
+#     name=about['__title__'],
+#     version=about['__version__'],
+#     url=about['__github__'],
+#     download_url=about['__pypi__'],
+#     license=about['__license__'],
+#     author=about['__author__'],
+#     author_email=about['__email__'],
+#     description=about['__description__'],
+#     long_description=long_description,
+#     long_description_content_type="text/markdown",
+#     packages=setuptools.find_packages(),
+#     package_data={'project': ['requirements.txt']},
+#     install_requires=requirements,
+#     extras_require=extra_requirements,
+#     classifiers=[
+#         "Programming Language :: Python :: 3",
+#         "License :: OSI Approved :: MIT License",
+#         "Operating System :: OS Independent",
+#     ],
+#     python_requires=">=3.6"
+# )
