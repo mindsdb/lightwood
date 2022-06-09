@@ -441,7 +441,8 @@
                         <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
                             <span class="s2">&quot;fit_on_dev&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                             <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;horizon&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.horizon&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;ts_analysis&quot;</span><span class="p">:</span> <span class="s2">&quot;$ts_analysis&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;tss&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
                         <span class="p">},</span>
                     <span class="p">}</span>
                 <span class="p">]</span>
@@ -724,8 +725,9 @@
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target_encoder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;target_encoder&quot;</span><span class="p">,</span> <span class="s2">&quot;$encoders[self.target]&quot;</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="s2">&quot;horizon&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]:</span>
-                <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;horizon&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;$problem_definition.timeseries_settings.horizon&quot;</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;tss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tss&quot;</span><span class="p">,</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;ts_analysis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ts_analysis&quot;</span><span class="p">,</span> <span class="s2">&quot;$ts_analysis&quot;</span><span class="p">)</span>
+            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;fit_on_dev&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fit_on_dev&quot;</span><span class="p">,</span> <span class="s2">&quot;True&quot;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;SkTime&quot;</span><span class="p">,</span> <span class="s2">&quot;ProphetMixer&quot;</span><span class="p">):</span>
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;$target&quot;</span><span class="p">)</span>
@@ -981,11 +983,6 @@
 <span class="s2"># Time-series blocks</span>
 <span class="si">{</span><span class="n">ts_transform_code</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">ts_analyze_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">clean_body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">if self.mode != &#39;predict&#39;:</span>
-<span class="si">{</span><span class="n">align</span><span class="p">(</span><span class="n">ts_analyze_code</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
-<span class="s2">&quot;&quot;&quot;</span>
 
     <span class="n">clean_body</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">return data&#39;</span>
 
@@ -1008,12 +1005,19 @@
     <span class="c1"># Prepare features Body</span>
     <span class="c1"># ----------------- #</span>
 
-    <span class="n">prepare_body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">prepare_body</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">self.mode = &#39;train&#39;</span>
 
 <span class="s2">if self.statistical_analysis is None:</span>
 <span class="s2">    raise Exception(&quot;Please run analyze_data first&quot;)</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ts_analyze_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">prepare_body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">if self.mode != &#39;predict&#39;:</span>
+<span class="s2">    </span><span class="si">{</span><span class="n">align</span><span class="p">(</span><span class="n">ts_analyze_code</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">&quot;&quot;&quot;</span>
 
+    <span class="n">prepare_body</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2"># Column to encoder mapping</span>
 <span class="s2">self.encoders = </span><span class="si">{</span><span class="n">inline_dict</span><span class="p">(</span><span class="n">encoder_dict</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
 

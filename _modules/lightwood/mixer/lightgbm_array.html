@@ -181,30 +181,44 @@
 <span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.base</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.lightgbm</span> <span class="kn">import</span> <span class="n">LightGBM</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span><span class="p">,</span> <span class="n">TimeseriesSettings</span>
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span>
 
 
 <div class="viewcode-block" id="LightGBMArray"><a class="viewcode-back" href="../../../mixer.html#mixer.LightGBMArray">[docs]</a><span class="k">class</span> <span class="nc">LightGBMArray</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;LightGBM-based model, intended for usage in time series tasks.&quot;&quot;&quot;</span>
     <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LightGBM</span><span class="p">]</span>
-    <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">submodel_stop_after</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">supports_proba</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span>
+    <span class="n">tss</span><span class="p">:</span> <span class="n">TimeseriesSettings</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
             <span class="n">input_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fit_on_dev</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">):</span>
+            <span class="n">fit_on_dev</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+            <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">,</span>
+            <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span>
+            <span class="n">tss</span><span class="p">:</span> <span class="n">TimeseriesSettings</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">submodel_stop_after</span> <span class="o">=</span> <span class="n">stop_after</span> <span class="o">/</span> <span class="n">horizon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tss</span> <span class="o">=</span> <span class="n">tss</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">submodel_stop_after</span> <span class="o">=</span> <span class="n">stop_after</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
-        <span class="c1"># dtype_dict[target] = dtype.float  @TODO: figure out if this can be removed</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">LightGBM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submodel_stop_after</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">input_cols</span><span class="p">,</span> <span class="n">fit_on_dev</span><span class="p">,</span>
-                                <span class="kc">False</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">)</span>
-                       <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">horizon</span><span class="p">)]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span> <span class="o">=</span> <span class="n">horizon</span>  <span class="c1"># for time series tasks, how long is the forecast horizon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">LightGBM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submodel_stop_after</span><span class="p">,</span>
+                                <span class="n">target</span><span class="p">,</span>
+                                <span class="n">dtype_dict</span><span class="p">,</span>
+                                <span class="n">input_cols</span><span class="p">,</span>
+                                <span class="n">fit_on_dev</span><span class="p">,</span>
+                                <span class="kc">False</span><span class="p">,</span>  <span class="c1"># use_optuna</span>
+                                <span class="n">target_encoder</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span> <span class="o">=</span> <span class="n">ts_analysis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -218,7 +232,7 @@
                 <span class="n">train_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="si">}</span><span class="s1">_timestep_</span><span class="si">{</span><span class="n">timestep</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
                 <span class="n">dev_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">dev_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="si">}</span><span class="s1">_timestep_</span><span class="si">{</span><span class="n">timestep</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">timestep</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">)</span>  <span class="c1"># @TODO: this call could be parallelized</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">timestep</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">)</span>
 
         <span class="c1"># restore target</span>
         <span class="n">train_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_target_train</span>

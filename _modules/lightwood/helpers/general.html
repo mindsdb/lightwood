@@ -172,39 +172,35 @@
             
   <h1>Source code for lightwood.helpers.general</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">importlib</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span><span class="p">,</span> <span class="n">f1_score</span><span class="p">,</span> <span class="n">mean_absolute_error</span><span class="p">,</span> <span class="n">balanced_accuracy_score</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.numeric</span> <span class="kn">import</span> <span class="n">is_nan_numeric</span>
 
 
-<div class="viewcode-block" id="get_group_matches"><a class="viewcode-back" href="../../../helpers.html#helpers.get_group_matches">[docs]</a><span class="k">def</span> <span class="nf">get_group_matches</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">combination</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Given a grouped-by combination, return rows of the data that match belong to it. Params:</span>
-<span class="sd">    data: dict with data to filter and group-by columns info.</span>
-<span class="sd">    combination: tuple with values to filter by</span>
-<span class="sd">    return: indexes for rows to normalize, data to normalize</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">keys</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;group_info&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>  <span class="c1"># which column does each combination value belong to</span>
+<div class="viewcode-block" id="get_group_matches"><a class="viewcode-back" href="../../../helpers.html#helpers.get_group_matches">[docs]</a><span class="k">def</span> <span class="nf">get_group_matches</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
+        <span class="n">combination</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
+        <span class="n">group_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Given a particular group combination, return the data subset that belongs to it.&quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
-        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrong data type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">, must be pandas.DataFrame or pd.Series&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">combination</span> <span class="o">==</span> <span class="s1">&#39;__default&#39;</span><span class="p">:</span>
-        <span class="n">idxs</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]))</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">idxs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])[</span><span class="n">idxs</span><span class="p">,</span> <span class="p">:]]</span>  <span class="c1"># return all data</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">data</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">all_sets</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">combination</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
-            <span class="n">all_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">elt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;group_info&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">])</span> <span class="k">if</span> <span class="n">elt</span> <span class="o">==</span> <span class="n">val</span><span class="p">]))</span>
-        <span class="k">if</span> <span class="n">all_sets</span><span class="p">:</span>
-            <span class="n">idxs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="o">*</span><span class="n">all_sets</span><span class="p">)))</span>
-            <span class="k">return</span> <span class="n">idxs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])[</span><span class="n">idxs</span><span class="p">,</span> <span class="p">:]</span>
-
+        <span class="n">subset</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">combination</span><span class="p">,</span> <span class="n">group_columns</span><span class="p">):</span>
+            <span class="n">subset</span> <span class="o">=</span> <span class="n">subset</span><span class="p">[</span><span class="n">subset</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="n">val</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">subset</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">subset</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
+            <span class="k">return</span> <span class="p">[],</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span></div>
 
 
 <span class="c1"># ------------------------- #</span>
@@ -313,12 +309,6 @@
         <span class="n">naive_errors</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">naive_errors</span> <span class="o">=</span> <span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ts_naive_mae&#39;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="n">wrapped_data</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="s1">&#39;group_info&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">gcol</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">gcol</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                           <span class="k">for</span> <span class="n">gcol</span> <span class="ow">in</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span><span class="p">}</span> <span class="k">if</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="p">{}</span>
-        <span class="p">}</span>
-
         <span class="k">if</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
             <span class="p">[</span><span class="n">true_values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">gby_col</span><span class="p">)</span> <span class="k">for</span> <span class="n">gby_col</span> <span class="ow">in</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span><span class="p">]</span>
 
@@ -334,7 +324,7 @@
 
     <span class="n">mases</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">]:</span>
-        <span class="n">g_idxs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">wrapped_data</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
+        <span class="n">g_idxs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">group</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
 
         <span class="c1"># only evaluate populated groups</span>
         <span class="k">if</span> <span class="n">g_idxs</span><span class="p">:</span>

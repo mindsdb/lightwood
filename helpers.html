@@ -365,11 +365,13 @@ If not, then a (positive bounded) R2 score is returned instead.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="helpers.get_group_matches">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">get_group_matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combination</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#get_group_matches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.get_group_matches" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a grouped-by combination, return rows of the data that match belong to it. Params:
-data: dict with data to filter and group-by columns info.
-combination: tuple with values to filter by
-return: indexes for rows to normalize, data to normalize</p>
+<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">get_group_matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_columns</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#get_group_matches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.get_group_matches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a particular group combination, return the data subset that belongs to it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
