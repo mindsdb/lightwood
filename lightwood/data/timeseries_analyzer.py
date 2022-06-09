@@ -45,10 +45,6 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
 
     deltas, periods, freqs = get_delta(data['train'], group_combinations, tss)
 
-    # TODO: transform all data splits using differencers, but not here
-    # TODO: must revert this analyzer to before the TS transform, because otherwise it's wasted compute to revert
-    #  those array-transforms, differentiate, then put them  back together...
-
     return {'target_normalizers': normalizers,
             'deltas': deltas,
             'tss': tss,
