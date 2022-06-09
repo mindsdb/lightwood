@@ -45,7 +45,7 @@ class NHitsMixer(BaseMixer):
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
 
         # pretraining info
-        self.pretrained = False  # todo: modifiable from JsonAI, plus option to finetune!
+        self.pretrained = True  # False  # todo: modifiable from JsonAI, plus option to finetune!
         self.base_url = 'https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/'
         self.freq_to_model_name = {
             'year': 'yearly',
@@ -65,6 +65,7 @@ class NHitsMixer(BaseMixer):
             'monthly': 'nhits_m4_monthly.ckpt',  # monthly
             'yearly': 'nhits_m4_yearly.ckpt',  # yearly
         }
+        self.model_name = None
         self.model = None
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
@@ -90,10 +91,10 @@ class NHitsMixer(BaseMixer):
         # train the model
         n_time_out = self.horizon
         if self.pretrained:
-            model_name = self.model_names.get(self.freq_to_model_name[self.ts_analysis['sample_freqs']['__default']],
+            self.model_name = self.model_names.get(self.freq_to_model_name[self.ts_analysis['sample_freqs']['__default']],
                                               None)
-            model_name = self.model_names['hourly'] if model_name is None else model_name
-            ckpt_url = self.base_url + model_name
+            self.model_name = self.model_names['hourly'] if self.model_name is None else self.model_name
+            ckpt_url = self.base_url + self.model_name
             self.model = MQNHITS.load_from_checkpoint(ckpt_url)  # TODO use this when not pretraining for consistency
 
             # TODO: if self.finetune: ...
