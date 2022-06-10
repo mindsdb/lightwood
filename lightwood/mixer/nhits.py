@@ -28,7 +28,7 @@ class NHitsMixer(BaseMixer):
             ts_analysis: Dict,
     ):
         """
-        Mixer description here.
+        Wrapper around a MQN-HITS deep learning model.
         
         :param stop_after: time budget in seconds.
         :param target: column to forecast.
@@ -45,9 +45,11 @@ class NHitsMixer(BaseMixer):
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
 
         # pretraining info
-        self.pretrained = True  # False  # todo: modifiable from JsonAI, plus option to finetune!
+        # todo: modifiable from JsonAI, plus option to finetune! if finetuning, ensure horizon check and revert if
+        #   pretrained is not long enough. Also, pass confidence bounds directly to analyzer and bypass normal procedure
+        self.pretrained = False  # True
         self.base_url = 'https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/'
-        self.freq_to_model_name = {
+        self.freq_to_model = {
             'year': 'yearly',
             'semestral': 'yearly',
             'quarter': 'monthly',
@@ -91,17 +93,18 @@ class NHitsMixer(BaseMixer):
         # train the model
         n_time_out = self.horizon
         if self.pretrained:
-            self.model_name = self.model_names.get(self.freq_to_model_name[self.ts_analysis['sample_freqs']['__default']],
-                                              None)
+            self.model_name = self.model_names.get(self.freq_to_model[self.ts_analysis['sample_freqs']['__default']],
+                                                   None)
             self.model_name = self.model_names['hourly'] if self.model_name is None else self.model_name
             ckpt_url = self.base_url + self.model_name
             self.model = MQNHITS.load_from_checkpoint(ckpt_url)  # TODO use this when not pretraining for consistency
-
+            # TODO: truncate horizon if smaller. if bigger, either raise exception or reapply predictor to get entire H
+            # TODO: if freq is different than pre-trained, needs alignment!
             # TODO: if self.finetune: ...
         else:
             self.model = nf.auto.MQNHITS(horizon=n_time_out)
-            self.model.space['max_steps'] = hp.choice('max_steps', [1e4])
-            self.model.space['max_epochs'] = hp.choice('max_epochs', [50])
+            self.model.space['max_steps'] = hp.choice('max_steps', [1e4])  # [10])  #
+            self.model.space['max_epochs'] = hp.choice('max_epochs', [50])  # [1])  #
             self.model.space['n_time_in'] = hp.choice('n_time_in', [self.ts_analysis['tss'].window])
             self.model.space['n_time_out'] = hp.choice('n_time_out', [self.horizon])
             self.model.space['n_x_hidden'] = hp.choice('n_x_hidden', [0])
@@ -111,7 +114,7 @@ class NHitsMixer(BaseMixer):
             self.model.fit(Y_df=Y_df,
                            X_df=None,       # Exogenous variables
                            S_df=None,       # Static variables
-                           hyperopt_steps=3,
+                           hyperopt_steps=3,  # 1, #
                            n_ts_val=n_ts_val,
                            n_ts_test=n_ts_test,
                            results_dir='./results/autonhits',  # TODO: rm/change to /tmp/lightwood/autonhits or similar
@@ -136,6 +139,10 @@ class NHitsMixer(BaseMixer):
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         """
         Calls the mixer to emit forecasts.
+        
+        NOTE: in the future we may support predicting every single row efficiently. For now, this mixer
+        replicates the neuralforecast library behavior and returns a forecast strictly for the next `tss.horizon`
+        timesteps after the end of the input dataframe.
         """  # noqa
         if args.predict_proba:
             log.warning('This mixer does not output probability estimates')
@@ -146,11 +153,20 @@ class NHitsMixer(BaseMixer):
                            columns=['prediction'],
                            dtype=object)
 
-        input_df = self._make_initial_df(ds.data_frame)  # TODO make it so that it's horizon worth of data in each row
+        ydf['prediction'] = [[0 for _ in range(self.horizon)] for _ in range(len(ydf))]  # turn into zero-filled arrays
+        input_df = self._make_initial_df(ds.data_frame).reset_index()
+        ydf['index'] = input_df['index']
         pred_col = 'y_50'  # median == point prediction
-        for i in range(input_df.shape[0]):
-            fcst = self.model.forecast(Y_df=input_df.iloc[i:i + 1])
-            ydf.iloc[i]['prediction'] = fcst[pred_col].tolist()[:self.horizon]
+
+        group_ends = []
+        for group in input_df['unique_id'].unique():
+            group_ends.append(input_df[input_df['unique_id'] == group]['index'].iloc[-1])
+        fcst = self.model.forecast(Y_df=input_df)
+
+        for gidx, group in zip(group_ends, input_df['unique_id'].unique()):
+            group_preds = fcst[fcst['unique_id'] == group][pred_col].tolist()[:self.horizon]
+            idx = ydf[ydf['index'] == gidx].index[0]
+            ydf.at[idx, 'prediction'] = group_preds
 
         return ydf[['prediction']]
 
