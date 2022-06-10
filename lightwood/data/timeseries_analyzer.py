@@ -2,21 +2,27 @@ from typing import Dict, Tuple, List
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import mean_squared_error
+from sktime.transformations.series.detrend import Detrender
+from sktime.forecasting.trend import PolynomialTrendForecaster
+from sktime.transformations.series.detrend import Deseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
+from lightwood.helpers.ts import get_ts_groups
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 from lightwood.helpers.ts import Differencer
-from lightwood.helpers.general import get_group_matches
+from lightwood.helpers.ts import get_group_matches
 
 
-def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str],
+def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str], # analysis,
                         timeseries_settings: TimeseriesSettings, target: str) -> Dict:
     """
     This module analyzes (pre-processed) time series data and stores a few useful insights used in the rest of Lightwood's pipeline.
     
     :param data: dictionary with the dataset split into train, val, test subsets. 
     :param dtype_dict: dictionary with inferred types for every column.
+    :param analysis: output of statistical analysis phase.
     :param timeseries_settings: A `TimeseriesSettings` object. For more details, check `lightwood.types.TimeseriesSettings`.
     :param target: name of the target column.
     
@@ -30,65 +36,36 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     :return: Dictionary with the aforementioned insights and the `TimeseriesSettings` object for future references.
     """  # noqa
     tss = timeseries_settings
+    groups = get_ts_groups(data['train'], tss)
+    deltas = {}  # analysis.ts_stats['deltas']
+    periods = {}  # aanalysis.ts_stats['periods']  # TODO: get from ts_transform?
+    freqs = {}  # analysis.ts_stats['freqs']
 
-    normalizers, group_combinations = generate_target_group_normalizers(data['train'], target, dtype_dict, tss)
+    normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
 
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
         naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'],
                                                                              target,
                                                                              tss,
-                                                                             group_combinations)
-        differencers = get_differencers(data['train'], target, group_combinations, tss.group_by)
+                                                                             groups)
+        differencers = get_differencers(data['train'], target, groups, tss.group_by)
     else:
         naive_forecast_residuals, scale_factor = {}, {}
         differencers = {}
 
-    deltas, periods, freqs = get_delta(data['train'], group_combinations, tss)
+    stl_transforms = get_stls(data['train'], data['dev'], target, periods, groups, tss)
 
     return {'target_normalizers': normalizers,
             'deltas': deltas,
             'tss': tss,
-            'group_combinations': group_combinations,
+            'group_combinations': groups,
             'ts_naive_residuals': naive_forecast_residuals,
             'ts_naive_mae': scale_factor,
             'periods': periods,
             'sample_freqs': freqs,
+            'stl_transforms': stl_transforms,
             'differencers': differencers
             }
-
-
-def get_delta(
-        df: pd.DataFrame,
-        group_combinations: list,
-        tss: TimeseriesSettings
-) -> Tuple[Dict, Dict, Dict]:
-    """
-    Infer the sampling interval of each time series, by picking the most popular time interval observed in the training data.
-    
-    :param df: Dataframe with time series data.
-    :param group_combinations: all tuples with distinct values for `TimeseriesSettings.group_by` columns, defining all available time series.
-    :param tss: timeseries settings
-    
-    :return:
-    Dictionary with group combination tuples as keys. Values are dictionaries with the inferred delta for each series.
-    """  # noqa
-    order_col = [f'__mdb_original_{tss.order_by[0]}']
-    deltas = {"__default": df[order_col].rolling(window=2).apply(np.diff).value_counts().index[0][0]}
-    freq, period = detect_freq_period(deltas["__default"], tss)
-    periods = {"__default": period}
-    freqs = {"__default": freq}
-
-    if tss.group_by:
-        for group in group_combinations:
-            if group != "__default":
-                _, subset = get_group_matches(df, group, tss.group_by)
-                if subset.size > 1:
-                    deltas[group] = subset[order_col].rolling(window=2).apply(np.diff).value_counts().index[0][0]
-                    freq, period = detect_freq_period(deltas[group], tss)
-                    periods[group] = period
-                    freqs[group] = freq
-
-    return deltas, periods, freqs
 
 
 def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, float]:
@@ -128,53 +105,6 @@ def get_grouped_naive_residuals(
     return group_residuals, group_scale_factors
 
 
-def detect_freq_period(deltas: pd.DataFrame, tss: TimeseriesSettings) -> tuple:
-    """
-    Helper method that, based on the most popular interval for a time series, determines its seasonal peridiocity (sp).
-    This bit of information can be crucial for good modelling with methods like ARIMA.
-
-    Supported time intervals are:
-        * 'year'
-        * 'semestral'
-        * 'quarter'
-        * 'bimonthly'
-        * 'monthly'
-        * 'weekly'
-        * 'daily'
-        * 'hourly'
-        * 'minute'
-        * 'second'
-
-    Note: all computations assume that the first provided `order_by` column is the one that specifies the sp.
-
-    :param deltas: output of `get_delta`, has the most popular interval for each time series.
-    :param tss: timeseries settings.
-
-    :return: for all time series 1) a dictionary with its sp and 2) a dictionary with the detected sampling frequency
-    """  # noqa
-    secs_to_interval = {
-        'year': 60 * 60 * 24 * 365,
-        'semestral': 60 * 60 * 24 * 365 // 2,
-        'quarter': 60 * 60 * 24 * 365 // 4,
-        'bimonthly': 60 * 60 * 24 * 365 // 6,
-        'monthly': 60 * 60 * 24 * 31,
-        'weekly': 60 * 60 * 24 * 7,
-        'daily': 60 * 60 * 24,
-        'hourly': 60 * 60,
-        'minute': 60,
-        'second': 1
-    }
-    freq_to_period = {interval: period for (interval, period) in tss.interval_periods}
-    for tag, period in (('year', 1), ('semestral', 2), ('quarter', 4), ('bimonthly', 6), ('monthly', 12),
-                        ('weekly', 4), ('daily', 1), ('hourly', 24), ('minute', 1), ('second', 1)):
-        if tag not in freq_to_period.keys():
-            freq_to_period[tag] = period
-
-    diffs = [(tag, abs(deltas - secs)) for tag, secs in secs_to_interval.items()]
-    freq, min_diff = sorted(diffs, key=lambda x: x[1])[0]
-    return freq, freq_to_period.get(freq, 1)
-
-
 def get_differencers(data: pd.DataFrame, target: str, groups: List, group_cols: List):
     differencers = {}
     for group in groups:
@@ -183,3 +113,53 @@ def get_differencers(data: pd.DataFrame, target: str, groups: List, group_cols: 
         differencer.fit(subset[target].values)
         differencers[group] = differencer
     return differencers
+
+
+def get_stls(train_df: pd.DataFrame,
+             dev_df: pd.DataFrame,
+             target: str,
+             sps: Dict,
+             groups: list,
+             tss: TimeseriesSettings
+) -> Dict[str, object]:
+    stls = {}
+    for group in groups:
+        _, tr_subset = get_group_matches(train_df, group, tss.group_by)
+        _, dev_subset = get_group_matches(dev_df, group, tss.group_by)
+        tr_subset.index = tr_subset[f'__mdb_original_index']
+        dev_subset.index = dev_subset[f'__mdb_original_{tss.order_by[0]}']
+        # dev_subset.index = pd.to_datetime(dev_subset[f'__mdb_original_{tss.order_by[0]}'], unit='s')
+        tr_subset = tr_subset[target]
+        dev_subset = dev_subset[target]
+        detrender = _pick_detrender(tr_subset, dev_subset)
+        deseasonalizer = _pick_deseasonalizer(tr_subset, dev_subset)
+
+    return stls
+
+
+def _pick_detrender(tr_subset, dev_subset):
+    detrenders = []
+    tr_scores = []
+    dev_scores = []
+
+    # TODO: pending: move group count and freq inference to before ts_transform, and impute missing data (as 0.0, doesn't matter)
+    #   then enforce this index and freq so that below is fittable and also usable when transforming or inverting
+    #   at arbitrary points
+
+    for degree in [1, 2]:
+        detrender = Detrender(forecaster=PolynomialTrendForecaster(degree=degree))
+        tr_res = detrender.fit_transform(tr_subset.reset_index(drop=True))
+        detrenders.append(detrender)
+        tr_scores.append(np.sqrt(mean_squared_error(tr_subset, tr_res)))
+        dev_res = detrender.transform(dev_subset.reset_index(drop=True))
+        dev_scores.append(np.sqrt(mean_squared_error(dev_subset, dev_res)))
+
+    r2s = np.mean([tr_scores, dev_scores], axis=1)
+    return detrenders[np.argmax(r2s)]
+
+
+def _pick_deseasonalizer(tr_subset, dev_subset):
+    deseasonalizers = []
+    tr_r2s = []
+    # dev_r2
+    return None

@@ -1,15 +1,18 @@
 import copy
-import datetime
 import dateutil
+import datetime
+from typing import Dict
+from functools import partial
+import multiprocessing as mp
+
 import numpy as np
 import pandas as pd
-import multiprocessing as mp
 from lightwood.helpers.parallelism import get_nr_procs
-from functools import partial
-from typing import Dict
+from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches
+
+from lightwood.api import dtype
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.log import log
-from lightwood.api import dtype
 
 
 def transform_timeseries(
@@ -46,6 +49,52 @@ def transform_timeseries(
     for hcol in tss.historical_columns:
         if hcol not in data.columns or data[hcol].isna().any():
             raise Exception(f"Cannot transform. Missing values in historical column {hcol}.")
+
+    # TODO work area -- objective: use DatetimeIndex from here on out, seems possible
+    #  infer frequencies for all partitions and impute missing values with empty registries
+
+    # 1. pass all rows to seconds
+    # Convert order_by columns to numbers (note, rows are references to mutable rows in `original_df`)
+    for i, row in original_df.iterrows():
+        for col in ob_arr:
+            # @TODO: Remove if the TS encoder can handle `None`
+            if row[col] is None or pd.isna(row[col]):
+                original_df.at[i, col] = 0.0
+            else:
+                if dtype_dict[col] == dtype.date:
+                    try:
+                        row[col] = dateutil.parser.parse(
+                            row[col],
+                            **{}
+                        )
+                    except (TypeError, ValueError):
+                        pass
+
+                if isinstance(row[col], datetime.datetime):
+                    row[col] = row[col].timestamp()
+
+                try:
+                    row[col] = float(row[col])
+                except ValueError:
+                    raise ValueError(f'Failed to order based on column: "{col}" due to faulty value: {row[col]}')
+
+    # 2. infer frequency with get_delta
+    oby_col = tss.order_by[0]
+    groups = get_ts_groups(data, tss)
+    deltas, periods, freqs = get_delta(data, dtype_dict, groups, tss)
+
+    # 3. pass seconds to timestamps according to each group's inferred freq
+    subsets = []
+    for group in groups:
+        if (tss.group_by and group != '__default') or not tss.group_by:
+            idxs, subset = get_group_matches(data, group, tss.group_by)
+            # original_df.loc[idxs][oby_col] = pd.to_datetime(original_df.loc[idxs][oby_col], unit='s')
+
+            # 4. multiindex: group-ts, use inferred freq + generate new rows where needed
+            index = pd.to_datetime(subset[oby_col], unit='s')
+            subset.index = pd.date_range(start=index.iloc[0], freq=freqs[group], periods=len(subset))
+            subsets.append(subset)
+    original_df = pd.concat(subsets).sort_values(by='__mdb_original_index')
 
     if '__mdb_forecast_offset' in original_df.columns:
         """ This special column can be either None or an integer. If this column is passed, then the TS transformation will react to the values within:
@@ -85,30 +134,6 @@ def transform_timeseries(
     for col in ob_arr:
         if dtype_dict[col] in (dtype.date, dtype.integer, dtype.float):
             secondary_type_dict[col] = dtype_dict[col]
-
-    # Convert order_by columns to numbers (note, rows are references to mutable rows in `original_df`)
-    for i, row in original_df.iterrows():
-        for col in ob_arr:
-            # @TODO: Remove if the TS encoder can handle `None`
-            if row[col] is None or pd.isna(row[col]):
-                original_df.at[i, col] = 0.0
-            else:
-                if dtype_dict[col] == dtype.date:
-                    try:
-                        row[col] = dateutil.parser.parse(
-                            row[col],
-                            **{}
-                        )
-                    except (TypeError, ValueError):
-                        pass
-
-                if isinstance(row[col], datetime.datetime):
-                    row[col] = row[col].timestamp()
-
-                try:
-                    row[col] = float(row[col])
-                except ValueError:
-                    raise ValueError(f'Failed to order based on column: "{col}" due to faulty value: {row[col]}')
 
     for oby in tss.order_by:
         original_df[f'__mdb_original_{oby}'] = original_df[oby]
@@ -277,9 +302,9 @@ def _ts_order_col_to_cell_lists(df: pd.DataFrame, order_cols: list) -> pd.DataFr
     :return: Dataframe with all `order_cols` modified so that their values are cells, e.g. `1` -> `[1]`
     """
     for order_col in order_cols:
-        for ii in range(len(df)):
-            label = df.index.values[ii]
-            df.at[label, order_col] = [df.at[label, order_col]]
+        col_idx = df.columns.tolist().index(order_col)
+        for i in range(len(df)):
+            df.iat[i, col_idx] = [df.iat[i, col_idx]]
     return df
 
 

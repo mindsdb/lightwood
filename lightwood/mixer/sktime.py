@@ -21,7 +21,7 @@ except ModuleNotFoundError:
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
-from lightwood.helpers.general import get_group_matches
+from lightwood.helpers.ts import get_group_matches
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 

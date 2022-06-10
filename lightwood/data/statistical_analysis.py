@@ -5,6 +5,7 @@ import datetime
 from dateutil.parser import parse as parse_dt
 from lightwood.api import StatisticalAnalysis, ProblemDefinition
 from lightwood.helpers.numeric import filter_nan_and_none
+from lightwood.helpers.ts import get_ts_groups
 from lightwood.helpers.seed import seed
 from lightwood.data.cleaner import cleaner
 from lightwood.helpers.log import log
@@ -168,6 +169,12 @@ def statistical_analysis(data: pd.DataFrame,
         else:
             avg_words_per_sentence[col] = None
 
+    if problem_definition.timeseries_settings.is_timeseries:
+        groups = get_ts_groups(data, problem_definition.timeseries_settings)
+        ts_stats={'groups': groups}
+    else:
+        ts_stats = {}
+
     log.info('Finished statistical analysis')
     return StatisticalAnalysis(
         nr_rows=nr_rows,
@@ -181,5 +188,6 @@ def statistical_analysis(data: pd.DataFrame,
         missing=missing,
         distinct=distinct,
         bias=bias,
-        avg_words_per_sentence=avg_words_per_sentence
+        avg_words_per_sentence=avg_words_per_sentence,
+        ts_stats=ts_stats
     )

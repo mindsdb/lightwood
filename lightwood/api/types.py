@@ -73,6 +73,7 @@ class StatisticalAnalysis:
     :param bias:
     :param avg_words_per_sentence:
     :param positive_domain:
+    :param ts_stats:
     """ # noqa
 
     nr_rows: int
@@ -87,6 +88,7 @@ class StatisticalAnalysis:
     bias: object
     avg_words_per_sentence: object
     positive_domain: bool
+    ts_stats: dict
 
 
 @dataclass_json
