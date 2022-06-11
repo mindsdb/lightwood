@@ -93,6 +93,7 @@ class NHitsMixer(BaseMixer):
         # train the model
         n_time_out = self.horizon
         if self.pretrained:
+            # todo: ensure target data undergoes same transformation as pretrained model?
             self.model_name = self.model_names.get(self.freq_to_model[self.ts_analysis['sample_freqs']['__default']],
                                                    None)
             self.model_name = self.model_names['hourly'] if self.model_name is None else self.model_name
@@ -104,7 +105,7 @@ class NHitsMixer(BaseMixer):
         else:
             self.model = nf.auto.MQNHITS(horizon=n_time_out)
             self.model.space['max_steps'] = hp.choice('max_steps', [1e4])  # [10])  #
-            self.model.space['max_epochs'] = hp.choice('max_epochs', [50])  # [1])  #
+            self.model.space['max_epochs'] = hp.choice('max_epochs', [100])  # [1])  #
             self.model.space['n_time_in'] = hp.choice('n_time_in', [self.ts_analysis['tss'].window])
             self.model.space['n_time_out'] = hp.choice('n_time_out', [self.horizon])
             self.model.space['n_x_hidden'] = hp.choice('n_x_hidden', [0])
@@ -114,7 +115,7 @@ class NHitsMixer(BaseMixer):
             self.model.fit(Y_df=Y_df,
                            X_df=None,       # Exogenous variables
                            S_df=None,       # Static variables
-                           hyperopt_steps=3,  # 1, #
+                           hyperopt_steps=5,  # 1, #
                            n_ts_val=n_ts_val,
                            n_ts_test=n_ts_test,
                            results_dir='./results/autonhits',  # TODO: rm/change to /tmp/lightwood/autonhits or similar
@@ -150,13 +151,16 @@ class NHitsMixer(BaseMixer):
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),
-                           columns=['prediction'],
+                           columns=['prediction', 'lower', 'upper'],
                            dtype=object)
 
-        ydf['prediction'] = [[0 for _ in range(self.horizon)] for _ in range(len(ydf))]  # turn into zero-filled arrays
         input_df = self._make_initial_df(ds.data_frame).reset_index()
         ydf['index'] = input_df['index']
-        pred_col = 'y_50'  # median == point prediction
+
+        pred_cols = ['y_5', 'y_50', 'y_95']
+        target_cols = ['lower', 'prediction', 'upper']
+        for target_col in target_cols:
+            ydf[target_col] = [[0 for _ in range(self.horizon)] for _ in range(len(ydf))]  # zero-filled arrays
 
         group_ends = []
         for group in input_df['unique_id'].unique():
@@ -164,11 +168,13 @@ class NHitsMixer(BaseMixer):
         fcst = self.model.forecast(Y_df=input_df)
 
         for gidx, group in zip(group_ends, input_df['unique_id'].unique()):
-            group_preds = fcst[fcst['unique_id'] == group][pred_col].tolist()[:self.horizon]
-            idx = ydf[ydf['index'] == gidx].index[0]
-            ydf.at[idx, 'prediction'] = group_preds
+            for pred_col, target_col in zip(pred_cols, target_cols):
+                group_preds = fcst[fcst['unique_id'] == group][pred_col].tolist()[:self.horizon]
+                idx = ydf[ydf['index'] == gidx].index[0]
+                ydf.at[idx, target_col] = group_preds
 
-        return ydf[['prediction']]
+        ydf['confidence'] = 0.9
+        return ydf
 
     def _make_initial_df(self, df):
         oby_col = self.ts_analysis["tss"].order_by[0]
