@@ -105,13 +105,13 @@ class NHitsMixer(BaseMixer):
         else:
             self.model = nf.auto.MQNHITS(horizon=n_time_out)
             self.model.space['max_steps'] = hp.choice('max_steps', [1e4])  # [10])  #
-            self.model.space['max_epochs'] = hp.choice('max_epochs', [100])  # [1])  #
+            self.model.space['max_epochs'] = hp.choice('max_epochs', [50])  # [1])  #
             self.model.space['n_time_in'] = hp.choice('n_time_in', [self.ts_analysis['tss'].window])
             self.model.space['n_time_out'] = hp.choice('n_time_out', [self.horizon])
             self.model.space['n_x_hidden'] = hp.choice('n_x_hidden', [0])
             self.model.space['n_s_hidden'] = hp.choice('n_s_hidden', [0])
             self.model.space['frequency'] = hp.choice('frequency', [self.ts_analysis['sample_freqs']['__default']])
-            self.model.space['random_seed'] = hp.choice('random_seed', [1])
+            self.model.space['random_seed'] = hp.choice('random_seed', [42])
             self.model.fit(Y_df=Y_df,
                            X_df=None,       # Exogenous variables
                            S_df=None,       # Static variables
