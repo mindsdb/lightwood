@@ -216,6 +216,15 @@ class ICP(BaseAnalysisBlock):
                 **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
         ns = SimpleNamespace(**kwargs)
 
+        if 'confidence' in ns.predictions.columns:
+            # bypass calibrator if model already outputs confidence
+            row_insights['prediction'] = ns.predictions['prediction']
+            row_insights['confidence'] = ns.predictions['confidence']
+            if 'upper' in ns.predictions.columns and 'lower' in ns.predictions.columns:
+                row_insights['upper'] = ns.predictions['upper']
+                row_insights['lower'] = ns.predictions['lower']
+            return row_insights, global_insights
+
         if ns.analysis['icp']['__mdb_active']:
             icp_X = deepcopy(ns.data)
 

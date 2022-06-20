@@ -556,6 +556,14 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get("ts_analysis", "$ts_analysis")
             mixers[i]["args"]["fit_on_dev"] = mixers[i]["args"].get("fit_on_dev", "True")
 
+        elif mixers[i]["module"] == "NHitsMixer":
+            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
+            mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
+            mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
+                "ts_analysis", "$ts_analysis"
+            )
+            problem_definition.fit_on_all = False  # takes too long otherwise
+
         elif mixers[i]["module"] in ("SkTime", "ProphetMixer"):
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
