@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.metrics import mean_squared_error
 from sktime.transformations.series.detrend import Detrender
 from sktime.forecasting.trend import PolynomialTrendForecaster
-from sktime.transformations.series.detrend import Deseasonalizer
+# from sktime.transformations.series.detrend import Deseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
@@ -15,7 +15,7 @@ from lightwood.helpers.ts import Differencer
 from lightwood.helpers.ts import get_group_matches
 
 
-def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str], # analysis,
+def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str],  # analysis,
                         timeseries_settings: TimeseriesSettings, target: str) -> Dict:
     """
     This module analyzes (pre-processed) time series data and stores a few useful insights used in the rest of Lightwood's pipeline.
@@ -121,18 +121,18 @@ def get_stls(train_df: pd.DataFrame,
              sps: Dict,
              groups: list,
              tss: TimeseriesSettings
-) -> Dict[str, object]:
+             ) -> Dict[str, object]:
     stls = {}
     for group in groups:
         _, tr_subset = get_group_matches(train_df, group, tss.group_by)
         _, dev_subset = get_group_matches(dev_df, group, tss.group_by)
-        tr_subset.index = tr_subset[f'__mdb_original_index']
+        tr_subset.index = tr_subset['__mdb_original_index']
         dev_subset.index = dev_subset[f'__mdb_original_{tss.order_by[0]}']
         # dev_subset.index = pd.to_datetime(dev_subset[f'__mdb_original_{tss.order_by[0]}'], unit='s')
         tr_subset = tr_subset[target]
         dev_subset = dev_subset[target]
-        detrender = _pick_detrender(tr_subset, dev_subset)
-        deseasonalizer = _pick_deseasonalizer(tr_subset, dev_subset)
+        # detrender = _pick_detrender(tr_subset, dev_subset)
+        # deseasonalizer = _pick_deseasonalizer(tr_subset, dev_subset)
 
     return stls
 
@@ -142,9 +142,10 @@ def _pick_detrender(tr_subset, dev_subset):
     tr_scores = []
     dev_scores = []
 
-    # TODO: pending: move group count and freq inference to before ts_transform, and impute missing data (as 0.0, doesn't matter)
-    #   then enforce this index and freq so that below is fittable and also usable when transforming or inverting
-    #   at arbitrary points
+    # TODO: pending: move group count and freq inference to before ts_transform,
+    #  and impute missing data (as 0.0, doesn't matter)
+    #  then enforce this index and freq so that below is fittable and also usable when transforming or inverting
+    #  at arbitrary points
 
     for degree in [1, 2]:
         detrender = Detrender(forecaster=PolynomialTrendForecaster(degree=degree))
@@ -159,7 +160,7 @@ def _pick_detrender(tr_subset, dev_subset):
 
 
 def _pick_deseasonalizer(tr_subset, dev_subset):
-    deseasonalizers = []
-    tr_r2s = []
+    # deseasonalizers = []
+    # tr_r2s = []
     # dev_r2
     return None

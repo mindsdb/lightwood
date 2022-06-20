@@ -1,13 +1,8 @@
-import dateutil
-import datetime
 from itertools import product
 from typing import List, Tuple, Union, Dict
 
 import numpy as np
 import pandas as pd
-
-from lightwood.api.dtype import dtype
-# from lightwood.api.types import TimeseriesSettings
 
 
 def get_ts_groups(df: pd.DataFrame, tss) -> list:
@@ -222,5 +217,6 @@ def freq_to_pandas(freq, sample_row=None):
         'yearly': 'Y',  # anchor and custom logic
     }
 
-    # TODO: implement custom dispatch for better precision, use row sample if available: pandas.pydata.org/docs/user_guide/timeseries.html
+    # TODO: implement custom dispatch for better precision, use row sample if available:
+    #  pandas.pydata.org/docs/user_guide/timeseries.html
     return mapping[freq]

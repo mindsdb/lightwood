@@ -174,7 +174,7 @@ def statistical_analysis(data: pd.DataFrame,
 
     if problem_definition.timeseries_settings.is_timeseries:
         groups = get_ts_groups(data, problem_definition.timeseries_settings)
-        ts_stats={'groups': groups}
+        ts_stats = {'groups': groups}
     else:
         ts_stats = {}
 
