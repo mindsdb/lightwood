@@ -37,7 +37,7 @@ class TimeSeriesEncoder(ArrayEncoder):
         if self.original_type in (dtype.integer, dtype.float, dtype.quantity, dtype.num_tsarray):
             mavgs = []
             for offset in range(self.max_mavg_offset):
-                ma = torch.mean(base_encode[:, self.max_mavg_offset - (offset + 1):self.max_mavg_offset], 1)
+                ma = torch.mean(base_encode[:, offset:self.max_mavg_offset], 1)
                 mavgs.append(ma.unsqueeze(1))
             base_encode[:, (self.output_size - self.max_mavg_offset):] = torch.cat(mavgs, dim=1)
 
