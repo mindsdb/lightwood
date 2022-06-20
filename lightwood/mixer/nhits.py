@@ -26,6 +26,7 @@ class NHitsMixer(BaseMixer):
             target: str,
             horizon: int,
             ts_analysis: Dict,
+            pretrained: bool = False
     ):
         """
         Wrapper around a MQN-HITS deep learning model.
@@ -44,10 +45,7 @@ class NHitsMixer(BaseMixer):
         self.ts_analysis = ts_analysis
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
 
-        # pretraining info
-        # todo: modifiable from JsonAI, plus option to finetune! if finetuning, ensure horizon check and revert if
-        #   pretrained is not long enough. Also, pass confidence bounds directly to analyzer and bypass normal procedure
-        self.pretrained = False  # True
+        self.pretrained = pretrained  # finetuning?
         self.base_url = 'https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/'
         self.freq_to_model = {
             'year': 'yearly',
@@ -58,8 +56,8 @@ class NHitsMixer(BaseMixer):
             'weekly': 'daily',
             'daily': 'daily',
             'hourly': 'hourly',
-            'minute': 'hourly',  # todo other?
-            'second': 'hourly'  # todo other?
+            'minute': 'hourly',  # consider using another pre-trained model once available
+            'second': 'hourly'  # consider using another pre-trained model once available
         }
         self.model_names = {
             'hourly': 'nhits_m4_hourly.ckpt',  # hourly (non-tiny)
@@ -88,24 +86,21 @@ class NHitsMixer(BaseMixer):
         n_ts_val = int(.1 * n_time)
         n_ts_test = int(.1 * n_time)
 
-        # 3. TODO: merge user-defined config into default
-
         # train the model
         n_time_out = self.horizon
         if self.pretrained:
-            # todo: ensure target data undergoes same transformation as pretrained model?
             self.model_name = self.model_names.get(self.freq_to_model[self.ts_analysis['sample_freqs']['__default']],
                                                    None)
             self.model_name = self.model_names['hourly'] if self.model_name is None else self.model_name
             ckpt_url = self.base_url + self.model_name
-            self.model = MQNHITS.load_from_checkpoint(ckpt_url)  # TODO use this when not pretraining for consistency
-            # TODO: truncate horizon if smaller. if bigger, either raise exception or reapply predictor to get entire H
-            # TODO: if freq is different than pre-trained, needs alignment!
-            # TODO: if self.finetune: ...
-        else:
+            self.model = MQNHITS.load_from_checkpoint(ckpt_url)
+            if self.horizon > self.model.hparams.n_time_out:
+                self.pretrained = False
+
+        if not self.pretrained:
             self.model = nf.auto.MQNHITS(horizon=n_time_out)
-            self.model.space['max_steps'] = hp.choice('max_steps', [1e4])  # [10])  #
-            self.model.space['max_epochs'] = hp.choice('max_epochs', [50])  # [1])  #
+            self.model.space['max_steps'] = hp.choice('max_steps', [1e4])
+            self.model.space['max_epochs'] = hp.choice('max_epochs', [50])
             self.model.space['n_time_in'] = hp.choice('n_time_in', [self.ts_analysis['tss'].window])
             self.model.space['n_time_out'] = hp.choice('n_time_out', [self.horizon])
             self.model.space['n_x_hidden'] = hp.choice('n_x_hidden', [0])
@@ -115,15 +110,15 @@ class NHitsMixer(BaseMixer):
             self.model.fit(Y_df=Y_df,
                            X_df=None,       # Exogenous variables
                            S_df=None,       # Static variables
-                           hyperopt_steps=5,  # 1, #
+                           hyperopt_steps=5,
                            n_ts_val=n_ts_val,
                            n_ts_test=n_ts_test,
-                           results_dir='./results/autonhits',  # TODO: rm/change to /tmp/lightwood/autonhits or similar
+                           results_dir='./results/autonhits',
                            save_trials=False,
                            loss_function_val=nf.losses.numpy.mqloss,
                            loss_functions_test={'MQ': nf.losses.numpy.mqloss},
                            return_test_forecast=False,
-                           verbose=True)  # False
+                           verbose=True)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
