@@ -30,7 +30,7 @@ def generate_target_group_normalizers(
     # numerical normalizers, here we spawn one per each group combination
     else:
         for combination in groups:
-            if combination != ():
+            if combination not in ('__default', ()):
                 combination = tuple(combination)
                 idxs, subset = get_group_matches(data, combination, tss.group_by)
                 if subset.size > 0:

@@ -37,6 +37,7 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     """  # noqa
     tss = timeseries_settings
     groups = get_ts_groups(data['train'], tss)
+    print(groups)
     deltas, periods, freqs = get_delta(data['train'], dtype_dict, groups, tss)
 
     normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
@@ -51,7 +52,7 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
         naive_forecast_residuals, scale_factor = {}, {}
         differencers = {}
 
-    stl_transforms = get_stls(data['train'], data['dev'], target, periods, groups, tss)
+    stl_transforms = {}  # get_stls(data['train'], data['dev'], target, periods, groups, tss)
 
     return {'target_normalizers': normalizers,
             'deltas': deltas,

@@ -184,8 +184,9 @@ def detect_freq_period(deltas: pd.DataFrame, tss) -> tuple:
     :return: for all time series 1) a dictionary with its sp and 2) a dictionary with the detected sampling frequency
     """  # noqa
     secs_to_interval = {
-        'year': 60 * 60 * 24 * 365,
-        'quarter': 60 * 60 * 24 * 365 // 4,
+        'yearly': 60 * 60 * 24 * 365,
+        'quarterly': 60 * 60 * 24 * 365 // 4,
+        'bimonthly': 60 * 60 * 24 * 31 * 2,
         'monthly': 60 * 60 * 24 * 31,
         'weekly': 60 * 60 * 24 * 7,
         'daily': 60 * 60 * 24,
@@ -213,7 +214,7 @@ def freq_to_pandas(freq, sample_row=None):
         'weekly': 'W',  # anchor logic
         'monthly': 'M',  # custom logic
         'bimonthly': 'M',
-        'quarter': 'Q',  # anchor and custom logic
+        'quarterly': 'Q',  # anchor and custom logic
         'yearly': 'Y',  # anchor and custom logic
     }
 
