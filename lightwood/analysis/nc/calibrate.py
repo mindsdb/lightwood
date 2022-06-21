@@ -90,6 +90,7 @@ class ICP(BaseAnalysisBlock):
             icp = icp_class(nc, cal_size=self.validation_size)
 
             output['icp']['__default'] = icp
+            icp_df = deepcopy(ns.data)
 
             # setup prediction cache to avoid additional .predict() calls
             if ns.is_classification:
@@ -116,6 +117,9 @@ class ICP(BaseAnalysisBlock):
 
             # fit additional ICPs in time series tasks with grouped columns
             if ns.tss.is_timeseries and ns.tss.group_by:
+                # generate a multiindex
+                midx = pd.MultiIndex.from_frame(icp_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by[0]}']])
+                icp_df.index = midx
 
                 # create an ICP for each possible group
                 group_info = ns.data[ns.tss.group_by].to_dict('list')
@@ -127,7 +131,6 @@ class ICP(BaseAnalysisBlock):
                     output['icp'][tuple(combination)] = deepcopy(icp)
 
             # calibrate ICP
-            icp_df = deepcopy(ns.data)
             icp_df, y = clean_df(icp_df, ns.target, ns.is_classification, output.get('label_encoders', None))
             output['icp']['__default'].index = icp_df.columns
             output['icp']['__default'].calibrate(icp_df.values, y)
@@ -137,11 +140,11 @@ class ICP(BaseAnalysisBlock):
                 icp_df, icp, ns.dtype_dict[ns.target],
                 output, positive_domain=self.positive_domain, significance=self.fixed_significance)
             if not ns.is_classification:
-                result_df = pd.DataFrame(index=ns.data.index, columns=['confidence', 'lower', 'upper'], dtype=float)
+                result_df = pd.DataFrame(index=icp_df.index, columns=['confidence', 'lower', 'upper'], dtype=float)
                 result_df.loc[icp_df.index, 'lower'] = ranges[:, 0]
                 result_df.loc[icp_df.index, 'upper'] = ranges[:, 1]
             else:
-                result_df = pd.DataFrame(index=ns.data.index, columns=['confidence'], dtype=float)
+                result_df = pd.DataFrame(index=icp_df.index, columns=['confidence'], dtype=float)
 
             result_df.loc[icp_df.index, 'confidence'] = conf
 
@@ -152,6 +155,8 @@ class ICP(BaseAnalysisBlock):
 
                 # add all predictions to DF
                 icps_df = deepcopy(ns.data)
+                midx = pd.MultiIndex.from_frame(icps_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by[0]}']])
+                icps_df.index = midx
                 if ns.is_multi_ts:
                     icps_df[f'__predicted_{ns.target}'] = [p[0] for p in ns.normal_predictions['prediction']]
                 else:
@@ -207,6 +212,7 @@ class ICP(BaseAnalysisBlock):
             # consolidate all groups here
             output['icp']['__mdb_active'] = True
 
+        result_df.index = ns.data.index
         output['result_df'] = result_df
 
         info = {**info, **output}

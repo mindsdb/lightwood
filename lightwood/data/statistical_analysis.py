@@ -5,7 +5,7 @@ import datetime
 from dateutil.parser import parse as parse_dt
 from lightwood.api import StatisticalAnalysis, ProblemDefinition
 from lightwood.helpers.numeric import filter_nan_and_none
-from lightwood.helpers.ts import get_ts_groups
+from lightwood.helpers.ts import get_ts_groups, get_delta
 from lightwood.helpers.seed import seed
 from lightwood.data.cleaner import cleaner
 from lightwood.helpers.log import log
@@ -174,7 +174,13 @@ def statistical_analysis(data: pd.DataFrame,
 
     if problem_definition.timeseries_settings.is_timeseries:
         groups = get_ts_groups(data, problem_definition.timeseries_settings)
-        ts_stats = {'groups': groups}
+        # deltas, periods, freqs = get_delta(data, dtypes, groups, problem_definition.timeseries_settings)
+        ts_stats = {
+            'groups': groups,
+            # 'deltas': deltas,
+            # 'periods': periods,
+            # 'freqs': freqs,
+        }
     else:
         ts_stats = {}
 

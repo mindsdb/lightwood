@@ -53,37 +53,12 @@ def transform_timeseries(
     # TODO work area -- objective: use DatetimeIndex from here on out, seems possible
     #  infer frequencies for all partitions and impute missing values with empty registries
 
-    # 1. pass all rows to seconds
-    # Convert order_by columns to numbers (note, rows are references to mutable rows in `original_df`)
-    for i, row in original_df.iterrows():
-        for col in ob_arr:
-            # @TODO: Remove if the TS encoder can handle `None`
-            if row[col] is None or pd.isna(row[col]):
-                original_df.at[i, col] = 0.0
-            else:
-                if dtype_dict[col] == dtype.date:
-                    try:
-                        row[col] = dateutil.parser.parse(
-                            row[col],
-                            **{}
-                        )
-                    except (TypeError, ValueError):
-                        pass
-
-                if isinstance(row[col], datetime.datetime):
-                    row[col] = row[col].timestamp()
-
-                try:
-                    row[col] = float(row[col])
-                except ValueError:
-                    raise ValueError(f'Failed to order based on column: "{col}" due to faulty value: {row[col]}')
-
-    # 2. infer frequency with get_delta
+    # 1. infer frequency with get_delta
     oby_col = tss.order_by[0]
     groups = get_ts_groups(data, tss)
     deltas, periods, freqs = get_delta(data, dtype_dict, groups, tss)
 
-    # 3. pass seconds to timestamps according to each group's inferred freq
+    # 2. pass seconds to timestamps according to each group's inferred freq
     subsets = []
     for group in groups:
         if (tss.group_by and group != '__default') or not tss.group_by:

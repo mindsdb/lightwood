@@ -147,13 +147,15 @@ def _standardize_datetime(element: object) -> Optional[float]:
     """
     Parses an expected date-time element. Intakes an element that can in theory be anything.
     """
+    if element is None or pd.isna(element):
+        return 0.0  # correct? TODO: Remove if the TS encoder can handle `None`
     try:
         date = parse_dt(str(element))
     except Exception:
         try:
             date = datetime.datetime.utcfromtimestamp(element)
         except Exception:
-            return None
+            return 0.0
 
     return date.timestamp()
 

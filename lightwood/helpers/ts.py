@@ -54,9 +54,9 @@ def get_delta(
     Dictionary with group combination tuples as keys. Values are dictionaries with the inferred delta for each series.
     """  # noqa
     df = df.copy()
-    order_col = [tss.order_by[0]]
-
-    deltas = {"__default": df[order_col].rolling(window=2).apply(np.diff).value_counts().index[0][0]}
+    original_col = f'__mdb_original_{tss.order_by[0]}'
+    order_col = [original_col] if original_col in df.columns else [tss.order_by[0]]
+    deltas = {"__default": df[order_col].astype(float).rolling(window=2).apply(np.diff).value_counts().index[0][0]}
     freq, period = detect_freq_period(deltas["__default"], tss)
     periods = {"__default": period}
     freqs = {"__default": freq}

@@ -1,5 +1,6 @@
 import inspect
 import importlib
+from copy import deepcopy
 from datetime import datetime
 from itertools import product
 from typing import Dict, Union
@@ -228,27 +229,29 @@ class SkTime(BaseMixer):
         if args.predict_proba:
             log.warning('This mixer does not output probability estimates')
 
+        df = deepcopy(ds.data_frame).reset_index(drop=True)
+
         forecast_offset = args.forecast_offset
-        if '__mdb_forecast_offset' in ds.data_frame.columns:
-            if ds.data_frame['__mdb_forecast_offset'].nunique() == 1:
-                forecast_offset = int(ds.data_frame['__mdb_forecast_offset'].unique()[0])
+        if '__mdb_forecast_offset' in df.columns:
+            if df['__mdb_forecast_offset'].nunique() == 1:
+                forecast_offset = int(df['__mdb_forecast_offset'].unique()[0])
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
-                           index=ds.data_frame.index,
+                           index=df.index,
                            columns=['prediction'],
                            dtype=object)
 
-        group_values = {gcol: ds.data_frame[gcol].tolist() for gcol in self.grouped_by} \
+        group_values = {gcol: df[gcol].tolist() for gcol in self.grouped_by} \
             if self.ts_analysis['tss'].group_by \
             else {'': ['__default' for _ in range(length)]}
 
-        pending_idxs = set(ds.data_frame.index)
+        pending_idxs = set(df.index)
         all_group_combinations = list(product(*[set(x) for x in group_values.values()]))
         for group in all_group_combinations:
             group = tuple(group)
             group = '__default' if group[0] == '__default' else group
-            series_idxs, series_data = get_group_matches(ds.data_frame, group, self.grouped_by)
+            series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
             series = series_data[self.target]
 
             if series_data.size > 0:
@@ -263,7 +266,7 @@ class SkTime(BaseMixer):
 
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
-            series = ds.data_frame[self.target][list(pending_idxs)].squeeze()
+            series = df[self.target][list(pending_idxs)].squeeze()
             ydf = self._call_default(ydf, series, list(pending_idxs))
 
         return ydf[['prediction']]
