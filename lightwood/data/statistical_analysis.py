@@ -5,7 +5,7 @@ import datetime
 from dateutil.parser import parse as parse_dt
 from lightwood.api import StatisticalAnalysis, ProblemDefinition
 from lightwood.helpers.numeric import filter_nan_and_none
-from lightwood.helpers.ts import get_ts_groups, get_delta
+from lightwood.helpers.ts import get_ts_groups
 from lightwood.helpers.seed import seed
 from lightwood.data.cleaner import cleaner
 from lightwood.helpers.log import log
