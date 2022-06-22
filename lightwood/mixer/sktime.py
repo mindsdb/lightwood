@@ -8,10 +8,7 @@ from typing import Dict, Union
 import optuna
 import numpy as np
 import pandas as pd
-from sktime.forecasting.trend import PolynomialTrendForecaster
 from sktime.forecasting.compose import TransformedTargetForecaster
-from sktime.transformations.series.detrend import ConditionalDeseasonalizer
-from sktime.transformations.series.detrend import Detrender
 from sktime.forecasting.base import ForecastingHorizon, BaseForecaster
 from sktime.performance_metrics.forecasting import MeanAbsolutePercentageError
 try:
@@ -44,7 +41,8 @@ class SkTime(BaseMixer):
             model_path: str = 'arima.AutoARIMA',
             auto_size: bool = True,
             hyperparam_search: bool = False,
-            target_transforms: Dict[str, Union[int, str]] = {}):
+            use_decomposers: bool = True
+    ):
         """
         This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
         to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with
@@ -69,7 +67,7 @@ class SkTime(BaseMixer):
         :param model_path: sktime forecaster to use as underlying model(s). Should be a string with format "$module.$class' where '$module' is inside `sktime.forecasting`. Default is 'arima.AutoARIMA'.
         :param hyperparam_search: bool that indicates whether to perform the hyperparameter tuning or not.
         :param auto_size: whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.
-        :param target_transforms: arguments for target transformation. Currently supported format: {'detrender': int, 'deseasonalizer': 'add' | 'mul' }. 'detrender' forces a particular type of polynomial to fit as trend curve for the series, while 'deseasonalizer' specifies additive or multiplicative seasonality decomposition (only applied if a seasonality test is triggered). By default, both are disabled.
+        :param use_decomposers: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase. Enabled by default.
         """  # noqa
         super().__init__(stop_after)
         self.stable = True
@@ -82,11 +80,7 @@ class SkTime(BaseMixer):
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.auto_size = auto_size
         self.cutoff_factor = 4  # times the detected maximum seasonal period
-        self.target_transforms = {
-            'detrender': 0,          # degree of detrender polynomial (0: disabled)
-            'deseasonalizer': ''  # seasonality decomposition: 'add'itive or 'mul'tiplicative (else, disabled)
-        }
-        self.target_transforms.update(target_transforms)
+        self.use_decomposers = use_decomposers
 
         # optuna hyperparameter tuning
         self.models = {}
@@ -159,17 +153,11 @@ class SkTime(BaseMixer):
 
             model_pipeline = [("forecaster", model_class(**kwargs))]
 
-            trend_degree = self.target_transforms['detrender']
-            seasonality_type = self.target_transforms['deseasonalizer']
-            if seasonality_type in ('add', 'mul'):
-                model_pipeline.insert(0, ("deseasonalizer",
-                                          ConditionalDeseasonalizer(
-                                              model='additive' if seasonality_type == 'add' else 'multiplicative',
-                                              sp=options['sp']
-                                          )))
-            if trend_degree > 0:
+            if self.use_decomposers:
                 model_pipeline.insert(0, ("detrender",
-                                          Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))))
+                                          self.ts_analysis['stl_transforms'][group]["detrender"]))
+                model_pipeline.insert(0, ("deseasonalizer",
+                                          self.ts_analysis['stl_transforms'][group]["deseasonalizer"]))
 
             self.models[group] = TransformedTargetForecaster(model_pipeline)
 

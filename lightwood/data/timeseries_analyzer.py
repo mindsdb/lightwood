@@ -4,7 +4,6 @@ from typing import Dict, Tuple, List
 import optuna
 import numpy as np
 import pandas as pd
-from sklearn.metrics import mean_squared_error
 from sktime.transformations.series.detrend import Detrender
 from sktime.forecasting.trend import PolynomialTrendForecaster
 from sktime.transformations.series.detrend import ConditionalDeseasonalizer
@@ -12,6 +11,7 @@ from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
 from lightwood.helpers.ts import get_ts_groups, get_delta
+from lightwood.helpers.log import log
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 from lightwood.helpers.ts import Differencer
 from lightwood.helpers.ts import get_group_matches
@@ -126,17 +126,15 @@ def get_stls(train_df: pd.DataFrame,
     for group in groups:
         _, tr_subset = get_group_matches(train_df, group, tss.group_by)
         _, dev_subset = get_group_matches(dev_df, group, tss.group_by)
+        group_freq = tr_subset['__mdb_inferred_freq'].iloc[0]
         tr_subset = deepcopy(tr_subset)[target]
         dev_subset = deepcopy(dev_subset)[target]
-        # TODO: WHY IS THE SUBSET HERE STILL HAVE NO FREQUENCY? TS TRANSFORM DOES SET IT!
-        detrender, deseasonalizer = _pick_ST(tr_subset, dev_subset, sps[group])
-        stls[group] = (detrender, deseasonalizer)
+        tr_subset.index = pd.date_range(start=tr_subset.iloc[0], freq=group_freq, periods=len(tr_subset)).to_period()
+        dev_subset.index = pd.date_range(start=dev_subset.iloc[0], freq=group_freq, periods=len(dev_subset)).to_period()
+        stl = _pick_ST(tr_subset, dev_subset, sps[group])
+        log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
+        stls[group] = stl
     return stls
-
-# TODO: pending:
-#  - [x] move group count and freq inference to before ts_transform,
-#  - [x] impute missing data (as 0.0, doesn't matter)
-#  - [ ] enforce this index and freq so sktime blocks are fittable and usable when transforming or inverting at arbitrary points  # noqa
 
 
 def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: int):
@@ -147,23 +145,24 @@ def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: int):
     :param dev_subset: dev series used for computing loss. Index should be datetime, and values are the actual time series.
     :param sp: seasonal period
     :return: best deseasonalizer and detrender combination based on dev_loss
-    """
+    """  # noqa
     def _ST_objective(trial: optuna.Trial):
+        # TODO: reduce decomp to additive-only if series has neg or null values
         decomp_type = trial.suggest_categorical("decomp_type", ['additive', 'multiplicative'])
-        trend_degree = trial.suggest_int("trend_degree", 1, 2)
-        ds_sp = trial.suggest_int("ds_sp", 1, sp)  # seasonality period to use in deseasonalizer
+        trend_degree = trial.suggest_categorical("trend_degree", [1, 2])
+        ds_sp = trial.suggest_categorical("ds_sp", [sp])  # seasonality period to use in deseasonalizer
 
         decomp_op = {
             'additive': lambda x, y: x - y,
             'multiplicative': lambda x, y: x / y
         }
         detrender = Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))
-        deseasonalizer = ConditionalDeseasonalizer(ds_sp, model=decomp_type)
+        deseasonalizer = ConditionalDeseasonalizer(sp=ds_sp, model=decomp_type)
 
-        detrender.fit(tr_subset)
-        deseasonalizer.fit(decomp_op[decomp_type](tr_subset, detrender.transform(tr_subset)))
+        deseasonalizer.fit(tr_subset)  # apply this one first so that "mul" case doesn't fail due to <= 0 values
+        detrender.fit(decomp_op[decomp_type](tr_subset, deseasonalizer.transform(tr_subset)))
 
-        residuals = deseasonalizer.transform(decomp_op[decomp_type](detrender.transform(dev_subset)))
+        residuals = detrender.transform(decomp_op[decomp_type](dev_subset, deseasonalizer.transform(dev_subset)))
         trial.set_user_attr("detrender", detrender)
         trial.set_user_attr("deseasonalizer", deseasonalizer)
 
@@ -171,6 +170,9 @@ def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: int):
 
     study = optuna.create_study()
     study.optimize(_ST_objective, n_trials=8)
-    print(study.best_params)
 
-    return study.best_trial.params['detrender'], study.best_trial.params['detrender']
+    return {
+        "detrender": study.best_trial.user_attrs['detrender'],
+        "deseasonalizer": study.best_trial.user_attrs['deseasonalizer'],
+        "best_params": study.best_params
+    }

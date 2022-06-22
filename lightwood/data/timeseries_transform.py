@@ -1,4 +1,3 @@
-import copy
 from typing import Dict
 from functools import partial
 import multiprocessing as mp
@@ -60,6 +59,7 @@ def transform_timeseries(
 
             index = pd.to_datetime(subset[oby_col], unit='s')
             subset.index = pd.date_range(start=index.iloc[0], freq=freqs[group], periods=len(subset))
+            subset['__mdb_inferred_freq'] = subset.index.freq   # sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa
             subsets.append(subset)
     # TODO: Why are freqs being lost here?
     #  solution: add group-wise and retrieve using iloc[0]
