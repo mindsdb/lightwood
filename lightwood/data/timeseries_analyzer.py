@@ -1,11 +1,13 @@
+from copy import deepcopy
 from typing import Dict, Tuple, List
 
+import optuna
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 from sktime.transformations.series.detrend import Detrender
 from sktime.forecasting.trend import PolynomialTrendForecaster
-# from sktime.transformations.series.detrend import Deseasonalizer
+from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
@@ -37,7 +39,6 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     """  # noqa
     tss = timeseries_settings
     groups = get_ts_groups(data['train'], tss)
-    print(groups)
     deltas, periods, freqs = get_delta(data['train'], dtype_dict, groups, tss)
 
     normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
@@ -52,7 +53,7 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
         naive_forecast_residuals, scale_factor = {}, {}
         differencers = {}
 
-    stl_transforms = {}  # get_stls(data['train'], data['dev'], target, periods, groups, tss)
+    stl_transforms = get_stls(data['train'], data['dev'], target, periods, groups, tss)
 
     return {'target_normalizers': normalizers,
             'deltas': deltas,
@@ -125,41 +126,51 @@ def get_stls(train_df: pd.DataFrame,
     for group in groups:
         _, tr_subset = get_group_matches(train_df, group, tss.group_by)
         _, dev_subset = get_group_matches(dev_df, group, tss.group_by)
-        tr_subset.index = tr_subset['__mdb_original_index']
-        dev_subset.index = dev_subset[f'__mdb_original_{tss.order_by[0]}']
-        # dev_subset.index = pd.to_datetime(dev_subset[f'__mdb_original_{tss.order_by[0]}'], unit='s')
-        tr_subset = tr_subset[target]
-        dev_subset = dev_subset[target]
-        # detrender = _pick_detrender(tr_subset, dev_subset)
-        # deseasonalizer = _pick_deseasonalizer(tr_subset, dev_subset)
-
+        tr_subset = deepcopy(tr_subset)[target]
+        dev_subset = deepcopy(dev_subset)[target]
+        # TODO: WHY IS THE SUBSET HERE STILL HAVE NO FREQUENCY? TS TRANSFORM DOES SET IT!
+        detrender, deseasonalizer = _pick_ST(tr_subset, dev_subset, sps[group])
+        stls[group] = (detrender, deseasonalizer)
     return stls
 
-
-def _pick_detrender(tr_subset, dev_subset):
-    detrenders = []
-    tr_scores = []
-    dev_scores = []
-
-    # TODO: pending: move group count and freq inference to before ts_transform,
-    #  and impute missing data (as 0.0, doesn't matter)
-    #  then enforce this index and freq so that below is fittable and also usable when transforming or inverting
-    #  at arbitrary points
-
-    for degree in [1, 2]:
-        detrender = Detrender(forecaster=PolynomialTrendForecaster(degree=degree))
-        tr_res = detrender.fit_transform(tr_subset.reset_index(drop=True))
-        detrenders.append(detrender)
-        tr_scores.append(np.sqrt(mean_squared_error(tr_subset, tr_res)))
-        dev_res = detrender.transform(dev_subset.reset_index(drop=True))
-        dev_scores.append(np.sqrt(mean_squared_error(dev_subset, dev_res)))
-
-    r2s = np.mean([tr_scores, dev_scores], axis=1)
-    return detrenders[np.argmax(r2s)]
+# TODO: pending:
+#  - [x] move group count and freq inference to before ts_transform,
+#  - [x] impute missing data (as 0.0, doesn't matter)
+#  - [ ] enforce this index and freq so sktime blocks are fittable and usable when transforming or inverting at arbitrary points  # noqa
 
 
-def _pick_deseasonalizer(tr_subset, dev_subset):
-    # deseasonalizers = []
-    # tr_r2s = []
-    # dev_r2
-    return None
+def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: int):
+    """
+    Perform hyperparam search with optuna to find best combination of ST transforms for a time series.
+
+    :param tr_subset: training series used for fitting blocks. Index should be datetime, and values are the actual time series.
+    :param dev_subset: dev series used for computing loss. Index should be datetime, and values are the actual time series.
+    :param sp: seasonal period
+    :return: best deseasonalizer and detrender combination based on dev_loss
+    """
+    def _ST_objective(trial: optuna.Trial):
+        decomp_type = trial.suggest_categorical("decomp_type", ['additive', 'multiplicative'])
+        trend_degree = trial.suggest_int("trend_degree", 1, 2)
+        ds_sp = trial.suggest_int("ds_sp", 1, sp)  # seasonality period to use in deseasonalizer
+
+        decomp_op = {
+            'additive': lambda x, y: x - y,
+            'multiplicative': lambda x, y: x / y
+        }
+        detrender = Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))
+        deseasonalizer = ConditionalDeseasonalizer(ds_sp, model=decomp_type)
+
+        detrender.fit(tr_subset)
+        deseasonalizer.fit(decomp_op[decomp_type](tr_subset, detrender.transform(tr_subset)))
+
+        residuals = deseasonalizer.transform(decomp_op[decomp_type](detrender.transform(dev_subset)))
+        trial.set_user_attr("detrender", detrender)
+        trial.set_user_attr("deseasonalizer", deseasonalizer)
+
+        return np.power(residuals, 2).sum()
+
+    study = optuna.create_study()
+    study.optimize(_ST_objective, n_trials=8)
+    print(study.best_params)
+
+    return study.best_trial.params['detrender'], study.best_trial.params['detrender']

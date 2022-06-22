@@ -195,7 +195,7 @@ def detect_freq_period(deltas: pd.DataFrame, tss) -> tuple:
         'second': 1
     }
     freq_to_period = {interval: period for (interval, period) in tss.interval_periods}
-    for tag, period in (('year', 1), ('semestral', 2), ('quarter', 4), ('bimonthly', 6), ('monthly', 12),
+    for tag, period in (('yearly', 1), ('quarterly', 4), ('bimonthly', 6), ('monthly', 12),
                         ('weekly', 4), ('daily', 1), ('hourly', 24), ('minute', 1), ('second', 1)):
         if tag not in freq_to_period.keys():
             freq_to_period[tag] = period

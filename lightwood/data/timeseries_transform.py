@@ -36,7 +36,6 @@ def transform_timeseries(
     """  # noqa
 
     tss = timeseries_settings
-    original_df = copy.deepcopy(data)
     gb_arr = tss.group_by if tss.group_by is not None else []
     ob_arr = tss.order_by
     window = tss.window
@@ -48,25 +47,24 @@ def transform_timeseries(
         if hcol not in data.columns or data[hcol].isna().any():
             raise Exception(f"Cannot transform. Missing values in historical column {hcol}.")
 
-    # TODO work area -- objective: use DatetimeIndex from here on out, seems possible
-    #  infer frequencies for all partitions and impute missing values with empty registries
-
-    # 1. infer frequency with get_delta
+    # infer frequency with get_delta
     oby_col = tss.order_by[0]
     groups = get_ts_groups(data, tss)
     deltas, periods, freqs = get_delta(data, dtype_dict, groups, tss)
 
-    # 2. pass seconds to timestamps according to each group's inferred freq
+    # pass seconds to timestamps according to each group's inferred freq, and force this freq on index
     subsets = []
     for group in groups:
         if (tss.group_by and group != '__default') or not tss.group_by:
             idxs, subset = get_group_matches(data, group, tss.group_by)
-            # original_df.loc[idxs][oby_col] = pd.to_datetime(original_df.loc[idxs][oby_col], unit='s')
 
-            # 4. multiindex: group-ts, use inferred freq + generate new rows where needed
             index = pd.to_datetime(subset[oby_col], unit='s')
             subset.index = pd.date_range(start=index.iloc[0], freq=freqs[group], periods=len(subset))
             subsets.append(subset)
+    # TODO: Why are freqs being lost here?
+    #  solution: add group-wise and retrieve using iloc[0]
+    #    subset['__mdb_freq'] = subset.index.freq
+    #
     original_df = pd.concat(subsets).sort_values(by='__mdb_original_index')
 
     if '__mdb_forecast_offset' in original_df.columns:
