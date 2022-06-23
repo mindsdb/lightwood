@@ -64,13 +64,20 @@ class LightGBMArray(BaseMixer):
                 if len(self.ts_analysis['group_combinations']) == 1 or group != '__default':
                     train_idxs, train_subset = get_group_matches(train_data.data_frame, group, self.tss.group_by)
                     dev_idxs, dev_subset = get_group_matches(dev_data.data_frame, group, self.tss.group_by)
-                    train_data.data_frame[self.target].loc[train_idxs] = self._transform_target(train_subset[self.target], group).values
-                    dev_data.data_frame[self.target].loc[dev_idxs] = self._transform_target(dev_subset[self.target], group).values
+
+                    train_data.data_frame[self.target].loc[train_idxs] = self._transform_target(
+                        train_subset[self.target], group).values
+
+                    dev_data.data_frame[self.target].loc[dev_idxs] = self._transform_target(
+                        dev_subset[self.target], group).values
 
                     # shift all timestep cols here by respective offset
                     for timestep in range(1, self.horizon):
-                        train_data.data_frame[f'{self.target}_timestep_{timestep}'].loc[train_idxs] = train_data.data_frame[self.target].loc[train_idxs].shift(-timestep)
-                        dev_data.data_frame[f'{self.target}_timestep_{timestep}'].loc[dev_idxs] = dev_data.data_frame[self.target].loc[dev_idxs].shift(-timestep)
+                        train_data.data_frame[f'{self.target}_timestep_{timestep}'].loc[train_idxs] = \
+                            train_data.data_frame[self.target].loc[train_idxs].shift(-timestep)
+
+                        dev_data.data_frame[f'{self.target}_timestep_{timestep}'].loc[dev_idxs] = \
+                            dev_data.data_frame[self.target].loc[dev_idxs].shift(-timestep)
 
             # afterwards, drop all nans
             # TODO: risk of no valid points...  would have to do this at transform time to solve, not sure if possible!
