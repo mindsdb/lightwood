@@ -155,9 +155,9 @@ class SkTime(BaseMixer):
 
             if self.use_decomposers:
                 model_pipeline.insert(0, ("detrender",
-                                          self.ts_analysis['stl_transforms'][group]["detrender"]))
+                                          self.ts_analysis['stl_transforms'][group]["transformer"].detrender))
                 model_pipeline.insert(0, ("deseasonalizer",
-                                          self.ts_analysis['stl_transforms'][group]["deseasonalizer"]))
+                                          self.ts_analysis['stl_transforms'][group]["transformer"].deseasonalizer))
 
             self.models[group] = TransformedTargetForecaster(model_pipeline)
 

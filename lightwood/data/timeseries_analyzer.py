@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Union
 
 import optuna
 import numpy as np
@@ -146,33 +146,59 @@ def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: int):
     :param sp: seasonal period
     :return: best deseasonalizer and detrender combination based on dev_loss
     """  # noqa
+
     def _ST_objective(trial: optuna.Trial):
-        # TODO: reduce decomp to additive-only if series has neg or null values
-        decomp_type = trial.suggest_categorical("decomp_type", ['additive', 'multiplicative'])
         trend_degree = trial.suggest_categorical("trend_degree", [1, 2])
         ds_sp = trial.suggest_categorical("ds_sp", [sp])  # seasonality period to use in deseasonalizer
+        if min(min(tr_subset), min(dev_subset)) <= 0:
+            decomp_type = trial.suggest_categorical("decomp_type", ['additive'])
+        else:
+            decomp_type = trial.suggest_categorical("decomp_type", ['additive', 'multiplicative'])
 
-        decomp_op = {
-            'additive': lambda x, y: x - y,
-            'multiplicative': lambda x, y: x / y
-        }
         detrender = Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))
         deseasonalizer = ConditionalDeseasonalizer(sp=ds_sp, model=decomp_type)
+        transformer = STLTransformer(detrender=detrender, deseasonalizer=deseasonalizer, type=decomp_type)
+        transformer.fit(tr_subset)
+        residuals = transformer.transform(dev_subset)
 
-        deseasonalizer.fit(tr_subset)  # apply this one first so that "mul" case doesn't fail due to <= 0 values
-        detrender.fit(decomp_op[decomp_type](tr_subset, deseasonalizer.transform(tr_subset)))
-
-        residuals = detrender.transform(decomp_op[decomp_type](dev_subset, deseasonalizer.transform(dev_subset)))
-        trial.set_user_attr("detrender", detrender)
-        trial.set_user_attr("deseasonalizer", deseasonalizer)
-
+        trial.set_user_attr("transformer", transformer)
         return np.power(residuals, 2).sum()
 
     study = optuna.create_study()
     study.optimize(_ST_objective, n_trials=8)
 
     return {
-        "detrender": study.best_trial.user_attrs['detrender'],
-        "deseasonalizer": study.best_trial.user_attrs['deseasonalizer'],
+        "transformer": study.best_trial.user_attrs['transformer'],
         "best_params": study.best_params
     }
+
+
+class STLTransformer:
+    def __init__(self, detrender: Detrender, deseasonalizer: ConditionalDeseasonalizer, type: str = 'additive'):
+        """
+        Class that handles STL transformation and inverse, given specific detrender and deseasonalizer instances.
+        :param detrender: Already initialized. 
+        :param deseasonalizer: Already initialized. 
+        :param type: Either 'additive' or 'multiplicative'.
+        """  # noqa
+        self._type = type
+        self.detrender = detrender
+        self.deseasonalizer = deseasonalizer
+        self.op = {
+            'additive': lambda x, y: x - y,
+            'multiplicative': lambda x, y: x / y
+        }
+        self.iop = {
+            'additive': lambda x, y: x + y,
+            'multiplicative': lambda x, y: x * y
+        }
+
+    def fit(self, x: Union[pd.DataFrame, pd.Series]):
+        self.deseasonalizer.fit(x)
+        self.detrender.fit(self.op[self._type](x, self.deseasonalizer.transform(x)))
+
+    def transform(self, x: Union[pd.DataFrame, pd.Series]):
+        return self.detrender.transform(self.op[self._type](x, self.deseasonalizer.transform(x)))
+
+    def inverse_transform(self, x: Union[pd.DataFrame, pd.Series]):
+        return self.deseasonalizer.inverse_transform(self.iop[self._type](x, self.detrender.inverse_transform(x)))
