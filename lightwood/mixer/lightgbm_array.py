@@ -73,8 +73,9 @@ class LightGBMArray(BaseMixer):
                         dev_data.data_frame[f'{self.target}_timestep_{timestep}'].loc[dev_idxs] = dev_data.data_frame[self.target].loc[dev_idxs].shift(-timestep)
 
             # afterwards, drop all nans
+            # TODO: risk of no valid points...  would have to do this at transform time to solve, not sure if possible!
             train_data.data_frame = train_data.data_frame.dropna()
-            dev_data.data_frame = train_data.data_frame.dropna()  # TODO: danger here of having no valid points! :( this is a problem... how to cope w/it? would have to actually do this at transform time, not sure that's even possible!
+            dev_data.data_frame = train_data.data_frame.dropna()
 
         for timestep in range(self.horizon):
             if timestep > 0:
@@ -91,43 +92,50 @@ class LightGBMArray(BaseMixer):
         self._fit(train_data, dev_data, submodel_method='fit')
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
-        log.info('Updating array of LGBM models...')
-        self._fit(train_data, dev_data, submodel_method='partial_fit')
+        pass
+        #  log.info('Updating array of LGBM models...')
+        #  self._fit(train_data, dev_data, submodel_method='partial_fit')
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
         if args.predict_proba:
             log.warning('This model does not output probability estimates')
 
-        original_target = deepcopy(ds.data_frame[self.target])
+        original_df = deepcopy(ds.data_frame)
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),
                            columns=[f'prediction_{i}' for i in range(self.horizon)])
 
         if self.ts_analysis.get('stl_transforms', False):
-            # if STL was computed, pre-process target
+            midx = pd.MultiIndex.from_frame(ds.data_frame.reset_index()[[*self.tss.group_by, 'index']])
+            ds.data_frame.index = midx
+            ydf.index = midx
             groups = get_ts_groups(ds.data_frame, self.tss)
             for group in groups:
                 group = group if group in self.ts_analysis['group_combinations'] else '__default'
-                ds.data_frame[self.target] = self._transform_target(ds.data_frame[self.target], group)
+                if len(self.ts_analysis['group_combinations']) == 1 or group != '__default':
+                    idxs, subset = get_group_matches(ds.data_frame, group, self.tss.group_by)
+                    ds.data_frame[self.target].loc[idxs] = self._transform_target(subset[self.target], group).values
 
         for timestep in range(self.horizon):
-            ydf[f'prediction_{timestep}'] = self.models[timestep](ds, args)['prediction']
+            ydf[f'prediction_{timestep}'] = self.models[timestep](ds, args)['prediction'].values
 
         if self.ts_analysis.get('stl_transforms', False):
-            # if STL was computed, inverse transform the forecast
             groups = get_ts_groups(ds.data_frame, self.tss)
             for group in groups:
                 group = group if group in self.ts_analysis['group_combinations'] else '__default'
-                idxs, subset = get_group_matches(ds.data_frame, group, self.tss.group_by)
-                for timestep in range(self.horizon):
-                    ydf[f'prediction_{timestep}'].iloc[idxs] = self._inverse_transform_target(
-                        ydf[f'prediction_{timestep}'].iloc[idxs],
-                        group
-                    )
+                if len(self.ts_analysis['group_combinations']) == 1 or group != '__default':
+                    idxs, subset = get_group_matches(ds.data_frame, group, self.tss.group_by)
+                    for timestep in range(self.horizon):
+                        ydf[f'prediction_{timestep}'].loc[idxs] = self._inverse_transform_target(
+                            ydf[f'prediction_{timestep}'].loc[idxs],
+                            group
+                        ).values
+            ydf = ydf.reset_index(drop=True)
 
         ydf['prediction'] = ydf.values.tolist()
+        ds.data_frame = original_df
         return ydf[['prediction']]
 
     def _transform_target(self, target_df: pd.DataFrame, group: tuple):
@@ -138,6 +146,8 @@ class LightGBMArray(BaseMixer):
             return transformer.transform(target_df.to_period())
 
     def _inverse_transform_target(self, predictions: pd.DataFrame, group: tuple):
-        # TODO: does it require index injection for period index?
         transformer = self.ts_analysis['stl_transforms'][group]['transformer']
-        return transformer.inverse_transform(predictions)
+        if isinstance(predictions.index, pd.MultiIndex):
+            return transformer.inverse_transform(predictions.droplevel(0).to_period())
+        else:
+            return transformer.inverse_transform(predictions.to_period())

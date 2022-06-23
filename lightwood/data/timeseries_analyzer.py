@@ -198,7 +198,7 @@ class STLTransformer:
         self.detrender.fit(self.op[self._type](x, self.deseasonalizer.transform(x)))
 
     def transform(self, x: Union[pd.DataFrame, pd.Series]):
-        return self.detrender.transform(self.op[self._type](x, self.deseasonalizer.transform(x)))
+        return self.detrender.transform(self.deseasonalizer.transform(x))
 
     def inverse_transform(self, x: Union[pd.DataFrame, pd.Series]):
-        return self.deseasonalizer.inverse_transform(self.iop[self._type](x, self.detrender.inverse_transform(x)))
+        return self.deseasonalizer.inverse_transform(self.detrender.inverse_transform(x))
