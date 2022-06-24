@@ -13,10 +13,7 @@ from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 from sktime.transformations.series.detrend import Detrender
 from sktime.forecasting.base import ForecastingHorizon, BaseForecaster
 from sktime.performance_metrics.forecasting import MeanAbsolutePercentageError
-try:
-    from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
-except ModuleNotFoundError:
-    from sktime.forecasting.arima import AutoARIMA
+from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
 
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
@@ -40,7 +37,7 @@ class SkTime(BaseMixer):
             dtype_dict: Dict[str, str],
             horizon: int,
             ts_analysis: Dict,
-            model_path: str = 'arima.AutoARIMA',
+            model_path: str = 'statsforecast.StatsForecastAutoARIMA',
             auto_size: bool = True,
             hyperparam_search: bool = False,
             target_transforms: Dict[str, Union[int, str]] = {}):
@@ -94,7 +91,7 @@ class SkTime(BaseMixer):
         self.model_path = model_path
         self.hyperparam_search = hyperparam_search
         self.trial_error_fn = MeanAbsolutePercentageError(symmetric=True)
-        self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
+        self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'statsforecast.StatsForecastAutoARIMA']
         self.n_trials = len(self.possible_models)
         self.freq = self._get_freq(self.ts_analysis['deltas']['__default'])
 
