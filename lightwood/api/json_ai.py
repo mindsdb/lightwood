@@ -220,27 +220,46 @@ def generate_json_ai(
     ):
         is_target_predicting_encoder = True
 
+    submodels = []
     if is_target_predicting_encoder:
-        submodels = [
-            {
-                "module": "Unit",
-                "args": {
-                    "target_encoder": "$encoders[self.target]",
-                    "stop_after": "$problem_definition.seconds_per_mixer",
-                },
-            }
-        ]
+        submodels.extend(
+            [
+                {
+                    "module": "Unit",
+                    "args": {
+                        "target_encoder": "$encoders[self.target]",
+                        "stop_after": "$problem_definition.seconds_per_mixer",
+                    },
+                }
+            ]
+        )
     else:
-        submodels = [
-            {
-                "module": "Neural",
-                "args": {
-                    "fit_on_dev": True,
-                    "stop_after": "$problem_definition.seconds_per_mixer",
-                    "search_hyperparameters": True,
-                },
-            }
-        ]
+        if not tss.is_timeseries:
+            submodels.extend(
+                [
+                    {
+                        "module": "Neural",
+                        "args": {
+                            "fit_on_dev": True,
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "search_hyperparameters": True,
+                        },
+                    }
+                ]
+            )
+        else:
+            submodels.extend(
+                [
+                    {
+                        "module": "NeuralTs",
+                        "args": {
+                            "fit_on_dev": True,
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "search_hyperparameters": True,
+                        },
+                    }
+                ]
+            )
 
         if (not tss.is_timeseries or tss.horizon == 1) and dtype_dict[target] not in (dtype.num_array, dtype.cat_array):
             submodels.extend(
@@ -495,13 +514,12 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     is_ts = tss.is_timeseries
 
     # Add implicit arguments
-    # @TODO: Consider removing once we have a proper editor in studio
     mixers = json_ai.model['args']['submodels']
     for i in range(len(mixers)):
         if mixers[i]["module"] == "Unit":
             pass
 
-        elif mixers[i]["module"] == "Neural":
+        elif mixers[i]["module"] in ("Neural", "NeuralTs"):
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
@@ -509,15 +527,16 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
                 "dtype_dict", "$dtype_dict"
             )
-            mixers[i]["args"]["timeseries_settings"] = mixers[i]["args"].get(
-                "timeseries_settings", "$problem_definition.timeseries_settings"
-            )
             mixers[i]["args"]["net"] = mixers[i]["args"].get(
                 "net",
                 '"DefaultNet"'
                 if not tss.is_timeseries or not tss.use_previous_target
                 else '"ArNet"',
             )
+            if tss.is_timeseries:
+                mixers[i]["args"]["timeseries_settings"] = mixers[i]["args"].get(
+                    "timeseries_settings", "$problem_definition.timeseries_settings"
+                )
 
         elif mixers[i]["module"] == "LightGBM":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
