@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from lightwood.helpers.log import log
-from lightwood.helpers.ts import get_group_matches, get_ts_groups
+from lightwood.mixer.helpers.ts import _apply_stl_on_training, _stl_transform, _stl_inverse_transform
 from lightwood.encoder.base import BaseEncoder
 from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.lightgbm import LightGBM
@@ -55,34 +55,7 @@ class LightGBMArray(BaseMixer):
         original_dev = deepcopy(dev_data.data_frame)
 
         if self.ts_analysis.get('stl_transforms', False):
-            tr_midx = pd.MultiIndex.from_frame(train_data.data_frame.reset_index()[[*self.tss.group_by, 'index']])
-            dev_midx = pd.MultiIndex.from_frame(dev_data.data_frame.reset_index()[[*self.tss.group_by, 'index']])
-            train_data.data_frame.index = tr_midx
-            dev_data.data_frame.index = dev_midx
-
-            for group in self.ts_analysis['group_combinations']:
-                if len(self.ts_analysis['group_combinations']) == 1 or group != '__default':
-                    train_idxs, train_subset = get_group_matches(train_data.data_frame, group, self.tss.group_by)
-                    dev_idxs, dev_subset = get_group_matches(dev_data.data_frame, group, self.tss.group_by)
-
-                    train_data.data_frame[self.target].loc[train_idxs] = self._transform_target(
-                        train_subset[self.target], group).values
-
-                    dev_data.data_frame[self.target].loc[dev_idxs] = self._transform_target(
-                        dev_subset[self.target], group).values
-
-                    # shift all timestep cols here by respective offset
-                    for timestep in range(1, self.horizon):
-                        train_data.data_frame[f'{self.target}_timestep_{timestep}'].loc[train_idxs] = \
-                            train_data.data_frame[self.target].loc[train_idxs].shift(-timestep)
-
-                        dev_data.data_frame[f'{self.target}_timestep_{timestep}'].loc[dev_idxs] = \
-                            dev_data.data_frame[self.target].loc[dev_idxs].shift(-timestep)
-
-            # afterwards, drop all nans
-            # TODO: risk of no valid points...  would have to do this at transform time to solve, not sure if possible!
-            train_data.data_frame = train_data.data_frame.dropna()
-            dev_data.data_frame = train_data.data_frame.dropna()
+            _apply_stl_on_training(train_data, dev_data, self.target, self.tss, self.ts_analysis)
 
         for timestep in range(self.horizon):
             if timestep > 0:
@@ -90,7 +63,7 @@ class LightGBMArray(BaseMixer):
                 dev_data.data_frame[self.target] = dev_data.data_frame[f'{self.target}_timestep_{timestep}']
             getattr(self.models[timestep], submodel_method)(train_data, dev_data)  # call submodel_method to fit
 
-        # restore target
+        # restore dfs
         train_data.data_frame = original_train
         dev_data.data_frame = original_dev
 
@@ -115,46 +88,14 @@ class LightGBMArray(BaseMixer):
                            columns=[f'prediction_{i}' for i in range(self.horizon)])
 
         if self.ts_analysis.get('stl_transforms', False):
-            midx = pd.MultiIndex.from_frame(ds.data_frame.reset_index()[[*self.tss.group_by, 'index']])
-            ds.data_frame.index = midx
-            ydf.index = midx
-            groups = get_ts_groups(ds.data_frame, self.tss)
-            for group in groups:
-                group = group if group in self.ts_analysis['group_combinations'] else '__default'
-                if len(self.ts_analysis['group_combinations']) == 1 or group != '__default':
-                    idxs, subset = get_group_matches(ds.data_frame, group, self.tss.group_by)
-                    ds.data_frame[self.target].loc[idxs] = self._transform_target(subset[self.target], group).values
+            ds.data_frame = _stl_transform(ydf, ds, self.target, self.tss, self.ts_analysis)
 
         for timestep in range(self.horizon):
             ydf[f'prediction_{timestep}'] = self.models[timestep](ds, args)['prediction'].values
 
         if self.ts_analysis.get('stl_transforms', False):
-            groups = get_ts_groups(ds.data_frame, self.tss)
-            for group in groups:
-                group = group if group in self.ts_analysis['group_combinations'] else '__default'
-                if len(self.ts_analysis['group_combinations']) == 1 or group != '__default':
-                    idxs, subset = get_group_matches(ds.data_frame, group, self.tss.group_by)
-                    for timestep in range(self.horizon):
-                        ydf[f'prediction_{timestep}'].loc[idxs] = self._inverse_transform_target(
-                            ydf[f'prediction_{timestep}'].loc[idxs],
-                            group
-                        ).values
-            ydf = ydf.reset_index(drop=True)
+            ydf = _stl_inverse_transform(ydf, ds, self.tss, self.ts_analysis)
 
         ydf['prediction'] = ydf.values.tolist()
         ds.data_frame = original_df
         return ydf[['prediction']]
-
-    def _transform_target(self, target_df: pd.DataFrame, group: tuple):
-        transformer = self.ts_analysis['stl_transforms'][group]['transformer']
-        if isinstance(target_df.index, pd.MultiIndex):
-            return transformer.transform(target_df.droplevel(0).to_period())
-        else:
-            return transformer.transform(target_df.to_period())
-
-    def _inverse_transform_target(self, predictions: pd.DataFrame, group: tuple):
-        transformer = self.ts_analysis['stl_transforms'][group]['transformer']
-        if isinstance(predictions.index, pd.MultiIndex):
-            return transformer.inverse_transform(predictions.droplevel(0).to_period())
-        else:
-            return transformer.inverse_transform(predictions.to_period())

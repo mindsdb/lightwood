@@ -75,6 +75,7 @@ class SkTime(BaseMixer):
         self.supports_proba = False
         self.target = target
 
+        self.dtype_dict = dtype_dict
         self.ts_analysis = ts_analysis
         self.horizon = horizon
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by

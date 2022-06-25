@@ -533,10 +533,11 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 if not tss.is_timeseries or not tss.use_previous_target
                 else '"ArNet"',
             )
-            if tss.is_timeseries:
+            if mixers[i]["module"] == "NeuralTs":
                 mixers[i]["args"]["timeseries_settings"] = mixers[i]["args"].get(
                     "timeseries_settings", "$problem_definition.timeseries_settings"
                 )
+                mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get("ts_analysis", "$ts_analysis")
 
         elif mixers[i]["module"] == "LightGBM":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
