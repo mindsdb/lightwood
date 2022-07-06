@@ -78,13 +78,6 @@ def _apply_stl_on_training(
                 dev_data.data_frame[f'{target}_timestep_{timestep}'].loc[dev_idxs] = \
                     dev_data.data_frame[target].loc[dev_idxs].shift(-timestep)
 
-    # afterwards, drop all nans
-    # TODO: risk of no valid points...  would have to do this at transform time to solve, not sure if possible!
-    train_data.data_frame = train_data.data_frame.dropna()
-    dev_data.data_frame = dev_data.data_frame.dropna()
-
-    # TODO: check that the side effects actually worked outside the fn scope
-
 
 def _stl_transform(
         ydf: pd.DataFrame,
@@ -107,6 +100,7 @@ def _stl_transform(
     """  # noqa
     gby = tss.group_by if tss.group_by else []
     midx = pd.MultiIndex.from_frame(ds.data_frame.reset_index()[[*gby, 'index']])
+    midx.levels[0].freq = ds.data_frame['__mdb_inferred_freq'].iloc[0]
     ds.data_frame.index = midx
     ydf.index = midx
     groups = get_ts_groups(ds.data_frame, tss)

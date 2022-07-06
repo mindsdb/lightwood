@@ -336,7 +336,7 @@ class TestTimeseries(unittest.TestCase):
             forecaster.fit(train[target], fh=fh)
             manual_preds = forecaster.predict(fh[1:horizon + 1]).tolist()
             lw_preds = [p[0] for p in ps['prediction']]
-            assert np.allclose(manual_preds, lw_preds, atol=1)
+            assert np.allclose(manual_preds, lw_preds, atol=1.5)
 
     def test_6_irregular_series(self):
         """

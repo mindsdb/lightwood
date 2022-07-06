@@ -82,7 +82,6 @@ def transform_timeseries(
         else:
             offset = 0
         infer_mode = offset_available and offset == 1
-        original_df = original_df.reset_index(drop=True) if infer_mode else original_df  # TODO: This is no longer correct!  # noqa
     else:
         offset_available = False
         offset = 0
@@ -120,13 +119,11 @@ def transform_timeseries(
         group_lengths.append(len(original_df))
 
     n_groups = len(df_arr)
-    last_index = original_df['original_index'].max()
     for i, subdf in enumerate(df_arr):
         if '__mdb_forecast_offset' in subdf.columns and mode == 'predict':
             if infer_mode:
-                df_arr[i] = _ts_infer_next_row(subdf, ob_arr, last_index)
+                df_arr[i] = _ts_infer_next_row(subdf, ob_arr)
                 make_preds = [False for _ in range(max(0, len(df_arr[i]) - 1))] + [True]
-                last_index += 1
             elif offset_available:
                 # truncate to forecast up until some len(df) + offset (which is <= 0)
                 new_index = df_arr[i].index[:len(df_arr[i].index) + offset]
@@ -219,27 +216,31 @@ def transform_timeseries(
     return combined_df
 
 
-def _ts_infer_next_row(df: pd.DataFrame, ob: str, last_index: int) -> pd.DataFrame:
+def _ts_infer_next_row(df: pd.DataFrame, ob: str) -> pd.DataFrame:
     """
     Adds an inferred next row for streaming mode purposes.
 
     :param df: dataframe from which next row is inferred.
     :param ob: `order_by` column.
-    :param last_index: index number of the latest row in `df`.
 
     :return: Modified `df` with the inferred row appended to it.
     """
+    original_index = df.index.copy()
+    start = original_index.min()
+    new_index = pd.date_range(start=start, periods=len(original_index) + 1, freq=df['__mdb_inferred_freq'].iloc[0])
     last_row = df.iloc[[-1]].copy()
+    last_row['__mdb_ts_inferred'] = True
+
     if df.shape[0] > 1:
         butlast_row = df.iloc[[-2]]
         delta = (last_row[ob].values - butlast_row[ob].values).flatten()[0]
     else:
         delta = 1
-    last_row.original_index = None
-    last_row.index = [last_index + 1]
-    last_row['__mdb_ts_inferred'] = True
+
     last_row[ob] += delta
-    return df.append(last_row)
+    new_df = df.append(last_row)
+    new_df.index = pd.DatetimeIndex(new_index)
+    return new_df
 
 
 def _make_pred(row) -> bool:
