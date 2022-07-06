@@ -173,6 +173,7 @@
   <h1>Source code for lightwood.mixer.sktime</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
@@ -180,10 +181,7 @@
 <span class="kn">import</span> <span class="nn">optuna</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">sktime.forecasting.trend</span> <span class="kn">import</span> <span class="n">PolynomialTrendForecaster</span>
 <span class="kn">from</span> <span class="nn">sktime.forecasting.compose</span> <span class="kn">import</span> <span class="n">TransformedTargetForecaster</span>
-<span class="kn">from</span> <span class="nn">sktime.transformations.series.detrend</span> <span class="kn">import</span> <span class="n">ConditionalDeseasonalizer</span>
-<span class="kn">from</span> <span class="nn">sktime.transformations.series.detrend</span> <span class="kn">import</span> <span class="n">Detrender</span>
 <span class="kn">from</span> <span class="nn">sktime.forecasting.base</span> <span class="kn">import</span> <span class="n">ForecastingHorizon</span><span class="p">,</span> <span class="n">BaseForecaster</span>
 <span class="kn">from</span> <span class="nn">sktime.performance_metrics.forecasting</span> <span class="kn">import</span> <span class="n">MeanAbsolutePercentageError</span>
 <span class="kn">from</span> <span class="nn">sktime.forecasting.statsforecast</span> <span class="kn">import</span> <span class="n">StatsForecastAutoARIMA</span> <span class="k">as</span> <span class="n">AutoARIMA</span>
@@ -191,7 +189,7 @@
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.base</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.general</span> <span class="kn">import</span> <span class="n">get_group_matches</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">get_group_matches</span>
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span>
 
 
@@ -213,7 +211,8 @@
             <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;statsforecast.StatsForecastAutoARIMA&#39;</span><span class="p">,</span>
             <span class="n">auto_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">hyperparam_search</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="n">target_transforms</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}):</span>
+            <span class="n">use_decomposers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared</span>
 <span class="sd">        to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with</span>
@@ -238,7 +237,7 @@
 <span class="sd">        :param model_path: sktime forecaster to use as underlying model(s). Should be a string with format &quot;$module.$class&#39; where &#39;$module&#39; is inside `sktime.forecasting`. Default is &#39;arima.AutoARIMA&#39;.</span>
 <span class="sd">        :param hyperparam_search: bool that indicates whether to perform the hyperparameter tuning or not.</span>
 <span class="sd">        :param auto_size: whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.</span>
-<span class="sd">        :param target_transforms: arguments for target transformation. Currently supported format: {&#39;detrender&#39;: int, &#39;deseasonalizer&#39;: &#39;add&#39; | &#39;mul&#39; }. &#39;detrender&#39; forces a particular type of polynomial to fit as trend curve for the series, while &#39;deseasonalizer&#39; specifies additive or multiplicative seasonality decomposition (only applied if a seasonality test is triggered). By default, both are disabled.</span>
+<span class="sd">        :param use_decomposers: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase. Enabled by default.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">True</span>
@@ -246,16 +245,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype_dict</span> <span class="o">=</span> <span class="n">dtype_dict</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span> <span class="o">=</span> <span class="n">ts_analysis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span> <span class="o">=</span> <span class="n">horizon</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_size</span> <span class="o">=</span> <span class="n">auto_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_factor</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># times the detected maximum seasonal period</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target_transforms</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;detrender&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>          <span class="c1"># degree of detrender polynomial (0: disabled)</span>
-            <span class="s1">&#39;deseasonalizer&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span>  <span class="c1"># seasonality decomposition: &#39;add&#39;itive or &#39;mul&#39;tiplicative (else, disabled)</span>
-        <span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target_transforms</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">target_transforms</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_decomposers</span> <span class="o">=</span> <span class="n">use_decomposers</span>
 
         <span class="c1"># optuna hyperparameter tuning</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
@@ -328,17 +324,11 @@
 
             <span class="n">model_pipeline</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;forecaster&quot;</span><span class="p">,</span> <span class="n">model_class</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))]</span>
 
-            <span class="n">trend_degree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transforms</span><span class="p">[</span><span class="s1">&#39;detrender&#39;</span><span class="p">]</span>
-            <span class="n">seasonality_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transforms</span><span class="p">[</span><span class="s1">&#39;deseasonalizer&#39;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">seasonality_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="s1">&#39;mul&#39;</span><span class="p">):</span>
-                <span class="n">model_pipeline</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;deseasonalizer&quot;</span><span class="p">,</span>
-                                          <span class="n">ConditionalDeseasonalizer</span><span class="p">(</span>
-                                              <span class="n">model</span><span class="o">=</span><span class="s1">&#39;additive&#39;</span> <span class="k">if</span> <span class="n">seasonality_type</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span> <span class="k">else</span> <span class="s1">&#39;multiplicative&#39;</span><span class="p">,</span>
-                                              <span class="n">sp</span><span class="o">=</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;sp&#39;</span><span class="p">]</span>
-                                          <span class="p">)))</span>
-            <span class="k">if</span> <span class="n">trend_degree</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_decomposers</span><span class="p">:</span>
                 <span class="n">model_pipeline</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;detrender&quot;</span><span class="p">,</span>
-                                          <span class="n">Detrender</span><span class="p">(</span><span class="n">forecaster</span><span class="o">=</span><span class="n">PolynomialTrendForecaster</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="n">trend_degree</span><span class="p">))))</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;stl_transforms&#39;</span><span class="p">][</span><span class="n">group</span><span class="p">][</span><span class="s2">&quot;transformer&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detrender</span><span class="p">))</span>
+                <span class="n">model_pipeline</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;deseasonalizer&quot;</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;stl_transforms&#39;</span><span class="p">][</span><span class="n">group</span><span class="p">][</span><span class="s2">&quot;transformer&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">deseasonalizer</span><span class="p">))</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">TransformedTargetForecaster</span><span class="p">(</span><span class="n">model_pipeline</span><span class="p">)</span>
 
@@ -398,27 +388,29 @@
         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;This mixer does not output probability estimates&#39;</span><span class="p">)</span>
 
+        <span class="n">df</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
         <span class="n">forecast_offset</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">forecast_offset</span>
-        <span class="k">if</span> <span class="s1">&#39;__mdb_forecast_offset&#39;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="s1">&#39;__mdb_forecast_offset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">forecast_offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="s1">&#39;__mdb_forecast_offset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s1">&#39;__mdb_forecast_offset&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;__mdb_forecast_offset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">forecast_offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;__mdb_forecast_offset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="n">length</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">encoded_ds_lenghts</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
         <span class="n">ydf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># zero-filled</span>
-                           <span class="n">index</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+                           <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">],</span>
                            <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
 
-        <span class="n">group_values</span> <span class="o">=</span> <span class="p">{</span><span class="n">gcol</span><span class="p">:</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="n">gcol</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">gcol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span><span class="p">}</span> \
+        <span class="n">group_values</span> <span class="o">=</span> <span class="p">{</span><span class="n">gcol</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="n">gcol</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">gcol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span><span class="p">}</span> \
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> \
             <span class="k">else</span> <span class="p">{</span><span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)]}</span>
 
-        <span class="n">pending_idxs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">pending_idxs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="n">all_group_combinations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">group_values</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">all_group_combinations</span><span class="p">:</span>
             <span class="n">group</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
             <span class="n">group</span> <span class="o">=</span> <span class="s1">&#39;__default&#39;</span> <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;__default&#39;</span> <span class="k">else</span> <span class="n">group</span>
-            <span class="n">series_idxs</span><span class="p">,</span> <span class="n">series_data</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span><span class="p">)</span>
+            <span class="n">series_idxs</span><span class="p">,</span> <span class="n">series_data</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span><span class="p">)</span>
             <span class="n">series</span> <span class="o">=</span> <span class="n">series_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">series_data</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -433,7 +425,7 @@
 
         <span class="c1"># apply default model in all remaining novel-group rows</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pending_idxs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">series</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">][</span><span class="nb">list</span><span class="p">(</span><span class="n">pending_idxs</span><span class="p">)]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">][</span><span class="nb">list</span><span class="p">(</span><span class="n">pending_idxs</span><span class="p">)]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
             <span class="n">ydf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_default</span><span class="p">(</span><span class="n">ydf</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">pending_idxs</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">ydf</span><span class="p">[[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]]</span>

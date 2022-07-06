@@ -320,13 +320,15 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parses an expected date-time element. Intakes an element that can in theory be anything.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">element</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">element</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.0</span>  <span class="c1"># correct? TODO: Remove if the TS encoder can handle `None`</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">date</span> <span class="o">=</span> <span class="n">parse_dt</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
 
     <span class="k">return</span> <span class="n">date</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
 

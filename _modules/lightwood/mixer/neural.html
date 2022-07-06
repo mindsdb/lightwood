@@ -194,7 +194,7 @@
 <span class="kn">from</span> <span class="nn">lightwood.mixer.base</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.helpers.ar_net</span> <span class="kn">import</span> <span class="n">ArNet</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.helpers.default_net</span> <span class="kn">import</span> <span class="n">DefaultNet</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">PredictionArguments</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.helpers.transform_corss_entropy_loss</span> <span class="kn">import</span> <span class="n">TransformCrossEntropyLoss</span>
 
 
@@ -207,16 +207,22 @@
     <span class="n">supports_proba</span><span class="p">:</span> <span class="nb">bool</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-            <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">,</span> <span class="n">net</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fit_on_dev</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-            <span class="n">search_hyperparameters</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">n_epochs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+            <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">,</span>
+            <span class="n">net</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">fit_on_dev</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+            <span class="n">search_hyperparameters</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+            <span class="n">n_epochs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The Neural mixer trains a fully connected dense network from concatenated encoded outputs of each of the features in the dataset to predicted the encoded output. </span>
 <span class="sd">        </span>
 <span class="sd">        :param stop_after: How long the total fitting process should take</span>
 <span class="sd">        :param target: Name of the target column</span>
 <span class="sd">        :param dtype_dict: Data type dictionary</span>
-<span class="sd">        :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for available settings.</span>
 <span class="sd">        :param target_encoder: Reference to the encoder used for the target</span>
 <span class="sd">        :param net: The network type to use (`DeafultNet` or `ArNet`)</span>
 <span class="sd">        :param fit_on_dev: If we should fit on the dev dataset</span>
@@ -226,7 +232,6 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype_dict</span> <span class="o">=</span> <span class="n">dtype_dict</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_settings</span> <span class="o">=</span> <span class="n">timeseries_settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span> <span class="o">=</span> <span class="n">target_encoder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epochs_to_best</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_epochs</span> <span class="o">=</span> <span class="n">n_epochs</span>
@@ -267,9 +272,6 @@
             <span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BCEWithLogitsLoss</span><span class="p">()</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">cat_array</span><span class="p">,</span> <span class="p">):</span>
             <span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">L1Loss</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">num_tsarray</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">):</span>
-            <span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">L1Loss</span><span class="p">()</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">num_array</span><span class="p">):</span>
             <span class="n">criterion</span> <span class="o">=</span> <span class="n">MSELoss</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -278,13 +280,7 @@
         <span class="k">return</span> <span class="n">criterion</span>
 
     <span class="k">def</span> <span class="nf">_select_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optimizer</span><span class="p">:</span>
-        <span class="c1"># ad_optim.Ranger</span>
-        <span class="c1"># torch.optim.AdamW</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
-            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">ad_optim</span><span class="o">.</span><span class="n">Ranger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">ad_optim</span><span class="o">.</span><span class="n">Ranger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">2e-2</span><span class="p">)</span>
-
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">ad_optim</span><span class="o">.</span><span class="n">Ranger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">2e-2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">optimizer</span>
 
     <span class="k">def</span> <span class="nf">_find_lr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dl</span><span class="p">):</span>
@@ -431,9 +427,9 @@
 
     <span class="c1"># @TODO: Compare partial fitting fully on and fully off on the benchmarks!</span>
     <span class="c1"># @TODO: Writeup on the methodology for partial fitting</span>
-<div class="viewcode-block" id="Neural.fit"><a class="viewcode-back" href="../../../mixer.html#mixer.Neural.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Fits the Neural mixer on some data, making it ready to predit</span>
+<span class="sd">        Fits the Neural mixer on some data, making it ready to predict</span>
 
 <span class="sd">        :param train_data: The network is fit/trained on this</span>
 <span class="sd">        :param dev_data: Data used for early stopping and hyperparameter determination</span>
@@ -469,8 +465,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_on_dev</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">dev_data</span><span class="p">,</span> <span class="n">train_data</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_final_tuning</span><span class="p">(</span><span class="n">dev_data</span><span class="p">)</span></div>
+<div class="viewcode-block" id="Neural.fit"><a class="viewcode-back" href="../../../mixer.html#mixer.Neural.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_final_tuning</span><span class="p">(</span><span class="n">dev_data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Neural.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.Neural.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>

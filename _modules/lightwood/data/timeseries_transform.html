@@ -171,22 +171,22 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.data.timeseries_transform</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">import</span> <span class="nn">dateutil</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.parallelism</span> <span class="kn">import</span> <span class="n">get_nr_procs</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">get_ts_groups</span><span class="p">,</span> <span class="n">get_delta</span><span class="p">,</span> <span class="n">get_group_matches</span>
+
+<span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
 
 
 <div class="viewcode-block" id="transform_timeseries"><a class="viewcode-back" href="../../../data.html#data.transform_timeseries">[docs]</a><span class="k">def</span> <span class="nf">transform_timeseries</span><span class="p">(</span>
-        <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">ts_analysis</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.</span>
@@ -200,6 +200,7 @@
 <span class="sd">    </span>
 <span class="sd">    :param data: Dataframe with data to transform.</span>
 <span class="sd">    :param dtype_dict: Dictionary with the types of each column.</span>
+<span class="sd">    :param ts_analysis: dictionary with various insights into each series passed as training input.</span>
 <span class="sd">    :param timeseries_settings: A `TimeseriesSettings` object.</span>
 <span class="sd">    :param target: The name of the target column to forecast.</span>
 <span class="sd">    :param mode: Either &quot;train&quot; or &quot;predict&quot;, depending on what phase is calling this procedure.</span>
@@ -208,7 +209,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="n">tss</span> <span class="o">=</span> <span class="n">timeseries_settings</span>
-    <span class="n">original_df</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="n">gb_arr</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
     <span class="n">ob_arr</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span>
     <span class="n">window</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">window</span>
@@ -219,6 +219,26 @@
     <span class="k">for</span> <span class="n">hcol</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">hcol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot transform. Missing values in historical column </span><span class="si">{</span><span class="n">hcol</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># infer frequency with get_delta</span>
+    <span class="n">oby_col</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="n">get_ts_groups</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">freqs</span> <span class="o">=</span> <span class="n">get_delta</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;sample_freqs&#39;</span><span class="p">]</span>
+
+    <span class="c1"># pass seconds to timestamps according to each group&#39;s inferred freq, and force this freq on index</span>
+    <span class="n">subsets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">and</span> <span class="n">group</span> <span class="o">!=</span> <span class="s1">&#39;__default&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
+            <span class="n">idxs</span><span class="p">,</span> <span class="n">subset</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
+
+            <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">subset</span><span class="p">[</span><span class="n">oby_col</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+            <span class="n">subset</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">index</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">freq</span><span class="o">=</span><span class="n">freqs</span><span class="p">[</span><span class="n">group</span><span class="p">],</span> <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">))</span>
+            <span class="n">subset</span><span class="p">[</span><span class="s1">&#39;__mdb_inferred_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span>   <span class="c1"># sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa</span>
+            <span class="n">subsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
+    <span class="n">original_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">subsets</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;__mdb_original_index&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;__mdb_forecast_offset&#39;</span> <span class="ow">in</span> <span class="n">original_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; This special column can be either None or an integer. If this column is passed, then the TS transformation will react to the values within:</span>
@@ -235,7 +255,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">infer_mode</span> <span class="o">=</span> <span class="n">offset_available</span> <span class="ow">and</span> <span class="n">offset</span> <span class="o">==</span> <span class="mi">1</span>
-        <span class="n">original_df</span> <span class="o">=</span> <span class="n">original_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">infer_mode</span> <span class="k">else</span> <span class="n">original_df</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">offset_available</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
@@ -259,30 +278,6 @@
         <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">):</span>
             <span class="n">secondary_type_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
 
-    <span class="c1"># Convert order_by columns to numbers (note, rows are references to mutable rows in `original_df`)</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">original_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">ob_arr</span><span class="p">:</span>
-            <span class="c1"># @TODO: Remove if the TS encoder can handle `None`</span>
-            <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]):</span>
-                <span class="n">original_df</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">date</span><span class="p">:</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">dateutil</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
-                            <span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">],</span>
-                            <span class="o">**</span><span class="p">{}</span>
-                        <span class="p">)</span>
-                    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-                        <span class="k">pass</span>
-
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
-                    <span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
-
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
-                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Failed to order based on column: &quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&quot; due to faulty value: </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
     <span class="k">for</span> <span class="n">oby</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">:</span>
         <span class="n">original_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;__mdb_original_</span><span class="si">{</span><span class="n">oby</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_df</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span>
 
@@ -297,13 +292,11 @@
         <span class="n">group_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">original_df</span><span class="p">))</span>
 
     <span class="n">n_groups</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_arr</span><span class="p">)</span>
-    <span class="n">last_index</span> <span class="o">=</span> <span class="n">original_df</span><span class="p">[</span><span class="s1">&#39;original_index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subdf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df_arr</span><span class="p">):</span>
         <span class="k">if</span> <span class="s1">&#39;__mdb_forecast_offset&#39;</span> <span class="ow">in</span> <span class="n">subdf</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;predict&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">infer_mode</span><span class="p">:</span>
-                <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_infer_next_row</span><span class="p">(</span><span class="n">subdf</span><span class="p">,</span> <span class="n">ob_arr</span><span class="p">,</span> <span class="n">last_index</span><span class="p">)</span>
+                <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_infer_next_row</span><span class="p">(</span><span class="n">subdf</span><span class="p">,</span> <span class="n">ob_arr</span><span class="p">)</span>
                 <span class="n">make_preds</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
-                <span class="n">last_index</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">elif</span> <span class="n">offset_available</span><span class="p">:</span>
                 <span class="c1"># truncate to forecast up until some len(df) + offset (which is &lt;= 0)</span>
                 <span class="n">new_index</span> <span class="o">=</span> <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span>
@@ -396,27 +389,31 @@
     <span class="k">return</span> <span class="n">combined_df</span></div>
 
 
-<span class="k">def</span> <span class="nf">_ts_infer_next_row</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ob</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">last_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_ts_infer_next_row</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ob</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds an inferred next row for streaming mode purposes.</span>
 
 <span class="sd">    :param df: dataframe from which next row is inferred.</span>
 <span class="sd">    :param ob: `order_by` column.</span>
-<span class="sd">    :param last_index: index number of the latest row in `df`.</span>
 
 <span class="sd">    :return: Modified `df` with the inferred row appended to it.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">original_index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">original_index</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">new_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">original_index</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;__mdb_inferred_freq&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">last_row</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">last_row</span><span class="p">[</span><span class="s1">&#39;__mdb_ts_inferred&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">butlast_row</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="o">-</span><span class="mi">2</span><span class="p">]]</span>
         <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_row</span><span class="p">[</span><span class="n">ob</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">butlast_row</span><span class="p">[</span><span class="n">ob</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">delta</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">last_row</span><span class="o">.</span><span class="n">original_index</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">last_row</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">last_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-    <span class="n">last_row</span><span class="p">[</span><span class="s1">&#39;__mdb_ts_inferred&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="n">last_row</span><span class="p">[</span><span class="n">ob</span><span class="p">]</span> <span class="o">+=</span> <span class="n">delta</span>
-    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_row</span><span class="p">)</span>
+    <span class="n">new_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_row</span><span class="p">)</span>
+    <span class="n">new_df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">new_index</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_df</span>
 
 
 <span class="k">def</span> <span class="nf">_make_pred</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -450,9 +447,9 @@
 <span class="sd">    :return: Dataframe with all `order_cols` modified so that their values are cells, e.g. `1` -&gt; `[1]`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">order_col</span> <span class="ow">in</span> <span class="n">order_cols</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)):</span>
-            <span class="n">label</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">label</span><span class="p">,</span> <span class="n">order_col</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">label</span><span class="p">,</span> <span class="n">order_col</span><span class="p">]]</span>
+        <span class="n">col_idx</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">order_col</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)):</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">col_idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">col_idx</span><span class="p">]]</span>
     <span class="k">return</span> <span class="n">df</span>
 
 

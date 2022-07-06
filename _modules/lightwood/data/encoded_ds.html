@@ -313,6 +313,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `ConcatedEncodedDs` abstracts over multiple encoded datasources (`EncodedDs`) as if they were a single entity.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+    <span class="c1"># TODO: We should probably delete this abstraction, it&#39;s not really useful and it adds complexity/overhead</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_ds_arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">EncodedDs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># @TODO: missing super() call here?</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span> <span class="o">=</span> <span class="n">encoded_ds_arr</span>
@@ -320,6 +321,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">encoders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encoders</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">encoder_spans</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encoder_spans</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">data_frame</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -338,17 +340,6 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">idx</span> <span class="o">-=</span> <span class="n">length</span>
         <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Property that concatenates all underlying `EncodedDs`&#39;s dataframes and returns them.</span>
-<span class="sd">        </span>
-<span class="sd">        Note: be careful to not modify a `ConcatedEncodedDs`, as you can see in the source, it will not have an effect.</span>
-<span class="sd">        </span>
-<span class="sd">        :return: Dataframe with all original data.</span>
-<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">data_frame</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span><span class="p">])</span>
 
 <div class="viewcode-block" id="ConcatedEncodedDs.get_column_original_data"><a class="viewcode-back" href="../../../data.html#data.ConcatedEncodedDs.get_column_original_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_column_original_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>

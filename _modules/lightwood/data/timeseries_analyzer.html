@@ -171,16 +171,21 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.data.timeseries_analyzer</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+<span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
+<span class="kn">import</span> <span class="nn">optuna</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sktime.transformations.series.detrend</span> <span class="kn">import</span> <span class="n">Detrender</span>
+<span class="kn">from</span> <span class="nn">sktime.forecasting.trend</span> <span class="kn">import</span> <span class="n">PolynomialTrendForecaster</span>
+<span class="kn">from</span> <span class="nn">sktime.transformations.series.detrend</span> <span class="kn">import</span> <span class="n">ConditionalDeseasonalizer</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">get_ts_groups</span><span class="p">,</span> <span class="n">get_delta</span><span class="p">,</span> <span class="n">get_group_matches</span><span class="p">,</span> <span class="n">Differencer</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.time_series.helpers.common</span> <span class="kn">import</span> <span class="n">generate_target_group_normalizers</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">Differencer</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.general</span> <span class="kn">import</span> <span class="n">get_group_matches</span>
 
 
 <div class="viewcode-block" id="timeseries_analyzer"><a class="viewcode-back" href="../../../data.html#data.timeseries_analyzer">[docs]</a><span class="k">def</span> <span class="nf">timeseries_analyzer</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
@@ -203,65 +208,34 @@
 <span class="sd">    :return: Dictionary with the aforementioned insights and the `TimeseriesSettings` object for future references.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
     <span class="n">tss</span> <span class="o">=</span> <span class="n">timeseries_settings</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="n">get_ts_groups</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span> <span class="n">tss</span><span class="p">)</span>
+    <span class="n">deltas</span><span class="p">,</span> <span class="n">periods</span><span class="p">,</span> <span class="n">freqs</span> <span class="o">=</span> <span class="n">get_delta</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
 
-    <span class="n">normalizers</span><span class="p">,</span> <span class="n">group_combinations</span> <span class="o">=</span> <span class="n">generate_target_group_normalizers</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span> <span class="n">target</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
+    <span class="n">normalizers</span> <span class="o">=</span> <span class="n">generate_target_group_normalizers</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span> <span class="n">target</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">num_tsarray</span><span class="p">):</span>
         <span class="n">naive_forecast_residuals</span><span class="p">,</span> <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">get_grouped_naive_residuals</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">],</span>
                                                                              <span class="n">target</span><span class="p">,</span>
                                                                              <span class="n">tss</span><span class="p">,</span>
-                                                                             <span class="n">group_combinations</span><span class="p">)</span>
-        <span class="n">differencers</span> <span class="o">=</span> <span class="n">get_differencers</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span> <span class="n">target</span><span class="p">,</span> <span class="n">group_combinations</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
+                                                                             <span class="n">groups</span><span class="p">)</span>
+        <span class="n">differencers</span> <span class="o">=</span> <span class="n">get_differencers</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span> <span class="n">target</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
+        <span class="n">stl_transforms</span> <span class="o">=</span> <span class="n">get_stls</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;dev&#39;</span><span class="p">],</span> <span class="n">target</span><span class="p">,</span> <span class="n">periods</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">naive_forecast_residuals</span><span class="p">,</span> <span class="n">scale_factor</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>
         <span class="n">differencers</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="n">deltas</span><span class="p">,</span> <span class="n">periods</span><span class="p">,</span> <span class="n">freqs</span> <span class="o">=</span> <span class="n">get_delta</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span> <span class="n">group_combinations</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
+        <span class="n">stl_transforms</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;target_normalizers&#39;</span><span class="p">:</span> <span class="n">normalizers</span><span class="p">,</span>
             <span class="s1">&#39;deltas&#39;</span><span class="p">:</span> <span class="n">deltas</span><span class="p">,</span>
             <span class="s1">&#39;tss&#39;</span><span class="p">:</span> <span class="n">tss</span><span class="p">,</span>
-            <span class="s1">&#39;group_combinations&#39;</span><span class="p">:</span> <span class="n">group_combinations</span><span class="p">,</span>
+            <span class="s1">&#39;group_combinations&#39;</span><span class="p">:</span> <span class="n">groups</span><span class="p">,</span>
             <span class="s1">&#39;ts_naive_residuals&#39;</span><span class="p">:</span> <span class="n">naive_forecast_residuals</span><span class="p">,</span>
             <span class="s1">&#39;ts_naive_mae&#39;</span><span class="p">:</span> <span class="n">scale_factor</span><span class="p">,</span>
             <span class="s1">&#39;periods&#39;</span><span class="p">:</span> <span class="n">periods</span><span class="p">,</span>
             <span class="s1">&#39;sample_freqs&#39;</span><span class="p">:</span> <span class="n">freqs</span><span class="p">,</span>
+            <span class="s1">&#39;stl_transforms&#39;</span><span class="p">:</span> <span class="n">stl_transforms</span><span class="p">,</span>
             <span class="s1">&#39;differencers&#39;</span><span class="p">:</span> <span class="n">differencers</span>
             <span class="p">}</span></div>
-
-
-<span class="k">def</span> <span class="nf">get_delta</span><span class="p">(</span>
-        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-        <span class="n">group_combinations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-        <span class="n">tss</span><span class="p">:</span> <span class="n">TimeseriesSettings</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Infer the sampling interval of each time series, by picking the most popular time interval observed in the training data.</span>
-<span class="sd">    </span>
-<span class="sd">    :param df: Dataframe with time series data.</span>
-<span class="sd">    :param group_combinations: all tuples with distinct values for `TimeseriesSettings.group_by` columns, defining all available time series.</span>
-<span class="sd">    :param tss: timeseries settings</span>
-<span class="sd">    </span>
-<span class="sd">    :return:</span>
-<span class="sd">    Dictionary with group combination tuples as keys. Values are dictionaries with the inferred delta for each series.</span>
-<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
-    <span class="n">order_col</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;__mdb_original_</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
-    <span class="n">deltas</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;__default&quot;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="n">order_col</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]}</span>
-    <span class="n">freq</span><span class="p">,</span> <span class="n">period</span> <span class="o">=</span> <span class="n">detect_freq_period</span><span class="p">(</span><span class="n">deltas</span><span class="p">[</span><span class="s2">&quot;__default&quot;</span><span class="p">],</span> <span class="n">tss</span><span class="p">)</span>
-    <span class="n">periods</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;__default&quot;</span><span class="p">:</span> <span class="n">period</span><span class="p">}</span>
-    <span class="n">freqs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;__default&quot;</span><span class="p">:</span> <span class="n">freq</span><span class="p">}</span>
-
-    <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">group_combinations</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">group</span> <span class="o">!=</span> <span class="s2">&quot;__default&quot;</span><span class="p">:</span>
-                <span class="n">_</span><span class="p">,</span> <span class="n">subset</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">subset</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">deltas</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">subset</span><span class="p">[</span><span class="n">order_col</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">freq</span><span class="p">,</span> <span class="n">period</span> <span class="o">=</span> <span class="n">detect_freq_period</span><span class="p">(</span><span class="n">deltas</span><span class="p">[</span><span class="n">group</span><span class="p">],</span> <span class="n">tss</span><span class="p">)</span>
-                    <span class="n">periods</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">period</span>
-                    <span class="n">freqs</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">freq</span>
-
-    <span class="k">return</span> <span class="n">deltas</span><span class="p">,</span> <span class="n">periods</span><span class="p">,</span> <span class="n">freqs</span>
 
 
 <span class="k">def</span> <span class="nf">get_naive_residuals</span><span class="p">(</span><span class="n">target_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
@@ -301,53 +275,6 @@
     <span class="k">return</span> <span class="n">group_residuals</span><span class="p">,</span> <span class="n">group_scale_factors</span>
 
 
-<span class="k">def</span> <span class="nf">detect_freq_period</span><span class="p">(</span><span class="n">deltas</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tss</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Helper method that, based on the most popular interval for a time series, determines its seasonal peridiocity (sp).</span>
-<span class="sd">    This bit of information can be crucial for good modelling with methods like ARIMA.</span>
-
-<span class="sd">    Supported time intervals are:</span>
-<span class="sd">        * &#39;year&#39;</span>
-<span class="sd">        * &#39;semestral&#39;</span>
-<span class="sd">        * &#39;quarter&#39;</span>
-<span class="sd">        * &#39;bimonthly&#39;</span>
-<span class="sd">        * &#39;monthly&#39;</span>
-<span class="sd">        * &#39;weekly&#39;</span>
-<span class="sd">        * &#39;daily&#39;</span>
-<span class="sd">        * &#39;hourly&#39;</span>
-<span class="sd">        * &#39;minute&#39;</span>
-<span class="sd">        * &#39;second&#39;</span>
-
-<span class="sd">    Note: all computations assume that the first provided `order_by` column is the one that specifies the sp.</span>
-
-<span class="sd">    :param deltas: output of `get_delta`, has the most popular interval for each time series.</span>
-<span class="sd">    :param tss: timeseries settings.</span>
-
-<span class="sd">    :return: for all time series 1) a dictionary with its sp and 2) a dictionary with the detected sampling frequency</span>
-<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
-    <span class="n">secs_to_interval</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span><span class="p">,</span>
-        <span class="s1">&#39;semestral&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="s1">&#39;quarter&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="s1">&#39;bimonthly&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span> <span class="o">//</span> <span class="mi">6</span><span class="p">,</span>
-        <span class="s1">&#39;monthly&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">31</span><span class="p">,</span>
-        <span class="s1">&#39;weekly&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">7</span><span class="p">,</span>
-        <span class="s1">&#39;daily&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span><span class="p">,</span>
-        <span class="s1">&#39;hourly&#39;</span><span class="p">:</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span>
-        <span class="s1">&#39;minute&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
-        <span class="s1">&#39;second&#39;</span><span class="p">:</span> <span class="mi">1</span>
-    <span class="p">}</span>
-    <span class="n">freq_to_period</span> <span class="o">=</span> <span class="p">{</span><span class="n">interval</span><span class="p">:</span> <span class="n">period</span> <span class="k">for</span> <span class="p">(</span><span class="n">interval</span><span class="p">,</span> <span class="n">period</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">interval_periods</span><span class="p">}</span>
-    <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">period</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;semestral&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;quarter&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;bimonthly&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;monthly&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
-                        <span class="p">(</span><span class="s1">&#39;weekly&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;daily&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;hourly&#39;</span><span class="p">,</span> <span class="mi">24</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;minute&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;second&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">freq_to_period</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">freq_to_period</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">period</span>
-
-    <span class="n">diffs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">tag</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">deltas</span> <span class="o">-</span> <span class="n">secs</span><span class="p">))</span> <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">secs</span> <span class="ow">in</span> <span class="n">secs_to_interval</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
-    <span class="n">freq</span><span class="p">,</span> <span class="n">min_diff</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">diffs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">freq</span><span class="p">,</span> <span class="n">freq_to_period</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-
-
 <span class="k">def</span> <span class="nf">get_differencers</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">groups</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">group_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
     <span class="n">differencers</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
@@ -356,6 +283,95 @@
         <span class="n">differencer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">subset</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="n">differencers</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">differencer</span>
     <span class="k">return</span> <span class="n">differencers</span>
+
+
+<span class="k">def</span> <span class="nf">get_stls</span><span class="p">(</span><span class="n">train_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+             <span class="n">dev_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+             <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+             <span class="n">sps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+             <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+             <span class="n">tss</span><span class="p">:</span> <span class="n">TimeseriesSettings</span>
+             <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+    <span class="n">stls</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">tr_subset</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">train_df</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">dev_subset</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">dev_df</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
+        <span class="n">group_freq</span> <span class="o">=</span> <span class="n">tr_subset</span><span class="p">[</span><span class="s1">&#39;__mdb_inferred_freq&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">tr_subset</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">tr_subset</span><span class="p">)[</span><span class="n">target</span><span class="p">]</span>
+        <span class="n">dev_subset</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">dev_subset</span><span class="p">)[</span><span class="n">target</span><span class="p">]</span>
+        <span class="n">tr_subset</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">tr_subset</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">freq</span><span class="o">=</span><span class="n">group_freq</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">tr_subset</span><span class="p">))</span><span class="o">.</span><span class="n">to_period</span><span class="p">()</span>
+        <span class="n">dev_subset</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">dev_subset</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">freq</span><span class="o">=</span><span class="n">group_freq</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">dev_subset</span><span class="p">))</span><span class="o">.</span><span class="n">to_period</span><span class="p">()</span>
+        <span class="n">stl</span> <span class="o">=</span> <span class="n">_pick_ST</span><span class="p">(</span><span class="n">tr_subset</span><span class="p">,</span> <span class="n">dev_subset</span><span class="p">,</span> <span class="n">sps</span><span class="p">[</span><span class="n">group</span><span class="p">])</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Best STL decomposition params for group </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s1"> are: </span><span class="si">{</span><span class="n">stl</span><span class="p">[</span><span class="s2">&quot;best_params&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">stls</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">stl</span>
+    <span class="k">return</span> <span class="n">stls</span>
+
+
+<span class="k">def</span> <span class="nf">_pick_ST</span><span class="p">(</span><span class="n">tr_subset</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">dev_subset</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">sp</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform hyperparam search with optuna to find best combination of ST transforms for a time series.</span>
+
+<span class="sd">    :param tr_subset: training series used for fitting blocks. Index should be datetime, and values are the actual time series.</span>
+<span class="sd">    :param dev_subset: dev series used for computing loss. Index should be datetime, and values are the actual time series.</span>
+<span class="sd">    :param sp: seasonal period</span>
+<span class="sd">    :return: best deseasonalizer and detrender combination based on dev_loss</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+    <span class="k">def</span> <span class="nf">_ST_objective</span><span class="p">(</span><span class="n">trial</span><span class="p">:</span> <span class="n">optuna</span><span class="o">.</span><span class="n">Trial</span><span class="p">):</span>
+        <span class="n">trend_degree</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s2">&quot;trend_degree&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">ds_sp</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s2">&quot;ds_sp&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">sp</span><span class="p">])</span>  <span class="c1"># seasonality period to use in deseasonalizer</span>
+        <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">tr_subset</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">dev_subset</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">decomp_type</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s2">&quot;decomp_type&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">decomp_type</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s2">&quot;decomp_type&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;additive&#39;</span><span class="p">,</span> <span class="s1">&#39;multiplicative&#39;</span><span class="p">])</span>
+
+        <span class="n">detrender</span> <span class="o">=</span> <span class="n">Detrender</span><span class="p">(</span><span class="n">forecaster</span><span class="o">=</span><span class="n">PolynomialTrendForecaster</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="n">trend_degree</span><span class="p">))</span>
+        <span class="n">deseasonalizer</span> <span class="o">=</span> <span class="n">ConditionalDeseasonalizer</span><span class="p">(</span><span class="n">sp</span><span class="o">=</span><span class="n">ds_sp</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">decomp_type</span><span class="p">)</span>
+        <span class="n">transformer</span> <span class="o">=</span> <span class="n">STLTransformer</span><span class="p">(</span><span class="n">detrender</span><span class="o">=</span><span class="n">detrender</span><span class="p">,</span> <span class="n">deseasonalizer</span><span class="o">=</span><span class="n">deseasonalizer</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">decomp_type</span><span class="p">)</span>
+        <span class="n">transformer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">tr_subset</span><span class="p">)</span>
+        <span class="n">residuals</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">dev_subset</span><span class="p">)</span>
+
+        <span class="n">trial</span><span class="o">.</span><span class="n">set_user_attr</span><span class="p">(</span><span class="s2">&quot;transformer&quot;</span><span class="p">,</span> <span class="n">transformer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">residuals</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">()</span>
+    <span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">_ST_objective</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;transformer&quot;</span><span class="p">:</span> <span class="n">study</span><span class="o">.</span><span class="n">best_trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="s1">&#39;transformer&#39;</span><span class="p">],</span>
+        <span class="s2">&quot;best_params&quot;</span><span class="p">:</span> <span class="n">study</span><span class="o">.</span><span class="n">best_params</span>
+    <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">STLTransformer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detrender</span><span class="p">:</span> <span class="n">Detrender</span><span class="p">,</span> <span class="n">deseasonalizer</span><span class="p">:</span> <span class="n">ConditionalDeseasonalizer</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;additive&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class that handles STL transformation and inverse, given specific detrender and deseasonalizer instances.</span>
+<span class="sd">        :param detrender: Already initialized. </span>
+<span class="sd">        :param deseasonalizer: Already initialized. </span>
+<span class="sd">        :param type: Either &#39;additive&#39; or &#39;multiplicative&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detrender</span> <span class="o">=</span> <span class="n">detrender</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deseasonalizer</span> <span class="o">=</span> <span class="n">deseasonalizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;additive&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">,</span>
+            <span class="s1">&#39;multiplicative&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">/</span> <span class="n">y</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iop</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;additive&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span>
+            <span class="s1">&#39;multiplicative&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deseasonalizer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detrender</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">](</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">deseasonalizer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">detrender</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deseasonalizer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">inverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deseasonalizer</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detrender</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 </pre></div>
 
            </div>

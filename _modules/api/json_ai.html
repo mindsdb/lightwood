@@ -393,27 +393,46 @@
     <span class="p">):</span>
         <span class="n">is_target_predicting_encoder</span> <span class="o">=</span> <span class="kc">True</span>
 
+    <span class="n">submodels</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">is_target_predicting_encoder</span><span class="p">:</span>
-        <span class="n">submodels</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;Unit&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;target_encoder&quot;</span><span class="p">:</span> <span class="s2">&quot;$encoders[self.target]&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
-                <span class="p">},</span>
-            <span class="p">}</span>
-        <span class="p">]</span>
+        <span class="n">submodels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;Unit&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;target_encoder&quot;</span><span class="p">:</span> <span class="s2">&quot;$encoders[self.target]&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">submodels</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;Neural&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;fit_on_dev&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;search_hyperparameters&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="p">},</span>
-            <span class="p">}</span>
-        <span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
+            <span class="n">submodels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;Neural&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;fit_on_dev&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;search_hyperparameters&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">submodels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;NeuralTs&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;fit_on_dev&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;search_hyperparameters&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">or</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">num_array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">cat_array</span><span class="p">):</span>
             <span class="n">submodels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
@@ -668,13 +687,12 @@
     <span class="n">is_ts</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span>
 
     <span class="c1"># Add implicit arguments</span>
-    <span class="c1"># @TODO: Consider removing once we have a proper editor in studio</span>
     <span class="n">mixers</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;submodels&#39;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mixers</span><span class="p">)):</span>
         <span class="k">if</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Unit&quot;</span><span class="p">:</span>
             <span class="k">pass</span>
 
-        <span class="k">elif</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Neural&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Neural&quot;</span><span class="p">,</span> <span class="s2">&quot;NeuralTs&quot;</span><span class="p">):</span>
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target_encoder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;target_encoder&quot;</span><span class="p">,</span> <span class="s2">&quot;$encoders[self.target]&quot;</span>
             <span class="p">)</span>
@@ -682,15 +700,17 @@
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;dtype_dict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;dtype_dict&quot;</span><span class="p">,</span> <span class="s2">&quot;$dtype_dict&quot;</span>
             <span class="p">)</span>
-            <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;timeseries_settings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">,</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span>
-            <span class="p">)</span>
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;net&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;net&quot;</span><span class="p">,</span>
                 <span class="s1">&#39;&quot;DefaultNet&quot;&#39;</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span>
                 <span class="k">else</span> <span class="s1">&#39;&quot;ArNet&quot;&#39;</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;NeuralTs&quot;</span><span class="p">:</span>
+                <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;timeseries_settings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">,</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span>
+                <span class="p">)</span>
+                <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;ts_analysis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ts_analysis&quot;</span><span class="p">,</span> <span class="s2">&quot;$ts_analysis&quot;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;LightGBM&quot;</span><span class="p">:</span>
             <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;$target&quot;</span><span class="p">)</span>
@@ -849,6 +869,7 @@
                 <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;$mode&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;ts_analysis&quot;</span><span class="p">:</span> <span class="s2">&quot;$ts_analysis&quot;</span>
             <span class="p">},</span>
         <span class="p">},</span>
         <span class="s2">&quot;timeseries_analyzer&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1318,6 +1339,7 @@
 
 <span class="s2">        # Initial stats analysis</span>
 <span class="s2">        self.statistical_analysis = None</span>
+<span class="s2">        self.ts_analysis = None</span>
 <span class="s2">        self.runtime_log = dict()</span>
 
 <span class="s2">    @timed</span>
