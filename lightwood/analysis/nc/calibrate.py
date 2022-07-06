@@ -389,7 +389,7 @@ class ICP(BaseAnalysisBlock):
                                         all_confs,
                                         df_target_stddev=ns.analysis['df_target_stddev'],
                                         positive_domain=self.positive_domain,
-                                        group=frozenset(group),
+                                        group=tuple(group),
                                         fixed_conf=fixed_conf
                                     )
 
