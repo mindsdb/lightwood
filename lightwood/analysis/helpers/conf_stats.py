@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Dict
 from types import SimpleNamespace
 
@@ -55,10 +56,10 @@ class ConfStats(BaseAnalysisBlock):
         mce: maximum value in `bins`.
         global_score: 1.0 minus absolute difference between accuracy and confidence over the entire validation set.
         """
-
+        confs = deepcopy(confs).reset_index(drop=True)
+        sorted_preds = deepcopy(preds).reset_index(drop=True)
+        sorted_inp = deepcopy(data).reset_index(drop=True)
         sorted_val = confs.sort_values(by='confidence', kind='stable')
-        sorted_preds = preds.reindex(sorted_val.index)
-        sorted_inp = data.reindex(sorted_val.index)
         sorted_inp['__mdb_confidence'] = sorted_val['confidence']
 
         if task_type == 'categorical':

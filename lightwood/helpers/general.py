@@ -1,33 +1,10 @@
 import importlib
-from typing import List, Dict, Optional, Tuple, Union
+from typing import List, Dict, Optional
 import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score, mean_absolute_error, balanced_accuracy_score
 from lightwood.helpers.numeric import is_nan_numeric
-
-
-def get_group_matches(
-        data: Union[pd.Series, pd.DataFrame],
-        combination: tuple,
-        group_columns: List[str]
-) -> Tuple[list, pd.DataFrame]:
-    """Given a particular group combination, return the data subset that belongs to it."""
-
-    if type(data) == pd.Series:
-        data = pd.DataFrame(data)
-    elif type(data) != pd.DataFrame:
-        raise Exception(f"Wrong data type {type(data)}, must be pandas.DataFrame or pd.Series")
-
-    if combination == '__default':
-        return list(data.index), data
-    else:
-        subset = data
-        for val, col in zip(combination, group_columns):
-            subset = subset[subset[col] == val]
-        if len(subset) > 0:
-            return list(subset.index), subset
-        else:
-            return [], pd.DataFrame()
+from lightwood.helpers.ts import get_group_matches
 
 
 # ------------------------- #
