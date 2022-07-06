@@ -696,6 +696,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "dtype_dict": "$dtype_dict",
                 "target": "$target",
                 "mode": "$mode",
+                "ts_analysis": "$ts_analysis"
             },
         },
         "timeseries_analyzer": {
@@ -1165,6 +1166,7 @@ class Predictor(PredictorInterface):
 
         # Initial stats analysis
         self.statistical_analysis = None
+        self.ts_analysis = None
         self.runtime_log = dict()
 
     @timed

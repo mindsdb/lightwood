@@ -10,21 +10,18 @@ from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
-from lightwood.helpers.ts import get_ts_groups, get_delta
+from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer
 from lightwood.helpers.log import log
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
-from lightwood.helpers.ts import Differencer
-from lightwood.helpers.ts import get_group_matches
 
 
-def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str],  # analysis,
+def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str],
                         timeseries_settings: TimeseriesSettings, target: str) -> Dict:
     """
     This module analyzes (pre-processed) time series data and stores a few useful insights used in the rest of Lightwood's pipeline.
     
     :param data: dictionary with the dataset split into train, val, test subsets. 
     :param dtype_dict: dictionary with inferred types for every column.
-    :param analysis: output of statistical analysis phase.
     :param timeseries_settings: A `TimeseriesSettings` object. For more details, check `lightwood.types.TimeseriesSettings`.
     :param target: name of the target column.
     
@@ -49,11 +46,11 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
                                                                              tss,
                                                                              groups)
         differencers = get_differencers(data['train'], target, groups, tss.group_by)
+        stl_transforms = get_stls(data['train'], data['dev'], target, periods, groups, tss)
     else:
         naive_forecast_residuals, scale_factor = {}, {}
         differencers = {}
-
-    stl_transforms = get_stls(data['train'], data['dev'], target, periods, groups, tss)
+        stl_transforms = {}
 
     return {'target_normalizers': normalizers,
             'deltas': deltas,

@@ -134,7 +134,7 @@ class NeuralTs(Neural):
         original_df = deepcopy(ds.data_frame)
 
         self.model = self.model.eval()
-        decoded_predictions: List[object] = []
+        decoded_predictions = []
         all_probs: List[List[float]] = []
         rev_map = {}
 
@@ -142,6 +142,7 @@ class NeuralTs(Neural):
         pred_cols = [f'prediction_{i}' for i in range(self.timeseries_settings.horizon)]
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),
+                           dtype=object,
                            columns=pred_cols)
 
         if self.ts_analysis.get('stl_transforms', False):
@@ -165,18 +166,21 @@ class NeuralTs(Neural):
 
                 decoded_predictions.extend(decoded_prediction)
 
+        decoded_predictions = np.array(decoded_predictions)
+        if len(decoded_predictions.shape) == 1:
+            decoded_predictions = np.expand_dims(decoded_predictions, axis=1)
         ydf[pred_cols] = decoded_predictions
+
+        if self.ts_analysis.get('stl_transforms', False):
+            ydf = _stl_inverse_transform(ydf, ds, self.timeseries_settings, self.ts_analysis)
+
+        ydf['prediction'] = ydf.values.tolist()
 
         if args.predict_proba and self.supports_proba:
             raw_predictions = np.array(all_probs).squeeze(axis=1)
 
             for idx, label in enumerate(rev_map.values()):
                 ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]
-
-        if self.ts_analysis.get('stl_transforms', False):
-            ydf = _stl_inverse_transform(ydf, ds, self.timeseries_settings, self.ts_analysis)
-
-        ydf['prediction'] = ydf.values.tolist()
 
         # TODO: make this part of the base mixer class? to avoid repetitive code
         #  and ensure other contribs don't accidentally modify the df

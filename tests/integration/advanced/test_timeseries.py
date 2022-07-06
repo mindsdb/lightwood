@@ -121,6 +121,7 @@ class TestTimeseries(unittest.TestCase):
     def test_1_time_series_regression(self):
         np.random.seed(0)
         data = pd.read_csv('tests/data/arrivals.csv')
+        data = data[data['Country'] == 'US']
         train_df, test_df = self.split_arrivals(data, grouped=False)
         target = 'Traffic'
         order_by = 'T'

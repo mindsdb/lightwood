@@ -96,6 +96,9 @@ class LightGBMArray(BaseMixer):
         if self.ts_analysis.get('stl_transforms', False):
             ydf = _stl_inverse_transform(ydf, ds, self.tss, self.ts_analysis)
 
+        if self.models[0].positive_domain:
+            ydf = ydf.clip(0)
+
         ydf['prediction'] = ydf.values.tolist()
         ds.data_frame = original_df
         return ydf[['prediction']]

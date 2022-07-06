@@ -13,7 +13,7 @@ from lightwood.helpers.log import log
 
 
 def transform_timeseries(
-        data: pd.DataFrame, dtype_dict: Dict[str, str],
+        data: pd.DataFrame, dtype_dict: Dict[str, str], ts_analysis: dict,
         timeseries_settings: TimeseriesSettings, target: str, mode: str) -> pd.DataFrame:
     """
     Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.
@@ -27,6 +27,7 @@ def transform_timeseries(
     
     :param data: Dataframe with data to transform.
     :param dtype_dict: Dictionary with the types of each column.
+    :param ts_analysis: dictionary with various insights into each series passed as training input.
     :param timeseries_settings: A `TimeseriesSettings` object.
     :param target: The name of the target column to forecast.
     :param mode: Either "train" or "predict", depending on what phase is calling this procedure.
@@ -49,7 +50,10 @@ def transform_timeseries(
     # infer frequency with get_delta
     oby_col = tss.order_by[0]
     groups = get_ts_groups(data, tss)
-    deltas, periods, freqs = get_delta(data, dtype_dict, groups, tss)
+    if not ts_analysis:
+        _, _, freqs = get_delta(data, dtype_dict, groups, tss)
+    else:
+        freqs = ts_analysis['sample_freqs']
 
     # pass seconds to timestamps according to each group's inferred freq, and force this freq on index
     subsets = []
@@ -61,10 +65,6 @@ def transform_timeseries(
             subset.index = pd.date_range(start=index.iloc[0], freq=freqs[group], periods=len(subset))
             subset['__mdb_inferred_freq'] = subset.index.freq   # sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa
             subsets.append(subset)
-    # TODO: Why are freqs being lost here?
-    #  solution: add group-wise and retrieve using iloc[0]
-    #    subset['__mdb_freq'] = subset.index.freq
-    #
     original_df = pd.concat(subsets).sort_values(by='__mdb_original_index')
 
     if '__mdb_forecast_offset' in original_df.columns:
@@ -82,7 +82,7 @@ def transform_timeseries(
         else:
             offset = 0
         infer_mode = offset_available and offset == 1
-        original_df = original_df.reset_index(drop=True) if infer_mode else original_df
+        original_df = original_df.reset_index(drop=True) if infer_mode else original_df  # TODO: This is no longer correct!  # noqa
     else:
         offset_available = False
         offset = 0
