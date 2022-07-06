@@ -283,7 +283,7 @@ class ProblemDefinition:
         fit_on_all = obj.get('fit_on_all', True)
         use_default_analysis = obj.get('use_default_analysis', True)
         strict_mode = obj.get('strict_mode', True)
-        seed_nr = obj.get('seed_nr', 420)
+        seed_nr = obj.get('seed_nr', 1)
         problem_definition = ProblemDefinition(
             target=target,
             pct_invalid=pct_invalid,

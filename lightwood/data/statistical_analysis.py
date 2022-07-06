@@ -86,8 +86,11 @@ def statistical_analysis(data: pd.DataFrame,
                  problem_definition.anomaly_detection)
     columns = [col for col in df.columns if col not in exceptions]
 
-    missing = {col: len([x for x in df[col] if x is None]) / len(df[col]) for col in columns}
-    distinct = {col: len(set([str(x) for x in df[col]])) / len(df[col]) for col in columns}
+    missing = {}
+    distinct = {}
+    for col in columns:
+        missing[col] = len([x for x in df[col] if x is None]) / len(df[col]) if len(df[col]) else 0
+        distinct[col] = len(set([str(x) for x in df[col]])) / len(df[col]) if len(df[col]) else 0
 
     nr_rows = len(df)
     target = problem_definition.target

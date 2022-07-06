@@ -185,6 +185,8 @@ class LightGBM(BaseMixer):
         if objective == 'multiclass':
             self.all_classes = self.ordinal_encoder.categories_[0]
             self.params['num_class'] = self.all_classes.size
+        elif output_dtype == dtype.num_tsarray:
+            self.params['linear_tree'] = True
         if self.device_str == 'gpu':
             self.params['gpu_use_dp'] = True
 

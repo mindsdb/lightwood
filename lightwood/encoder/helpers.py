@@ -19,8 +19,8 @@ class MinMaxNormalizer:
         if len(x.shape) < 2:
             x = np.expand_dims(x, axis=1)
 
-        x = x.astype(float)
         x[x == None] = 0 # noqa
+        x = x.astype(float)
         self.abs_mean = np.mean(np.abs(x))
         self.scaler.fit(x.reshape(x.size, -1))
 

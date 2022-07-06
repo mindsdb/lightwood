@@ -58,8 +58,9 @@ def cleaner(
         data = clean_timeseries(data, timeseries_settings)
 
     for col, imputer in imputers.items():
-        cols = [col] + [col for col in imputer.dependencies]
-        data[col] = imputer.impute(data[cols])
+        if col in data.columns:
+            cols = [col] + [col for col in imputer.dependencies]
+            data[col] = imputer.impute(data[cols])
 
     return data
 
@@ -263,7 +264,9 @@ def _clean_quantity(element: object) -> Optional[float]:
     """
     Given a quantity, clean and convert it into float numeric format. If element is NaN, or inf, then returns None.
     """
-    element = float(re.sub("[^0-9.,]", "", str(element)).replace(",", "."))
+    no_symbols = re.sub("[^0-9.,]", "", str(element)).replace(",", ".")
+    no_symbols = '0' if no_symbols == '' else no_symbols
+    element = float(no_symbols)
     return _clean_float(element)
 
 
@@ -329,13 +332,15 @@ def _remove_columns(data: pd.DataFrame, identifiers: Dict[str, object], target: 
     to_drop = [*[x for x in identifiers.keys() if x != target],
                *[x for x in data.columns if x in dtype_dict and dtype_dict[x] == dtype.invalid]]
 
-    exceptions = ["__mdb_make_predictions"]
+    exceptions = ["__mdb_forecast_offset"]
     if timeseries_settings.group_by is not None:
         exceptions += timeseries_settings.group_by
 
     to_drop = [x for x in to_drop if x in data.columns and x not in exceptions]
-    log.info(f'Dropping features: {to_drop}')
-    data = data.drop(columns=to_drop)
+
+    if to_drop:
+        log.info(f'Dropping features: {to_drop}')
+        data = data.drop(columns=to_drop)
 
     if mode == "train":
         data = _rm_rows_w_empty_targets(data, target)

@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 import unittest
 import numpy as np
 import pandas as pd
@@ -8,10 +9,7 @@ from sklearn.metrics import r2_score
 from lightwood.api.types import ProblemDefinition
 from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
-try:
-    from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
-except ModuleNotFoundError:
-    from sktime.forecasting.arima import AutoARIMA
+from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
 
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
 from lightwood.mixer.sktime import SkTime
@@ -82,7 +80,7 @@ class TestTimeseries(unittest.TestCase):
             "module": "SkTime",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
-                "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
+                "horizon": "$problem_definition.timeseries_settings.horizon",
                 "model_path": "'trend.TrendForecaster'",  # use a cheap forecaster
                 "hyperparam_search": False,  # disable this as it's expensive and covered in test #3
             },
@@ -100,19 +98,18 @@ class TestTimeseries(unittest.TestCase):
         preds = pred.predict(test[:window - 1])
         self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        # test inferring mode
-        test['__mdb_make_predictions'] = False
+        # test inferring mode, check timestamps are further into the future than test dates
+        test['__mdb_forecast_offset'] = 1
         preds = pred.predict(test)
         self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        # Additionally, check timestamps are further into the future than test dates
         latest_timestamp = pd.to_datetime(test[order_by]).max().timestamp()
         for idx, row in preds.iterrows():
             for timestamp in row[f'order_{order_by}']:
                 assert timestamp > latest_timestamp
 
         # Check custom ICP params
-        test.pop('__mdb_make_predictions')
+        test.pop('__mdb_forecast_offset')
         preds = pred.predict(test, {'fixed_confidence': 0.01, 'anomaly_cooldown': 100})
         assert all([all([v == 0.01 for v in f]) for f in preds['confidence'].values])
         assert pred.pred_args.anomaly_cooldown == 100
@@ -148,17 +145,25 @@ class TestTimeseries(unittest.TestCase):
         # test incomplete history, should not be possible
         self.assertRaises(Exception, pred.predict, test_df[:window - 1])
 
-        # test inferring mode
-        test_df['__mdb_make_predictions'] = False
+        # test inferring mode, check timestamps are further into the future than test dates
+        test_df['__mdb_forecast_offset'] = 1
         test_df = test_df.sample(frac=1)  # shuffle to test internal ordering logic
         preds = pred.predict(test_df)
         self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        # Additionally, check timestamps are further into the future than test dates
         latest_timestamp = pd.to_datetime(test_df[order_by]).max().timestamp()
         for idx, row in preds.iterrows():
             for timestamp in row[f'order_{order_by}']:
                 assert timestamp > latest_timestamp
+
+        # test null offset mode
+        test_df['__mdb_forecast_offset'] = 0
+        preds = pred.predict(test_df)
+        self.check_ts_prediction_df(preds, horizon, [order_by])
+        assert preds.shape[0] == 1
+        last_dt = datetime.utcfromtimestamp(preds[f'order_{order_by}'].values[0][0])
+        formatted = str(last_dt.year) + '-' + str(last_dt.month)
+        assert formatted == test_df.sort_values(by=order_by).iloc[-1][order_by]
 
     def test_2_time_series_classification_short_horizon_binary(self):
         df = pd.read_csv('tests/data/arrivals.csv')[:127]
@@ -242,7 +247,9 @@ class TestTimeseries(unittest.TestCase):
         particular, given a train-dev-test split, any forecasts coming from a sktime
         mixer should start from the latest observed data in the entire dataset.
         
-        This test also compares against manual use of sktime to ensure equal results.
+        This test also compares:
+         - correct propagation of offset by K if the special `__mdb_forecast_offset` column is present
+         - results against manual use of sktime to ensure equal results.
         """  # noqa
 
         # synth square wave
@@ -273,7 +280,7 @@ class TestTimeseries(unittest.TestCase):
             "module": "SkTime",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
-                "n_ts_predictions": "$problem_definition.timeseries_settings.horizon",
+                "horizon": "$problem_definition.timeseries_settings.horizon",
             }}]
 
         code = code_from_json_ai(json_ai)
@@ -283,6 +290,32 @@ class TestTimeseries(unittest.TestCase):
         train_and_check_time_aim(predictor, train)
         ps = predictor.predict(test)
         assert r2_score(test[target].values, ps['prediction'].iloc[0]) >= 0.95
+
+        # test offset for infer mode
+        test['__mdb_forecast_offset'] = 1  # one step after latest (inferred)
+        ps1 = predictor.predict(test)
+        test['__mdb_forecast_offset'] = 0  # at latest
+        ps0 = predictor.predict(test)
+        test['__mdb_forecast_offset'] = -1  # one step before latest
+        psm1 = predictor.predict(test)
+        times_1 = psm1['order_Time'].tolist()[0]
+        values_1 = psm1['prediction'].tolist()[0]
+        times0 = ps0['order_Time'].tolist()[0]
+        values0 = ps0['prediction'].tolist()[0]
+        times1 = ps1['order_Time'].tolist()[0]
+        values1 = ps1['prediction'].tolist()[0]
+
+        # due to the offset, these intermediate indexes should be equal
+        self.assertTrue(times_1[1:] == times0[0:-1])
+        self.assertTrue(times0[1:] == times1[0:-1])
+        self.assertTrue(values_1[1:] == values0[0:-1])
+        self.assertTrue(values0[1:] == values1[0:-1])
+
+        # the rest should be different
+        self.assertTrue(times_1 != times0)
+        self.assertTrue(times0 != times1)
+        self.assertTrue(values_1 != values0)
+        self.assertTrue(values0 != values1)
 
         # test historical columns asserts
         test[f'{target}_2x'].iloc[0] = np.nan
@@ -337,5 +370,5 @@ class TestTimeseries(unittest.TestCase):
 
         train_and_check_time_aim(predictor, train)  # Test with a longer time aim
 
-        test['__mdb_make_predictions'] = False
+        test['__mdb_forecast_offset'] = 1
         predictor.predict(test)

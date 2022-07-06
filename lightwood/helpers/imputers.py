@@ -3,6 +3,8 @@ from typing import List
 
 import pandas as pd
 
+from lightwood.helpers.log import log
+
 
 class BaseImputer:
     def __init__(self, target: str, dependencies: List[str] = []):
@@ -26,12 +28,12 @@ class BaseImputer:
 
 
 class NumericalImputer(BaseImputer):
-    def __init__(self, target: str, dependencies: List[str] = [], value: str = 'zero', typecast: str = None):
+    def __init__(self, target: str, dependencies: List[str] = [], value: str = 'zero', typecast: bool = True):
         """
         Imputer for numerical columns. Supports a handful of different approaches to define the imputation value.
         
         :param value: The value to impute. One of 'mean', 'median', 'zero', 'mode'.
-        :param typecast: Used to cast the column into either 'int' or 'float' (`None` skips forced casting).
+        :param typecast: Used to cast the column into 'float' dtype.
         """  # noqa
         self.value = value
         self.typecast = typecast
@@ -46,9 +48,9 @@ class NumericalImputer(BaseImputer):
                 try:
                     data[col] = data[col].astype(float)
                 except ValueError:
-                    raise Exception(f'Numerical imputer failed to cast column {col} to float!')
+                    log.warning(f'Numerical imputer failed to cast column {col} to float!')
             else:
-                raise Exception(f'Numerical imputer used in non-numeric column {col} with dtype {data[col].dtype}!')
+                log.warning(f'Numerical imputer used in non-numeric column {col} with dtype {data[col].dtype}!')
 
         if self.value == 'mean':
             value = data[col].dropna().mean()

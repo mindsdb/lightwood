@@ -1,37 +1,33 @@
 import importlib
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score, mean_absolute_error, balanced_accuracy_score
 from lightwood.helpers.numeric import is_nan_numeric
 
 
-def get_group_matches(data, combination):
-    """Given a grouped-by combination, return rows of the data that match belong to it. Params:
-    data: dict with data to filter and group-by columns info.
-    combination: tuple with values to filter by
-    return: indexes for rows to normalize, data to normalize
-    """
-    keys = data['group_info'].keys()  # which column does each combination value belong to
+def get_group_matches(
+        data: Union[pd.Series, pd.DataFrame],
+        combination: tuple,
+        group_columns: List[str]
+) -> Tuple[list, pd.DataFrame]:
+    """Given a particular group combination, return the data subset that belongs to it."""
 
-    if isinstance(data['data'], pd.Series):
-        data['data'] = np.vstack(data['data'])
-    if isinstance(data['data'], np.ndarray) and len(data['data'].shape) < 2:
-        data['data'] = np.expand_dims(data['data'], axis=1)
+    if type(data) == pd.Series:
+        data = pd.DataFrame(data)
+    elif type(data) != pd.DataFrame:
+        raise Exception(f"Wrong data type {type(data)}, must be pandas.DataFrame or pd.Series")
 
     if combination == '__default':
-        idxs = range(len(data['data']))
-        return [idxs, np.array(data['data'])[idxs, :]]  # return all data
+        return list(data.index), data
     else:
-        all_sets = []
-        for val, key in zip(combination, keys):
-            all_sets.append(set([i for i, elt in enumerate(data['group_info'][key]) if elt == val]))
-        if all_sets:
-            idxs = list(set.intersection(*all_sets))
-            return idxs, np.array(data['data'])[idxs, :]
-
+        subset = data
+        for val, col in zip(combination, group_columns):
+            subset = subset[subset[col] == val]
+        if len(subset) > 0:
+            return list(subset.index), subset
         else:
-            return [], np.array([])
+            return [], pd.DataFrame()
 
 
 # ------------------------- #
@@ -140,12 +136,6 @@ def evaluate_num_array_accuracy(
         naive_errors = None
     else:
         naive_errors = ts_analysis.get('ts_naive_mae', {})
-        wrapped_data = {
-            'data': kwargs['data'].reset_index(drop=True),
-            'group_info': {gcol: kwargs['data'][gcol].tolist()
-                           for gcol in ts_analysis['tss'].group_by} if ts_analysis['tss'].group_by else {}
-        }
-
         if ts_analysis['tss'].group_by:
             [true_values.pop(gby_col) for gby_col in ts_analysis['tss'].group_by]
 
@@ -161,7 +151,7 @@ def evaluate_num_array_accuracy(
 
     mases = []
     for group in ts_analysis['group_combinations']:
-        g_idxs, _ = get_group_matches(wrapped_data, group)
+        g_idxs, _ = get_group_matches(kwargs['data'].reset_index(drop=True), group, ts_analysis['tss'].group_by)
 
         # only evaluate populated groups
         if g_idxs:

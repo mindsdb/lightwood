@@ -132,7 +132,7 @@ class ICP(BaseAnalysisBlock):
                 output['icp']['__mdb_group_keys'] = [x for x in group_info.keys()]
 
                 for combination in all_group_combinations:
-                    output['icp'][frozenset(combination)] = deepcopy(icp)
+                    output['icp'][tuple(combination)] = deepcopy(icp)
 
             # calibrate ICP
             icp_df = deepcopy(ns.data)
@@ -173,8 +173,8 @@ class ICP(BaseAnalysisBlock):
                     for key, val in zip(group_keys, group):
                         icp_df = icp_df[icp_df[key] == val]
 
-                    if icps[frozenset(group)].nc_function.normalizer is not None:
-                        group_normalizer = icps[frozenset(group)].nc_function.normalizer
+                    if icps[tuple(group)].nc_function.normalizer is not None:
+                        group_normalizer = icps[tuple(group)].nc_function.normalizer
                         norm_input_df = ns.encoded_val_data.data_frame.iloc[icp_df.pop('__mdb_norm_index')]
                         norm_input = EncodedDs(ns.encoded_val_data.encoders, norm_input_df, ns.target)
                         norm_cache = group_normalizer(norm_input, args=PredictionArguments())
@@ -184,14 +184,14 @@ class ICP(BaseAnalysisBlock):
                     pred_cache = icp_df.pop(f'__predicted_{ns.target}').values
                     if ns.is_multi_ts:
                         pred_cache = np.array([np.array(p) for p in pred_cache])
-                    icps[frozenset(group)].nc_function.model.prediction_cache = pred_cache
+                    icps[tuple(group)].nc_function.model.prediction_cache = pred_cache
                     icp_df, y = clean_df(icp_df, ns, output.get('label_encoders', None))
-                    if icps[frozenset(group)].nc_function.normalizer is not None:
-                        icps[frozenset(group)].nc_function.normalizer.prediction_cache = icp_df.pop(
+                    if icps[tuple(group)].nc_function.normalizer is not None:
+                        icps[tuple(group)].nc_function.normalizer.prediction_cache = icp_df.pop(
                             f'__norm_{ns.target}').values
 
-                    icps[frozenset(group)].index = icp_df.columns  # important at inference time
-                    icps[frozenset(group)].calibrate(icp_df.values, y)
+                    icps[tuple(group)].index = icp_df.columns  # important at inference time
+                    icps[tuple(group)].calibrate(icp_df.values, y)
 
                     # save training std() for bounds width selection
                     if not ns.is_classification:
@@ -199,13 +199,13 @@ class ICP(BaseAnalysisBlock):
                         for key, val in zip(group_keys, group):
                             icp_train_df = icp_train_df[icp_train_df[key] == val]
                         y_train = icp_train_df[ns.target].values
-                        output['df_target_stddev'][frozenset(group)] = y_train.std()
+                        output['df_target_stddev'][tuple(group)] = y_train.std()
 
                     # get bounds for relevant rows in validation dataset
                     conf, group_ranges = set_conf_range(
-                        icp_df, icps[frozenset(group)],
+                        icp_df, icps[tuple(group)],
                         ns.dtype_dict[ns.target],
-                        output, group=frozenset(group),
+                        output, group=tuple(group),
                         positive_domain=self.positive_domain, significance=self.fixed_significance)
                     # save group bounds
                     if not ns.is_classification:
@@ -225,6 +225,15 @@ class ICP(BaseAnalysisBlock):
     def explain(self, row_insights: pd.DataFrame, global_insights: Dict[str, object],
                 **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
         ns = SimpleNamespace(**kwargs)
+
+        if 'confidence' in ns.predictions.columns:
+            # bypass calibrator if model already outputs confidence
+            row_insights['prediction'] = ns.predictions['prediction']
+            row_insights['confidence'] = ns.predictions['confidence']
+            if 'upper' in ns.predictions.columns and 'lower' in ns.predictions.columns:
+                row_insights['upper'] = ns.predictions['upper']
+                row_insights['lower'] = ns.predictions['lower']
+            return row_insights, global_insights
 
         if ns.analysis['icp']['__mdb_active']:
             icp_X = deepcopy(ns.data)
@@ -350,7 +359,7 @@ class ICP(BaseAnalysisBlock):
                     group_keys = icps['__mdb_group_keys']
 
                     for group in icps['__mdb_groups']:
-                        icp = icps[frozenset(group)]
+                        icp = icps[tuple(group)]
 
                         # check ICP has calibration scores
                         if icp.cal_scores[0].shape[0] > 0:
@@ -408,7 +417,7 @@ class ICP(BaseAnalysisBlock):
                                         all_confs,
                                         df_target_stddev=ns.analysis['df_target_stddev'],
                                         positive_domain=self.positive_domain,
-                                        group=frozenset(group),
+                                        group=tuple(group),
                                         fixed_conf=fixed_conf
                                     )
 
