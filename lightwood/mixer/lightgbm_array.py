@@ -48,6 +48,7 @@ class LightGBMArray(BaseMixer):
                        for _ in range(self.horizon)]
         self.ts_analysis = ts_analysis
         self.supports_proba = False
+        self.use_stl_blocks = True
         self.stable = True
 
     def _fit(self, train_data: EncodedDs, dev_data: EncodedDs, submodel_method='fit') -> None:
@@ -72,9 +73,8 @@ class LightGBMArray(BaseMixer):
         self._fit(train_data, dev_data, submodel_method='fit')
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
-        pass
-        #  log.info('Updating array of LGBM models...')
-        #  self._fit(train_data, dev_data, submodel_method='partial_fit')
+        log.info('Updating array of LGBM models...')
+        self._fit(train_data, dev_data, submodel_method='partial_fit')
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
@@ -87,13 +87,13 @@ class LightGBMArray(BaseMixer):
                            index=np.arange(length),
                            columns=[f'prediction_{i}' for i in range(self.horizon)])
 
-        if self.ts_analysis.get('stl_transforms', False):
+        if self.use_stl_blocks and self.ts_analysis.get('stl_transforms', False):
             ds.data_frame = _stl_transform(ydf, ds, self.target, self.tss, self.ts_analysis)
 
         for timestep in range(self.horizon):
             ydf[f'prediction_{timestep}'] = self.models[timestep](ds, args)['prediction'].values
 
-        if self.ts_analysis.get('stl_transforms', False):
+        if self.use_stl_blocks and self.ts_analysis.get('stl_transforms', False):
             ydf = _stl_inverse_transform(ydf, ds, self.tss, self.ts_analysis)
 
         if self.models[0].positive_domain:

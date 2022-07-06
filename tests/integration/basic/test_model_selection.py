@@ -53,7 +53,7 @@ class TestMixerSelection(unittest.TestCase):
                 'window': 5
             }
         }
-        expected_mixers = ['Neural', 'LightGBM', 'Regression']
+        expected_mixers = ['NeuralTs', 'LightGBM', 'Regression']
         mixers = self.get_mixers(df, target, prob_kwargs=prob_kwargs)
         self.assertEqual(set(mixers), set(expected_mixers))
 
@@ -69,6 +69,6 @@ class TestMixerSelection(unittest.TestCase):
                 'window': 5
             }
         }
-        expected_mixers = ['Neural', 'LightGBMArray', 'SkTime']
+        expected_mixers = ['NeuralTs', 'LightGBMArray', 'SkTime']
         mixers = self.get_mixers(df, target, prob_kwargs=prob_kwargs)
         self.assertEqual(set(mixers), set(expected_mixers))

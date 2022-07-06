@@ -20,7 +20,6 @@ from lightwood.mixer.sktime import SkTime
 np.random.seed(0)
 
 
-# TODO: add tests for STL blocks usage
 class TestTimeseries(unittest.TestCase):
     def check_ts_prediction_df(self, df: pd.DataFrame, horizon: int, orders: List[str]):
         for idx, row in df.iterrows():
