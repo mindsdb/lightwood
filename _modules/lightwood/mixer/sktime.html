@@ -211,7 +211,7 @@
             <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;statsforecast.StatsForecastAutoARIMA&#39;</span><span class="p">,</span>
             <span class="n">auto_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">hyperparam_search</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="n">use_decomposers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">use_stl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared</span>
@@ -237,7 +237,7 @@
 <span class="sd">        :param model_path: sktime forecaster to use as underlying model(s). Should be a string with format &quot;$module.$class&#39; where &#39;$module&#39; is inside `sktime.forecasting`. Default is &#39;arima.AutoARIMA&#39;.</span>
 <span class="sd">        :param hyperparam_search: bool that indicates whether to perform the hyperparameter tuning or not.</span>
 <span class="sd">        :param auto_size: whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.</span>
-<span class="sd">        :param use_decomposers: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase. Enabled by default.</span>
+<span class="sd">        :param use_stl: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">True</span>
@@ -251,7 +251,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_size</span> <span class="o">=</span> <span class="n">auto_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_factor</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># times the detected maximum seasonal period</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_decomposers</span> <span class="o">=</span> <span class="n">use_decomposers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_stl</span> <span class="o">=</span> <span class="n">use_stl</span>
 
         <span class="c1"># optuna hyperparameter tuning</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
@@ -324,7 +324,7 @@
 
             <span class="n">model_pipeline</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;forecaster&quot;</span><span class="p">,</span> <span class="n">model_class</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))]</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_decomposers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_stl</span><span class="p">:</span>
                 <span class="n">model_pipeline</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;detrender&quot;</span><span class="p">,</span>
                                           <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;stl_transforms&#39;</span><span class="p">][</span><span class="n">group</span><span class="p">][</span><span class="s2">&quot;transformer&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detrender</span><span class="p">))</span>
                 <span class="n">model_pipeline</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;deseasonalizer&quot;</span><span class="p">,</span>
