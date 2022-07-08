@@ -39,14 +39,17 @@ class LightGBMArray(BaseMixer):
         self.submodel_stop_after = stop_after / self.horizon
         self.target = target
         self.offset_pred_cols = [f'{self.target}_timestep_{i}' for i in range(1, self.horizon)]
+        input_cols.remove(*self.tss.order_by)
+        for col in self.offset_pred_cols:
+            dtype_dict[col] = dtype_dict[self.target]
         self.models = [LightGBM(self.submodel_stop_after,
-                                target,
+                                target_col,
                                 dtype_dict,
                                 input_cols,
-                                fit_on_dev,
-                                False,  # use_optuna
+                                False,  # fit_on_dev,
+                                True,  # use_optuna
                                 target_encoder)
-                       for _ in range(self.horizon)]
+                       for _, target_col in zip(range(self.horizon), [target] + self.offset_pred_cols)]
         self.ts_analysis = ts_analysis
         self.supports_proba = False
         self.use_stl = False
@@ -56,20 +59,11 @@ class LightGBMArray(BaseMixer):
         original_train = deepcopy(train_data.data_frame)
         original_dev = deepcopy(dev_data.data_frame)
 
-        if self.ts_analysis.get('stl_transforms', False):
+        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
             _apply_stl_on_training(train_data, dev_data, self.target, self.tss, self.ts_analysis)
 
         for timestep in range(self.horizon):
-            train_data.data_frame = original_train
-            dev_data.data_frame = original_dev
-
-            if timestep > 0:
-                train_data.data_frame[self.target] = train_data.data_frame[f'{self.target}_timestep_{timestep}']
-                dev_data.data_frame[self.target] = dev_data.data_frame[f'{self.target}_timestep_{timestep}']
-
-            train_data.data_frame = train_data.data_frame.loc[train_data.data_frame[self.target].notna().index]
-            dev_data.data_frame = dev_data.data_frame.loc[dev_data.data_frame[self.target].notna().index]
-            getattr(self.models[timestep], submodel_method)(train_data, dev_data)  # call submodel_method to fit
+            getattr(self.models[timestep], submodel_method)(train_data, dev_data)
 
         # restore dfs
         train_data.data_frame = original_train
