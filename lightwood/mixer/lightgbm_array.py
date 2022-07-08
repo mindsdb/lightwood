@@ -38,6 +38,7 @@ class LightGBMArray(BaseMixer):
         self.horizon = tss.horizon
         self.submodel_stop_after = stop_after / self.horizon
         self.target = target
+        self.offset_pred_cols = [f'{self.target}_timestep_{i}' for i in range(1, self.horizon)]
         self.models = [LightGBM(self.submodel_stop_after,
                                 target,
                                 dtype_dict,
@@ -59,9 +60,15 @@ class LightGBMArray(BaseMixer):
             _apply_stl_on_training(train_data, dev_data, self.target, self.tss, self.ts_analysis)
 
         for timestep in range(self.horizon):
+            train_data.data_frame = original_train
+            dev_data.data_frame = original_dev
+
             if timestep > 0:
                 train_data.data_frame[self.target] = train_data.data_frame[f'{self.target}_timestep_{timestep}']
                 dev_data.data_frame[self.target] = dev_data.data_frame[f'{self.target}_timestep_{timestep}']
+
+            train_data.data_frame = train_data.data_frame.loc[train_data.data_frame[self.target].notna().index]
+            dev_data.data_frame = dev_data.data_frame.loc[dev_data.data_frame[self.target].notna().index]
             getattr(self.models[timestep], submodel_method)(train_data, dev_data)  # call submodel_method to fit
 
         # restore dfs
