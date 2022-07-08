@@ -38,31 +38,33 @@ class LightGBMArray(BaseMixer):
         self.horizon = tss.horizon
         self.submodel_stop_after = stop_after / self.horizon
         self.target = target
+        self.offset_pred_cols = [f'{self.target}_timestep_{i}' for i in range(1, self.horizon)]
+        if set(input_cols) != set(self.tss.order_by):
+            input_cols.remove(*self.tss.order_by)
+        for col in self.offset_pred_cols:
+            dtype_dict[col] = dtype_dict[self.target]
         self.models = [LightGBM(self.submodel_stop_after,
-                                target,
+                                target_col,
                                 dtype_dict,
                                 input_cols,
-                                fit_on_dev,
-                                False,  # use_optuna
+                                False,  # fit_on_dev,
+                                True,  # use_optuna
                                 target_encoder)
-                       for _ in range(self.horizon)]
+                       for _, target_col in zip(range(self.horizon), [target] + self.offset_pred_cols)]
         self.ts_analysis = ts_analysis
         self.supports_proba = False
-        self.use_stl_blocks = True
+        self.use_stl = False
         self.stable = True
 
     def _fit(self, train_data: EncodedDs, dev_data: EncodedDs, submodel_method='fit') -> None:
         original_train = deepcopy(train_data.data_frame)
         original_dev = deepcopy(dev_data.data_frame)
 
-        if self.ts_analysis.get('stl_transforms', False):
+        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
             _apply_stl_on_training(train_data, dev_data, self.target, self.tss, self.ts_analysis)
 
         for timestep in range(self.horizon):
-            if timestep > 0:
-                train_data.data_frame[self.target] = train_data.data_frame[f'{self.target}_timestep_{timestep}']
-                dev_data.data_frame[self.target] = dev_data.data_frame[f'{self.target}_timestep_{timestep}']
-            getattr(self.models[timestep], submodel_method)(train_data, dev_data)  # call submodel_method to fit
+            getattr(self.models[timestep], submodel_method)(train_data, dev_data)
 
         # restore dfs
         train_data.data_frame = original_train
@@ -87,13 +89,13 @@ class LightGBMArray(BaseMixer):
                            index=np.arange(length),
                            columns=[f'prediction_{i}' for i in range(self.horizon)])
 
-        if self.use_stl_blocks and self.ts_analysis.get('stl_transforms', False):
+        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
             ds.data_frame = _stl_transform(ydf, ds, self.target, self.tss, self.ts_analysis)
 
         for timestep in range(self.horizon):
             ydf[f'prediction_{timestep}'] = self.models[timestep](ds, args)['prediction'].values
 
-        if self.use_stl_blocks and self.ts_analysis.get('stl_transforms', False):
+        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
             ydf = _stl_inverse_transform(ydf, ds, self.tss, self.ts_analysis)
 
         if self.models[0].positive_domain:
