@@ -48,7 +48,7 @@ class LightGBMArray(BaseMixer):
                        for _ in range(self.horizon)]
         self.ts_analysis = ts_analysis
         self.supports_proba = False
-        self.use_stl_blocks = True
+        self.use_stl = False
         self.stable = True
 
     def _fit(self, train_data: EncodedDs, dev_data: EncodedDs, submodel_method='fit') -> None:
@@ -87,13 +87,13 @@ class LightGBMArray(BaseMixer):
                            index=np.arange(length),
                            columns=[f'prediction_{i}' for i in range(self.horizon)])
 
-        if self.use_stl_blocks and self.ts_analysis.get('stl_transforms', False):
+        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
             ds.data_frame = _stl_transform(ydf, ds, self.target, self.tss, self.ts_analysis)
 
         for timestep in range(self.horizon):
             ydf[f'prediction_{timestep}'] = self.models[timestep](ds, args)['prediction'].values
 
-        if self.use_stl_blocks and self.ts_analysis.get('stl_transforms', False):
+        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
             ydf = _stl_inverse_transform(ydf, ds, self.tss, self.ts_analysis)
 
         if self.models[0].positive_domain:

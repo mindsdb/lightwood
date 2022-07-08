@@ -36,6 +36,7 @@ class NeuralTs(Neural):
             search_hyperparameters: bool,
             ts_analysis: Dict[str, Dict],
             n_epochs: Optional[int] = None,
+            use_stl: Optional[bool] = False
     ):
         """
         Subclassed Neural mixer used for time series forecasting scenarios. 
@@ -65,6 +66,7 @@ class NeuralTs(Neural):
         self.ts_analysis = ts_analysis
         self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
         self.stable = True
+        self.use_stl = use_stl
 
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.num_tsarray, dtype.quantity):
@@ -88,7 +90,7 @@ class NeuralTs(Neural):
         original_dev = deepcopy(dev_data.data_frame)
 
         # Use STL blocks if available
-        if self.ts_analysis.get('stl_transforms', False):
+        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
             _apply_stl_on_training(train_data, dev_data, self.target, self.timeseries_settings, self.ts_analysis)
 
         # ConcatedEncodedDs
@@ -145,7 +147,7 @@ class NeuralTs(Neural):
                            dtype=object,
                            columns=pred_cols)
 
-        if self.ts_analysis.get('stl_transforms', False):
+        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
             ds.data_frame = _stl_transform(ydf, ds, self.target, self.timeseries_settings, self.ts_analysis)
 
         with torch.no_grad():
@@ -171,7 +173,7 @@ class NeuralTs(Neural):
             decoded_predictions = np.expand_dims(decoded_predictions, axis=1)
         ydf[pred_cols] = decoded_predictions
 
-        if self.ts_analysis.get('stl_transforms', False):
+        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
             ydf = _stl_inverse_transform(ydf, ds, self.timeseries_settings, self.ts_analysis)
 
         ydf['prediction'] = ydf.values.tolist()

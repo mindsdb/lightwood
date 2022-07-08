@@ -38,7 +38,7 @@ class SkTime(BaseMixer):
             model_path: str = 'statsforecast.StatsForecastAutoARIMA',
             auto_size: bool = True,
             hyperparam_search: bool = False,
-            use_decomposers: bool = True
+            use_stl: bool = False
     ):
         """
         This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
@@ -64,7 +64,7 @@ class SkTime(BaseMixer):
         :param model_path: sktime forecaster to use as underlying model(s). Should be a string with format "$module.$class' where '$module' is inside `sktime.forecasting`. Default is 'arima.AutoARIMA'.
         :param hyperparam_search: bool that indicates whether to perform the hyperparameter tuning or not.
         :param auto_size: whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.
-        :param use_decomposers: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase. Enabled by default.
+        :param use_stl: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.
         """  # noqa
         super().__init__(stop_after)
         self.stable = True
@@ -78,7 +78,7 @@ class SkTime(BaseMixer):
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.auto_size = auto_size
         self.cutoff_factor = 4  # times the detected maximum seasonal period
-        self.use_decomposers = use_decomposers
+        self.use_stl = use_stl
 
         # optuna hyperparameter tuning
         self.models = {}
@@ -151,7 +151,7 @@ class SkTime(BaseMixer):
 
             model_pipeline = [("forecaster", model_class(**kwargs))]
 
-            if self.use_decomposers:
+            if self.use_stl:
                 model_pipeline.insert(0, ("detrender",
                                           self.ts_analysis['stl_transforms'][group]["transformer"].detrender))
                 model_pipeline.insert(0, ("deseasonalizer",
