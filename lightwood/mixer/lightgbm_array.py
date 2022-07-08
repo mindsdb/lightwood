@@ -39,7 +39,8 @@ class LightGBMArray(BaseMixer):
         self.submodel_stop_after = stop_after / self.horizon
         self.target = target
         self.offset_pred_cols = [f'{self.target}_timestep_{i}' for i in range(1, self.horizon)]
-        input_cols.remove(*self.tss.order_by)
+        if set(input_cols) != set(self.tss.order_by):
+            input_cols.remove(*self.tss.order_by)
         for col in self.offset_pred_cols:
             dtype_dict[col] = dtype_dict[self.target]
         self.models = [LightGBM(self.submodel_stop_after,
