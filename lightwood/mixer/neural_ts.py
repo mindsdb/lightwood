@@ -178,6 +178,9 @@ class NeuralTs(Neural):
 
         ydf['prediction'] = ydf.values.tolist()
 
+        if self.timeseries_settings.horizon == 1:
+            ydf['prediction'] = [p[0] for p in ydf['prediction']]
+
         if args.predict_proba and self.supports_proba:
             raw_predictions = np.array(all_probs).squeeze(axis=1)
 

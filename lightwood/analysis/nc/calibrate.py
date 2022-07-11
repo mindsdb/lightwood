@@ -106,7 +106,7 @@ class ICP(BaseAnalysisBlock):
                     predicted_classes = pd.get_dummies(preds).values  # inflate to one-hot enc
                     icp.nc_function.model.prediction_cache = predicted_classes
 
-            elif ns.is_multi_ts:
+            elif ns.is_multi_ts or isinstance(ns.normal_predictions['prediction'][0], list):
                 # we fit ICPs for time series confidence bounds only at t+1 forecast
                 icp.nc_function.model.prediction_cache = np.array([p[0] for p in ns.normal_predictions['prediction']])
             else:
@@ -157,10 +157,10 @@ class ICP(BaseAnalysisBlock):
                 icps_df = deepcopy(ns.data)
                 midx = pd.MultiIndex.from_frame(icps_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by[0]}']])
                 icps_df.index = midx
-                if ns.is_multi_ts:
-                    icps_df[f'__predicted_{ns.target}'] = [p[0] for p in ns.normal_predictions['prediction']]
+                if ns.is_multi_ts or isinstance(ns.normal_predictions['prediction'][0], list):
+                    icps_df[f'__predicted_{ns.target}'] = np.array([p[0] for p in ns.normal_predictions['prediction']])
                 else:
-                    icps_df[f'__predicted_{ns.target}'] = ns.normal_predictions['prediction']
+                    icps_df[f'__predicted_{ns.target}'] = np.array(ns.normal_predictions['prediction'])
 
                 for group in icps['__mdb_groups']:
                     icp_df = icps_df
@@ -236,7 +236,7 @@ class ICP(BaseAnalysisBlock):
 
             # replace observed data w/predictions
             preds = ns.predictions['prediction']
-            if ns.tss.is_timeseries and ns.tss.horizon > 1:
+            if ns.tss.is_timeseries and (ns.tss.horizon > 1 or isinstance(preds[0], list)):
                 preds = [p[0] for p in preds]
 
                 for col in [f'timestep_{i}' for i in range(1, ns.tss.horizon)]:

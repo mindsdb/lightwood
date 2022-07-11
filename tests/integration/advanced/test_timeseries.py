@@ -27,6 +27,7 @@ class TestTimeseries(unittest.TestCase):
             assert len(prediction) == horizon
 
             for oby in orders:
+                row[f'order_{oby}'] = [row[f'order_{oby}']] if horizon == 1 else row[f'order_{oby}']
                 assert len(row[f'order_{oby}']) == horizon
                 assert not any(pd.isna(row[f'order_{oby}']))
 
@@ -57,62 +58,69 @@ class TestTimeseries(unittest.TestCase):
         train, test = self.split_arrivals(data, grouped=True)
         target = 'Traffic'
         order_by = 'T'
-        horizon = 2
         window = 5
-        jai = json_ai_from_problem(train,
-                                   ProblemDefinition.from_dict({'target': target,
-                                                                'time_aim': 30,
-                                                                'anomaly_detection': True,
-                                                                'timeseries_settings': {
-                                                                    'use_previous_target': True,
-                                                                    'allow_incomplete_history': True,
-                                                                    'group_by': ['Country'],
-                                                                    'horizon': horizon,
-                                                                    'order_by': [order_by],
-                                                                    'period_intervals': (('daily', 7),),
-                                                                    'window': window
-                                                                }}))
-        for i, mixer in enumerate(jai.model['args']['submodels']):
-            if mixer["module"] == 'SkTime':
-                sktime_mixer_idx = i
 
-        jai.model['args']['submodels'][sktime_mixer_idx] = {
-            "module": "SkTime",
-            "args": {
-                "stop_after": "$problem_definition.seconds_per_mixer",
-                "horizon": "$problem_definition.timeseries_settings.horizon",
-                "model_path": "'trend.TrendForecaster'",  # use a cheap forecaster
-                "hyperparam_search": False,  # disable this as it's expensive and covered in test #3
-            },
-        }
+        for horizon in (1, 2):
+            jai = json_ai_from_problem(train,
+                                       ProblemDefinition.from_dict({'target': target,
+                                                                    'time_aim': 30,
+                                                                    'anomaly_detection': True,
+                                                                    'timeseries_settings': {
+                                                                        'use_previous_target': True,
+                                                                        'allow_incomplete_history': True,
+                                                                        'group_by': ['Country'],
+                                                                        'horizon': horizon,
+                                                                        'order_by': [order_by],
+                                                                        'period_intervals': (('daily', 7),),
+                                                                        'window': window
+                                                                    }}))
+            sktime_mixer_idx = None
+            for i, mixer in enumerate(jai.model['args']['submodels']):
+                if mixer["module"] == 'SkTime':
+                    sktime_mixer_idx = i
 
-        code = code_from_json_ai(jai)
-        pred = predictor_from_code(code)
+            if sktime_mixer_idx:
+                jai.model['args']['submodels'][sktime_mixer_idx] = {
+                    "module": "SkTime",
+                    "args": {
+                        "stop_after": "$problem_definition.seconds_per_mixer",
+                        "horizon": "$problem_definition.timeseries_settings.horizon",
+                        "model_path": "'trend.TrendForecaster'",  # use a cheap forecaster
+                        "hyperparam_search": False,  # disable this as it's expensive and covered in test #3
+                    },
+                }
 
-        # Test with a short time aim
-        train_and_check_time_aim(pred, train)
-        preds = pred.predict(test)
-        self.check_ts_prediction_df(preds, horizon, [order_by])
+            code = code_from_json_ai(jai)
+            pred = predictor_from_code(code)
 
-        # test allowed incomplete history
-        preds = pred.predict(test[:window - 1])
-        self.check_ts_prediction_df(preds, horizon, [order_by])
+            # Test with a short time aim
+            train_and_check_time_aim(pred, train)
+            preds = pred.predict(test)
+            self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        # test inferring mode, check timestamps are further into the future than test dates
-        test['__mdb_forecast_offset'] = 1
-        preds = pred.predict(test)
-        self.check_ts_prediction_df(preds, horizon, [order_by])
+            # test allowed incomplete history
+            preds = pred.predict(test[:window - 1])
+            self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        latest_timestamp = pd.to_datetime(test[order_by]).max().timestamp()
-        for idx, row in preds.iterrows():
-            for timestamp in row[f'order_{order_by}']:
-                assert timestamp > latest_timestamp
+            # test inferring mode, check timestamps are further into the future than test dates
+            test['__mdb_forecast_offset'] = 1
+            preds = pred.predict(test)
+            self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        # Check custom ICP params
-        test.pop('__mdb_forecast_offset')
-        preds = pred.predict(test, {'fixed_confidence': 0.01, 'anomaly_cooldown': 100})
-        assert all([all([v == 0.01 for v in f]) for f in preds['confidence'].values])
-        assert pred.pred_args.anomaly_cooldown == 100
+            latest_timestamp = pd.to_datetime(test[order_by]).max().timestamp()
+            for idx, row in preds.iterrows():
+                row[f'order_{order_by}'] = [row[f'order_{order_by}']] if horizon == 1 else row[f'order_{order_by}']
+                for timestamp in row[f'order_{order_by}']:
+                    assert timestamp > latest_timestamp
+
+            # Check custom ICP params
+            test.pop('__mdb_forecast_offset')
+            preds = pred.predict(test, {'fixed_confidence': 0.01, 'anomaly_cooldown': 100})
+            if horizon == 1:
+                assert set([v for v in preds['confidence'].values]) == {0.01}
+            else:
+                assert all([all([v == 0.01 for v in f]) for f in preds['confidence'].values])
+            assert pred.pred_args.anomaly_cooldown == 100
 
     def test_1_time_series_regression(self):
         np.random.seed(0)
@@ -121,50 +129,57 @@ class TestTimeseries(unittest.TestCase):
         train_df, test_df = self.split_arrivals(data, grouped=False)
         target = 'Traffic'
         order_by = 'T'
-        horizon = 2
         window = 5
-        pred = predictor_from_problem(data,
-                                      ProblemDefinition.from_dict({'target': target,
-                                                                   'anomaly_detection': False,
-                                                                   'timeseries_settings': {
-                                                                       'use_previous_target': False,
-                                                                       'allow_incomplete_history': False,
-                                                                       'horizon': horizon,
-                                                                       'order_by': [order_by],
-                                                                       'window': window}
-                                                                   }))
+        for horizon in (1, 2):
+            jai = json_ai_from_problem(data,
+                                       ProblemDefinition.from_dict({'target': target,
+                                                                    'anomaly_detection': False,
+                                                                    'timeseries_settings': {
+                                                                        'use_previous_target': False,
+                                                                        'allow_incomplete_history': False,
+                                                                        'horizon': horizon,
+                                                                        'order_by': [order_by],
+                                                                        'window': window}
+                                                                    }))
+            jai.model['args']['submodels'] = [jai.model['args']['submodels'][0]]
+            code = code_from_json_ai(jai)
+            pred = predictor_from_code(code)
 
-        # add a few invalid datetime values to test cleaning procedures
-        for idx in list(np.where(np.random.random((len(train_df),)) > 0.98)[0]):
-            train_df.at[idx, 'T'] = pd.NaT
+            # add a few invalid datetime values to test cleaning procedures
+            for idx in list(np.where(np.random.random((len(train_df),)) > 0.98)[0]):
+                train_df.at[idx, 'T'] = pd.NaT
 
-        pred.learn(train_df)
-        preds = pred.predict(data.sample(frac=1)[0:10])
-        self.assertTrue('original_index' in preds.columns)
-        self.check_ts_prediction_df(preds, horizon, [order_by])
+            pred.learn(train_df)
+            preds = pred.predict(data.sample(frac=1)[0:10])
+            self.assertTrue('original_index' in preds.columns)
+            self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        # test incomplete history, should not be possible
-        self.assertRaises(Exception, pred.predict, test_df[:window - 1])
+            # test incomplete history, should not be possible
+            self.assertRaises(Exception, pred.predict, test_df[:window - 1])
 
-        # test inferring mode, check timestamps are further into the future than test dates
-        test_df['__mdb_forecast_offset'] = 1
-        test_df = test_df.sample(frac=1)  # shuffle to test internal ordering logic
-        preds = pred.predict(test_df)
-        self.check_ts_prediction_df(preds, horizon, [order_by])
+            # test inferring mode, check timestamps are further into the future than test dates
+            test_df['__mdb_forecast_offset'] = 1
+            test_df = test_df.sample(frac=1)  # shuffle to test internal ordering logic
+            preds = pred.predict(test_df)
+            self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        latest_timestamp = pd.to_datetime(test_df[order_by]).max().timestamp()
-        for idx, row in preds.iterrows():
-            for timestamp in row[f'order_{order_by}']:
-                assert timestamp > latest_timestamp
+            latest_timestamp = pd.to_datetime(test_df[order_by]).max().timestamp()
+            for idx, row in preds.iterrows():
+                row[f'order_{order_by}'] = [row[f'order_{order_by}']] if horizon == 1 else row[f'order_{order_by}']
+                for timestamp in row[f'order_{order_by}']:
+                    assert timestamp > latest_timestamp
 
-        # test null offset mode
-        test_df['__mdb_forecast_offset'] = 0
-        preds = pred.predict(test_df)
-        self.check_ts_prediction_df(preds, horizon, [order_by])
-        assert preds.shape[0] == 1
-        last_dt = datetime.utcfromtimestamp(preds[f'order_{order_by}'].values[0][0])
-        formatted = str(last_dt.year) + '-' + str(last_dt.month)
-        assert formatted == test_df.sort_values(by=order_by).iloc[-1][order_by]
+            # test null offset mode
+            test_df['__mdb_forecast_offset'] = 0
+            preds = pred.predict(test_df)
+            self.check_ts_prediction_df(preds, horizon, [order_by])
+            assert preds.shape[0] == 1
+            if horizon == 1:
+                last_dt = datetime.utcfromtimestamp(preds[f'order_{order_by}'].values[0])
+            else:
+                last_dt = datetime.utcfromtimestamp(preds[f'order_{order_by}'].values[0][0])
+            formatted = str(last_dt.year) + '-' + str(last_dt.month)
+            assert formatted == test_df.sort_values(by=order_by).iloc[-1][order_by]
 
     def test_2_time_series_classification_short_horizon_binary(self):
         df = pd.read_csv('tests/data/arrivals.csv')[:127]
