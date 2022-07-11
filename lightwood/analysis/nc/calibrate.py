@@ -93,6 +93,8 @@ class ICP(BaseAnalysisBlock):
             icp_df = deepcopy(ns.data)
 
             # setup prediction cache to avoid additional .predict() calls
+            pred_is_list = isinstance(ns.normal_predictions['prediction'], list) and \
+                isinstance(ns.normal_predictions['prediction'][0], list)
             if ns.is_classification:
                 if ns.predictor.supports_proba:
                     icp.nc_function.model.prediction_cache = ns.normal_predictions[all_cat_cols].values
@@ -106,7 +108,7 @@ class ICP(BaseAnalysisBlock):
                     predicted_classes = pd.get_dummies(preds).values  # inflate to one-hot enc
                     icp.nc_function.model.prediction_cache = predicted_classes
 
-            elif ns.is_multi_ts or isinstance(ns.normal_predictions['prediction'][0], list):
+            elif ns.is_multi_ts or pred_is_list:
                 # we fit ICPs for time series confidence bounds only at t+1 forecast
                 icp.nc_function.model.prediction_cache = np.array([p[0] for p in ns.normal_predictions['prediction']])
             else:
@@ -157,7 +159,7 @@ class ICP(BaseAnalysisBlock):
                 icps_df = deepcopy(ns.data)
                 midx = pd.MultiIndex.from_frame(icps_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by[0]}']])
                 icps_df.index = midx
-                if ns.is_multi_ts or isinstance(ns.normal_predictions['prediction'][0], list):
+                if ns.is_multi_ts or pred_is_list:
                     icps_df[f'__predicted_{ns.target}'] = np.array([p[0] for p in ns.normal_predictions['prediction']])
                 else:
                     icps_df[f'__predicted_{ns.target}'] = np.array(ns.normal_predictions['prediction'])
