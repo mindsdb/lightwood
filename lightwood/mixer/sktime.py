@@ -1,5 +1,6 @@
 import inspect
 import importlib
+from copy import deepcopy
 from datetime import datetime
 from itertools import product
 from typing import Dict, Union
@@ -7,21 +8,15 @@ from typing import Dict, Union
 import optuna
 import numpy as np
 import pandas as pd
-from sktime.forecasting.trend import PolynomialTrendForecaster
 from sktime.forecasting.compose import TransformedTargetForecaster
-from sktime.transformations.series.detrend import ConditionalDeseasonalizer
-from sktime.transformations.series.detrend import Detrender
 from sktime.forecasting.base import ForecastingHorizon, BaseForecaster
 from sktime.performance_metrics.forecasting import MeanAbsolutePercentageError
-try:
-    from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
-except ModuleNotFoundError:
-    from sktime.forecasting.arima import AutoARIMA
+from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
 
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
-from lightwood.helpers.general import get_group_matches
+from lightwood.helpers.ts import get_group_matches
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
@@ -40,10 +35,11 @@ class SkTime(BaseMixer):
             dtype_dict: Dict[str, str],
             horizon: int,
             ts_analysis: Dict,
-            model_path: str = 'arima.AutoARIMA',
+            model_path: str = 'statsforecast.StatsForecastAutoARIMA',
             auto_size: bool = True,
             hyperparam_search: bool = False,
-            target_transforms: Dict[str, Union[int, str]] = {}):
+            use_stl: bool = False
+    ):
         """
         This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
         to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with
@@ -68,7 +64,7 @@ class SkTime(BaseMixer):
         :param model_path: sktime forecaster to use as underlying model(s). Should be a string with format "$module.$class' where '$module' is inside `sktime.forecasting`. Default is 'arima.AutoARIMA'.
         :param hyperparam_search: bool that indicates whether to perform the hyperparameter tuning or not.
         :param auto_size: whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.
-        :param target_transforms: arguments for target transformation. Currently supported format: {'detrender': int, 'deseasonalizer': 'add' | 'mul' }. 'detrender' forces a particular type of polynomial to fit as trend curve for the series, while 'deseasonalizer' specifies additive or multiplicative seasonality decomposition (only applied if a seasonality test is triggered). By default, both are disabled.
+        :param use_stl: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.
         """  # noqa
         super().__init__(stop_after)
         self.stable = True
@@ -76,16 +72,13 @@ class SkTime(BaseMixer):
         self.supports_proba = False
         self.target = target
 
+        self.dtype_dict = dtype_dict
         self.ts_analysis = ts_analysis
         self.horizon = horizon
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.auto_size = auto_size
         self.cutoff_factor = 4  # times the detected maximum seasonal period
-        self.target_transforms = {
-            'detrender': 0,          # degree of detrender polynomial (0: disabled)
-            'deseasonalizer': ''  # seasonality decomposition: 'add'itive or 'mul'tiplicative (else, disabled)
-        }
-        self.target_transforms.update(target_transforms)
+        self.use_stl = use_stl
 
         # optuna hyperparameter tuning
         self.models = {}
@@ -94,9 +87,9 @@ class SkTime(BaseMixer):
         self.model_path = model_path
         self.hyperparam_search = hyperparam_search
         self.trial_error_fn = MeanAbsolutePercentageError(symmetric=True)
-        self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'arima.AutoARIMA']
+        self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'statsforecast.StatsForecastAutoARIMA']
         self.n_trials = len(self.possible_models)
-        self.freq = self._get_freq(self.ts_analysis['deltas']['__default'][self.ts_analysis['tss'].order_by[0]])
+        self.freq = self._get_freq(self.ts_analysis['deltas']['__default'])
 
         # sktime forecast horizon object is made relative to the end of the latest data point seen at training time
         # the default assumption is to forecast the next `self.horizon` after said data point
@@ -126,10 +119,6 @@ class SkTime(BaseMixer):
         Internal method that fits forecasters to a given dataframe.
         """
         df = data.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
-        data = {'data': df,
-                'group_info': {gcol: df[gcol].tolist()
-                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by
-                else {'': ['__default' for _ in range(df.shape[0])]}}
 
         if not self.hyperparam_search and not self.study:
             module_name = self.model_path
@@ -162,34 +151,24 @@ class SkTime(BaseMixer):
 
             model_pipeline = [("forecaster", model_class(**kwargs))]
 
-            trend_degree = self.target_transforms['detrender']
-            seasonality_type = self.target_transforms['deseasonalizer']
-            if seasonality_type in ('add', 'mul'):
-                model_pipeline.insert(0, ("deseasonalizer",
-                                          ConditionalDeseasonalizer(
-                                              model='additive' if seasonality_type == 'add' else 'multiplicative',
-                                              sp=options['sp']
-                                          )))
-            if trend_degree > 0:
+            if self.use_stl:
                 model_pipeline.insert(0, ("detrender",
-                                          Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))))
+                                          self.ts_analysis['stl_transforms'][group]["transformer"].detrender))
+                model_pipeline.insert(0, ("deseasonalizer",
+                                          self.ts_analysis['stl_transforms'][group]["transformer"].deseasonalizer))
 
             self.models[group] = TransformedTargetForecaster(model_pipeline)
 
             oby_col = self.ts_analysis['tss'].order_by[0]
             if self.grouped_by == ['__default']:
-                series_idxs = data['data'][f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}']
-                series_data = data['data'][self.target].values
-                series_oby = data['data'][oby_col].values
+                series_data = df
+                series_oby = df[oby_col]
             else:
-                target_idx = data['data'].columns.tolist().index(self.target)
-                oby_idx = data['data'].columns.tolist().index(oby_col)
-                series_idxs, series_data = get_group_matches(data, group)
-                series_oby = series_data[:, oby_idx]
-                series_data = series_data[:, target_idx]
+                series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
+                series_oby = series_data[oby_col]
 
+            series = series_data[self.target]
             if series_data.size > self.ts_analysis['tss'].window:
-                series = pd.Series(series_data.squeeze(), index=series_idxs)
                 series = series.sort_index(ascending=True)
                 series = series.reset_index(drop=True)
                 series = series.loc[~pd.isnull(series.values)]  # remove NaN  # @TODO: benchmark imputation vs this?
@@ -236,43 +215,44 @@ class SkTime(BaseMixer):
         if args.predict_proba:
             log.warning('This mixer does not output probability estimates')
 
+        df = deepcopy(ds.data_frame).reset_index(drop=True)
+
         forecast_offset = args.forecast_offset
-        if '__mdb_forecast_offset' in ds.data_frame.columns:
-            if ds.data_frame['__mdb_forecast_offset'].nunique() == 1:
-                forecast_offset = int(ds.data_frame['__mdb_forecast_offset'].unique()[0])
+        if '__mdb_forecast_offset' in df.columns:
+            if df['__mdb_forecast_offset'].nunique() == 1:
+                forecast_offset = int(df['__mdb_forecast_offset'].unique()[0])
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
-                           index=np.arange(length),
+                           index=df.index,
                            columns=['prediction'],
                            dtype=object)
 
-        data = {'data': ds.data_frame[self.target],
-                'group_info': {gcol: ds.data_frame[gcol].tolist()
-                               for gcol in self.grouped_by} if self.ts_analysis['tss'].group_by
-                else {'': ['__default' for _ in range(length)]}}
+        group_values = {gcol: df[gcol].tolist() for gcol in self.grouped_by} \
+            if self.ts_analysis['tss'].group_by \
+            else {'': ['__default' for _ in range(length)]}
 
-        pending_idxs = set(range(length))
-        all_group_combinations = list(product(*[set(x) for x in data['group_info'].values()]))
+        pending_idxs = set(df.index)
+        all_group_combinations = list(product(*[set(x) for x in group_values.values()]))
         for group in all_group_combinations:
             group = tuple(group)
             group = '__default' if group[0] == '__default' else group
-            series_idxs, series_data = get_group_matches(data, group)
+            series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
+            series = series_data[self.target]
 
             if series_data.size > 0:
                 series_idxs = sorted(series_idxs)
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     forecaster = self.models[group]
-                    series = pd.Series(series_data.squeeze(), index=series_idxs)
                     ydf = self._call_groupmodel(ydf, forecaster, series, offset=forecast_offset)
                 else:
                     log.warning(f"Applying naive forecaster for novel group {group}. Performance might not be optimal.")
-                    ydf = self._call_default(ydf, series_data, series_idxs)
+                    ydf = self._call_default(ydf, series.values, series_idxs)
                 pending_idxs -= set(series_idxs)
 
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
-            series = data['data'][list(pending_idxs)].squeeze()
+            series = df[self.target][list(pending_idxs)].squeeze()
             ydf = self._call_default(ydf, series, list(pending_idxs))
 
         return ydf[['prediction']]
@@ -287,9 +267,6 @@ class SkTime(BaseMixer):
 
         :param offset: indicates relative offset to the latest data point seen during model training. Cannot be less than the number of training data points + the amount of diffences applied internally by the model.
         """  # noqa
-        original_index = series.index
-        series = series.reset_index(drop=True)
-
         if isinstance(model, TransformedTargetForecaster):
             submodel = model.steps_[-1][-1]
         else:
@@ -304,11 +281,10 @@ class SkTime(BaseMixer):
         start = max(1 + offset, min_offset)
         end = 1 + series.shape[0] + offset + self.horizon
         all_preds = model.predict(np.arange(start, end)).tolist()
-
-        for idx, _ in enumerate(series.iteritems()):
-            start_idx = 0 if max(1 + idx + offset, min_offset) < 0 else idx
+        for true_idx, (idx, _) in enumerate(series.items()):
+            start_idx = 0 if max(1 + true_idx + offset, min_offset) < 0 else true_idx
             end_idx = start_idx + self.horizon
-            ydf['prediction'].iloc[original_index[idx]] = all_preds[start_idx:end_idx]
+            ydf['prediction'].loc[idx] = all_preds[start_idx:end_idx]
         return ydf
 
     def _call_default(self, ydf, data, idxs):

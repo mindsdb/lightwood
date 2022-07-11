@@ -140,6 +140,7 @@ class ConcatedEncodedDs(EncodedDs):
     """
     `ConcatedEncodedDs` abstracts over multiple encoded datasources (`EncodedDs`) as if they were a single entity.
     """  # noqa
+    # TODO: We should probably delete this abstraction, it's not really useful and it adds complexity/overhead
     def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
         # @TODO: missing super() call here?
         self.encoded_ds_arr = encoded_ds_arr
@@ -147,6 +148,7 @@ class ConcatedEncodedDs(EncodedDs):
         self.encoders = self.encoded_ds_arr[0].encoders
         self.encoder_spans = self.encoded_ds_arr[0].encoder_spans
         self.target = self.encoded_ds_arr[0].target
+        self.data_frame = pd.concat([x.data_frame for x in self.encoded_ds_arr])
 
     def __len__(self):
         """
@@ -165,17 +167,6 @@ class ConcatedEncodedDs(EncodedDs):
             else:
                 idx -= length
         raise StopIteration()
-
-    @property
-    def data_frame(self) -> pd.DataFrame:
-        """
-        Property that concatenates all underlying `EncodedDs`'s dataframes and returns them.
-        
-        Note: be careful to not modify a `ConcatedEncodedDs`, as you can see in the source, it will not have an effect.
-        
-        :return: Dataframe with all original data.
-        """  # noqa
-        return pd.concat([x.data_frame for x in self.encoded_ds_arr])
 
     def get_column_original_data(self, column_name: str) -> pd.Series:
         """
