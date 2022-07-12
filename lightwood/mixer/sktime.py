@@ -67,7 +67,7 @@ class SkTime(BaseMixer):
         :param use_stl: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.
         """  # noqa
         super().__init__(stop_after)
-        self.stable = True
+        self.stable = False
         self.prepared = False
         self.supports_proba = False
         self.target = target
