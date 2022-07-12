@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Custom Encoder: Rule-Based &mdash; lightwood 22.7.2.0 documentation</title>
+  <title>Custom Encoder: Rule-Based &mdash; lightwood 22.7.2.1 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                22.7.2.0
+                22.7.2.1
               </div>
             
           
@@ -490,10 +490,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-[nltk_data] Downloading package punkt to /home/runner/nltk_data...
-[nltk_data]   Unzipping tokenizers/punkt.zip.
-<span class="ansi-green-fg">INFO:lightwood-2187:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 </div>
@@ -641,28 +639,28 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2187:Analyzing a sample of 6920</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Infering type for: model</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Column model has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Infering type for: year</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Column year has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Infering type for: price</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Column price has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Infering type for: transmission</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Column transmission has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Infering type for: mileage</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Column mileage has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Infering type for: fuelType</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Column fuelType has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Infering type for: tax</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Column tax has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Infering type for: mpg</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Column mpg has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Infering type for: engineSize</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Column engineSize has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Analyzing a sample of 6920</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: model</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Column model has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: year</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Column year has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: price</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Column price has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: transmission</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Column transmission has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: mileage</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Column mileage has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: fuelType</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Column fuelType has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: tax</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Column tax has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: mpg</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Column mpg has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Infering type for: engineSize</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Column engineSize has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Let’s take a look at our JSON-AI and print to file.</p>
@@ -770,7 +768,7 @@ div.rendered_html tbody tr:hover {
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 57024.0,
         &#34;seconds_per_encoder&#34;: null,
-        &#34;expected_additional_time&#34;: 2.400904655456543,
+        &#34;expected_additional_time&#34;: 1.746342420578003,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -1013,7 +1011,7 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2187:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <p>Now, let’s run our pipeline. To do so, let’s first:</p>
@@ -1049,27 +1047,27 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2187:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2187: `analyze_data` runtime: 0.34 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2187: `preprocess` runtime: 0.12 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2187: `split` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Done running for: model</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Done running for: year</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Done running for: transmission</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Done running for: mileage</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Done running for: fuelType</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Done running for: tax</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Done running for: mpg</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Done running for: engineSize</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2187: `prepare` runtime: 0.34 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2187:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2187: `featurize` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2408: `analyze_data` runtime: 0.28 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2408: `preprocess` runtime: 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2408: `split` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Done running for: model</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Done running for: year</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Done running for: transmission</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Done running for: mileage</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Done running for: fuelType</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Done running for: tax</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Done running for: mpg</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Done running for: engineSize</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2408: `prepare` runtime: 0.26 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2408:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2408: `featurize` runtime: 0.0 seconds</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>
