@@ -238,9 +238,9 @@ class SkTime(BaseMixer):
             group = tuple(group)
             group = '__default' if group[0] == '__default' else group
             series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
-            series = series_data[self.target]
 
             if series_data.size > 0:
+                series = series_data[self.target]
                 series_idxs = sorted(series_idxs)
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     forecaster = self.models[group]
