@@ -60,11 +60,11 @@ def transform_timeseries(
     for group in groups:
         if (tss.group_by and group != '__default') or not tss.group_by:
             idxs, subset = get_group_matches(data, group, tss.group_by)
-
-            index = pd.to_datetime(subset[oby_col], unit='s')
-            subset.index = pd.date_range(start=index.iloc[0], freq=freqs[group], periods=len(subset))
-            subset['__mdb_inferred_freq'] = subset.index.freq   # sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa
-            subsets.append(subset)
+            if subset.size > 0:
+                index = pd.to_datetime(subset[oby_col], unit='s')
+                subset.index = pd.date_range(start=index.iloc[0], freq=freqs[group], periods=len(subset))
+                subset['__mdb_inferred_freq'] = subset.index.freq   # sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa
+                subsets.append(subset)
     original_df = pd.concat(subsets).sort_values(by='__mdb_original_index')
 
     if '__mdb_forecast_offset' in original_df.columns:
