@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.data.timeseries_transform &mdash; lightwood 22.7.2.1 documentation</title>
+  <title>lightwood.data.timeseries_transform &mdash; lightwood 22.7.2.2 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                22.7.2.1
+                22.7.2.2
               </div>
             
           
@@ -233,11 +233,11 @@
     <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">and</span> <span class="n">group</span> <span class="o">!=</span> <span class="s1">&#39;__default&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
             <span class="n">idxs</span><span class="p">,</span> <span class="n">subset</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
-
-            <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">subset</span><span class="p">[</span><span class="n">oby_col</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
-            <span class="n">subset</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">index</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">freq</span><span class="o">=</span><span class="n">freqs</span><span class="p">[</span><span class="n">group</span><span class="p">],</span> <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">))</span>
-            <span class="n">subset</span><span class="p">[</span><span class="s1">&#39;__mdb_inferred_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span>   <span class="c1"># sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa</span>
-            <span class="n">subsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">subset</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">subset</span><span class="p">[</span><span class="n">oby_col</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+                <span class="n">subset</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">index</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">freq</span><span class="o">=</span><span class="n">freqs</span><span class="p">[</span><span class="n">group</span><span class="p">],</span> <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">))</span>
+                <span class="n">subset</span><span class="p">[</span><span class="s1">&#39;__mdb_inferred_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span>   <span class="c1"># sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa</span>
+                <span class="n">subsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
     <span class="n">original_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">subsets</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;__mdb_original_index&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;__mdb_forecast_offset&#39;</span> <span class="ow">in</span> <span class="n">original_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
