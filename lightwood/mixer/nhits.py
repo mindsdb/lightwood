@@ -48,16 +48,14 @@ class NHitsMixer(BaseMixer):
         self.pretrained = pretrained  # finetuning?
         self.base_url = 'https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/'
         self.freq_to_model = {
-            'year': 'yearly',
-            'semestral': 'yearly',
-            'quarter': 'monthly',
-            'bimonthly': 'monthly',
-            'monthly': 'monthly',
-            'weekly': 'daily',
-            'daily': 'daily',
-            'hourly': 'hourly',
-            'minute': 'hourly',  # consider using another pre-trained model once available
-            'second': 'hourly'  # consider using another pre-trained model once available
+            'Y': 'yearly',
+            'Q': 'monthly',
+            'M': 'monthly',
+            'W': 'daily',
+            'D': 'daily',
+            'H': 'hourly',
+            'T': 'hourly',  # consider using another pre-trained model once available
+            'S': 'hourly'  # consider using another pre-trained model once available
         }
         self.model_names = {
             'hourly': 'nhits_m4_hourly.ckpt',  # hourly (non-tiny)

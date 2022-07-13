@@ -3,6 +3,7 @@ from typing import List, Tuple, Union, Dict
 
 import numpy as np
 import pandas as pd
+from statsmodels.tsa.stattools import pacf
 
 
 def get_ts_groups(df: pd.DataFrame, tss) -> list:
@@ -221,3 +222,15 @@ def freq_to_pandas(freq, sample_row=None):
     # TODO: implement custom dispatch for better precision, use row sample if available:
     #  pandas.pydata.org/docs/user_guide/timeseries.html
     return mapping[freq]
+
+
+def max_pacf(data: pd.DataFrame, group_combinations, target, tss):
+    top_k = 5
+    candidate_sps = {'__default': (1 + np.argpartition(pacf(data[target].values)[1:], -top_k))[-top_k:].tolist()[::-1]}
+    if tss.group_by:
+        for group in group_combinations:
+            if group != "__default":
+                _, subset = get_group_matches(data, group, tss.group_by)
+                candidates = (1 + np.argpartition(pacf(subset[target].values)[1:], -top_k))[-top_k:].tolist()[::-1]
+                candidate_sps[group] = candidates
+    return candidate_sps

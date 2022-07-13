@@ -10,7 +10,7 @@ from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
-from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer
+from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer, max_pacf
 from lightwood.helpers.log import log
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 
@@ -37,6 +37,7 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     tss = timeseries_settings
     groups = get_ts_groups(data['train'], tss)
     deltas, periods, freqs = get_delta(data['train'], dtype_dict, groups, tss)
+    periods = max_pacf(data['train'], groups, target, tss)
 
     normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
 
@@ -134,19 +135,19 @@ def get_stls(train_df: pd.DataFrame,
     return stls
 
 
-def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: int):
+def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: list):
     """
     Perform hyperparam search with optuna to find best combination of ST transforms for a time series.
 
     :param tr_subset: training series used for fitting blocks. Index should be datetime, and values are the actual time series.
     :param dev_subset: dev series used for computing loss. Index should be datetime, and values are the actual time series.
-    :param sp: seasonal period
+    :param sp: list of candidate seasonal periods
     :return: best deseasonalizer and detrender combination based on dev_loss
     """  # noqa
 
     def _ST_objective(trial: optuna.Trial):
         trend_degree = trial.suggest_categorical("trend_degree", [1, 2])
-        ds_sp = trial.suggest_categorical("ds_sp", [sp])  # seasonality period to use in deseasonalizer
+        ds_sp = trial.suggest_categorical("ds_sp", sp)  # seasonality period to use in deseasonalizer
         if min(min(tr_subset), min(dev_subset)) <= 0:
             decomp_type = trial.suggest_categorical("decomp_type", ['additive'])
         else:
@@ -161,7 +162,8 @@ def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: int):
         trial.set_user_attr("transformer", transformer)
         return np.power(residuals, 2).sum()
 
-    study = optuna.create_study()
+    space = {"trend_degree": [1, 2], "ds_sp": sp, "decomp_type": ['additive', 'multiplicative']}
+    study = optuna.create_study(sampler=optuna.samplers.GridSampler(space))
     study.optimize(_ST_objective, n_trials=8)
 
     return {
