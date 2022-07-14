@@ -129,8 +129,10 @@ def get_stls(train_df: pd.DataFrame,
             group_freq = tr_subset['__mdb_inferred_freq'].iloc[0]
             tr_subset = deepcopy(tr_subset)[target]
             dev_subset = deepcopy(dev_subset)[target]
-            tr_subset.index = pd.date_range(start=tr_subset.iloc[0], freq=group_freq, periods=len(tr_subset)).to_period()
-            dev_subset.index = pd.date_range(start=dev_subset.iloc[0], freq=group_freq, periods=len(dev_subset)).to_period()
+            tr_subset.index = pd.date_range(start=tr_subset.iloc[0], freq=group_freq,
+                                            periods=len(tr_subset)).to_period()
+            dev_subset.index = pd.date_range(start=dev_subset.iloc[0], freq=group_freq,
+                                             periods=len(dev_subset)).to_period()
             stl = _pick_ST(tr_subset, dev_subset, sps[group])
             log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
             stls[group] = stl
