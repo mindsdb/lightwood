@@ -37,11 +37,11 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     tss = timeseries_settings
     groups = get_ts_groups(data['train'], tss)
     deltas, periods, freqs = get_delta(data['train'], dtype_dict, groups, tss)
-    periods = max_pacf(data['train'], groups, target, tss)
 
     normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
 
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
+        periods = max_pacf(data['train'], groups, target, tss)  # override with PACF output
         naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'],
                                                                              target,
                                                                              tss,
