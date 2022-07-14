@@ -12,6 +12,7 @@ from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
 
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
+from lightwood.data.splitter import stratify
 from lightwood.mixer.sktime import SkTime
 
 np.random.seed(0)
@@ -388,3 +389,41 @@ class TestTimeseries(unittest.TestCase):
 
         test['__mdb_forecast_offset'] = 1
         predictor.predict(test)
+
+    def test_7_time_series_double_grouped_regression(self):
+        """Test double-grouped numerical predictions, replicates quick start guide in cloud.mindsdb.com """
+        data = pd.read_csv('tests/data/house_sales.csv')
+        gby = ['bedrooms', 'type']
+        target = 'MA'
+        order_by = 'saledate'
+        window = 8
+        horizon = 4
+        train, _, test = stratify(data,
+                                  pct_train=0.8,
+                                  pct_dev=0,
+                                  pct_test=0.2,
+                                  stratify_on=gby,
+                                  seed=1,
+                                  reshuffle=False)
+        jai = json_ai_from_problem(train,
+                                   ProblemDefinition.from_dict({'target': target,
+                                                                'time_aim': 30,
+                                                                'timeseries_settings': {
+                                                                    'group_by': gby,
+                                                                    'horizon': horizon,
+                                                                    'order_by': [order_by],
+                                                                    'window': window
+                                                                }}))
+        code = code_from_json_ai(jai)
+        pred = predictor_from_code(code)
+
+        # Test with a short time aim with inferring mode, check timestamps are further into the future than test dates
+        test['__mdb_forecast_offset'] = 1
+        train_and_check_time_aim(pred, train)
+        preds = pred.predict(test)
+        self.check_ts_prediction_df(preds, horizon, [order_by])
+
+        for idx, row in preds.iterrows():
+            row[f'order_{order_by}'] = [row[f'order_{order_by}']] if horizon == 1 else row[f'order_{order_by}']
+            for timestamp in row[f'order_{order_by}']:
+                assert timestamp > pd.to_datetime(test[order_by]).max().timestamp()

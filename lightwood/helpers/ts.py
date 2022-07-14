@@ -1,4 +1,3 @@
-from itertools import product
 from typing import List, Tuple, Union, Dict
 
 import numpy as np
@@ -7,10 +6,11 @@ from statsmodels.tsa.stattools import pacf
 
 
 def get_ts_groups(df: pd.DataFrame, tss) -> list:
-    group_values = {gcol: df[gcol].unique() for gcol in tss.group_by} if tss.group_by else {}
-    group_combinations = list(product(*[set(x) for x in group_values.values()]))
-    group_combinations = [val for val in group_combinations if val != ()]
-    group_combinations.append('__default')
+    group_combinations = ['__default']
+    if tss.group_by:
+        groups = [tuple([g]) if not isinstance(g, tuple) else g
+                  for g in list(df.groupby(by=tss.group_by).groups.keys())]
+        group_combinations.extend(groups)
     return group_combinations
 
 
