@@ -9,7 +9,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.api.dtype import dtype
 from lightwood.api.types import PredictionArguments
-from lightwood.helpers.ts import add_tn_conf_bounds
+from lightwood.helpers.ts import add_tn_num_conf_bounds, add_tn_cat_conf_bounds
 
 from lightwood.data import EncodedDs
 from lightwood.analysis.base import BaseAnalysisBlock
@@ -380,8 +380,11 @@ class ICP(BaseAnalysisBlock):
                                               cooldown=ns.pred_args.anomaly_cooldown)
                     row_insights['anomaly'] = anomalies
 
-            if ns.tss.is_timeseries and ns.tss.horizon > 1 and is_numerical:
-                row_insights = add_tn_conf_bounds(row_insights, ns.tss)
+            if ns.tss.is_timeseries and ns.tss.horizon > 1:
+                if is_numerical:
+                    row_insights = add_tn_num_conf_bounds(row_insights, ns.tss)
+                else:
+                    row_insights = add_tn_cat_conf_bounds(row_insights, ns.tss)
 
             # clip bounds if necessary
             if is_numerical:
