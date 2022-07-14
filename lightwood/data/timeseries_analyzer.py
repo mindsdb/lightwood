@@ -10,7 +10,7 @@ from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
-from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer
+from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer, max_pacf
 from lightwood.helpers.log import log
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 
@@ -41,6 +41,7 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
 
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
+        periods = max_pacf(data['train'], groups, target, tss)  # override with PACF output
         naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'],
                                                                              target,
                                                                              tss,
@@ -96,9 +97,10 @@ def get_grouped_naive_residuals(
     group_scale_factors = {}
     for group in group_combinations:
         idxs, subset = get_group_matches(info, group, tss.group_by)
-        residuals, scale_factor = get_naive_residuals(subset[target])  # @TODO: pass m once we handle seasonality
-        group_residuals[group] = residuals
-        group_scale_factors[group] = scale_factor
+        if subset.shape[0] > 1:
+            residuals, scale_factor = get_naive_residuals(subset[target])  # @TODO: pass m once we handle seasonality
+            group_residuals[group] = residuals
+            group_scale_factors[group] = scale_factor
     return group_residuals, group_scale_factors
 
 
@@ -123,30 +125,33 @@ def get_stls(train_df: pd.DataFrame,
     for group in groups:
         _, tr_subset = get_group_matches(train_df, group, tss.group_by)
         _, dev_subset = get_group_matches(dev_df, group, tss.group_by)
-        group_freq = tr_subset['__mdb_inferred_freq'].iloc[0]
-        tr_subset = deepcopy(tr_subset)[target]
-        dev_subset = deepcopy(dev_subset)[target]
-        tr_subset.index = pd.date_range(start=tr_subset.iloc[0], freq=group_freq, periods=len(tr_subset)).to_period()
-        dev_subset.index = pd.date_range(start=dev_subset.iloc[0], freq=group_freq, periods=len(dev_subset)).to_period()
-        stl = _pick_ST(tr_subset, dev_subset, sps[group])
-        log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
-        stls[group] = stl
+        if tr_subset.shape[0] > 0 and dev_subset.shape[0] > 0 and sps.get(group, False):
+            group_freq = tr_subset['__mdb_inferred_freq'].iloc[0]
+            tr_subset = deepcopy(tr_subset)[target]
+            dev_subset = deepcopy(dev_subset)[target]
+            tr_subset.index = pd.date_range(start=tr_subset.iloc[0], freq=group_freq,
+                                            periods=len(tr_subset)).to_period()
+            dev_subset.index = pd.date_range(start=dev_subset.iloc[0], freq=group_freq,
+                                             periods=len(dev_subset)).to_period()
+            stl = _pick_ST(tr_subset, dev_subset, sps[group])
+            log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
+            stls[group] = stl
     return stls
 
 
-def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: int):
+def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: list):
     """
     Perform hyperparam search with optuna to find best combination of ST transforms for a time series.
 
     :param tr_subset: training series used for fitting blocks. Index should be datetime, and values are the actual time series.
     :param dev_subset: dev series used for computing loss. Index should be datetime, and values are the actual time series.
-    :param sp: seasonal period
+    :param sp: list of candidate seasonal periods
     :return: best deseasonalizer and detrender combination based on dev_loss
     """  # noqa
 
     def _ST_objective(trial: optuna.Trial):
         trend_degree = trial.suggest_categorical("trend_degree", [1, 2])
-        ds_sp = trial.suggest_categorical("ds_sp", [sp])  # seasonality period to use in deseasonalizer
+        ds_sp = trial.suggest_categorical("ds_sp", sp)  # seasonality period to use in deseasonalizer
         if min(min(tr_subset), min(dev_subset)) <= 0:
             decomp_type = trial.suggest_categorical("decomp_type", ['additive'])
         else:
@@ -161,7 +166,8 @@ def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: int):
         trial.set_user_attr("transformer", transformer)
         return np.power(residuals, 2).sum()
 
-    study = optuna.create_study()
+    space = {"trend_degree": [1, 2], "ds_sp": sp, "decomp_type": ['additive', 'multiplicative']}
+    study = optuna.create_study(sampler=optuna.samplers.GridSampler(space))
     study.optimize(_ST_objective, n_trials=8)
 
     return {

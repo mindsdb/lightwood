@@ -31,6 +31,7 @@ class LightGBMArray(BaseMixer):
             fit_on_dev: bool,
             target_encoder: BaseEncoder,
             ts_analysis: Dict[str, object],
+            use_stl: bool,
             tss: TimeseriesSettings
     ):
         super().__init__(stop_after)
