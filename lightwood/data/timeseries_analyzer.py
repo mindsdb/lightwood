@@ -97,9 +97,10 @@ def get_grouped_naive_residuals(
     group_scale_factors = {}
     for group in group_combinations:
         idxs, subset = get_group_matches(info, group, tss.group_by)
-        residuals, scale_factor = get_naive_residuals(subset[target])  # @TODO: pass m once we handle seasonality
-        group_residuals[group] = residuals
-        group_scale_factors[group] = scale_factor
+        if subset.shape[0] > 1:
+            residuals, scale_factor = get_naive_residuals(subset[target])  # @TODO: pass m once we handle seasonality
+            group_residuals[group] = residuals
+            group_scale_factors[group] = scale_factor
     return group_residuals, group_scale_factors
 
 
@@ -124,14 +125,15 @@ def get_stls(train_df: pd.DataFrame,
     for group in groups:
         _, tr_subset = get_group_matches(train_df, group, tss.group_by)
         _, dev_subset = get_group_matches(dev_df, group, tss.group_by)
-        group_freq = tr_subset['__mdb_inferred_freq'].iloc[0]
-        tr_subset = deepcopy(tr_subset)[target]
-        dev_subset = deepcopy(dev_subset)[target]
-        tr_subset.index = pd.date_range(start=tr_subset.iloc[0], freq=group_freq, periods=len(tr_subset)).to_period()
-        dev_subset.index = pd.date_range(start=dev_subset.iloc[0], freq=group_freq, periods=len(dev_subset)).to_period()
-        stl = _pick_ST(tr_subset, dev_subset, sps[group])
-        log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
-        stls[group] = stl
+        if tr_subset.shape[0] > 0 and dev_subset.shape[0] > 0 and sps.get(group, False):
+            group_freq = tr_subset['__mdb_inferred_freq'].iloc[0]
+            tr_subset = deepcopy(tr_subset)[target]
+            dev_subset = deepcopy(dev_subset)[target]
+            tr_subset.index = pd.date_range(start=tr_subset.iloc[0], freq=group_freq, periods=len(tr_subset)).to_period()
+            dev_subset.index = pd.date_range(start=dev_subset.iloc[0], freq=group_freq, periods=len(dev_subset)).to_period()
+            stl = _pick_ST(tr_subset, dev_subset, sps[group])
+            log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
+            stls[group] = stl
     return stls
 
 

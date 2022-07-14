@@ -69,14 +69,14 @@ def _apply_stl_on_training(
             train_idxs, train_subset = get_group_matches(train_data.data_frame, group, gby)
             dev_idxs, dev_subset = get_group_matches(dev_data.data_frame, group, gby)
 
-            if train_subset.size > 0:
+            if train_subset.shape[0] > 0:
                 train_data.data_frame[target].loc[train_idxs] = _transform_target(ts_analysis, train_subset[target],
                                                                                   freq, group).values
                 for timestep in range(1, tss.horizon):
                     train_data.data_frame[f'{target}_timestep_{timestep}'].loc[train_idxs] = \
                         train_data.data_frame[target].loc[train_idxs].shift(-timestep)
 
-            if dev_subset.size > 0:
+            if dev_subset.shape[0] > 0:
                 dev_data.data_frame[target].loc[dev_idxs] = _transform_target(ts_analysis, dev_subset[target],
                                                                               freq, group).values
                 for timestep in range(1, tss.horizon):

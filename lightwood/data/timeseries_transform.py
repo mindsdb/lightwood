@@ -60,7 +60,7 @@ def transform_timeseries(
     for group in groups:
         if (tss.group_by and group != '__default') or not tss.group_by:
             idxs, subset = get_group_matches(data, group, tss.group_by)
-            if subset.size > 0:
+            if subset.shape[0] > 0:
                 index = pd.to_datetime(subset[oby_col], unit='s')
                 subset.index = pd.date_range(start=index.iloc[0], freq=freqs[group], periods=len(subset))
                 subset['__mdb_inferred_freq'] = subset.index.freq   # sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa
