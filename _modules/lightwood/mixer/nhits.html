@@ -221,16 +221,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pretrained</span> <span class="o">=</span> <span class="n">pretrained</span>  <span class="c1"># finetuning?</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="s1">&#39;https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">freq_to_model</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="s1">&#39;yearly&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;semestral&#39;</span><span class="p">:</span> <span class="s1">&#39;yearly&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;quarter&#39;</span><span class="p">:</span> <span class="s1">&#39;monthly&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;bimonthly&#39;</span><span class="p">:</span> <span class="s1">&#39;monthly&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;monthly&#39;</span><span class="p">:</span> <span class="s1">&#39;monthly&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;weekly&#39;</span><span class="p">:</span> <span class="s1">&#39;daily&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;daily&#39;</span><span class="p">:</span> <span class="s1">&#39;daily&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;hourly&#39;</span><span class="p">:</span> <span class="s1">&#39;hourly&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;minute&#39;</span><span class="p">:</span> <span class="s1">&#39;hourly&#39;</span><span class="p">,</span>  <span class="c1"># consider using another pre-trained model once available</span>
-            <span class="s1">&#39;second&#39;</span><span class="p">:</span> <span class="s1">&#39;hourly&#39;</span>  <span class="c1"># consider using another pre-trained model once available</span>
+            <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;yearly&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="s1">&#39;monthly&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="s1">&#39;monthly&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;W&#39;</span><span class="p">:</span> <span class="s1">&#39;daily&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="s1">&#39;daily&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="s1">&#39;hourly&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;hourly&#39;</span><span class="p">,</span>  <span class="c1"># consider using another pre-trained model once available</span>
+            <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;hourly&#39;</span>  <span class="c1"># consider using another pre-trained model once available</span>
         <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_names</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;hourly&#39;</span><span class="p">:</span> <span class="s1">&#39;nhits_m4_hourly.ckpt&#39;</span><span class="p">,</span>  <span class="c1"># hourly (non-tiny)</span>
