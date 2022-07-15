@@ -772,27 +772,10 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
             )
 
             dtype_dict[col_name] = target_type
+            # @TODO: Is populating the json_ai at this stage even necessary?
             json_ai.encoders[col_name] = encoder_dict[col_name]
             json_ai.dtype_dict[col_name] = target_type
             json_ai.dependency_dict[col_name] = []
-
-        # TODO: generalize this
-        oby_additional_col = f"__mdb_ts_datetime_{json_ai.problem_definition.timeseries_settings.order_by}"
-        oby_dtype = 'datetime'
-        dtype_dict[oby_additional_col] = oby_dtype
-        encoder_dict[oby_additional_col] = call(
-            lookup_encoder(
-                oby_dtype,
-                oby_additional_col,
-                False,
-                json_ai.problem_definition,
-                False,
-                None,
-            )
-        )
-        json_ai.encoders[oby_additional_col] = encoder_dict[oby_additional_col]
-        json_ai.dtype_dict[oby_additional_col] = oby_dtype
-        json_ai.dependency_dict[oby_additional_col] = []
 
     # ----------------- #
 
