@@ -99,7 +99,7 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss) -> pd
     return df[f'order_{col}']
 
 
-def add_tn_conf_bounds(data: pd.DataFrame, tss_args):
+def add_tn_num_conf_bounds(data: pd.DataFrame, tss_args):
     """
     Add confidence (and bounds if applicable) to t+n predictions, for n>1
     TODO: active research question: how to guarantee 1-e coverage for t+n, n>1
@@ -119,6 +119,13 @@ def add_tn_conf_bounds(data: pd.DataFrame, tss_args):
         data['lower'].iloc[idx] = [pred - (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
         data['upper'].iloc[idx] = [pred + (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
 
+    return data
+
+
+def add_tn_cat_conf_bounds(data: pd.DataFrame, tss_args):
+    data['confidence'] = data['confidence'].astype(object)
+    for idx, row in data.iterrows():
+        data['confidence'].iloc[idx] = [row['confidence'] for _ in range(tss_args.horizon)]
     return data
 
 
