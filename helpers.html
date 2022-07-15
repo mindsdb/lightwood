@@ -107,7 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.LightwoodAutocast">LightwoodAutocast</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.add_tn_conf_bounds">add_tn_conf_bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#helpers.add_tn_num_conf_bounds">add_tn_num_conf_bounds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.analyze_sentences">analyze_sentences</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.bounded_evaluate_array_accuracy">bounded_evaluate_array_accuracy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.cast_string_to_python_type">cast_string_to_python_type</a></li>
@@ -229,8 +229,8 @@ to activate the feature only when the GPU has tensor cores to leverage AMP.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="helpers.add_tn_conf_bounds">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">add_tn_conf_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tss_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/ts.html#add_tn_conf_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.add_tn_conf_bounds" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="helpers.add_tn_num_conf_bounds">
+<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">add_tn_num_conf_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tss_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/ts.html#add_tn_num_conf_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.add_tn_num_conf_bounds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add confidence (and bounds if applicable) to t+n predictions, for n&gt;1
 TODO: active research question: how to guarantee 1-e coverage for t+n, n&gt;1
 For now, (conservatively) increases width by the confidence times the log of the time step (and a scaling factor).</p>

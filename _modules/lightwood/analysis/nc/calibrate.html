@@ -182,7 +182,7 @@
 
 <span class="kn">from</span> <span class="nn">lightwood.api.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">add_tn_conf_bounds</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">add_tn_num_conf_bounds</span><span class="p">,</span> <span class="n">add_tn_cat_conf_bounds</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.data</span> <span class="kn">import</span> <span class="n">EncodedDs</span>
 <span class="kn">from</span> <span class="nn">lightwood.analysis.base</span> <span class="kn">import</span> <span class="n">BaseAnalysisBlock</span>
@@ -553,8 +553,11 @@
                                               <span class="n">cooldown</span><span class="o">=</span><span class="n">ns</span><span class="o">.</span><span class="n">pred_args</span><span class="o">.</span><span class="n">anomaly_cooldown</span><span class="p">)</span>
                     <span class="n">row_insights</span><span class="p">[</span><span class="s1">&#39;anomaly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalies</span>
 
-            <span class="k">if</span> <span class="n">ns</span><span class="o">.</span><span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">and</span> <span class="n">ns</span><span class="o">.</span><span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">is_numerical</span><span class="p">:</span>
-                <span class="n">row_insights</span> <span class="o">=</span> <span class="n">add_tn_conf_bounds</span><span class="p">(</span><span class="n">row_insights</span><span class="p">,</span> <span class="n">ns</span><span class="o">.</span><span class="n">tss</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ns</span><span class="o">.</span><span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">and</span> <span class="n">ns</span><span class="o">.</span><span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">is_numerical</span><span class="p">:</span>
+                    <span class="n">row_insights</span> <span class="o">=</span> <span class="n">add_tn_num_conf_bounds</span><span class="p">(</span><span class="n">row_insights</span><span class="p">,</span> <span class="n">ns</span><span class="o">.</span><span class="n">tss</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">row_insights</span> <span class="o">=</span> <span class="n">add_tn_cat_conf_bounds</span><span class="p">(</span><span class="n">row_insights</span><span class="p">,</span> <span class="n">ns</span><span class="o">.</span><span class="n">tss</span><span class="p">)</span>
 
             <span class="c1"># clip bounds if necessary</span>
             <span class="k">if</span> <span class="n">is_numerical</span><span class="p">:</span>

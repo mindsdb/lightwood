@@ -272,7 +272,7 @@
     <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;order_</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="add_tn_conf_bounds"><a class="viewcode-back" href="../../../helpers.html#helpers.add_tn_conf_bounds">[docs]</a><span class="k">def</span> <span class="nf">add_tn_conf_bounds</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tss_args</span><span class="p">):</span>
+<div class="viewcode-block" id="add_tn_num_conf_bounds"><a class="viewcode-back" href="../../../helpers.html#helpers.add_tn_num_conf_bounds">[docs]</a><span class="k">def</span> <span class="nf">add_tn_num_conf_bounds</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tss_args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add confidence (and bounds if applicable) to t+n predictions, for n&gt;1</span>
 <span class="sd">    TODO: active research question: how to guarantee 1-e coverage for t+n, n&gt;1</span>
@@ -293,6 +293,13 @@
         <span class="n">data</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">pred</span> <span class="o">+</span> <span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">modifier</span> <span class="k">for</span> <span class="n">pred</span><span class="p">,</span> <span class="n">modifier</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">error_increase</span><span class="p">)]</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
+
+
+<span class="k">def</span> <span class="nf">add_tn_cat_conf_bounds</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tss_args</span><span class="p">):</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;confidence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;confidence&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;confidence&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;confidence&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tss_args</span><span class="o">.</span><span class="n">horizon</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">data</span>
 
 
 <span class="k">class</span> <span class="nc">Differencer</span><span class="p">:</span>
