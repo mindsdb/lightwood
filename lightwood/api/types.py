@@ -152,9 +152,13 @@ class TimeseriesSettings:
         :returns: A populated ``TimeseriesSettings`` object.
         """ # noqa
         if len(obj) > 0:
-            for mandatory_setting in ["order_by", "window"]:
+            for mandatory_setting, etype in zip(["order_by", "window"], [str, int]):
                 if mandatory_setting not in obj:
                     err = f"Missing mandatory timeseries setting: {mandatory_setting}"
+                    log.error(err)
+                    raise Exception(err)
+                if not isinstance(obj[mandatory_setting], etype):
+                    err = f"Wrong type for mandatory timeseries setting '{mandatory_setting}': found '{type(obj[mandatory_setting])}', expected '{etype}'"  # noqa
                     log.error(err)
                     raise Exception(err)
 
