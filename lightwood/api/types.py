@@ -157,7 +157,7 @@ class TimeseriesSettings:
                     err = f"Missing mandatory timeseries setting: {mandatory_setting}"
                     log.error(err)
                     raise Exception(err)
-                if not isinstance(obj[mandatory_setting], etype):
+                if obj[mandatory_setting] and not isinstance(obj[mandatory_setting], etype):
                     err = f"Wrong type for mandatory timeseries setting '{mandatory_setting}': found '{type(obj[mandatory_setting])}', expected '{etype}'"  # noqa
                     log.error(err)
                     raise Exception(err)
