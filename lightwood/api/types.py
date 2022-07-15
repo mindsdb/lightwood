@@ -110,7 +110,7 @@ class TimeseriesSettings:
 
     :param is_timeseries: Whether the input data should be treated as time series; if true, this flag is checked in \
         subsequent internal steps to ensure processing is appropriate for time-series data.
-    :param order_by: A list of columns by which the data should be ordered.
+    :param order_by: Column by which the data should be ordered.
     :param group_by: Optional list of columns by which the data should be grouped. Each different combination of values\
          for these columns will yield a different series.
     :param window: The temporal horizon (number of rows) that a model intakes to "look back" into when making a\
@@ -128,7 +128,7 @@ class TimeseriesSettings:
     """  # noqa
 
     is_timeseries: bool
-    order_by: List[str] = None
+    order_by: str = None
     window: int = None
     group_by: List[str] = None
     use_previous_target: bool = True

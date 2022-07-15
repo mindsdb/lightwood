@@ -394,7 +394,7 @@ def clean_timeseries(df: pd.DataFrame, tss: TimeseriesSettings) -> pd.DataFrame:
     invalid_rows = []
 
     for idx, row in df.iterrows():
-        if pd.isna(row[tss.order_by[0]]):
+        if pd.isna(row[tss.order_by]):
             invalid_rows.append(idx)
 
     df = df.drop(invalid_rows)

@@ -120,7 +120,7 @@ class ICP(BaseAnalysisBlock):
             # fit additional ICPs in time series tasks with grouped columns
             if ns.tss.is_timeseries and ns.tss.group_by:
                 # generate a multiindex
-                midx = pd.MultiIndex.from_frame(icp_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by[0]}']])
+                midx = pd.MultiIndex.from_frame(icp_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by}']])
                 icp_df.index = midx
 
                 # create an ICP for each possible group
@@ -157,7 +157,7 @@ class ICP(BaseAnalysisBlock):
 
                 # add all predictions to DF
                 icps_df = deepcopy(ns.data)
-                midx = pd.MultiIndex.from_frame(icps_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by[0]}']])
+                midx = pd.MultiIndex.from_frame(icps_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by}']])
                 icps_df.index = midx
                 if ns.is_multi_ts or pred_is_list:
                     icps_df[f'__predicted_{ns.target}'] = np.array([p[0] for p in ns.normal_predictions['prediction']])

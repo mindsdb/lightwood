@@ -37,7 +37,7 @@ def transform_timeseries(
 
     tss = timeseries_settings
     gb_arr = tss.group_by if tss.group_by is not None else []
-    ob_arr = tss.order_by
+    oby = tss.order_by
     window = tss.window
 
     if tss.use_previous_target and target not in data.columns:
@@ -48,7 +48,7 @@ def transform_timeseries(
             raise Exception(f"Cannot transform. Missing values in historical column {hcol}.")
 
     # infer frequency with get_delta
-    oby_col = tss.order_by[0]
+    oby_col = tss.order_by
     groups = get_ts_groups(data, tss)
     if not ts_analysis:
         _, _, freqs = get_delta(data, dtype_dict, groups, tss)
@@ -101,28 +101,25 @@ def transform_timeseries(
     original_df['original_index'] = original_index_list
 
     secondary_type_dict = {}
-    for col in ob_arr:
-        if dtype_dict[col] in (dtype.date, dtype.integer, dtype.float):
-            secondary_type_dict[col] = dtype_dict[col]
+    if dtype_dict[oby] in (dtype.date, dtype.integer, dtype.float):
+        secondary_type_dict[oby] = dtype_dict[oby]
 
-    for oby in tss.order_by:
-        original_df[f'__mdb_original_{oby}'] = original_df[oby]
-
+    original_df[f'__mdb_original_{oby}'] = original_df[oby]
     group_lengths = []
     if len(gb_arr) > 0:
         df_arr = []
         for _, df in original_df.groupby(gb_arr):
-            df_arr.append(df.sort_values(by=ob_arr))
+            df_arr.append(df.sort_values(by=oby))
             group_lengths.append(len(df))
     else:
-        df_arr = [original_df.sort_values(by=ob_arr)]
+        df_arr = [original_df.sort_values(by=oby)]
         group_lengths.append(len(original_df))
 
     n_groups = len(df_arr)
     for i, subdf in enumerate(df_arr):
         if '__mdb_forecast_offset' in subdf.columns and mode == 'predict':
             if infer_mode:
-                df_arr[i] = _ts_infer_next_row(subdf, ob_arr)
+                df_arr[i] = _ts_infer_next_row(subdf, oby)
                 make_preds = [False for _ in range(max(0, len(df_arr[i]) - 1))] + [True]
             elif offset_available:
                 # truncate to forecast up until some len(df) + offset (which is <= 0)
@@ -139,12 +136,12 @@ def transform_timeseries(
         log.info(f'Using {nr_procs} processes to reshape.')
         pool = mp.Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
-        df_arr = pool.map(partial(_ts_to_obj, historical_columns=ob_arr + tss.historical_columns), df_arr)
+        df_arr = pool.map(partial(_ts_to_obj, historical_columns=[oby] + tss.historical_columns), df_arr)
         df_arr = pool.map(partial(_ts_order_col_to_cell_lists,
-                          order_cols=ob_arr + tss.historical_columns), df_arr)
+                          order_cols=[oby] + tss.historical_columns), df_arr)
         df_arr = pool.map(
             partial(
-                _ts_add_previous_rows, order_cols=ob_arr + tss.historical_columns, window=window),
+                _ts_add_previous_rows, order_cols=[oby] + tss.historical_columns, window=window),
             df_arr)
 
         df_arr = pool.map(partial(_ts_add_future_target, target=target, horizon=tss.horizon,
@@ -159,10 +156,10 @@ def transform_timeseries(
         pool.join()
     else:
         for i in range(n_groups):
-            df_arr[i] = _ts_to_obj(df_arr[i], historical_columns=ob_arr + tss.historical_columns)
-            df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], order_cols=ob_arr + tss.historical_columns)
+            df_arr[i] = _ts_to_obj(df_arr[i], historical_columns=[oby] + tss.historical_columns)
+            df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], order_cols=[oby] + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i],
-                                              order_cols=ob_arr + tss.historical_columns, window=window)
+                                              order_cols=[oby] + tss.historical_columns, window=window)
             df_arr[i] = _ts_add_future_target(df_arr[i], target=target, horizon=tss.horizon,
                                               data_dtype=tss.target_type, mode=mode)
             if tss.use_previous_target:
