@@ -136,6 +136,7 @@ def transform_timeseries(
         log.info(f'Using {nr_procs} processes to reshape.')
         pool = mp.Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
+        df_arr = pool.map(partial(_ts_repeat_oby, oby=tss.order_by), df_arr)
         df_arr = pool.map(partial(_ts_to_obj, historical_columns=[oby] + tss.historical_columns), df_arr)
         df_arr = pool.map(partial(_ts_order_col_to_cell_lists,
                           order_cols=[oby] + tss.historical_columns), df_arr)
@@ -156,6 +157,7 @@ def transform_timeseries(
         pool.join()
     else:
         for i in range(n_groups):
+            df_arr[i] = _ts_repeat_oby(df_arr[i], tss.order_by)
             df_arr[i] = _ts_to_obj(df_arr[i], historical_columns=[oby] + tss.historical_columns)
             df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], order_cols=[oby] + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i],
@@ -358,4 +360,12 @@ def _ts_add_future_target(df, target, horizon, data_dtype, mode):
         df[col_name] = next_target_value_arr
         df[col_name] = df[col_name].fillna(value=np.nan)
 
+    return df
+
+
+def _ts_repeat_oby(df: pd.DataFrame, oby: str) -> pd.DataFrame:
+    """
+    Clones the order_by column for usage with a non-temporal encoder (e.g. DatetimeEncoder).
+    """
+    df[f'__mdb_ts_datetime_{oby}'] = df[oby]
     return df
