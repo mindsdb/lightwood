@@ -19,7 +19,7 @@ def transform_timeseries(
     Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.
     
     The main transformations performed by this block are:
-      - Type casting (e.g. to numerical for `order_by` columns).
+      - Type casting (e.g. to numerical for `order_by` column).
       - Windowing functions for historical context based on `TimeseriesSettings.window` parameter.
       - Explicitly add target columns according to the `TimeseriesSettings.horizon` parameter.
       - Flag all rows that are "predictable" based on all `TimeseriesSettings`.
@@ -265,10 +265,10 @@ def _ts_to_obj(df: pd.DataFrame, historical_columns: list) -> pd.DataFrame:
 
 def _ts_order_col_to_cell_lists(df: pd.DataFrame, order_cols: list) -> pd.DataFrame:
     """
-    Casts all data in `order_by` columns into cells.
+    Casts all data in the `order_by` column into cells.
 
     :param df: Input dataframe
-    :param order_cols: `order_by` columns
+    :param order_cols: `order_by` column and other columns flagged as `historical`.
 
     :return: Dataframe with all `order_cols` modified so that their values are cells, e.g. `1` -> `[1]`
     """
@@ -281,10 +281,10 @@ def _ts_order_col_to_cell_lists(df: pd.DataFrame, order_cols: list) -> pd.DataFr
 
 def _ts_add_previous_rows(df: pd.DataFrame, order_cols: list, window: int) -> pd.DataFrame:
     """
-    Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of all `order_by` columns.
+    Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of the `order_by` column.
 
     :param df: Input dataframe.
-    :param order_cols: `order_by` columns.
+    :param order_cols: `order_by` column and other columns flagged as `historical`.
     :param window: value of `TimeseriesSettings.window` parameter.
     
     :return: Dataframe with all `order_cols` modified so that their values are now arrays of historical context.

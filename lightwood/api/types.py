@@ -114,7 +114,7 @@ class TimeseriesSettings:
     :param group_by: Optional list of columns by which the data should be grouped. Each different combination of values\
          for these columns will yield a different series.
     :param window: The temporal horizon (number of rows) that a model intakes to "look back" into when making a\
-         prediction, after the rows are ordered by order_by columns and split into groups if applicable.
+         prediction, after the rows are ordered by the order_by column and split into groups if applicable.
     :param horizon: The number of points in the future that predictions should be made for, defaults to 1. Once \
         trained, the model will be able to predict up to this many points into the future.
     :param historical_columns: The temporal dynamics of these columns will be used as additional context to train the \

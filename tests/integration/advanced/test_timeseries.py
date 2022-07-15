@@ -71,7 +71,7 @@ class TestTimeseries(unittest.TestCase):
                                                                         'allow_incomplete_history': True,
                                                                         'group_by': ['Country'],
                                                                         'horizon': horizon,
-                                                                        'order_by': [order_by],
+                                                                        'order_by': order_by,
                                                                         'period_intervals': (('daily', 7),),
                                                                         'window': window
                                                                     }}))
@@ -139,7 +139,7 @@ class TestTimeseries(unittest.TestCase):
                                                                         'use_previous_target': False,
                                                                         'allow_incomplete_history': False,
                                                                         'horizon': horizon,
-                                                                        'order_by': [order_by],
+                                                                        'order_by': order_by,
                                                                         'window': window}
                                                                     }))
             jai.model['args']['submodels'] = [jai.model['args']['submodels'][0]]
@@ -196,7 +196,7 @@ class TestTimeseries(unittest.TestCase):
                                                                         'time_aim': 80,
                                                                         'anomaly_detection': False,
                                                                         'timeseries_settings': {
-                                                                            'order_by': ['T'],
+                                                                            'order_by': 'T',
                                                                             'use_previous_target': True,
                                                                             'window': 5
                                                                         },
@@ -219,7 +219,7 @@ class TestTimeseries(unittest.TestCase):
                                                                         'time_aim': 80,
                                                                         'anomaly_detection': False,
                                                                         'timeseries_settings': {
-                                                                            'order_by': ['T'],
+                                                                            'order_by': 'T',
                                                                             'use_previous_target': True,
                                                                             'window': 5,
                                                                             'horizon': 2
@@ -247,7 +247,7 @@ class TestTimeseries(unittest.TestCase):
                                                                         'time_aim': 80,
                                                                         'anomaly_detection': False,
                                                                         'timeseries_settings': {
-                                                                            'order_by': ['T'],
+                                                                            'order_by': 'T',
                                                                             'use_previous_target': True,
                                                                             'window': 5,
                                                                             'horizon': 2
@@ -286,7 +286,7 @@ class TestTimeseries(unittest.TestCase):
         pdef = ProblemDefinition.from_dict({'target': target,
                                             'time_aim': 200,
                                             'timeseries_settings': {
-                                                'order_by': ['Time'],
+                                                'order_by': 'Time',
                                                 'window': 5,
                                                 'horizon': horizon,
                                                 'historical_columns': [f'{target}_2x']
@@ -375,7 +375,7 @@ class TestTimeseries(unittest.TestCase):
         pdef = ProblemDefinition.from_dict({'target': target,
                                             'time_aim': 200,
                                             'timeseries_settings': {
-                                                'order_by': ['Time'],
+                                                'order_by': 'Time',
                                                 'window': 5,
                                                 'horizon': horizon,
                                                 'historical_columns': [f'{target}_2x']
@@ -411,7 +411,7 @@ class TestTimeseries(unittest.TestCase):
                                                                 'timeseries_settings': {
                                                                     'group_by': gby,
                                                                     'horizon': horizon,
-                                                                    'order_by': [order_by],
+                                                                    'order_by': order_by,
                                                                     'window': window
                                                                 }}))
         code = code_from_json_ai(jai)
