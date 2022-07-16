@@ -49,7 +49,7 @@ class TestMixerSelection(unittest.TestCase):
                 'time_aim': 15,
                 'group_by': ['Country'],
                 'horizon': 1,
-                'order_by': ['T'],
+                'order_by': 'T',
                 'window': 5
             }
         }
@@ -65,7 +65,7 @@ class TestMixerSelection(unittest.TestCase):
             'timeseries_settings': {
                 'group_by': ['Country'],
                 'horizon': 3,
-                'order_by': ['T'],
+                'order_by': 'T',
                 'window': 5
             }
         }

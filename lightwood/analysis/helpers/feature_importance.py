@@ -38,7 +38,7 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
         else:
             empty_input_accuracy = {}
             ignorable_input_cols = [x for x in ns.input_cols if (not ns.tss.is_timeseries or
-                                                                 (x not in ns.tss.order_by and
+                                                                 (x != ns.tss.order_by and
                                                                   x not in ns.tss.historical_columns))]
             for col in ignorable_input_cols:
                 partial_data = deepcopy(ns.encoded_val_data)
