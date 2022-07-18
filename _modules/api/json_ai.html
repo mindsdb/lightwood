@@ -308,7 +308,7 @@
     <span class="c1"># Time-series representations require more advanced flags</span>
     <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
         <span class="n">gby</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">col_name</span> <span class="o">==</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">:</span>
             <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ArrayEncoder&quot;</span>
             <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;original_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">target_type</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
             <span class="n">encoder_dict</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="s2">&quot;window&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">window</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -926,27 +926,29 @@
         <span class="n">encoder_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">call</span><span class="p">(</span><span class="n">encoder</span><span class="p">)</span>
 
     <span class="c1"># Populate time-series specific details</span>
+    <span class="c1"># TODO: consider moving this to a `JsonAI override` phase</span>
     <span class="n">tss</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span>
-    <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">and</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span><span class="p">:</span>
-        <span class="n">col_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;__mdb_ts_previous_</span><span class="si">{</span><span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">target_type</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
-        <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">target_type</span> <span class="o">=</span> <span class="n">target_type</span>
-        <span class="n">encoder_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">call</span><span class="p">(</span>
-            <span class="n">lookup_encoder</span><span class="p">(</span>
-                <span class="n">target_type</span><span class="p">,</span>
-                <span class="n">col_name</span><span class="p">,</span>
-                <span class="kc">False</span><span class="p">,</span>
-                <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="p">,</span>
-                <span class="kc">False</span><span class="p">,</span>
-                <span class="kc">None</span><span class="p">,</span>
+    <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span><span class="p">:</span>
+            <span class="n">col_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;__mdb_ts_previous_</span><span class="si">{</span><span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">target_type</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
+            <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">target_type</span> <span class="o">=</span> <span class="n">target_type</span>
+            <span class="n">encoder_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">call</span><span class="p">(</span>
+                <span class="n">lookup_encoder</span><span class="p">(</span>
+                    <span class="n">target_type</span><span class="p">,</span>
+                    <span class="n">col_name</span><span class="p">,</span>
+                    <span class="kc">False</span><span class="p">,</span>
+                    <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span><span class="p">,</span>
+                    <span class="kc">False</span><span class="p">,</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="p">)</span>
-        <span class="p">)</span>
 
-        <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_type</span>
-        <span class="c1"># @TODO: Is populating the json_ai at this stage even necessary?</span>
-        <span class="n">json_ai</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span>
-        <span class="n">json_ai</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_type</span>
-        <span class="n">json_ai</span><span class="o">.</span><span class="n">dependency_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_type</span>
+            <span class="c1"># @TODO: Is populating the json_ai at this stage even necessary?</span>
+            <span class="n">json_ai</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span>
+            <span class="n">json_ai</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_type</span>
+            <span class="n">json_ai</span><span class="o">.</span><span class="n">dependency_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># ----------------- #</span>
 

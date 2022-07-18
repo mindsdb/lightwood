@@ -434,7 +434,7 @@
 <dd><p>Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.</p>
 <dl class="simple">
 <dt>The main transformations performed by this block are:</dt><dd><ul class="simple">
-<li><p>Type casting (e.g. to numerical for <cite>order_by</cite> columns).</p></li>
+<li><p>Type casting (e.g. to numerical for <cite>order_by</cite> column).</p></li>
 <li><p>Windowing functions for historical context based on <cite>TimeseriesSettings.window</cite> parameter.</p></li>
 <li><p>Explicitly add target columns according to the <cite>TimeseriesSettings.horizon</cite> parameter.</p></li>
 <li><p>Flag all rows that are “predictable” based on all <cite>TimeseriesSettings</cite>.</p></li>

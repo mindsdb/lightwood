@@ -192,7 +192,7 @@
 <span class="sd">    Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.</span>
 <span class="sd">    </span>
 <span class="sd">    The main transformations performed by this block are:</span>
-<span class="sd">      - Type casting (e.g. to numerical for `order_by` columns).</span>
+<span class="sd">      - Type casting (e.g. to numerical for `order_by` column).</span>
 <span class="sd">      - Windowing functions for historical context based on `TimeseriesSettings.window` parameter.</span>
 <span class="sd">      - Explicitly add target columns according to the `TimeseriesSettings.horizon` parameter.</span>
 <span class="sd">      - Flag all rows that are &quot;predictable&quot; based on all `TimeseriesSettings`.</span>
@@ -210,7 +210,7 @@
 
     <span class="n">tss</span> <span class="o">=</span> <span class="n">timeseries_settings</span>
     <span class="n">gb_arr</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
-    <span class="n">ob_arr</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span>
+    <span class="n">oby</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span>
     <span class="n">window</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">window</span>
 
     <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span> <span class="ow">and</span> <span class="n">target</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -221,7 +221,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot transform. Missing values in historical column </span><span class="si">{</span><span class="n">hcol</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
     <span class="c1"># infer frequency with get_delta</span>
-    <span class="n">oby_col</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">oby_col</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="n">get_ts_groups</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">:</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">freqs</span> <span class="o">=</span> <span class="n">get_delta</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
@@ -274,28 +274,25 @@
     <span class="n">original_df</span><span class="p">[</span><span class="s1">&#39;original_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_index_list</span>
 
     <span class="n">secondary_type_dict</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">ob_arr</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">):</span>
-            <span class="n">secondary_type_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">):</span>
+        <span class="n">secondary_type_dict</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span> <span class="o">=</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span>
 
-    <span class="k">for</span> <span class="n">oby</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">:</span>
-        <span class="n">original_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;__mdb_original_</span><span class="si">{</span><span class="n">oby</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_df</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span>
-
+    <span class="n">original_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;__mdb_original_</span><span class="si">{</span><span class="n">oby</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_df</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span>
     <span class="n">group_lengths</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gb_arr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">df_arr</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">original_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">gb_arr</span><span class="p">):</span>
-            <span class="n">df_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">ob_arr</span><span class="p">))</span>
+            <span class="n">df_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">oby</span><span class="p">))</span>
             <span class="n">group_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">df_arr</span> <span class="o">=</span> <span class="p">[</span><span class="n">original_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">ob_arr</span><span class="p">)]</span>
+        <span class="n">df_arr</span> <span class="o">=</span> <span class="p">[</span><span class="n">original_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">oby</span><span class="p">)]</span>
         <span class="n">group_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">original_df</span><span class="p">))</span>
 
     <span class="n">n_groups</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_arr</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subdf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df_arr</span><span class="p">):</span>
         <span class="k">if</span> <span class="s1">&#39;__mdb_forecast_offset&#39;</span> <span class="ow">in</span> <span class="n">subdf</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;predict&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">infer_mode</span><span class="p">:</span>
-                <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_infer_next_row</span><span class="p">(</span><span class="n">subdf</span><span class="p">,</span> <span class="n">ob_arr</span><span class="p">)</span>
+                <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_infer_next_row</span><span class="p">(</span><span class="n">subdf</span><span class="p">,</span> <span class="n">oby</span><span class="p">)</span>
                 <span class="n">make_preds</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
             <span class="k">elif</span> <span class="n">offset_available</span><span class="p">:</span>
                 <span class="c1"># truncate to forecast up until some len(df) + offset (which is &lt;= 0)</span>
@@ -312,12 +309,12 @@
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Using </span><span class="si">{</span><span class="n">nr_procs</span><span class="si">}</span><span class="s1"> processes to reshape.&#39;</span><span class="p">)</span>
         <span class="n">pool</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">nr_procs</span><span class="p">)</span>
         <span class="c1"># Make type `object` so that dataframe cells can be python lists</span>
-        <span class="n">df_arr</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_ts_to_obj</span><span class="p">,</span> <span class="n">historical_columns</span><span class="o">=</span><span class="n">ob_arr</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">),</span> <span class="n">df_arr</span><span class="p">)</span>
+        <span class="n">df_arr</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_ts_to_obj</span><span class="p">,</span> <span class="n">historical_columns</span><span class="o">=</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">),</span> <span class="n">df_arr</span><span class="p">)</span>
         <span class="n">df_arr</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_ts_order_col_to_cell_lists</span><span class="p">,</span>
-                          <span class="n">order_cols</span><span class="o">=</span><span class="n">ob_arr</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">),</span> <span class="n">df_arr</span><span class="p">)</span>
+                          <span class="n">order_cols</span><span class="o">=</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">),</span> <span class="n">df_arr</span><span class="p">)</span>
         <span class="n">df_arr</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
             <span class="n">partial</span><span class="p">(</span>
-                <span class="n">_ts_add_previous_rows</span><span class="p">,</span> <span class="n">order_cols</span><span class="o">=</span><span class="n">ob_arr</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">),</span>
+                <span class="n">_ts_add_previous_rows</span><span class="p">,</span> <span class="n">order_cols</span><span class="o">=</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">),</span>
             <span class="n">df_arr</span><span class="p">)</span>
 
         <span class="n">df_arr</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_ts_add_future_target</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">horizon</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">horizon</span><span class="p">,</span>
@@ -332,10 +329,10 @@
         <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_groups</span><span class="p">):</span>
-            <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_to_obj</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">historical_columns</span><span class="o">=</span><span class="n">ob_arr</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">)</span>
-            <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_order_col_to_cell_lists</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">order_cols</span><span class="o">=</span><span class="n">ob_arr</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">)</span>
+            <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_to_obj</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">historical_columns</span><span class="o">=</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">)</span>
+            <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_order_col_to_cell_lists</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">order_cols</span><span class="o">=</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">)</span>
             <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_add_previous_rows</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                                              <span class="n">order_cols</span><span class="o">=</span><span class="n">ob_arr</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
+                                              <span class="n">order_cols</span><span class="o">=</span><span class="p">[</span><span class="n">oby</span><span class="p">]</span> <span class="o">+</span> <span class="n">tss</span><span class="o">.</span><span class="n">historical_columns</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
             <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_add_future_target</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">horizon</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">horizon</span><span class="p">,</span>
                                               <span class="n">data_dtype</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">target_type</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span><span class="p">:</span>
@@ -439,10 +436,10 @@
 
 <span class="k">def</span> <span class="nf">_ts_order_col_to_cell_lists</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">order_cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Casts all data in `order_by` columns into cells.</span>
+<span class="sd">    Casts all data in the `order_by` column into cells.</span>
 
 <span class="sd">    :param df: Input dataframe</span>
-<span class="sd">    :param order_cols: `order_by` columns</span>
+<span class="sd">    :param order_cols: `order_by` column and other columns flagged as `historical`.</span>
 
 <span class="sd">    :return: Dataframe with all `order_cols` modified so that their values are cells, e.g. `1` -&gt; `[1]`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -455,10 +452,10 @@
 
 <span class="k">def</span> <span class="nf">_ts_add_previous_rows</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">order_cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of all `order_by` columns.</span>
+<span class="sd">    Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of the `order_by` column.</span>
 
 <span class="sd">    :param df: Input dataframe.</span>
-<span class="sd">    :param order_cols: `order_by` columns.</span>
+<span class="sd">    :param order_cols: `order_by` column and other columns flagged as `historical`.</span>
 <span class="sd">    :param window: value of `TimeseriesSettings.window` parameter.</span>
 <span class="sd">    </span>
 <span class="sd">    :return: Dataframe with all `order_cols` modified so that their values are now arrays of historical context.</span>
