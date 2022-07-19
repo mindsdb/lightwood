@@ -71,6 +71,10 @@ def get_delta(
                     freq, period = detect_freq_period(deltas[group], tss)
                     periods[group] = period
                     freqs[group] = freq
+                else:
+                    deltas[group] = deltas['__default']
+                    periods[group] = periods['__default']
+                    freqs[group] = freqs['__default']
 
     return deltas, periods, freqs
 
