@@ -93,7 +93,8 @@ def stratify(data: pd.DataFrame,
              pct_test: float,
              stratify_on: List[str],
              seed: int,
-             reshuffle: bool) -> List[pd.DataFrame]:
+             reshuffle: bool,
+             atol: float = 0.05) -> List[pd.DataFrame]:
     """
     Stratified data splitter.
 
@@ -109,6 +110,7 @@ def stratify(data: pd.DataFrame,
     :param stratify_on: Columns to consider when stratifying
     :param seed: Random state for pandas data-frame shuffling
     :param reshuffle: specify if reshuffling should be done post-split
+    :param atol: absolute tolerance for difference in stratification percentages. If violated, reverts to a non-stratified split.
 
     :returns Stratified train, dev, test dataframes
     """  # noqa
@@ -136,10 +138,13 @@ def stratify(data: pd.DataFrame,
                                      for df in [train_st, dev_st, test_st]]
 
     # check that stratified lengths conform to expected percentages
-    if not np.isclose(len(train_st) / len(data), pct_train, atol=0.01) or \
-            not np.isclose(len(dev_st) / len(data), pct_dev, atol=0.01) or \
-            not np.isclose(len(test_st) / len(data), pct_test, atol=0.01):
-        log.info("Could not stratify; reverting to simple split")
+    emp_tr = len(train_st) / len(data)
+    emp_dev = len(dev_st) / len(data)
+    emp_te = len(test_st) / len(data)
+    if not np.isclose(emp_tr, pct_train, atol=atol) or \
+            not np.isclose(emp_dev, pct_dev, atol=atol) or \
+            not np.isclose(emp_te, pct_test, atol=atol):
+        log.warning(f"Stratification is outside of imposed tolerance ({atol}) ({emp_tr} train - {emp_dev} dev - {emp_te} test), reverting to a simple split.")  # noqa
         train_st, dev_st, test_st = simple_split(data, pct_train, pct_dev, pct_test)
 
     return [train_st, dev_st, test_st]

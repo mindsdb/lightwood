@@ -72,9 +72,9 @@ def get_delta(
                     periods[group] = period
                     freqs[group] = freq
                 else:
-                    deltas[group] = deltas['__default']
-                    periods[group] = periods['__default']
-                    freqs[group] = freqs['__default']
+                    deltas[group] = 1.0
+                    periods[group] = 1
+                    freqs[group] = 'S'
 
     return deltas, periods, freqs
 

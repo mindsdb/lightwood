@@ -62,7 +62,7 @@ def transform_timeseries(
         if (tss.group_by and group != '__default') or not tss.group_by:
             if periods[group] == 0:
                 raise Exception(
-                    f"Partition is not valid. Please make sure you group by a set of columns that ensures unique measurements for each grouping through time.")  # noqa
+                    f"Partition is not valid, faulty group {group}. Please make sure you group by a set of columns that ensures unique measurements for each grouping through time.")  # noqa
             idxs, subset = get_group_matches(data, group, tss.group_by)
             if subset.shape[0] > 0:
                 index = pd.to_datetime(subset[oby_col], unit='s')

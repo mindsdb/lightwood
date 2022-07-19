@@ -398,12 +398,7 @@ class TestTimeseries(unittest.TestCase):
         order_by = 'saledate'
         window = 8
         horizon = 4
-        train, _, test = stratify(data,
-                                  pct_train=0.8,
-                                  pct_dev=0,
-                                  pct_test=0.2,
-                                  stratify_on=gby,
-                                  seed=1,
+        train, _, test = stratify(data, pct_train=0.8, pct_dev=0, pct_test=0.2, stratify_on=gby, seed=1,
                                   reshuffle=False)
         jai = json_ai_from_problem(train,
                                    ProblemDefinition.from_dict({'target': target,
