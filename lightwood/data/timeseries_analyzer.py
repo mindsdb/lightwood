@@ -121,21 +121,22 @@ def get_stls(train_df: pd.DataFrame,
              groups: list,
              tss: TimeseriesSettings
              ) -> Dict[str, object]:
-    stls = {}
+    stls = {'__default': None}
     for group in groups:
-        _, tr_subset = get_group_matches(train_df, group, tss.group_by)
-        _, dev_subset = get_group_matches(dev_df, group, tss.group_by)
-        if tr_subset.shape[0] > 0 and dev_subset.shape[0] > 0 and sps.get(group, False):
-            group_freq = tr_subset['__mdb_inferred_freq'].iloc[0]
-            tr_subset = deepcopy(tr_subset)[target]
-            dev_subset = deepcopy(dev_subset)[target]
-            tr_subset.index = pd.date_range(start=tr_subset.iloc[0], freq=group_freq,
-                                            periods=len(tr_subset)).to_period()
-            dev_subset.index = pd.date_range(start=dev_subset.iloc[0], freq=group_freq,
-                                             periods=len(dev_subset)).to_period()
-            stl = _pick_ST(tr_subset, dev_subset, sps[group])
-            log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
-            stls[group] = stl
+        if group != '__default':
+            _, tr_subset = get_group_matches(train_df, group, tss.group_by)
+            _, dev_subset = get_group_matches(dev_df, group, tss.group_by)
+            if tr_subset.shape[0] > 0 and dev_subset.shape[0] > 0 and sps.get(group, False):
+                group_freq = tr_subset['__mdb_inferred_freq'].iloc[0]
+                tr_subset = deepcopy(tr_subset)[target]
+                dev_subset = deepcopy(dev_subset)[target]
+                tr_subset.index = pd.date_range(start=tr_subset.iloc[0], freq=group_freq,
+                                                periods=len(tr_subset)).to_period()
+                dev_subset.index = pd.date_range(start=dev_subset.iloc[0], freq=group_freq,
+                                                 periods=len(dev_subset)).to_period()
+                stl = _pick_ST(tr_subset, dev_subset, sps[group])
+                log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
+                stls[group] = stl
     return stls
 
 
