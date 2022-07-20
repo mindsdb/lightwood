@@ -116,7 +116,7 @@ To train a ``Predictor`` end-to-end, starting with unprocessed data, users can u
 
    # Make the train/test splits and show predictions for a few examples
    test_df = predictor.split(predictor.preprocess(df))["test"]
-   preds = predictor.predict(test).iloc[:10]
+   preds = predictor.predict(test_df).iloc[:10]
    print(preds)
 
 BYOM: Bring your own models
