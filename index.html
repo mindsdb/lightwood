@@ -307,7 +307,7 @@
 
 <span class="c1"># Make the train/test splits and show predictions for a few examples</span>
 <span class="n">test_df</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">df</span><span class="p">))[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span>
-<span class="n">preds</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_df</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span>
 </pre></div>
 </div>
