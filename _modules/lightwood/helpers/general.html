@@ -281,6 +281,12 @@
 <span class="sd">    Scores are computed for each timestep (as determined by `timeseries_settings.horizon`),</span>
 <span class="sd">    and the final accuracy is the reciprocal of the average score through all timesteps.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_naive</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
+        <span class="n">nan_mask</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">true_values</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">*=</span> <span class="n">nan_mask</span>
+        <span class="n">true_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">evaluate_array_accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="o">=</span><span class="n">ts_analysis</span><span class="p">)</span>
+
     <span class="n">ts_analysis</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">,</span> <span class="p">{})</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">:</span>
         <span class="n">naive_errors</span> <span class="o">=</span> <span class="kc">None</span>
@@ -294,10 +300,7 @@
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">naive_errors</span><span class="p">:</span>
         <span class="c1"># use mean R2 method if naive errors are not available</span>
-        <span class="n">nan_mask</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">true_values</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">predictions</span> <span class="o">*=</span> <span class="n">nan_mask</span>
-        <span class="n">true_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">evaluate_array_accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="o">=</span><span class="n">ts_analysis</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_naive</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">predictions</span><span class="p">)</span>
 
     <span class="n">mases</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">]:</span>
@@ -310,9 +313,17 @@
 
             <span class="c1"># add MASE score for each group (__default only considered if the task is non-grouped)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">group</span> <span class="o">!=</span> <span class="s1">&#39;__default&#39;</span><span class="p">:</span>
-                <span class="n">mases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mase</span><span class="p">(</span><span class="n">trues</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;ts_naive_mae&#39;</span><span class="p">][</span><span class="n">group</span><span class="p">],</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">horizon</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">mases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mase</span><span class="p">(</span><span class="n">trues</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;ts_naive_mae&#39;</span><span class="p">][</span><span class="n">group</span><span class="p">],</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">horizon</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="c1"># group is novel, ignore for accuracy reporting purposes</span>
+                    <span class="k">pass</span>
 
-    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">mases</span><span class="p">),</span> <span class="mf">1e-4</span><span class="p">)</span>  <span class="c1"># reciprocal to respect &quot;larger -&gt; better&quot; convention</span></div>
+    <span class="n">acc</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">mases</span><span class="p">),</span> <span class="mf">1e-4</span><span class="p">)</span>  <span class="c1"># reciprocal to respect &quot;larger -&gt; better&quot; convention</span>
+    <span class="k">if</span> <span class="n">acc</span> <span class="o">!=</span> <span class="n">acc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_naive</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">predictions</span><span class="p">)</span>  <span class="c1"># nan due to having only novel groups in validation, forces reversal</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">acc</span></div>
 
 
 <div class="viewcode-block" id="evaluate_array_accuracy"><a class="viewcode-back" href="../../../helpers.html#helpers.evaluate_array_accuracy">[docs]</a><span class="k">def</span> <span class="nf">evaluate_array_accuracy</span><span class="p">(</span>
