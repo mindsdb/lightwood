@@ -205,6 +205,9 @@ def detect_freq_period(deltas: pd.DataFrame, tss) -> tuple:
         'hourly': 60 * 60,
         'minute': 60,
         'second': 1,
+        'millisecond': 0.001,
+        'microsecond': 1e-6,
+        'nanosecond': 1e-9,
         'constant': 0
     }
     freq_to_period = {interval: period for (interval, period) in tss.interval_periods}
@@ -220,7 +223,10 @@ def detect_freq_period(deltas: pd.DataFrame, tss) -> tuple:
 
 def freq_to_pandas(freq, sample_row=None):
     mapping = {
-        'constant': 'S',
+        'constant': 'N',
+        'nanosecond': 'N',
+        'microsecond': 'us',
+        'millisecond': 'ms',
         'second': 'S',
         'minute': 'T',
         'hourly': 'H',  # custom logic
