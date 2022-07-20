@@ -54,12 +54,9 @@ def explain(data: pd.DataFrame,
             for col in timeseries_settings.group_by:
                 row_insights[f'group_{col}'] = data[col]
 
-        for col in timeseries_settings.order_by:
-            row_insights[f'order_{col}'] = data[col]
-
-        for col in timeseries_settings.order_by:
-            row_insights[f'order_{col}'] = get_inferred_timestamps(
-                row_insights, col, ts_analysis['deltas'], timeseries_settings)
+        row_insights[f'order_{timeseries_settings.order_by}'] = data[timeseries_settings.order_by]
+        row_insights[f'order_{timeseries_settings.order_by}'] = get_inferred_timestamps(
+            row_insights, timeseries_settings.order_by, ts_analysis['deltas'], timeseries_settings)
 
     kwargs = {
         'data': data,

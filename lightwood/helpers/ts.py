@@ -2,6 +2,7 @@ from typing import List, Tuple, Union, Dict
 
 import numpy as np
 import pandas as pd
+from statsmodels.tsa.stattools import pacf
 
 
 def get_ts_groups(df: pd.DataFrame, tss) -> list:
@@ -54,9 +55,9 @@ def get_delta(
     Dictionary with group combination tuples as keys. Values are dictionaries with the inferred delta for each series.
     """  # noqa
     df = df.copy()
-    original_col = f'__mdb_original_{tss.order_by[0]}'
-    order_col = [original_col] if original_col in df.columns else [tss.order_by[0]]
-    deltas = {"__default": df[order_col].astype(float).rolling(window=2).apply(np.diff).value_counts().index[0][0]}
+    original_col = f'__mdb_original_{tss.order_by}'
+    order_col = original_col if original_col in df.columns else tss.order_by
+    deltas = {"__default": df[order_col].astype(float).rolling(window=2).apply(np.diff).value_counts().index[0]}
     freq, period = detect_freq_period(deltas["__default"], tss)
     periods = {"__default": period}
     freqs = {"__default": freq}
@@ -65,11 +66,15 @@ def get_delta(
         for group in group_combinations:
             if group != "__default":
                 _, subset = get_group_matches(df, group, tss.group_by)
-                if subset.size > 1:
-                    deltas[group] = subset[order_col].rolling(window=2).apply(np.diff).value_counts().index[0][0]
+                if subset.shape[0] > 1:
+                    deltas[group] = subset[order_col].rolling(window=2).apply(np.diff).value_counts().index[0]
                     freq, period = detect_freq_period(deltas[group], tss)
                     periods[group] = period
                     freqs[group] = freq
+                else:
+                    deltas[group] = 1.0
+                    periods[group] = 1
+                    freqs[group] = 'S'
 
     return deltas, periods, freqs
 
@@ -98,7 +103,7 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss) -> pd
     return df[f'order_{col}']
 
 
-def add_tn_conf_bounds(data: pd.DataFrame, tss_args):
+def add_tn_num_conf_bounds(data: pd.DataFrame, tss_args):
     """
     Add confidence (and bounds if applicable) to t+n predictions, for n>1
     TODO: active research question: how to guarantee 1-e coverage for t+n, n>1
@@ -118,6 +123,13 @@ def add_tn_conf_bounds(data: pd.DataFrame, tss_args):
         data['lower'].iloc[idx] = [pred - (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
         data['upper'].iloc[idx] = [pred + (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
 
+    return data
+
+
+def add_tn_cat_conf_bounds(data: pd.DataFrame, tss_args):
+    data['confidence'] = data['confidence'].astype(object)
+    for idx, row in data.iterrows():
+        data['confidence'].iloc[idx] = [row['confidence'] for _ in range(tss_args.horizon)]
     return data
 
 
@@ -192,11 +204,15 @@ def detect_freq_period(deltas: pd.DataFrame, tss) -> tuple:
         'daily': 60 * 60 * 24,
         'hourly': 60 * 60,
         'minute': 60,
-        'second': 1
+        'second': 1,
+        'millisecond': 0.001,
+        'microsecond': 1e-6,
+        'nanosecond': 1e-9,
+        'constant': 0
     }
     freq_to_period = {interval: period for (interval, period) in tss.interval_periods}
     for tag, period in (('yearly', 1), ('quarterly', 4), ('bimonthly', 6), ('monthly', 12),
-                        ('weekly', 4), ('daily', 1), ('hourly', 24), ('minute', 1), ('second', 1)):
+                        ('weekly', 4), ('daily', 1), ('hourly', 24), ('minute', 1), ('second', 1), ('constant', 0)):
         if tag not in freq_to_period.keys():
             freq_to_period[tag] = period
 
@@ -207,6 +223,10 @@ def detect_freq_period(deltas: pd.DataFrame, tss) -> tuple:
 
 def freq_to_pandas(freq, sample_row=None):
     mapping = {
+        'constant': 'N',
+        'nanosecond': 'N',
+        'microsecond': 'us',
+        'millisecond': 'ms',
         'second': 'S',
         'minute': 'T',
         'hourly': 'H',  # custom logic
@@ -221,3 +241,26 @@ def freq_to_pandas(freq, sample_row=None):
     # TODO: implement custom dispatch for better precision, use row sample if available:
     #  pandas.pydata.org/docs/user_guide/timeseries.html
     return mapping[freq]
+
+
+def max_pacf(data: pd.DataFrame, group_combinations, target, tss):
+    def min_k(top_k, data):
+        return min(top_k, len(data))
+
+    top_k = 5
+    k = min_k(top_k, data[target])
+    candidate_sps = {'__default': (1 + np.argpartition(pacf(data[target].values)[1:], -k))[-k:].tolist()[::-1]}
+    if tss.group_by:
+        for group in group_combinations:
+            if group != "__default":
+                _, subset = get_group_matches(data, group, tss.group_by)
+                try:
+                    k = min_k(top_k, subset[target])
+                    candidates = (1 + np.argpartition(pacf(subset[target].values)[1:], -k))[-k:].tolist()[::-1]
+                    candidate_sps[group] = candidates
+                except Exception:
+                    candidate_sps[group] = None
+            if not candidate_sps[group]:
+                candidate_sps[group] = [1]
+
+    return candidate_sps

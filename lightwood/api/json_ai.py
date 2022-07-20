@@ -135,7 +135,7 @@ def lookup_encoder(
     # Time-series representations require more advanced flags
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
-        if col_name in tss.order_by:
+        if col_name == tss.order_by:
             encoder_dict["module"] = "ArrayEncoder"
             encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
             encoder_dict["args"]["window"] = f"{tss.window}"
@@ -575,6 +575,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["tss"] = mixers[i]["args"].get("tss", "$problem_definition.timeseries_settings")
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get("ts_analysis", "$ts_analysis")
             mixers[i]["args"]["fit_on_dev"] = mixers[i]["args"].get("fit_on_dev", "True")
+            mixers[i]["args"]["use_stl"] = mixers[i]["args"].get("use_stl", "False")
 
         elif mixers[i]["module"] == "NHitsMixer":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
@@ -752,27 +753,29 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         encoder_dict[col_name] = call(encoder)
 
     # Populate time-series specific details
+    # TODO: consider moving this to a `JsonAI override` phase
     tss = json_ai.problem_definition.timeseries_settings
-    if tss.is_timeseries and tss.use_previous_target:
-        col_name = f"__mdb_ts_previous_{json_ai.problem_definition.target}"
-        target_type = json_ai.dtype_dict[json_ai.problem_definition.target]
-        json_ai.problem_definition.timeseries_settings.target_type = target_type
-        encoder_dict[col_name] = call(
-            lookup_encoder(
-                target_type,
-                col_name,
-                False,
-                json_ai.problem_definition,
-                False,
-                None,
+    if tss.is_timeseries:
+        if tss.use_previous_target:
+            col_name = f"__mdb_ts_previous_{json_ai.problem_definition.target}"
+            target_type = json_ai.dtype_dict[json_ai.problem_definition.target]
+            json_ai.problem_definition.timeseries_settings.target_type = target_type
+            encoder_dict[col_name] = call(
+                lookup_encoder(
+                    target_type,
+                    col_name,
+                    False,
+                    json_ai.problem_definition,
+                    False,
+                    None,
+                )
             )
-        )
 
-        dtype_dict[col_name] = target_type
-        # @TODO: Is populating the json_ai at this stage even necessary?
-        json_ai.encoders[col_name] = encoder_dict[col_name]
-        json_ai.dtype_dict[col_name] = target_type
-        json_ai.dependency_dict[col_name] = []
+            dtype_dict[col_name] = target_type
+            # @TODO: Is populating the json_ai at this stage even necessary?
+            json_ai.encoders[col_name] = encoder_dict[col_name]
+            json_ai.dtype_dict[col_name] = target_type
+            json_ai.dependency_dict[col_name] = []
 
     # ----------------- #
 

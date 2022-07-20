@@ -118,7 +118,7 @@ class SkTime(BaseMixer):
         """
         Internal method that fits forecasters to a given dataframe.
         """
-        df = data.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
+        df = data.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by}')
 
         if not self.hyperparam_search and not self.study:
             module_name = self.model_path
@@ -159,7 +159,7 @@ class SkTime(BaseMixer):
 
             self.models[group] = TransformedTargetForecaster(model_pipeline)
 
-            oby_col = self.ts_analysis['tss'].order_by[0]
+            oby_col = self.ts_analysis['tss'].order_by
             if self.grouped_by == ['__default']:
                 series_data = df
                 series_oby = df[oby_col]
@@ -180,7 +180,7 @@ class SkTime(BaseMixer):
 
                 # if data is huge, filter out old records for quicker fitting
                 if self.auto_size:
-                    cutoff = min(len(series), max(500, options['sp'] * self.cutoff_factor))
+                    cutoff = min(len(series), max(500, max(options['sp']) * self.cutoff_factor))
                     series = series.iloc[-cutoff:]
                 try:
                     self.models[group].fit(series, fh=self.fh)

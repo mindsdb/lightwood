@@ -9,7 +9,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.api.dtype import dtype
 from lightwood.api.types import PredictionArguments
-from lightwood.helpers.ts import add_tn_conf_bounds
+from lightwood.helpers.ts import add_tn_num_conf_bounds, add_tn_cat_conf_bounds
 
 from lightwood.data import EncodedDs
 from lightwood.analysis.base import BaseAnalysisBlock
@@ -120,7 +120,7 @@ class ICP(BaseAnalysisBlock):
             # fit additional ICPs in time series tasks with grouped columns
             if ns.tss.is_timeseries and ns.tss.group_by:
                 # generate a multiindex
-                midx = pd.MultiIndex.from_frame(icp_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by[0]}']])
+                midx = pd.MultiIndex.from_frame(icp_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by}']])
                 icp_df.index = midx
 
                 # create an ICP for each possible group
@@ -157,7 +157,7 @@ class ICP(BaseAnalysisBlock):
 
                 # add all predictions to DF
                 icps_df = deepcopy(ns.data)
-                midx = pd.MultiIndex.from_frame(icps_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by[0]}']])
+                midx = pd.MultiIndex.from_frame(icps_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by}']])
                 icps_df.index = midx
                 if ns.is_multi_ts or pred_is_list:
                     icps_df[f'__predicted_{ns.target}'] = np.array([p[0] for p in ns.normal_predictions['prediction']])
@@ -380,8 +380,11 @@ class ICP(BaseAnalysisBlock):
                                               cooldown=ns.pred_args.anomaly_cooldown)
                     row_insights['anomaly'] = anomalies
 
-            if ns.tss.is_timeseries and ns.tss.horizon > 1 and is_numerical:
-                row_insights = add_tn_conf_bounds(row_insights, ns.tss)
+            if ns.tss.is_timeseries and ns.tss.horizon > 1:
+                if is_numerical:
+                    row_insights = add_tn_num_conf_bounds(row_insights, ns.tss)
+                else:
+                    row_insights = add_tn_cat_conf_bounds(row_insights, ns.tss)
 
             # clip bounds if necessary
             if is_numerical:

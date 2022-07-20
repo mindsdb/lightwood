@@ -108,6 +108,12 @@ def evaluate_num_array_accuracy(
     Scores are computed for each timestep (as determined by `timeseries_settings.horizon`),
     and the final accuracy is the reciprocal of the average score through all timesteps.
     """
+    def _naive(true_values, predictions):
+        nan_mask = (~np.isnan(true_values)).astype(int)
+        predictions *= nan_mask
+        true_values = np.nan_to_num(true_values, 0.0)
+        return evaluate_array_accuracy(true_values, predictions, ts_analysis=ts_analysis)
+
     ts_analysis = kwargs.get('ts_analysis', {})
     if not ts_analysis:
         naive_errors = None
@@ -121,10 +127,7 @@ def evaluate_num_array_accuracy(
 
     if not naive_errors:
         # use mean R2 method if naive errors are not available
-        nan_mask = (~np.isnan(true_values)).astype(int)
-        predictions *= nan_mask
-        true_values = np.nan_to_num(true_values, 0.0)
-        return evaluate_array_accuracy(true_values, predictions, ts_analysis=ts_analysis)
+        return _naive(true_values, predictions)
 
     mases = []
     for group in ts_analysis['group_combinations']:
@@ -137,9 +140,17 @@ def evaluate_num_array_accuracy(
 
             # add MASE score for each group (__default only considered if the task is non-grouped)
             if len(ts_analysis['group_combinations']) == 1 or group != '__default':
-                mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].horizon))
+                try:
+                    mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].horizon))
+                except Exception:
+                    # group is novel, ignore for accuracy reporting purposes
+                    pass
 
-    return 1 / max(np.average(mases), 1e-4)  # reciprocal to respect "larger -> better" convention
+    acc = 1 / max(np.average(mases), 1e-4)  # reciprocal to respect "larger -> better" convention
+    if acc != acc:
+        return _naive(true_values, predictions)  # nan due to having only novel groups in validation, forces reversal
+    else:
+        return acc
 
 
 def evaluate_array_accuracy(

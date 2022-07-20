@@ -33,7 +33,7 @@ def generate_target_group_normalizers(
             if combination not in ('__default', ()):
                 combination = tuple(combination)
                 idxs, subset = get_group_matches(data, combination, tss.group_by)
-                if subset.size > 0:
+                if subset.shape[0] > 0:
                     target_data = subset[target].values
                     if target_dtype == dtype.num_tsarray:
                         target_data = target_data.reshape(-1, 1).astype(float)
