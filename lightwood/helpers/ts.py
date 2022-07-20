@@ -71,6 +71,10 @@ def get_delta(
                     freq, period = detect_freq_period(deltas[group], tss)
                     periods[group] = period
                     freqs[group] = freq
+                else:
+                    deltas[group] = 1.0
+                    periods[group] = 1
+                    freqs[group] = 'S'
 
     return deltas, periods, freqs
 
@@ -200,11 +204,15 @@ def detect_freq_period(deltas: pd.DataFrame, tss) -> tuple:
         'daily': 60 * 60 * 24,
         'hourly': 60 * 60,
         'minute': 60,
-        'second': 1
+        'second': 1,
+        'millisecond': 0.001,
+        'microsecond': 1e-6,
+        'nanosecond': 1e-9,
+        'constant': 0
     }
     freq_to_period = {interval: period for (interval, period) in tss.interval_periods}
     for tag, period in (('yearly', 1), ('quarterly', 4), ('bimonthly', 6), ('monthly', 12),
-                        ('weekly', 4), ('daily', 1), ('hourly', 24), ('minute', 1), ('second', 1)):
+                        ('weekly', 4), ('daily', 1), ('hourly', 24), ('minute', 1), ('second', 1), ('constant', 0)):
         if tag not in freq_to_period.keys():
             freq_to_period[tag] = period
 
@@ -215,6 +223,10 @@ def detect_freq_period(deltas: pd.DataFrame, tss) -> tuple:
 
 def freq_to_pandas(freq, sample_row=None):
     mapping = {
+        'constant': 'N',
+        'nanosecond': 'N',
+        'microsecond': 'us',
+        'millisecond': 'ms',
         'second': 'S',
         'minute': 'T',
         'hourly': 'H',  # custom logic
@@ -232,12 +244,23 @@ def freq_to_pandas(freq, sample_row=None):
 
 
 def max_pacf(data: pd.DataFrame, group_combinations, target, tss):
+    def min_k(top_k, data):
+        return min(top_k, len(data))
+
     top_k = 5
-    candidate_sps = {'__default': (1 + np.argpartition(pacf(data[target].values)[1:], -top_k))[-top_k:].tolist()[::-1]}
+    k = min_k(top_k, data[target])
+    candidate_sps = {'__default': (1 + np.argpartition(pacf(data[target].values)[1:], -k))[-k:].tolist()[::-1]}
     if tss.group_by:
         for group in group_combinations:
             if group != "__default":
                 _, subset = get_group_matches(data, group, tss.group_by)
-                candidates = (1 + np.argpartition(pacf(subset[target].values)[1:], -top_k))[-top_k:].tolist()[::-1]
-                candidate_sps[group] = candidates
+                try:
+                    k = min_k(top_k, subset[target])
+                    candidates = (1 + np.argpartition(pacf(subset[target].values)[1:], -k))[-k:].tolist()[::-1]
+                    candidate_sps[group] = candidates
+                except Exception:
+                    candidate_sps[group] = None
+            if not candidate_sps[group]:
+                candidate_sps[group] = [1]
+
     return candidate_sps
