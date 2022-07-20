@@ -273,7 +273,7 @@ class TestTimeseries(unittest.TestCase):
         tsteps = 100
         target = 'Value'
         horizon = 20
-        t = np.linspace(0, 1, tsteps, endpoint=False)
+        t = np.linspace(0, 100, tsteps, endpoint=False)
         ts = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * t, width=0.5))]
         df = pd.DataFrame(columns=['Time', target])
         df['Time'] = t
@@ -362,7 +362,7 @@ class TestTimeseries(unittest.TestCase):
         horizon = 20
         # added random noise for irregular sampling
         np.random.seed(0)
-        t = np.linspace(0, 1, tsteps, endpoint=False) + np.random.uniform(size=(tsteps,), low=-0.005, high=0.005)
+        t = np.linspace(0, 100, tsteps, endpoint=False) + np.random.uniform(size=(tsteps,), low=-0.005, high=0.005)
         ts = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * t, width=0.5))]
         df = pd.DataFrame(columns=['Time', target])
         df['Time'] = t
