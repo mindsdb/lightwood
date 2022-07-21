@@ -60,7 +60,7 @@ def get_delta(
     original_col = f'__mdb_original_{tss.order_by}'
     order_col = original_col if original_col in df.columns else tss.order_by
     deltas = {"__default": df[order_col].astype(float).rolling(window=2).apply(np.diff).value_counts().index[0]}
-    freq, period = detect_freq_period(deltas["__default"], tss)
+    freq, period = detect_freq_period(deltas["__default"], tss, len(df))
     periods = {"__default": [period]}
     freqs = {"__default": freq}
 
@@ -70,7 +70,7 @@ def get_delta(
                 _, subset = get_group_matches(df, group, tss.group_by)
                 if subset.shape[0] > 1:
                     deltas[group] = subset[order_col].rolling(window=2).apply(np.diff).value_counts().index[0]
-                    freq, period = detect_freq_period(deltas[group], tss)
+                    freq, period = detect_freq_period(deltas[group], tss, len(subset))
                     freqs[group] = freq
                     if period:
                         periods[group] = [period]
@@ -176,7 +176,7 @@ class Differencer:
         return series
 
 
-def detect_freq_period(deltas: pd.DataFrame, tss) -> tuple:
+def detect_freq_period(deltas: pd.DataFrame, tss, n_points) -> tuple:
     """
     Helper method that, based on the most popular interval for a time series, determines its seasonal peridiocity (sp).
     This bit of information can be crucial for good modelling with methods like ARIMA.
@@ -219,7 +219,7 @@ def detect_freq_period(deltas: pd.DataFrame, tss) -> tuple:
     for tag, period in (('yearly', 1), ('quarterly', 4), ('bimonthly', 6), ('monthly', 12),
                         ('weekly', 52), ('daily', 7), ('hourly', 24), ('minute', 60), ('second', 60), ('constant', 0)):
         if tag not in freq_to_period.keys():
-            if period <= tss.window:
+            if period <= n_points:
                 freq_to_period[tag] = period
             else:
                 freq_to_period[tag] = None

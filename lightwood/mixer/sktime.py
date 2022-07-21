@@ -149,9 +149,9 @@ class SkTime(BaseMixer):
             print()
             kwargs = {}
             options = {
-                'sp': self.ts_analysis['periods'].get(group, '__default'),  # seasonality period
-                'suppress_warnings': True,                                     # ignore warnings if possible
-                'error_action': 'raise',                                       # avoids fit() failing silently
+                'sp': self.ts_analysis['periods'].get(group, '__default')[0],   # seasonality period
+                'suppress_warnings': True,                                      # ignore warnings if possible
+                'error_action': 'raise',                                        # avoids fit() failing silently
             }
             if self.model_path == 'fbprophet.Prophet':
                 options['freq'] = self.freq
