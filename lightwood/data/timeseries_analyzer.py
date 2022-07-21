@@ -10,7 +10,7 @@ from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
-from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer, max_pacf
+from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer
 from lightwood.helpers.log import log
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 
@@ -36,12 +36,11 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     """  # noqa
     tss = timeseries_settings
     groups = get_ts_groups(data['train'], tss)
-    deltas, periods, freqs = get_delta(data['train'], dtype_dict, groups, tss)
+    deltas, periods, freqs = get_delta(data['train'], dtype_dict, groups, target, tss)
 
     normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
 
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
-        periods = max_pacf(data['train'], groups, target, tss)  # override with PACF output
         naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'],
                                                                              target,
                                                                              tss,

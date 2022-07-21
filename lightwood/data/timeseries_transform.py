@@ -51,7 +51,7 @@ def transform_timeseries(
     oby_col = tss.order_by
     groups = get_ts_groups(data, tss)
     if not ts_analysis:
-        _, periods, freqs = get_delta(data, dtype_dict, groups, tss)
+        _, periods, freqs = get_delta(data, dtype_dict, groups, target, tss)
     else:
         periods = ts_analysis['periods']
         freqs = ts_analysis['sample_freqs']

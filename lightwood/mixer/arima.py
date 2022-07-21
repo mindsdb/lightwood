@@ -13,7 +13,7 @@ class ARIMAMixer(SkTime):
                  model_path: str = 'statsforecast.StatsForecastAutoARIMA',
                  auto_size: bool = True,
                  hyperparam_search: bool = False,
-                 use_stl: bool = False
+                 use_stl: bool = True
                  ):
         hyperparam_search = False
         super().__init__(stop_after, target, dtype_dict, horizon, ts_analysis,
