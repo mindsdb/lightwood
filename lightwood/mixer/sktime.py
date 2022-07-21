@@ -35,9 +35,9 @@ class SkTime(BaseMixer):
             dtype_dict: Dict[str, str],
             horizon: int,
             ts_analysis: Dict,
-            model_path: str = 'statsforecast.StatsForecastAutoARIMA',
+            model_path: str = None,
             auto_size: bool = True,
-            hyperparam_search: bool = False,
+            hyperparam_search: bool = True,
             use_stl: bool = False
     ):
         """
@@ -71,6 +71,15 @@ class SkTime(BaseMixer):
         self.prepared = False
         self.supports_proba = False
         self.target = target
+        self.name = 'AutoSKTime'
+
+        default_possible_models = [
+            'croston.Croston',
+            'theta.ThetaForecaster',
+            'trend.STLForecaster',
+            'trend.PolynomialTrendForecaster',
+            'naive.NaiveForecaster'
+        ]
 
         self.dtype_dict = dtype_dict
         self.ts_analysis = ts_analysis
@@ -84,10 +93,10 @@ class SkTime(BaseMixer):
         self.models = {}
         self.study = None
         self.hyperparam_dict = {}
-        self.model_path = model_path
+        self.model_path = model_path if model_path else 'trend.STLForecaster'
         self.hyperparam_search = hyperparam_search
         self.trial_error_fn = MeanAbsolutePercentageError(symmetric=True)
-        self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'statsforecast.StatsForecastAutoARIMA']
+        self.possible_models = default_possible_models if not model_path else [model_path]
         self.n_trials = len(self.possible_models)
         self.freq = self._get_freq(self.ts_analysis['deltas']['__default'])
 
@@ -101,7 +110,7 @@ class SkTime(BaseMixer):
 
         Forecaster type can be specified by providing the `model_class` argument in `__init__()`. It can also be determined by hyperparameter optimization based on dev data validation error.
         """  # noqa
-        log.info('Started fitting sktime forecaster for array prediction')
+        log.info(f'Started fitting {self.name} forecaster for array prediction')
 
         if self.hyperparam_search:
             search_space = {'class': self.possible_models}

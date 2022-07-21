@@ -303,6 +303,20 @@ def generate_json_ai(
                                 "stop_after": "$problem_definition.seconds_per_mixer",
                                 "horizon": "$problem_definition.timeseries_settings.horizon",
                             },
+                        },
+                        {
+                            "module": "ETSMixer",
+                            "args": {
+                                "stop_after": "$problem_definition.seconds_per_mixer",
+                                "horizon": "$problem_definition.timeseries_settings.horizon",
+                            },
+                        },
+                        {
+                            "module": "ARIMAMixer",
+                            "args": {
+                                "stop_after": "$problem_definition.seconds_per_mixer",
+                                "horizon": "$problem_definition.timeseries_settings.horizon",
+                            },
                         }
                     ]
                 )
@@ -585,7 +599,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             )
             problem_definition.fit_on_all = False  # takes too long otherwise
 
-        elif mixers[i]["module"] in ("SkTime", "ProphetMixer"):
+        elif mixers[i]["module"] in ("SkTime", "ProphetMixer", "ETSMixer", "ARIMAMixer"):
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
                 "dtype_dict", "$dtype_dict"
