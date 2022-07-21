@@ -31,10 +31,10 @@
    "id": "happy-wheat",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-07-21T16:38:20.746126Z",
-     "iopub.status.busy": "2022-07-21T16:38:20.745637Z",
-     "iopub.status.idle": "2022-07-21T16:38:24.256949Z",
-     "shell.execute_reply": "2022-07-21T16:38:24.256119Z"
+     "iopub.execute_input": "2022-07-21T19:21:49.157236Z",
+     "iopub.status.busy": "2022-07-21T19:21:49.156730Z",
+     "iopub.status.idle": "2022-07-21T19:21:52.696595Z",
+     "shell.execute_reply": "2022-07-21T19:21:52.695820Z"
     }
    },
    "outputs": [
@@ -42,8 +42,8 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2959:No torchvision detected, image helpers not supported.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2944:No torchvision detected, image helpers not supported.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
      ]
     }
    ],
@@ -81,10 +81,10 @@
    "id": "recognized-parish",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-07-21T16:38:24.261281Z",
-     "iopub.status.busy": "2022-07-21T16:38:24.260751Z",
-     "iopub.status.idle": "2022-07-21T16:38:25.305038Z",
-     "shell.execute_reply": "2022-07-21T16:38:25.304268Z"
+     "iopub.execute_input": "2022-07-21T19:21:52.701325Z",
+     "iopub.status.busy": "2022-07-21T19:21:52.700747Z",
+     "iopub.status.idle": "2022-07-21T19:21:53.721030Z",
+     "shell.execute_reply": "2022-07-21T19:21:53.720303Z"
     }
    },
    "outputs": [
@@ -215,10 +215,10 @@
    "id": "chicken-truth",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-07-21T16:38:25.308883Z",
-     "iopub.status.busy": "2022-07-21T16:38:25.308478Z",
-     "iopub.status.idle": "2022-07-21T16:39:09.314112Z",
-     "shell.execute_reply": "2022-07-21T16:39:09.313470Z"
+     "iopub.execute_input": "2022-07-21T19:21:53.724717Z",
+     "iopub.status.busy": "2022-07-21T19:21:53.724329Z",
+     "iopub.status.idle": "2022-07-21T19:22:37.738002Z",
+     "shell.execute_reply": "2022-07-21T19:22:37.737349Z"
     }
    },
    "outputs": [
@@ -226,20 +226,20 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2959:Dropping features: ['url_legal', 'license', 'standard_error']\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Analyzing a sample of 2478\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:from a total population of 2834, this is equivalent to 87.4% of your data.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Infering type for: id\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Doing text detection for column: id\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Column id has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Infering type for: excerpt\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Doing text detection for column: excerpt\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Infering type for: target\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Column target has data type float\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-2959:Column id is an identifier of type \"Hash-like identifier\"\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Dropping features: ['id']\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2944:Dropping features: ['url_legal', 'license', 'standard_error']\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Analyzing a sample of 2478\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:from a total population of 2834, this is equivalent to 87.4% of your data.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Infering type for: id\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Doing text detection for column: id\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Column id has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Infering type for: excerpt\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Doing text detection for column: excerpt\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Infering type for: target\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Column target has data type float\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2944:Column id is an identifier of type \"Hash-like identifier\"\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Dropping features: ['id']\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Finished statistical analysis\u001b[0m\n"
      ]
     }
    ],
@@ -276,10 +276,10 @@
    "id": "designed-condition",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-07-21T16:39:09.317449Z",
-     "iopub.status.busy": "2022-07-21T16:39:09.317208Z",
-     "iopub.status.idle": "2022-07-21T16:39:09.325180Z",
-     "shell.execute_reply": "2022-07-21T16:39:09.323827Z"
+     "iopub.execute_input": "2022-07-21T19:22:37.741282Z",
+     "iopub.status.busy": "2022-07-21T19:22:37.741047Z",
+     "iopub.status.idle": "2022-07-21T19:22:37.748220Z",
+     "shell.execute_reply": "2022-07-21T19:22:37.747589Z"
     }
    },
    "outputs": [
@@ -346,7 +346,7 @@
       "        \"unbias_target\": true,\n",
       "        \"seconds_per_mixer\": 28512.0,\n",
       "        \"seconds_per_encoder\": 85536.0,\n",
-      "        \"expected_additional_time\": 43.99518609046936,\n",
+      "        \"expected_additional_time\": 44.003334283828735,\n",
       "        \"time_aim\": 259200,\n",
       "        \"target_weights\": null,\n",
       "        \"positive_domain\": false,\n",
@@ -428,10 +428,10 @@
    "id": "325d8f1b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-07-21T16:39:09.328549Z",
-     "iopub.status.busy": "2022-07-21T16:39:09.328295Z",
-     "iopub.status.idle": "2022-07-21T16:39:09.334861Z",
-     "shell.execute_reply": "2022-07-21T16:39:09.334174Z"
+     "iopub.execute_input": "2022-07-21T19:22:37.751820Z",
+     "iopub.status.busy": "2022-07-21T19:22:37.751575Z",
+     "iopub.status.idle": "2022-07-21T19:22:37.757641Z",
+     "shell.execute_reply": "2022-07-21T19:22:37.756975Z"
     }
    },
    "outputs": [
@@ -554,10 +554,10 @@
    "id": "f030f8ca",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-07-21T16:39:09.338785Z",
-     "iopub.status.busy": "2022-07-21T16:39:09.338557Z",
-     "iopub.status.idle": "2022-07-21T16:39:09.342060Z",
-     "shell.execute_reply": "2022-07-21T16:39:09.341370Z"
+     "iopub.execute_input": "2022-07-21T19:22:37.761810Z",
+     "iopub.status.busy": "2022-07-21T19:22:37.761584Z",
+     "iopub.status.idle": "2022-07-21T19:22:37.765110Z",
+     "shell.execute_reply": "2022-07-21T19:22:37.764413Z"
     }
    },
    "outputs": [],
@@ -619,10 +619,10 @@
    "id": "floating-patent",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-07-21T16:39:09.345298Z",
-     "iopub.status.busy": "2022-07-21T16:39:09.345071Z",
-     "iopub.status.idle": "2022-07-21T16:39:09.534446Z",
-     "shell.execute_reply": "2022-07-21T16:39:09.533735Z"
+     "iopub.execute_input": "2022-07-21T19:22:37.768564Z",
+     "iopub.status.busy": "2022-07-21T19:22:37.768274Z",
+     "iopub.status.idle": "2022-07-21T19:22:37.963079Z",
+     "shell.execute_reply": "2022-07-21T19:22:37.962291Z"
     }
    },
    "outputs": [
@@ -630,7 +630,7 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2959:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2944:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
      ]
     },
     {
@@ -701,7 +701,7 @@
       "                \"unbias_target\": True,\n",
       "                \"seconds_per_mixer\": 28512.0,\n",
       "                \"seconds_per_encoder\": 85536.0,\n",
-      "                \"expected_additional_time\": 43.99518609046936,\n",
+      "                \"expected_additional_time\": 44.003334283828735,\n",
       "                \"time_aim\": 259200,\n",
       "                \"target_weights\": None,\n",
       "                \"positive_domain\": False,\n",
@@ -1220,10 +1220,10 @@
    "id": "violent-guard",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-07-21T16:39:09.538540Z",
-     "iopub.status.busy": "2022-07-21T16:39:09.537863Z",
-     "iopub.status.idle": "2022-07-21T16:39:09.546101Z",
-     "shell.execute_reply": "2022-07-21T16:39:09.545451Z"
+     "iopub.execute_input": "2022-07-21T19:22:37.967768Z",
+     "iopub.status.busy": "2022-07-21T19:22:37.967519Z",
+     "iopub.status.idle": "2022-07-21T19:22:37.975342Z",
+     "shell.execute_reply": "2022-07-21T19:22:37.974667Z"
     }
    },
    "outputs": [],
@@ -1238,10 +1238,10 @@
    "id": "closing-episode",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-07-21T16:39:09.549175Z",
-     "iopub.status.busy": "2022-07-21T16:39:09.548939Z",
-     "iopub.status.idle": "2022-07-21T16:39:09.709955Z",
-     "shell.execute_reply": "2022-07-21T16:39:09.709286Z"
+     "iopub.execute_input": "2022-07-21T19:22:37.978402Z",
+     "iopub.status.busy": "2022-07-21T19:22:37.978174Z",
+     "iopub.status.idle": "2022-07-21T19:22:38.137869Z",
+     "shell.execute_reply": "2022-07-21T19:22:38.137160Z"
     }
    },
    "outputs": [
@@ -1249,16 +1249,16 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2959:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Dropping features: ['id']\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Finished statistical analysis\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2959: `analyze_data` runtime: 0.05 seconds\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Cleaning the data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Dropping features: ['id']\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Cleaning column =excerpt\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Cleaning column =target\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2959:Converted target into strictly non-negative\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2959: `preprocess` runtime: 0.1 seconds\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2944:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Dropping features: ['id']\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Finished statistical analysis\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2944: `analyze_data` runtime: 0.05 seconds\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Cleaning the data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Dropping features: ['id']\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Cleaning column =excerpt\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Cleaning column =target\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2944:Converted target into strictly non-negative\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2944: `preprocess` runtime: 0.1 seconds\u001b[0m\n"
      ]
     },
     {
@@ -1348,10 +1348,10 @@
    "id": "major-stake",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2022-07-21T16:39:09.713458Z",
-     "iopub.status.busy": "2022-07-21T16:39:09.712976Z",
-     "iopub.status.idle": "2022-07-21T16:39:09.719776Z",
-     "shell.execute_reply": "2022-07-21T16:39:09.719149Z"
+     "iopub.execute_input": "2022-07-21T19:22:38.141664Z",
+     "iopub.status.busy": "2022-07-21T19:22:38.141428Z",
+     "iopub.status.idle": "2022-07-21T19:22:38.147047Z",
+     "shell.execute_reply": "2022-07-21T19:22:38.146338Z"
     }
    },
    "outputs": [
