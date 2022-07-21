@@ -75,7 +75,7 @@ def get_delta(
                     if period:
                         periods[group] = [period]
                     else:
-                        periods[group] = [max_pacf(df, group_combinations, target, tss)[0]]
+                        periods[group] = [max_pacf(df, group_combinations, target, tss)[group][0]]
                 else:
                     deltas[group] = 1.0
                     periods[group] = [1]
