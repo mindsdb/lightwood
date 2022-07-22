@@ -79,7 +79,7 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
     :return: (list of naive residuals, average residual value)
     """  # noqa
     # @TODO: support categorical series as well
-    residuals = np.abs(target_data.values[1:] - target_data.values[0])
+    residuals = np.abs(target_data.values[1:] - target_data.values[0]).flatten()
     scale_factor = np.average(residuals)
     return residuals.tolist(), scale_factor
 
