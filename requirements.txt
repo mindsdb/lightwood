@@ -18,7 +18,7 @@ dataclasses_json >=0.5.4
 autopep8 >=1.5.7
 dill ==0.3.4
 sktime >=0.11.0,<0.12.0
-statsforecast ==0.5.6
+statsforecast ==0.7.0
 torch_optimizer ==0.1.0
 black >=21.9b0
 typing_extensions
