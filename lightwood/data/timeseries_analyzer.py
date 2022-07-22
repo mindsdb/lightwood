@@ -10,7 +10,7 @@ from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
-from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer, max_pacf
+from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer
 from lightwood.helpers.log import log
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 
@@ -36,16 +36,12 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     """  # noqa
     tss = timeseries_settings
     groups = get_ts_groups(data['train'], tss)
-    deltas, periods, freqs = get_delta(data['train'], dtype_dict, groups, tss)
+    deltas, periods, freqs = get_delta(data['train'], dtype_dict, groups, target, tss)
 
     normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
 
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
-        periods = max_pacf(data['train'], groups, target, tss)  # override with PACF output
-        naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'],
-                                                                             target,
-                                                                             tss,
-                                                                             groups)
+        naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'], target, tss, groups)
         differencers = get_differencers(data['train'], target, groups, tss.group_by)
         stl_transforms = get_stls(data['train'], data['dev'], target, periods, groups, tss)
     else:
@@ -71,6 +67,9 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
     Computes forecasting residuals for the naive method (forecasts for time `t` is the value observed at `t-1`).
     Useful for computing MASE forecasting error.
 
+    As per arxiv.org/abs/2203.10716, we resort to a constant forecast based on the last-seen measurement across the entire horizon.
+    By following the original measure, the naive forecaster would have the advantage of knowing the actual values whereas the predictor would not.
+
     Note: method assumes predictions are all for the same group combination. For a dataframe that contains multiple
      series, use `get_grouped_naive_resiudals`.
 
@@ -80,7 +79,7 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
     :return: (list of naive residuals, average residual value)
     """  # noqa
     # @TODO: support categorical series as well
-    residuals = target_data.rolling(window=m + 1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:].values.flatten()
+    residuals = np.abs(target_data.values[1:] - target_data.values[0]).flatten()
     scale_factor = np.average(residuals)
     return residuals.tolist(), scale_factor
 

@@ -69,6 +69,6 @@ class TestMixerSelection(unittest.TestCase):
                 'window': 5
             }
         }
-        expected_mixers = ['NeuralTs', 'LightGBMArray', 'SkTime']
+        expected_mixers = ['NeuralTs', 'LightGBMArray', 'SkTime', 'ARIMAMixer', 'ETSMixer']
         mixers = self.get_mixers(df, target, prob_kwargs=prob_kwargs)
         self.assertEqual(set(mixers), set(expected_mixers))
