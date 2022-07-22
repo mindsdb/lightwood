@@ -60,11 +60,12 @@ def transform_timeseries(
     subsets = []
     for group in groups:
         if (tss.group_by and group != '__default') or not tss.group_by:
-            if periods[group] == 0:
-                raise Exception(
-                    f"Partition is not valid, faulty group {group}. Please make sure you group by a set of columns that ensures unique measurements for each grouping through time.")  # noqa
             idxs, subset = get_group_matches(data, group, tss.group_by)
             if subset.shape[0] > 0:
+                if periods[group] == 0 and subset.shape[0] > 1:
+                    raise Exception(
+                        f"Partition is not valid, faulty group {group}. Please make sure you group by a set of columns that ensures unique measurements for each grouping through time.")  # noqa
+
                 index = pd.to_datetime(subset[oby_col], unit='s')
                 subset.index = pd.date_range(start=index.iloc[0], freq=freqs[group], periods=len(subset))
                 subset['__mdb_inferred_freq'] = subset.index.freq   # sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa
