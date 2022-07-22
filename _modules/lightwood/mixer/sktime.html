@@ -208,9 +208,9 @@
             <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
             <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
             <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
-            <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;statsforecast.StatsForecastAutoARIMA&#39;</span><span class="p">,</span>
+            <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">auto_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="n">hyperparam_search</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">hyperparam_search</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">use_stl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -244,6 +244,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">prepared</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;AutoSKTime&#39;</span>
+
+        <span class="n">default_possible_models</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;croston.Croston&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;theta.ThetaForecaster&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;trend.STLForecaster&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;trend.PolynomialTrendForecaster&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;naive.NaiveForecaster&#39;</span>
+        <span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype_dict</span> <span class="o">=</span> <span class="n">dtype_dict</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span> <span class="o">=</span> <span class="n">ts_analysis</span>
@@ -257,10 +266,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_dict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">=</span> <span class="n">model_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">=</span> <span class="n">model_path</span> <span class="k">if</span> <span class="n">model_path</span> <span class="k">else</span> <span class="s1">&#39;trend.STLForecaster&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_search</span> <span class="o">=</span> <span class="n">hyperparam_search</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trial_error_fn</span> <span class="o">=</span> <span class="n">MeanAbsolutePercentageError</span><span class="p">(</span><span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ets.AutoETS&#39;</span><span class="p">,</span> <span class="s1">&#39;theta.ThetaForecaster&#39;</span><span class="p">,</span> <span class="s1">&#39;statsforecast.StatsForecastAutoARIMA&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span> <span class="o">=</span> <span class="n">default_possible_models</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">model_path</span> <span class="k">else</span> <span class="p">[</span><span class="n">model_path</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_freq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;deltas&#39;</span><span class="p">][</span><span class="s1">&#39;__default&#39;</span><span class="p">])</span>
 
@@ -274,7 +283,7 @@
 
 <span class="sd">        Forecaster type can be specified by providing the `model_class` argument in `__init__()`. It can also be determined by hyperparameter optimization based on dev data validation error.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Started fitting sktime forecaster for array prediction&#39;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Started fitting </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> forecaster for array prediction&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_search</span><span class="p">:</span>
             <span class="n">search_space</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span><span class="p">}</span>
@@ -310,11 +319,12 @@
             <span class="n">model_class</span> <span class="o">=</span> <span class="n">AutoARIMA</span>  <span class="c1"># use AutoARIMA when the provided class does not exist</span>
 
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">()</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;sp&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;periods&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;__default&#39;</span><span class="p">),</span>  <span class="c1"># seasonality period</span>
-                <span class="s1">&#39;suppress_warnings&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                                  <span class="c1"># ignore warnings if possible</span>
-                <span class="s1">&#39;error_action&#39;</span><span class="p">:</span> <span class="s1">&#39;raise&#39;</span><span class="p">,</span>                                    <span class="c1"># avoids fit() failing silently</span>
+                <span class="s1">&#39;sp&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;periods&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;__default&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>   <span class="c1"># seasonality period</span>
+                <span class="s1">&#39;suppress_warnings&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>                                      <span class="c1"># ignore warnings if possible</span>
+                <span class="s1">&#39;error_action&#39;</span><span class="p">:</span> <span class="s1">&#39;raise&#39;</span><span class="p">,</span>                                        <span class="c1"># avoids fit() failing silently</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">==</span> <span class="s1">&#39;fbprophet.Prophet&#39;</span><span class="p">:</span>
                 <span class="n">options</span><span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span>
@@ -324,7 +334,7 @@
 
             <span class="n">model_pipeline</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;forecaster&quot;</span><span class="p">,</span> <span class="n">model_class</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))]</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_stl</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_stl</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;stl_transforms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
                 <span class="n">model_pipeline</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;detrender&quot;</span><span class="p">,</span>
                                           <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;stl_transforms&#39;</span><span class="p">][</span><span class="n">group</span><span class="p">][</span><span class="s2">&quot;transformer&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detrender</span><span class="p">))</span>
                 <span class="n">model_pipeline</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;deseasonalizer&quot;</span><span class="p">,</span>
@@ -353,7 +363,7 @@
 
                 <span class="c1"># if data is huge, filter out old records for quicker fitting</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_size</span><span class="p">:</span>
-                    <span class="n">cutoff</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;sp&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_factor</span><span class="p">))</span>
+                    <span class="n">cutoff</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;sp&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_factor</span><span class="p">))</span>
                     <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="n">cutoff</span><span class="p">:]</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">fh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">)</span>

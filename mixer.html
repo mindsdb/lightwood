@@ -103,11 +103,13 @@
 <li class="toctree-l1"><a class="reference internal" href="data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.ARIMAMixer">ARIMAMixer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#mixer.BaseMixer">BaseMixer</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mixer.BaseMixer.fit">fit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mixer.BaseMixer.partial_fit">partial_fit</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.ETSMixer">ETSMixer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#mixer.LightGBM">LightGBM</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mixer.LightGBM.fit">fit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mixer.LightGBM.partial_fit">partial_fit</a></li>
@@ -250,6 +252,39 @@
 <h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code><a class="headerlink" href="#mixers" title="Permalink to this headline">¶</a></h1>
 <p>Mixers learn to map encoded representation, they are the core of lightwood’s automl.</p>
 <span class="target" id="module-mixer"></span><dl class="py class">
+<dt class="sig sig-object py" id="mixer.ARIMAMixer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">ARIMAMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'statsforecast.StatsForecastAutoARIMA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparam_search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/arima.html#ARIMAMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.ARIMAMixer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
+to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with
+respect to the last seen data point at training time.</p>
+<p>Due to this, the mixer tries to “fit_on_all” so that the latest point in the validation split marks the
+difference between training data and where forecasts will start. In practice, you need to specify how much
+time has passed since the aforementioned timestamp for correct forecasts. By default, it is assumed that</p>
+<blockquote>
+<div><p>predictions are for the very next timestamp post-training.</p>
+</div></blockquote>
+<p>If the task has groups (i.e. ‘TimeseriesSettings.group_by’ is not empty), the mixer will spawn one forecaster
+object per each different group observed at training time, plus an additional default forecaster fit with all data.</p>
+<p>There is an optuna-based automatic hyperparameter search. For now, it considers selecting the forecaster type
+based on the global SMAPE error across all groups.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – column to forecast.</p></li>
+<li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dtypes of all columns in the data.</p></li>
+<li><p><strong>horizon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – length of forecasted horizon.</p></li>
+<li><p><strong>ts_analysis</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – dictionary with miscellaneous time series info, as generated by ‘lightwood.data.timeseries_analyzer’.</p></li>
+<li><p><strong>model_path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – sktime forecaster to use as underlying model(s). Should be a string with format “$module.$class’ where ‘$module’ is inside <cite>sktime.forecasting</cite>. Default is ‘arima.AutoARIMA’.</p></li>
+<li><p><strong>hyperparam_search</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – bool that indicates whether to perform the hyperparameter tuning or not.</p></li>
+<li><p><strong>auto_size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.</p></li>
+<li><p><strong>use_stl</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="mixer.BaseMixer">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">BaseMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/base.html#BaseMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.BaseMixer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for all mixers.</p>
@@ -305,6 +340,39 @@
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mixer.ETSMixer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">ETSMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ets.AutoETS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparam_search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/ets.html#ETSMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.ETSMixer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
+to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with
+respect to the last seen data point at training time.</p>
+<p>Due to this, the mixer tries to “fit_on_all” so that the latest point in the validation split marks the
+difference between training data and where forecasts will start. In practice, you need to specify how much
+time has passed since the aforementioned timestamp for correct forecasts. By default, it is assumed that</p>
+<blockquote>
+<div><p>predictions are for the very next timestamp post-training.</p>
+</div></blockquote>
+<p>If the task has groups (i.e. ‘TimeseriesSettings.group_by’ is not empty), the mixer will spawn one forecaster
+object per each different group observed at training time, plus an additional default forecaster fit with all data.</p>
+<p>There is an optuna-based automatic hyperparameter search. For now, it considers selecting the forecaster type
+based on the global SMAPE error across all groups.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – column to forecast.</p></li>
+<li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dtypes of all columns in the data.</p></li>
+<li><p><strong>horizon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – length of forecasted horizon.</p></li>
+<li><p><strong>ts_analysis</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – dictionary with miscellaneous time series info, as generated by ‘lightwood.data.timeseries_analyzer’.</p></li>
+<li><p><strong>model_path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – sktime forecaster to use as underlying model(s). Should be a string with format “$module.$class’ where ‘$module’ is inside <cite>sktime.forecasting</cite>. Default is ‘arima.AutoARIMA’.</p></li>
+<li><p><strong>hyperparam_search</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – bool that indicates whether to perform the hyperparameter tuning or not.</p></li>
+<li><p><strong>auto_size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.</p></li>
+<li><p><strong>use_stl</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">
@@ -646,7 +714,7 @@ between the predicted target value and the observed true value.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.SkTime">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">SkTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'statsforecast.StatsForecastAutoARIMA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparam_search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/sktime.html#SkTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.SkTime" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">SkTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparam_search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/sktime.html#SkTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.SkTime" title="Permalink to this definition">¶</a></dt>
 <dd><p>This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
 to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with
 respect to the last seen data point at training time.</p>
@@ -668,7 +736,7 @@ based on the global SMAPE error across all groups.</p>
 <li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dtypes of all columns in the data.</p></li>
 <li><p><strong>horizon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – length of forecasted horizon.</p></li>
 <li><p><strong>ts_analysis</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – dictionary with miscellaneous time series info, as generated by ‘lightwood.data.timeseries_analyzer’.</p></li>
-<li><p><strong>model_path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – sktime forecaster to use as underlying model(s). Should be a string with format “$module.$class’ where ‘$module’ is inside <cite>sktime.forecasting</cite>. Default is ‘arima.AutoARIMA’.</p></li>
+<li><p><strong>model_path</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – sktime forecaster to use as underlying model(s). Should be a string with format “$module.$class’ where ‘$module’ is inside <cite>sktime.forecasting</cite>. Default is ‘arima.AutoARIMA’.</p></li>
 <li><p><strong>hyperparam_search</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – bool that indicates whether to perform the hyperparameter tuning or not.</p></li>
 <li><p><strong>auto_size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.</p></li>
 <li><p><strong>use_stl</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.</p></li>
