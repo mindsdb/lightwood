@@ -586,8 +586,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-3455:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <p>Let’s see how this object has been populated. <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> is a Python <code class="docutils literal notranslate"><span class="pre">dataclass</span></code>, so it comes with some convenient tools to achieve this:</p>
@@ -645,22 +645,22 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-3455:Analyzing a sample of 222</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:from a total population of 225, this is equivalent to 98.7% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Infering type for: Population</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Column Population has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Infering type for: Area (sq. mi.)</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Column Area (sq. mi.) has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Infering type for: Pop. Density </span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Column Pop. Density  has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Infering type for: GDP ($ per capita)</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Column GDP ($ per capita) has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Infering type for: Literacy (%)</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Column Literacy (%) has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Infering type for: Infant mortality </span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Column Infant mortality  has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Infering type for: Development Index</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Column Development Index has data type categorical</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Analyzing a sample of 222</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:from a total population of 225, this is equivalent to 98.7% of your data.</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Infering type for: Population</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Column Population has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Infering type for: Area (sq. mi.)</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Column Area (sq. mi.) has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Infering type for: Pop. Density </span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Column Pop. Density  has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Infering type for: GDP ($ per capita)</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Column GDP ($ per capita) has data type integer</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Infering type for: Literacy (%)</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Column Literacy (%) has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Infering type for: Infant mortality </span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Column Infant mortality  has data type float</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Infering type for: Development Index</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Column Development Index has data type categorical</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -722,8 +722,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-3455:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-3455:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-3643:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </div>
@@ -796,13 +796,20 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;Population&#39;: 0.0,
- &#39;Area (sq. mi.)&#39;: 0.0,
- &#39;Pop. Density &#39;: 0.0,
- &#39;GDP ($ per capita)&#39;: 0.0,
- &#39;Literacy (%)&#39;: 0.0,
- &#39;Infant mortality &#39;: 0.0,
- &#39;Development Index&#39;: 0.0}
+{&#39;Population&#39;: {&#39;missing&#39;: 0.0,
+  &#39;description&#39;: &#39;Proportion of missing values for the column. Columns with high % of missing values may not be as useful for modelling purposes.&#39;},
+ &#39;Area (sq. mi.)&#39;: {&#39;missing&#39;: 0.0,
+  &#39;description&#39;: &#39;Proportion of missing values for the column. Columns with high % of missing values may not be as useful for modelling purposes.&#39;},
+ &#39;Pop. Density &#39;: {&#39;missing&#39;: 0.0,
+  &#39;description&#39;: &#39;Proportion of missing values for the column. Columns with high % of missing values may not be as useful for modelling purposes.&#39;},
+ &#39;GDP ($ per capita)&#39;: {&#39;missing&#39;: 0.0,
+  &#39;description&#39;: &#39;Proportion of missing values for the column. Columns with high % of missing values may not be as useful for modelling purposes.&#39;},
+ &#39;Literacy (%)&#39;: {&#39;missing&#39;: 0.0,
+  &#39;description&#39;: &#39;Proportion of missing values for the column. Columns with high % of missing values may not be as useful for modelling purposes.&#39;},
+ &#39;Infant mortality &#39;: {&#39;missing&#39;: 0.0,
+  &#39;description&#39;: &#39;Proportion of missing values for the column. Columns with high % of missing values may not be as useful for modelling purposes.&#39;},
+ &#39;Development Index&#39;: {&#39;missing&#39;: 0.0,
+  &#39;description&#39;: &#39;Proportion of missing values for the column. Columns with high % of missing values may not be as useful for modelling purposes.&#39;}}
 </pre></div></div>
 </div>
 <p>Seemingly not!</p>
