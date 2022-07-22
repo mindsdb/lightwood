@@ -90,7 +90,10 @@ def statistical_analysis(data: pd.DataFrame,
     missing = {}
     distinct = {}
     for col in columns:
-        missing[col] = len([x for x in df[col] if x is None]) / len(df[col]) if len(df[col]) else 0
+        missing[col] = {
+            'missing': len([x for x in df[col] if x is None]) / len(df[col]) if len(df[col]) else 0,
+            'description': 'Proportion of missing values for the column. Columns with high % of missing values may not be as useful for modelling purposes.'  # noqa
+        }
         distinct[col] = len(set([str(x) for x in df[col]])) / len(df[col]) if len(df[col]) else 0
 
     nr_rows = len(df)
