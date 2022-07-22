@@ -157,7 +157,7 @@ def statistical_analysis(data: pd.DataFrame,
         S, biased_buckets = compute_entropy_biased_buckets(histograms[col])
         bias[col] = {
             'entropy': S,
-            'description': """Under the assumption of uniformly distributed data (i.e., same probability for Head or Tails on a coin flip) mindsdb tries to detect potential divergences from such case, and it calls this "potential bias". Thus by our data having any potential bias mindsdb means any divergence from all categories having the same probability of being selected.""", # noqa
+            'description': """"Potential bias" is flagged when data does not distribute normally or uniformly, likely over-representing or under-representing some values. This may be normal, hence bias is only "potential".""", # noqa
             'biased_buckets': biased_buckets
         }
 
