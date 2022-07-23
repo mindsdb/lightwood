@@ -29,13 +29,11 @@ def get_group_matches(
     if combination == '__default':
         return list(data.index), data
     else:
-        idxs = set(data.index.values)
         subset = data
         for val, col in zip(combination, group_columns):
             subset = subset[subset[col] == val]
-            idxs = idxs.intersection(subset.index.values)
-        if len(idxs) > 0:
-            return list(data.loc[idxs].index), data.loc[idxs]
+        if len(subset) > 0:
+            return list(subset.index), subset
         else:
             return [], pd.DataFrame()
 
@@ -106,7 +104,7 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss) -> pd
         if tss.horizon == 1:
             timestamps = timestamps[0]  # preserves original input format if horizon == 1
 
-        df.at[idx, f'order_{col}'] = timestamps
+        df[f'order_{col}'].iloc[idx] = timestamps
     return df[f'order_{col}']
 
 
@@ -123,12 +121,12 @@ def add_tn_num_conf_bounds(data: pd.DataFrame, tss_args):
         error_increase = [row['confidence']] + \
                          [row['confidence'] * np.log(np.e + t / 2)  # offset by e so that y intercept is 1
                           for t in range(1, tss_args.horizon)]
-        data.at[idx, 'confidence'] = [row['confidence'] for _ in range(tss_args.horizon)]
+        data['confidence'].iloc[idx] = [row['confidence'] for _ in range(tss_args.horizon)]
 
         preds = row['prediction']
         width = row['upper'] - row['lower']
-        data.at[idx, 'lower'] = [pred - (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
-        data.at[idx, 'upper'] = [pred + (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
+        data['lower'].iloc[idx] = [pred - (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
+        data['upper'].iloc[idx] = [pred + (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
 
     return data
 
@@ -136,7 +134,7 @@ def add_tn_num_conf_bounds(data: pd.DataFrame, tss_args):
 def add_tn_cat_conf_bounds(data: pd.DataFrame, tss_args):
     data['confidence'] = data['confidence'].astype(object)
     for idx, row in data.iterrows():
-        data.at[idx, 'confidence'] = [row['confidence'] for _ in range(tss_args.horizon)]
+        data['confidence'].iloc[idx] = [row['confidence'] for _ in range(tss_args.horizon)]
     return data
 
 
