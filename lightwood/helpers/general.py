@@ -29,7 +29,7 @@ def evaluate_accuracy(data: pd.DataFrame,
     score_dict = {}
 
     for accuracy_function_str in accuracy_functions:
-        if 'array_accuracy' in accuracy_function_str:
+        if 'array_accuracy' in accuracy_function_str or accuracy_function_str in ('bounded_ts_accuracy', ):
             if ts_analysis is None or not ts_analysis['tss'].is_timeseries:
                 # normal array, needs to be expanded
                 cols = [target]
