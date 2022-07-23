@@ -1,4 +1,5 @@
 import importlib
+from copy import deepcopy
 from typing import List, Dict, Optional
 import numpy as np
 import pandas as pd
@@ -47,7 +48,7 @@ def evaluate_accuracy(data: pd.DataFrame,
             elif accuracy_function_str == 'evaluate_cat_array_accuracy':
                 acc_fn = evaluate_cat_array_accuracy
             else:
-                acc_fn = bounded_evaluate_array_accuracy
+                acc_fn = bounded_evaluate_num_array_accuracy
             score_dict[accuracy_function_str] = acc_fn(true_values,
                                                        predictions,
                                                        data=data[cols],
@@ -204,7 +205,7 @@ def evaluate_cat_array_accuracy(
                                    base_acc_fn=balanced_accuracy_score)
 
 
-def bounded_evaluate_array_accuracy(
+def bounded_evaluate_num_array_accuracy(
         true_values: pd.Series,
         predictions: pd.Series,
         **kwargs
@@ -216,9 +217,11 @@ def bounded_evaluate_array_accuracy(
     For worse-than-naive, it scales linearly (with a factor).
     For better-than-naive, we fix 10 as 0.99, and scaled-logarithms (with 10 and 1e4 cutoffs as respective bases) are used to squash all remaining preimages to values between 0.5 and 1.0.
     """  # noqa
-    result = evaluate_array_accuracy(np.array(true_values),
-                                     np.array(predictions),
-                                     **kwargs)
+    true_values = deepcopy(true_values)
+    predictions = deepcopy(predictions)
+    result = evaluate_num_array_accuracy(true_values,
+                                         predictions,
+                                         **kwargs)
     if 10 < result <= 1e4:
         step_base = 0.99
         return step_base + (np.log(result) / np.log(1e4)) * (1 - step_base)
