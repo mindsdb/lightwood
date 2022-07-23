@@ -21,8 +21,8 @@ class AccStats(BaseAnalysisBlock):
         ns = SimpleNamespace(**kwargs)
 
         if ns.accuracy_functions == ['evaluate_array_accuracy'] and ns.ts_analysis.get('ts_naive_mae', {}):
-            accuracy_functions = ['bounded_evaluate_num_array_accuracy']
-            log.info("AccStats will bound the array accuracy for reporting purposes. Check `bounded_evaluate_num_array_accuracy` for a description of the bounding procedure.")  # noqa
+            accuracy_functions = ['bounded_ts_accuracy']
+            log.info("AccStats will bound the array accuracy for reporting purposes. Check `bounded_ts_accuracy` for a description of the bounding procedure.")  # noqa
         else:
             accuracy_functions = ns.accuracy_functions
 

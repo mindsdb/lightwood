@@ -375,7 +375,7 @@ def generate_json_ai(
     elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ["balanced_accuracy_score"]
     elif output_dtype in (dtype.num_array, dtype.num_tsarray):
-        accuracy_functions = ["bounded_evaluate_num_array_accuracy"]
+        accuracy_functions = ["bounded_ts_accuracy"]
     elif output_dtype in (dtype.cat_array, dtype.cat_tsarray):
         accuracy_functions = ["evaluate_cat_array_accuracy"]
     else:
@@ -385,7 +385,7 @@ def generate_json_ai(
 
     if is_ts:
         if output_dtype in [dtype.integer, dtype.float]:
-            accuracy_functions = ["bounded_evaluate_num_array_accuracy"]  # forces this acc fn for t+1 time series forecasters  # noqa
+            accuracy_functions = ["bounded_ts_accuracy"]  # forces this acc fn for t+1 time series forecasters  # noqa
 
         if output_dtype in (dtype.integer, dtype.float, dtype.num_tsarray):
             imputers.append({"module": "NumericalImputer",
