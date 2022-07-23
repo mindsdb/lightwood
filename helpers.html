@@ -109,7 +109,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#helpers.LightwoodAutocast">LightwoodAutocast</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.add_tn_num_conf_bounds">add_tn_num_conf_bounds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.analyze_sentences">analyze_sentences</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.bounded_evaluate_array_accuracy">bounded_evaluate_array_accuracy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#helpers.bounded_ts_accuracy">bounded_ts_accuracy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.cast_string_to_python_type">cast_string_to_python_type</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.evaluate_accuracy">evaluate_accuracy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.evaluate_array_accuracy">evaluate_array_accuracy</a></li>
@@ -257,8 +257,8 @@ dict: nr_words_dist</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="helpers.bounded_evaluate_array_accuracy">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">bounded_evaluate_array_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#bounded_evaluate_array_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.bounded_evaluate_array_accuracy" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="helpers.bounded_ts_accuracy">
+<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">bounded_ts_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#bounded_ts_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.bounded_ts_accuracy" title="Permalink to this definition">¶</a></dt>
 <dd><p>The normal MASE accuracy inside <code class="docutils literal notranslate"><span class="pre">evaluate_array_accuracy</span></code> has a break point of 1.0: smaller values mean a naive forecast is better, and bigger values imply the forecast is better than a naive one. It is upper-bounded by 1e4.</p>
 <p>This 0-1 bounded MASE variant scores the 1.0 breakpoint to be equal to 0.5.
 For worse-than-naive, it scales linearly (with a factor).

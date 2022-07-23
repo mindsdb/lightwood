@@ -194,8 +194,8 @@
         <span class="n">ns</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ns</span><span class="o">.</span><span class="n">accuracy_functions</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;evaluate_array_accuracy&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ns</span><span class="o">.</span><span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ts_naive_mae&#39;</span><span class="p">,</span> <span class="p">{}):</span>
-            <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;bounded_evaluate_array_accuracy&#39;</span><span class="p">]</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;AccStats will bound the array accuracy for reporting purposes. Check `bounded_evaluate_array_accuracy` for a description of the bounding procedure.&quot;</span><span class="p">)</span>  <span class="c1"># noqa</span>
+            <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;bounded_ts_accuracy&#39;</span><span class="p">]</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;AccStats will bound the array accuracy for reporting purposes. Check `bounded_ts_accuracy` for a description of the bounding procedure.&quot;</span><span class="p">)</span>  <span class="c1"># noqa</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="n">ns</span><span class="o">.</span><span class="n">accuracy_functions</span>
 
