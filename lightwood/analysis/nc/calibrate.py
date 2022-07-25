@@ -375,10 +375,12 @@ class ICP(BaseAnalysisBlock):
 
                 # anomaly detection
                 if is_anomaly_task:
-                    anomalies = get_anomalies(row_insights,
-                                              ns.data[ns.target_name],
-                                              cooldown=ns.pred_args.anomaly_cooldown)
-                    row_insights['anomaly'] = anomalies
+                    row_insights['anomaly'] = None
+                    if ns.target_name in ns.data.columns:
+                        anomalies = get_anomalies(row_insights,
+                                                  ns.data[ns.target_name],
+                                                  cooldown=ns.pred_args.anomaly_cooldown)
+                        row_insights['anomaly'] = anomalies
 
             if ns.tss.is_timeseries and ns.tss.horizon > 1:
                 if is_numerical:
