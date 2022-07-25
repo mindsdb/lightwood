@@ -1,6 +1,6 @@
 from typing import Dict
 from functools import partial
-import multiprocessing as mp
+from ray.util.multiprocessing import Pool
 
 import numpy as np
 import pandas as pd
@@ -139,7 +139,7 @@ def transform_timeseries(
         # @TODO: restore possibility to override this with args
         nr_procs = get_nr_procs(original_df)
         log.info(f'Using {nr_procs} processes to reshape.')
-        pool = mp.Pool(processes=nr_procs)
+        pool = Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
         df_arr = pool.map(partial(_ts_to_obj, historical_columns=[oby] + tss.historical_columns), df_arr)
         df_arr = pool.map(partial(_ts_order_col_to_cell_lists,

@@ -2,6 +2,7 @@ import os
 from typing import Dict
 import psutil
 import multiprocessing as mp
+from ray.util.multiprocessing import Pool
 from lightwood.helpers.log import log
 
 
@@ -39,7 +40,7 @@ def mut_method_call(object_dict: Dict[str, tuple]) -> Dict[str, object]:
     return_dict = manager.dict()
 
     nr_procs = get_nr_procs()
-    pool = mp.Pool(processes=nr_procs)
+    pool = Pool(processes=nr_procs)
     promise_arr = []
     for name, data in object_dict.items():
         promise = pool.apply_async(func=run_mut_method, args=(data[0], data[1], data[2], name))

@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 import imghdr
 import sndhdr
-import multiprocessing as mp
+from ray.util.multiprocessing import Pool
 from lightwood.api.types import TypeInformation
 from lightwood.api.dtype import dtype
 from lightwood.helpers.parallelism import get_nr_procs
@@ -380,7 +380,7 @@ def infer_types(data: pd.DataFrame, pct_invalid: float, seed_nr: int = 420) -> T
     nr_procs = get_nr_procs(data)
     if nr_procs > 1:
         log.info(f'Using {nr_procs} processes to deduct types.')
-        pool = mp.Pool(processes=nr_procs)
+        pool = Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
         answer_arr = pool.map(get_column_data_type, [
             (sample_df[x].dropna(), data[x], x, pct_invalid) for x in sample_df.columns.values
@@ -409,7 +409,7 @@ def infer_types(data: pd.DataFrame, pct_invalid: float, seed_nr: int = 420) -> T
         }
 
     if nr_procs > 1:
-        pool = mp.Pool(processes=nr_procs)
+        pool = Pool(processes=nr_procs)
         answer_arr = pool.map(get_identifier_description_mp, [
             (data[x], x, type_information.dtypes[x])
             for x in sample_df.columns.values

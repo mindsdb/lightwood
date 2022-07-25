@@ -26,3 +26,4 @@ colorlog ==6.5.0
 statsmodels >=0.12.0
 neuralforecast ==0.1.0
 pytorch-lightning>=1.3.0
+ray>=1.8.0
