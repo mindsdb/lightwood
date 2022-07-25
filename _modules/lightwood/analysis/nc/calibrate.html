@@ -548,10 +548,12 @@
 
                 <span class="c1"># anomaly detection</span>
                 <span class="k">if</span> <span class="n">is_anomaly_task</span><span class="p">:</span>
-                    <span class="n">anomalies</span> <span class="o">=</span> <span class="n">get_anomalies</span><span class="p">(</span><span class="n">row_insights</span><span class="p">,</span>
-                                              <span class="n">ns</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">ns</span><span class="o">.</span><span class="n">target_name</span><span class="p">],</span>
-                                              <span class="n">cooldown</span><span class="o">=</span><span class="n">ns</span><span class="o">.</span><span class="n">pred_args</span><span class="o">.</span><span class="n">anomaly_cooldown</span><span class="p">)</span>
-                    <span class="n">row_insights</span><span class="p">[</span><span class="s1">&#39;anomaly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalies</span>
+                    <span class="n">row_insights</span><span class="p">[</span><span class="s1">&#39;anomaly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">ns</span><span class="o">.</span><span class="n">target_name</span> <span class="ow">in</span> <span class="n">ns</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                        <span class="n">anomalies</span> <span class="o">=</span> <span class="n">get_anomalies</span><span class="p">(</span><span class="n">row_insights</span><span class="p">,</span>
+                                                  <span class="n">ns</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">ns</span><span class="o">.</span><span class="n">target_name</span><span class="p">],</span>
+                                                  <span class="n">cooldown</span><span class="o">=</span><span class="n">ns</span><span class="o">.</span><span class="n">pred_args</span><span class="o">.</span><span class="n">anomaly_cooldown</span><span class="p">)</span>
+                        <span class="n">row_insights</span><span class="p">[</span><span class="s1">&#39;anomaly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalies</span>
 
             <span class="k">if</span> <span class="n">ns</span><span class="o">.</span><span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">and</span> <span class="n">ns</span><span class="o">.</span><span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">is_numerical</span><span class="p">:</span>
