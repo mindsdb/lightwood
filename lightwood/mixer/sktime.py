@@ -146,7 +146,6 @@ class SkTime(BaseMixer):
             model_class = AutoARIMA  # use AutoARIMA when the provided class does not exist
 
         for group in self.ts_analysis['group_combinations']:
-            print()
             kwargs = {}
             options = {
                 'sp': self.ts_analysis['periods'].get(group, '__default')[0],   # seasonality period
