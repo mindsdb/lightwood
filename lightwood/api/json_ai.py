@@ -303,6 +303,20 @@ def generate_json_ai(
                                 "stop_after": "$problem_definition.seconds_per_mixer",
                                 "horizon": "$problem_definition.timeseries_settings.horizon",
                             },
+                        },
+                        {
+                            "module": "ETSMixer",
+                            "args": {
+                                "stop_after": "$problem_definition.seconds_per_mixer",
+                                "horizon": "$problem_definition.timeseries_settings.horizon",
+                            },
+                        },
+                        {
+                            "module": "ARIMAMixer",
+                            "args": {
+                                "stop_after": "$problem_definition.seconds_per_mixer",
+                                "horizon": "$problem_definition.timeseries_settings.horizon",
+                            },
                         }
                     ]
                 )
@@ -361,7 +375,7 @@ def generate_json_ai(
     elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ["balanced_accuracy_score"]
     elif output_dtype in (dtype.num_array, dtype.num_tsarray):
-        accuracy_functions = ["evaluate_num_array_accuracy"]
+        accuracy_functions = ["bounded_ts_accuracy"]
     elif output_dtype in (dtype.cat_array, dtype.cat_tsarray):
         accuracy_functions = ["evaluate_cat_array_accuracy"]
     else:
@@ -371,7 +385,7 @@ def generate_json_ai(
 
     if is_ts:
         if output_dtype in [dtype.integer, dtype.float]:
-            accuracy_functions = ["evaluate_num_array_accuracy"]  # forces this acc fn for t+1 time series forecasters
+            accuracy_functions = ["bounded_ts_accuracy"]  # forces this acc fn for t+1 time series forecasters  # noqa
 
         if output_dtype in (dtype.integer, dtype.float, dtype.num_tsarray):
             imputers.append({"module": "NumericalImputer",
@@ -585,7 +599,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             )
             problem_definition.fit_on_all = False  # takes too long otherwise
 
-        elif mixers[i]["module"] in ("SkTime", "ProphetMixer"):
+        elif mixers[i]["module"] in ("SkTime", "ProphetMixer", "ETSMixer", "ARIMAMixer"):
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
                 "dtype_dict", "$dtype_dict"
