@@ -319,7 +319,6 @@
             <span class="n">model_class</span> <span class="o">=</span> <span class="n">AutoARIMA</span>  <span class="c1"># use AutoARIMA when the provided class does not exist</span>
 
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">]:</span>
-            <span class="nb">print</span><span class="p">()</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s1">&#39;sp&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;periods&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;__default&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>   <span class="c1"># seasonality period</span>
