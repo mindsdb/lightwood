@@ -594,6 +594,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
         elif mixers[i]["module"] == "NHitsMixer":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
+            mixers[i]["args"]["window"] = "$problem_definition.timeseries_settings.window"
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
                 "ts_analysis", "$ts_analysis"
             )
