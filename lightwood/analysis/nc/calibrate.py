@@ -10,7 +10,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.api.dtype import dtype
 from lightwood.api.types import PredictionArguments
-from lightwood.helpers.ts import add_tn_num_conf_bounds, add_tn_cat_conf_bounds
+from lightwood.helpers.ts import add_tn_cat_conf_bounds
 
 from lightwood.data import EncodedDs
 from lightwood.analysis.base import BaseAnalysisBlock
