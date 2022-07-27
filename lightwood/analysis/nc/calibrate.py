@@ -143,7 +143,7 @@ class ICP(BaseAnalysisBlock):
 
             # calibrate ICP
             icp_df = deepcopy(ns.data)
-            icp_df, y = clean_df(icp_df, ns.target, ns.is_classification, output.get('label_encoders', None))
+            icp_df, y = clean_df(icp_df, ns, output.get('label_encoders', None))
             output['icp']['__default'].index = icp_df.columns
             output['icp']['__default'].calibrate(icp_df.values, y)
 
