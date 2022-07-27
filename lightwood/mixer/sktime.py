@@ -1,5 +1,6 @@
 import inspect
 import importlib
+from copy import deepcopy
 from datetime import datetime
 from itertools import product
 from typing import Dict, Union
@@ -7,10 +8,7 @@ from typing import Dict, Union
 import optuna
 import numpy as np
 import pandas as pd
-from sktime.forecasting.trend import PolynomialTrendForecaster
 from sktime.forecasting.compose import TransformedTargetForecaster
-from sktime.transformations.series.detrend import ConditionalDeseasonalizer
-from sktime.transformations.series.detrend import Detrender
 from sktime.forecasting.base import ForecastingHorizon, BaseForecaster
 from sktime.performance_metrics.forecasting import MeanAbsolutePercentageError
 from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
@@ -18,7 +16,7 @@ from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
-from lightwood.helpers.general import get_group_matches
+from lightwood.helpers.ts import get_group_matches
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
@@ -37,10 +35,11 @@ class SkTime(BaseMixer):
             dtype_dict: Dict[str, str],
             horizon: int,
             ts_analysis: Dict,
-            model_path: str = 'statsforecast.StatsForecastAutoARIMA',
+            model_path: str = None,
             auto_size: bool = True,
-            hyperparam_search: bool = False,
-            target_transforms: Dict[str, Union[int, str]] = {}):
+            hyperparam_search: bool = True,
+            use_stl: bool = False
+    ):
         """
         This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
         to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with
@@ -65,33 +64,39 @@ class SkTime(BaseMixer):
         :param model_path: sktime forecaster to use as underlying model(s). Should be a string with format "$module.$class' where '$module' is inside `sktime.forecasting`. Default is 'arima.AutoARIMA'.
         :param hyperparam_search: bool that indicates whether to perform the hyperparameter tuning or not.
         :param auto_size: whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.
-        :param target_transforms: arguments for target transformation. Currently supported format: {'detrender': int, 'deseasonalizer': 'add' | 'mul' }. 'detrender' forces a particular type of polynomial to fit as trend curve for the series, while 'deseasonalizer' specifies additive or multiplicative seasonality decomposition (only applied if a seasonality test is triggered). By default, both are disabled.
+        :param use_stl: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.
         """  # noqa
         super().__init__(stop_after)
-        self.stable = True
+        self.stable = False
         self.prepared = False
         self.supports_proba = False
         self.target = target
+        self.name = 'AutoSKTime'
 
+        default_possible_models = [
+            'croston.Croston',
+            'theta.ThetaForecaster',
+            'trend.STLForecaster',
+            'trend.PolynomialTrendForecaster',
+            'naive.NaiveForecaster'
+        ]
+
+        self.dtype_dict = dtype_dict
         self.ts_analysis = ts_analysis
         self.horizon = horizon
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.auto_size = auto_size
         self.cutoff_factor = 4  # times the detected maximum seasonal period
-        self.target_transforms = {
-            'detrender': 0,          # degree of detrender polynomial (0: disabled)
-            'deseasonalizer': ''  # seasonality decomposition: 'add'itive or 'mul'tiplicative (else, disabled)
-        }
-        self.target_transforms.update(target_transforms)
+        self.use_stl = use_stl
 
         # optuna hyperparameter tuning
         self.models = {}
         self.study = None
         self.hyperparam_dict = {}
-        self.model_path = model_path
+        self.model_path = model_path if model_path else 'trend.STLForecaster'
         self.hyperparam_search = hyperparam_search
         self.trial_error_fn = MeanAbsolutePercentageError(symmetric=True)
-        self.possible_models = ['ets.AutoETS', 'theta.ThetaForecaster', 'statsforecast.StatsForecastAutoARIMA']
+        self.possible_models = default_possible_models if not model_path else [model_path]
         self.n_trials = len(self.possible_models)
         self.freq = self._get_freq(self.ts_analysis['deltas']['__default'])
 
@@ -105,7 +110,7 @@ class SkTime(BaseMixer):
 
         Forecaster type can be specified by providing the `model_class` argument in `__init__()`. It can also be determined by hyperparameter optimization based on dev data validation error.
         """  # noqa
-        log.info('Started fitting sktime forecaster for array prediction')
+        log.info(f'Started fitting {self.name} forecaster for array prediction')
 
         if self.hyperparam_search:
             search_space = {'class': self.possible_models}
@@ -122,7 +127,7 @@ class SkTime(BaseMixer):
         """
         Internal method that fits forecasters to a given dataframe.
         """
-        df = data.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by[0]}')
+        df = data.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by}')
 
         if not self.hyperparam_search and not self.study:
             module_name = self.model_path
@@ -143,9 +148,9 @@ class SkTime(BaseMixer):
         for group in self.ts_analysis['group_combinations']:
             kwargs = {}
             options = {
-                'sp': self.ts_analysis['periods'].get(group, '__default'),  # seasonality period
-                'suppress_warnings': True,                                  # ignore warnings if possible
-                'error_action': 'raise',                                    # avoids fit() failing silently
+                'sp': self.ts_analysis['periods'].get(group, '__default')[0],   # seasonality period
+                'suppress_warnings': True,                                      # ignore warnings if possible
+                'error_action': 'raise',                                        # avoids fit() failing silently
             }
             if self.model_path == 'fbprophet.Prophet':
                 options['freq'] = self.freq
@@ -155,21 +160,15 @@ class SkTime(BaseMixer):
 
             model_pipeline = [("forecaster", model_class(**kwargs))]
 
-            trend_degree = self.target_transforms['detrender']
-            seasonality_type = self.target_transforms['deseasonalizer']
-            if seasonality_type in ('add', 'mul'):
-                model_pipeline.insert(0, ("deseasonalizer",
-                                          ConditionalDeseasonalizer(
-                                              model='additive' if seasonality_type == 'add' else 'multiplicative',
-                                              sp=options['sp']
-                                          )))
-            if trend_degree > 0:
+            if self.use_stl and self.ts_analysis['stl_transforms'].get(group, False):
                 model_pipeline.insert(0, ("detrender",
-                                          Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))))
+                                          self.ts_analysis['stl_transforms'][group]["transformer"].detrender))
+                model_pipeline.insert(0, ("deseasonalizer",
+                                          self.ts_analysis['stl_transforms'][group]["transformer"].deseasonalizer))
 
             self.models[group] = TransformedTargetForecaster(model_pipeline)
 
-            oby_col = self.ts_analysis['tss'].order_by[0]
+            oby_col = self.ts_analysis['tss'].order_by
             if self.grouped_by == ['__default']:
                 series_data = df
                 series_oby = df[oby_col]
@@ -225,30 +224,32 @@ class SkTime(BaseMixer):
         if args.predict_proba:
             log.warning('This mixer does not output probability estimates')
 
+        df = deepcopy(ds.data_frame).reset_index(drop=True)
+
         forecast_offset = args.forecast_offset
-        if '__mdb_forecast_offset' in ds.data_frame.columns:
-            if ds.data_frame['__mdb_forecast_offset'].nunique() == 1:
-                forecast_offset = int(ds.data_frame['__mdb_forecast_offset'].unique()[0])
+        if '__mdb_forecast_offset' in df.columns:
+            if df['__mdb_forecast_offset'].nunique() == 1:
+                forecast_offset = int(df['__mdb_forecast_offset'].unique()[0])
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
-                           index=ds.data_frame.index,
+                           index=df.index,
                            columns=['prediction'],
                            dtype=object)
 
-        group_values = {gcol: ds.data_frame[gcol].tolist() for gcol in self.grouped_by} \
+        group_values = {gcol: df[gcol].tolist() for gcol in self.grouped_by} \
             if self.ts_analysis['tss'].group_by \
             else {'': ['__default' for _ in range(length)]}
 
-        pending_idxs = set(ds.data_frame.index)
+        pending_idxs = set(df.index)
         all_group_combinations = list(product(*[set(x) for x in group_values.values()]))
         for group in all_group_combinations:
             group = tuple(group)
             group = '__default' if group[0] == '__default' else group
-            series_idxs, series_data = get_group_matches(ds.data_frame, group, self.grouped_by)
-            series = series_data[self.target]
+            series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
 
             if series_data.size > 0:
+                series = series_data[self.target]
                 series_idxs = sorted(series_idxs)
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     forecaster = self.models[group]
@@ -260,7 +261,7 @@ class SkTime(BaseMixer):
 
         # apply default model in all remaining novel-group rows
         if len(pending_idxs) > 0:
-            series = ds.data_frame[self.target][list(pending_idxs)].squeeze()
+            series = df[self.target][list(pending_idxs)].squeeze()
             ydf = self._call_default(ydf, series, list(pending_idxs))
 
         return ydf[['prediction']]

@@ -1,4 +1,5 @@
 import time
+import inspect
 from typing import Dict, List, Set
 import torch
 import optuna
@@ -206,9 +207,11 @@ class LightGBM(BaseMixer):
 
         Why does the following crash happen and what does it mean? No idea, closest relationships I can find is /w optuna modifying parameters after the dataset is create: https://github.com/microsoft/LightGBM/issues/4019 | But why this would apply here makes no sense. Could have to do with the `train` process of lightgbm itself setting a "set only once" property on a dataset when it starts. Dunno, if you find out replace this comment with the real reason.
         ''' # noqa
-
+        kwargs = {}
+        if 'verbose_eval' in inspect.getfullargspec(lightgbm.train).args:
+            kwargs['verbose_eval'] = False
         self.model = lightgbm.train(self.params, lightgbm.Dataset(data['train']['data'], label=data['train']
-                                    ['label_data'], weight=data['train']['weights']), verbose_eval=False)
+                                    ['label_data'], weight=data['train']['weights']), **kwargs)
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
 
@@ -243,10 +246,12 @@ class LightGBM(BaseMixer):
         dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'],
                                        weight=data['dev']['weights'])
 
+        if 'verbose_eval' in inspect.getfullargspec(lightgbm.train).args:
+            kwargs['verbose_eval'] = False
         self.model = model_generator.train(
             self.params, train_dataset, valid_sets=[dev_dataset, train_dataset],
             valid_names=['dev', 'train'],
-            verbose_eval=False, **kwargs)
+            **kwargs)
         self.num_iterations = self.model.best_iteration
         log.info(f'Lightgbm model contains {self.model.num_trees()} weak estimators')
 
@@ -276,10 +281,15 @@ class LightGBM(BaseMixer):
 
         log.info(f'Updating lightgbm model with {iterations} iterations')
         self.params['num_iterations'] = int(iterations)
+
+        kwargs = {}
+        if 'verbose_eval' in inspect.getfullargspec(lightgbm.train).args:
+            kwargs['verbose_eval'] = False
+
         self.model = lightgbm.train(
             self.params, train_dataset, valid_sets=[dev_dataset, train_dataset],
             valid_names=['dev', 'retrain'],
-            verbose_eval=False, init_model=self.model)
+            init_model=self.model, **kwargs)
         log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
 
     def __call__(self, ds: EncodedDs,

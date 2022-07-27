@@ -135,7 +135,7 @@ def lookup_encoder(
     # Time-series representations require more advanced flags
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
-        if col_name in tss.order_by:
+        if col_name == tss.order_by:
             encoder_dict["module"] = "ArrayEncoder"
             encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
             encoder_dict["args"]["window"] = f"{tss.window}"
@@ -220,27 +220,46 @@ def generate_json_ai(
     ):
         is_target_predicting_encoder = True
 
+    submodels = []
     if is_target_predicting_encoder:
-        submodels = [
-            {
-                "module": "Unit",
-                "args": {
-                    "target_encoder": "$encoders[self.target]",
-                    "stop_after": "$problem_definition.seconds_per_mixer",
-                },
-            }
-        ]
+        submodels.extend(
+            [
+                {
+                    "module": "Unit",
+                    "args": {
+                        "target_encoder": "$encoders[self.target]",
+                        "stop_after": "$problem_definition.seconds_per_mixer",
+                    },
+                }
+            ]
+        )
     else:
-        submodels = [
-            {
-                "module": "Neural",
-                "args": {
-                    "fit_on_dev": True,
-                    "stop_after": "$problem_definition.seconds_per_mixer",
-                    "search_hyperparameters": True,
-                },
-            }
-        ]
+        if not tss.is_timeseries:
+            submodels.extend(
+                [
+                    {
+                        "module": "Neural",
+                        "args": {
+                            "fit_on_dev": True,
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "search_hyperparameters": True,
+                        },
+                    }
+                ]
+            )
+        else:
+            submodels.extend(
+                [
+                    {
+                        "module": "NeuralTs",
+                        "args": {
+                            "fit_on_dev": True,
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "search_hyperparameters": True,
+                        },
+                    }
+                ]
+            )
 
         if (not tss.is_timeseries or tss.horizon == 1) and dtype_dict[target] not in (dtype.num_array, dtype.cat_array):
             submodels.extend(
@@ -280,6 +299,20 @@ def generate_json_ai(
                     [
                         {
                             "module": "SkTime",
+                            "args": {
+                                "stop_after": "$problem_definition.seconds_per_mixer",
+                                "horizon": "$problem_definition.timeseries_settings.horizon",
+                            },
+                        },
+                        {
+                            "module": "ETSMixer",
+                            "args": {
+                                "stop_after": "$problem_definition.seconds_per_mixer",
+                                "horizon": "$problem_definition.timeseries_settings.horizon",
+                            },
+                        },
+                        {
+                            "module": "ARIMAMixer",
                             "args": {
                                 "stop_after": "$problem_definition.seconds_per_mixer",
                                 "horizon": "$problem_definition.timeseries_settings.horizon",
@@ -342,7 +375,7 @@ def generate_json_ai(
     elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ["balanced_accuracy_score"]
     elif output_dtype in (dtype.num_array, dtype.num_tsarray):
-        accuracy_functions = ["evaluate_num_array_accuracy"]
+        accuracy_functions = ["bounded_ts_accuracy"]
     elif output_dtype in (dtype.cat_array, dtype.cat_tsarray):
         accuracy_functions = ["evaluate_cat_array_accuracy"]
     else:
@@ -352,7 +385,7 @@ def generate_json_ai(
 
     if is_ts:
         if output_dtype in [dtype.integer, dtype.float]:
-            accuracy_functions = ["evaluate_num_array_accuracy"]  # forces this acc fn for t+1 time series forecasters
+            accuracy_functions = ["bounded_ts_accuracy"]  # forces this acc fn for t+1 time series forecasters  # noqa
 
         if output_dtype in (dtype.integer, dtype.float, dtype.num_tsarray):
             imputers.append({"module": "NumericalImputer",
@@ -495,13 +528,12 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     is_ts = tss.is_timeseries
 
     # Add implicit arguments
-    # @TODO: Consider removing once we have a proper editor in studio
     mixers = json_ai.model['args']['submodels']
     for i in range(len(mixers)):
         if mixers[i]["module"] == "Unit":
             pass
 
-        elif mixers[i]["module"] == "Neural":
+        elif mixers[i]["module"] in ("Neural", "NeuralTs"):
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
@@ -509,15 +541,17 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
                 "dtype_dict", "$dtype_dict"
             )
-            mixers[i]["args"]["timeseries_settings"] = mixers[i]["args"].get(
-                "timeseries_settings", "$problem_definition.timeseries_settings"
-            )
             mixers[i]["args"]["net"] = mixers[i]["args"].get(
                 "net",
                 '"DefaultNet"'
                 if not tss.is_timeseries or not tss.use_previous_target
                 else '"ArNet"',
             )
+            if mixers[i]["module"] == "NeuralTs":
+                mixers[i]["args"]["timeseries_settings"] = mixers[i]["args"].get(
+                    "timeseries_settings", "$problem_definition.timeseries_settings"
+                )
+                mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get("ts_analysis", "$ts_analysis")
 
         elif mixers[i]["module"] == "LightGBM":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
@@ -555,6 +589,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["tss"] = mixers[i]["args"].get("tss", "$problem_definition.timeseries_settings")
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get("ts_analysis", "$ts_analysis")
             mixers[i]["args"]["fit_on_dev"] = mixers[i]["args"].get("fit_on_dev", "True")
+            mixers[i]["args"]["use_stl"] = mixers[i]["args"].get("use_stl", "False")
 
         elif mixers[i]["module"] == "NHitsMixer":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
@@ -564,7 +599,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             )
             problem_definition.fit_on_all = False  # takes too long otherwise
 
-        elif mixers[i]["module"] in ("SkTime", "ProphetMixer"):
+        elif mixers[i]["module"] in ("SkTime", "ProphetMixer", "ETSMixer", "ARIMAMixer"):
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
                 "dtype_dict", "$dtype_dict"
@@ -676,6 +711,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "dtype_dict": "$dtype_dict",
                 "target": "$target",
                 "mode": "$mode",
+                "ts_analysis": "$ts_analysis"
             },
         },
         "timeseries_analyzer": {
@@ -731,27 +767,29 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
         encoder_dict[col_name] = call(encoder)
 
     # Populate time-series specific details
+    # TODO: consider moving this to a `JsonAI override` phase
     tss = json_ai.problem_definition.timeseries_settings
-    if tss.is_timeseries and tss.use_previous_target:
-        col_name = f"__mdb_ts_previous_{json_ai.problem_definition.target}"
-        target_type = json_ai.dtype_dict[json_ai.problem_definition.target]
-        json_ai.problem_definition.timeseries_settings.target_type = target_type
-        encoder_dict[col_name] = call(
-            lookup_encoder(
-                target_type,
-                col_name,
-                False,
-                json_ai.problem_definition,
-                False,
-                None,
+    if tss.is_timeseries:
+        if tss.use_previous_target:
+            col_name = f"__mdb_ts_previous_{json_ai.problem_definition.target}"
+            target_type = json_ai.dtype_dict[json_ai.problem_definition.target]
+            json_ai.problem_definition.timeseries_settings.target_type = target_type
+            encoder_dict[col_name] = call(
+                lookup_encoder(
+                    target_type,
+                    col_name,
+                    False,
+                    json_ai.problem_definition,
+                    False,
+                    None,
+                )
             )
-        )
 
-        dtype_dict[col_name] = target_type
-        # @TODO: Is populating the json_ai at this stage even necessary?
-        json_ai.encoders[col_name] = encoder_dict[col_name]
-        json_ai.dtype_dict[col_name] = target_type
-        json_ai.dependency_dict[col_name] = []
+            dtype_dict[col_name] = target_type
+            # @TODO: Is populating the json_ai at this stage even necessary?
+            json_ai.encoders[col_name] = encoder_dict[col_name]
+            json_ai.dtype_dict[col_name] = target_type
+            json_ai.dependency_dict[col_name] = []
 
     # ----------------- #
 
@@ -1145,6 +1183,7 @@ class Predictor(PredictorInterface):
 
         # Initial stats analysis
         self.statistical_analysis = None
+        self.ts_analysis = None
         self.runtime_log = dict()
 
     @timed

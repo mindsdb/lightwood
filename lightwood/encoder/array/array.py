@@ -92,7 +92,7 @@ class ArrayEncoder(BaseEncoder):
         for i in range(len(column_data)):
             if is_none(column_data[i]):
                 column_data[i] = [0] * self.output_size
-        column_data = [self._pad_and_strip(list(x)) for x in column_data]
+        column_data = np.array([self._pad_and_strip(list(x)) for x in column_data])
 
         data = torch.cat([self._normalizer.encode(column_data)], dim=-1)
         data[torch.isnan(data)] = 0.0

@@ -73,6 +73,7 @@ class StatisticalAnalysis:
     :param bias:
     :param avg_words_per_sentence:
     :param positive_domain:
+    :param ts_stats:
     """ # noqa
 
     nr_rows: int
@@ -87,6 +88,7 @@ class StatisticalAnalysis:
     bias: object
     avg_words_per_sentence: object
     positive_domain: bool
+    ts_stats: dict
 
 
 @dataclass_json
@@ -108,11 +110,11 @@ class TimeseriesSettings:
 
     :param is_timeseries: Whether the input data should be treated as time series; if true, this flag is checked in \
         subsequent internal steps to ensure processing is appropriate for time-series data.
-    :param order_by: A list of columns by which the data should be ordered.
+    :param order_by: Column by which the data should be ordered.
     :param group_by: Optional list of columns by which the data should be grouped. Each different combination of values\
          for these columns will yield a different series.
     :param window: The temporal horizon (number of rows) that a model intakes to "look back" into when making a\
-         prediction, after the rows are ordered by order_by columns and split into groups if applicable.
+         prediction, after the rows are ordered by the order_by column and split into groups if applicable.
     :param horizon: The number of points in the future that predictions should be made for, defaults to 1. Once \
         trained, the model will be able to predict up to this many points into the future.
     :param historical_columns: The temporal dynamics of these columns will be used as additional context to train the \
@@ -126,7 +128,7 @@ class TimeseriesSettings:
     """  # noqa
 
     is_timeseries: bool
-    order_by: List[str] = None
+    order_by: str = None
     window: int = None
     group_by: List[str] = None
     use_previous_target: bool = True
@@ -150,9 +152,13 @@ class TimeseriesSettings:
         :returns: A populated ``TimeseriesSettings`` object.
         """ # noqa
         if len(obj) > 0:
-            for mandatory_setting in ["order_by", "window"]:
+            for mandatory_setting, etype in zip(["order_by", "window"], [str, int]):
                 if mandatory_setting not in obj:
                     err = f"Missing mandatory timeseries setting: {mandatory_setting}"
+                    log.error(err)
+                    raise Exception(err)
+                if obj[mandatory_setting] and not isinstance(obj[mandatory_setting], etype):
+                    err = f"Wrong type for mandatory timeseries setting '{mandatory_setting}': found '{type(obj[mandatory_setting])}', expected '{etype}'"  # noqa
                     log.error(err)
                     raise Exception(err)
 

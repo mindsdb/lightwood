@@ -1,33 +1,11 @@
 import importlib
-from typing import List, Dict, Optional, Tuple, Union
+from copy import deepcopy
+from typing import List, Dict, Optional
 import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score, mean_absolute_error, balanced_accuracy_score
 from lightwood.helpers.numeric import is_nan_numeric
-
-
-def get_group_matches(
-        data: Union[pd.Series, pd.DataFrame],
-        combination: tuple,
-        group_columns: List[str]
-) -> Tuple[list, pd.DataFrame]:
-    """Given a particular group combination, return the data subset that belongs to it."""
-
-    if type(data) == pd.Series:
-        data = pd.DataFrame(data)
-    elif type(data) != pd.DataFrame:
-        raise Exception(f"Wrong data type {type(data)}, must be pandas.DataFrame or pd.Series")
-
-    if combination == '__default':
-        return list(data.index), data
-    else:
-        subset = data
-        for val, col in zip(combination, group_columns):
-            subset = subset[subset[col] == val]
-        if len(subset) > 0:
-            return list(subset.index), subset
-        else:
-            return [], pd.DataFrame()
+from lightwood.helpers.ts import get_group_matches
 
 
 # ------------------------- #
@@ -51,7 +29,7 @@ def evaluate_accuracy(data: pd.DataFrame,
     score_dict = {}
 
     for accuracy_function_str in accuracy_functions:
-        if 'array_accuracy' in accuracy_function_str:
+        if 'array_accuracy' in accuracy_function_str or accuracy_function_str in ('bounded_ts_accuracy', ):
             if ts_analysis is None or not ts_analysis['tss'].is_timeseries:
                 # normal array, needs to be expanded
                 cols = [target]
@@ -70,7 +48,7 @@ def evaluate_accuracy(data: pd.DataFrame,
             elif accuracy_function_str == 'evaluate_cat_array_accuracy':
                 acc_fn = evaluate_cat_array_accuracy
             else:
-                acc_fn = bounded_evaluate_array_accuracy
+                acc_fn = bounded_ts_accuracy
             score_dict[accuracy_function_str] = acc_fn(true_values,
                                                        predictions,
                                                        data=data[cols],
@@ -131,6 +109,12 @@ def evaluate_num_array_accuracy(
     Scores are computed for each timestep (as determined by `timeseries_settings.horizon`),
     and the final accuracy is the reciprocal of the average score through all timesteps.
     """
+    def _naive(true_values, predictions):
+        nan_mask = (~np.isnan(true_values)).astype(int)
+        predictions *= nan_mask
+        true_values = np.nan_to_num(true_values, 0.0)
+        return evaluate_array_accuracy(true_values, predictions, ts_analysis=ts_analysis)
+
     ts_analysis = kwargs.get('ts_analysis', {})
     if not ts_analysis:
         naive_errors = None
@@ -144,10 +128,7 @@ def evaluate_num_array_accuracy(
 
     if not naive_errors:
         # use mean R2 method if naive errors are not available
-        nan_mask = (~np.isnan(true_values)).astype(int)
-        predictions *= nan_mask
-        true_values = np.nan_to_num(true_values, 0.0)
-        return evaluate_array_accuracy(true_values, predictions, ts_analysis=ts_analysis)
+        return _naive(true_values, predictions)
 
     mases = []
     for group in ts_analysis['group_combinations']:
@@ -160,9 +141,17 @@ def evaluate_num_array_accuracy(
 
             # add MASE score for each group (__default only considered if the task is non-grouped)
             if len(ts_analysis['group_combinations']) == 1 or group != '__default':
-                mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].horizon))
+                try:
+                    mases.append(mase(trues, preds, ts_analysis['ts_naive_mae'][group], ts_analysis['tss'].horizon))
+                except Exception:
+                    # group is novel, ignore for accuracy reporting purposes
+                    pass
 
-    return 1 / max(np.average(mases), 1e-4)  # reciprocal to respect "larger -> better" convention
+    acc = 1 / max(np.average(mases), 1e-4)  # reciprocal to respect "larger -> better" convention
+    if acc != acc:
+        return _naive(true_values, predictions)  # nan due to having only novel groups in validation, forces reversal
+    else:
+        return acc
 
 
 def evaluate_array_accuracy(
@@ -216,7 +205,7 @@ def evaluate_cat_array_accuracy(
                                    base_acc_fn=balanced_accuracy_score)
 
 
-def bounded_evaluate_array_accuracy(
+def bounded_ts_accuracy(
         true_values: pd.Series,
         predictions: pd.Series,
         **kwargs
@@ -228,15 +217,18 @@ def bounded_evaluate_array_accuracy(
     For worse-than-naive, it scales linearly (with a factor).
     For better-than-naive, we fix 10 as 0.99, and scaled-logarithms (with 10 and 1e4 cutoffs as respective bases) are used to squash all remaining preimages to values between 0.5 and 1.0.
     """  # noqa
-    result = evaluate_array_accuracy(np.array(true_values),
-                                     np.array(predictions),
-                                     **kwargs)
-    if 10 < result <= 1e4:
+    true_values = deepcopy(true_values)
+    predictions = deepcopy(predictions)
+    result = evaluate_num_array_accuracy(true_values,
+                                         predictions,
+                                         **kwargs)
+    sp = 5
+    if sp < result <= 1e4:
         step_base = 0.99
         return step_base + (np.log(result) / np.log(1e4)) * (1 - step_base)
-    elif 1 <= result <= 10:
+    elif 1 <= result <= sp:
         step_base = 0.5
-        return step_base + (np.log(result) / np.log(10)) * (0.99 - step_base)
+        return step_base + (np.log(result) / np.log(sp)) * (0.99 - step_base)
     else:
         return result / 2  # worse than naive
 

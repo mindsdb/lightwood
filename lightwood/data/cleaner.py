@@ -147,13 +147,15 @@ def _standardize_datetime(element: object) -> Optional[float]:
     """
     Parses an expected date-time element. Intakes an element that can in theory be anything.
     """
+    if element is None or pd.isna(element):
+        return 0.0  # correct? TODO: Remove if the TS encoder can handle `None`
     try:
         date = parse_dt(str(element))
     except Exception:
         try:
             date = datetime.datetime.utcfromtimestamp(element)
         except Exception:
-            return None
+            return 0.0
 
     return date.timestamp()
 
@@ -392,7 +394,7 @@ def clean_timeseries(df: pd.DataFrame, tss: TimeseriesSettings) -> pd.DataFrame:
     invalid_rows = []
 
     for idx, row in df.iterrows():
-        if pd.isna(row[tss.order_by[0]]):
+        if pd.isna(row[tss.order_by]):
             invalid_rows.append(idx)
 
     df = df.drop(invalid_rows)

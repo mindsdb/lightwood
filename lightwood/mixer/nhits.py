@@ -48,16 +48,14 @@ class NHitsMixer(BaseMixer):
         self.pretrained = pretrained  # finetuning?
         self.base_url = 'https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/'
         self.freq_to_model = {
-            'year': 'yearly',
-            'semestral': 'yearly',
-            'quarter': 'monthly',
-            'bimonthly': 'monthly',
-            'monthly': 'monthly',
-            'weekly': 'daily',
-            'daily': 'daily',
-            'hourly': 'hourly',
-            'minute': 'hourly',  # consider using another pre-trained model once available
-            'second': 'hourly'  # consider using another pre-trained model once available
+            'Y': 'yearly',
+            'Q': 'monthly',
+            'M': 'monthly',
+            'W': 'daily',
+            'D': 'daily',
+            'H': 'hourly',
+            'T': 'hourly',  # consider using another pre-trained model once available
+            'S': 'hourly'  # consider using another pre-trained model once available
         }
         self.model_names = {
             'hourly': 'nhits_m4_hourly.ckpt',  # hourly (non-tiny)
@@ -75,7 +73,7 @@ class NHitsMixer(BaseMixer):
         log.info('Started fitting N-HITS forecasting model')
 
         cat_ds = ConcatedEncodedDs([train_data, dev_data])
-        oby_col = self.ts_analysis["tss"].order_by[0]
+        oby_col = self.ts_analysis["tss"].order_by
         df = cat_ds.data_frame.sort_values(by=f'__mdb_original_{oby_col}')
 
         # 2. adapt data into the expected DFs
@@ -172,7 +170,7 @@ class NHitsMixer(BaseMixer):
         return ydf
 
     def _make_initial_df(self, df):
-        oby_col = self.ts_analysis["tss"].order_by[0]
+        oby_col = self.ts_analysis["tss"].order_by
         Y_df = pd.DataFrame()
         Y_df['y'] = df[self.target]
         Y_df['ds'] = pd.to_datetime(df[f'__mdb_original_{oby_col}'], unit='s')
