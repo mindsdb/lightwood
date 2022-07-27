@@ -464,11 +464,8 @@ class ICP(BaseAnalysisBlock):
                                                   cooldown=ns.pred_args.anomaly_cooldown)
                         row_insights['anomaly'] = anomalies
 
-            if ns.tss.is_timeseries and ns.tss.horizon > 1:
-                if is_numerical:
-                    row_insights = add_tn_num_conf_bounds(row_insights, ns.tss)
-                else:
-                    row_insights = add_tn_cat_conf_bounds(row_insights, ns.tss)
+            if ns.tss.is_timeseries and ns.tss.horizon > 1 and not is_numerical:
+                row_insights = add_tn_cat_conf_bounds(row_insights, ns.tss)
 
             # clip bounds if necessary
             if is_numerical:
