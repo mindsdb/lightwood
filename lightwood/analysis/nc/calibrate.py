@@ -131,6 +131,7 @@ class ICP(BaseAnalysisBlock):
                 # generate a multiindex
                 midx = pd.MultiIndex.from_frame(icp_df[[*ns.tss.group_by, f'__mdb_original_{ns.tss.order_by}']])
                 icp_df.index = midx
+                result_df.index = midx
 
                 # create an ICP for each possible group
                 group_info = ns.data[ns.tss.group_by].to_dict('list')
@@ -144,6 +145,8 @@ class ICP(BaseAnalysisBlock):
             # calibrate ICP
             icp_df = deepcopy(ns.data)
             icp_df, y = clean_df(icp_df, ns, output.get('label_encoders', None))
+            if ns.tss.is_timeseries and ns.tss.group_by:
+                icp_df.index = midx
             output['icp']['__default'].index = icp_df.columns
             output['icp']['__default'].calibrate(icp_df.values, y)
 
