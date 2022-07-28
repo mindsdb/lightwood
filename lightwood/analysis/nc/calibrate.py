@@ -1,6 +1,5 @@
 import inspect
 from copy import deepcopy
-from itertools import product
 from typing import Dict, Tuple
 from types import SimpleNamespace
 
@@ -10,7 +9,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 from lightwood.api.dtype import dtype
 from lightwood.api.types import PredictionArguments
-from lightwood.helpers.ts import add_tn_cat_conf_bounds
+from lightwood.helpers.ts import add_tn_cat_conf_bounds, get_ts_groups
 
 from lightwood.data import EncodedDs
 from lightwood.analysis.base import BaseAnalysisBlock
@@ -135,7 +134,8 @@ class ICP(BaseAnalysisBlock):
 
                 # create an ICP for each possible group
                 group_info = ns.data[ns.tss.group_by].to_dict('list')
-                all_group_combinations = list(product(*[set(x) for x in group_info.values()]))
+                all_group_combinations = get_ts_groups(ns.data, ns.tss)
+                all_group_combinations.remove('__default')
                 output['icp']['__mdb_groups'] = all_group_combinations
                 output['icp']['__mdb_group_keys'] = [x for x in group_info.keys()]
 
