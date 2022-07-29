@@ -333,25 +333,12 @@ class ICP(BaseAnalysisBlock):
 
                 # convert (B, 2, 99) into (B, 2) given width or error rate constraints
                 if is_multi_ts and is_numerical:
-                    # @TODO: should be a function
                     significances, confs = get_ts_conf_range(all_confs,
                                                              df_target_stddev=ns.analysis['df_target_stddev'],
                                                              positive_domain=self.positive_domain,
                                                              fixed_conf=ns.pred_args.fixed_confidence)
 
-                    result.loc[X.index, 'lower'] = confs[:, 0, 0]
-                    result.loc[X.index, 'upper'] = confs[:, 0, 1]
-                    result.loc[X.index, 'significance'] = significances[:, 0]
-                    for timestep in range(1, ns.tss.horizon):
-                        result.loc[X.index, f'lower_timestep_{timestep}'] = confs[:, timestep, 0]
-                        result.loc[X.index, f'upper_timestep_{timestep}'] = confs[:, timestep, 1]
-                        result.loc[X.index, f'significance_timestep_{timestep}'] = significances[:, timestep]
-
-                    # merge all significances, lower and upper bounds into a single column
-                    for base_col in ['significance', 'lower', 'upper']:
-                        added_cols = [f'{base_col}_timestep_{t}' for t in range(1, ns.tss.horizon)]
-                        cols = [base_col] + added_cols
-                        result[base_col] = result[cols].values.tolist()
+                    result = self._ts_assign_confs(result, X, confs, significances, ns.tss)
 
                 elif is_numerical:
                     significances, confs = get_numeric_conf_range(all_confs,
@@ -405,23 +392,7 @@ class ICP(BaseAnalysisBlock):
                                         group=tuple(group),
                                         fixed_conf=fixed_conf
                                     )
-
-                                    # TODO: should be a function
-                                    result.loc[X.index, 'lower'] = confs[:, 0, 0]
-                                    result.loc[X.index, 'upper'] = confs[:, 0, 1]
-                                    result.loc[X.index, 'significance'] = significances[:, 0]
-                                    for timestep in range(1, ns.tss.horizon):
-                                        result.loc[X.index, f'lower_timestep_{timestep}'] = confs[:, timestep, 0]
-                                        result.loc[X.index, f'upper_timestep_{timestep}'] = confs[:, timestep, 1]
-                                        result.loc[X.index,
-                                                   f'significance_timestep_{timestep}'] = significances[:, timestep]
-                                    # TODO: only if tighter
-                                    # merge all significances, lower and upper bounds into a single column
-                                    for base_col in ['significance', 'lower', 'upper']:
-                                        added_cols = [f'{base_col}_timestep_{t}' for t in range(1, ns.tss.horizon)]
-                                        cols = [base_col] + added_cols
-                                        result.loc[X.index, base_col] = result.loc[X.index, cols].values.tolist()
-                                        # [result.pop(c) for c in added_cols]
+                                    result = self._ts_assign_confs(result, X, confs, significances, ns.tss)
 
                                 elif is_numerical:
                                     all_confs = icp.predict(X.values)
@@ -498,3 +469,24 @@ class ICP(BaseAnalysisBlock):
                 row_insights['prediction'] = row_insights['prediction'].astype(str)
 
         return row_insights, global_insights
+
+    @staticmethod
+    def _ts_assign_confs(result, df, confs, significances, tss) -> pd.DataFrame:
+        result.loc[df.index, 'lower'] = confs[:, 0, 0]
+        result.loc[df.index, 'upper'] = confs[:, 0, 1]
+        result.loc[df.index, 'significance'] = significances[:, 0]
+        for timestep in range(1, tss.horizon):
+            result.loc[df.index, f'lower_timestep_{timestep}'] = confs[:, timestep, 0]
+            result.loc[df.index, f'upper_timestep_{timestep}'] = confs[:, timestep, 1]
+            result.loc[df.index,
+                       f'significance_timestep_{timestep}'] = significances[:, timestep]
+
+        # TODO: only if tighter
+        # merge all significances, lower and upper bounds into a single column
+        for base_col in ['significance', 'lower', 'upper']:
+            added_cols = [f'{base_col}_timestep_{t}' for t in range(1, tss.horizon)]
+            cols = [base_col] + added_cols
+            result.loc[df.index, base_col] = result.loc[df.index, cols].values.tolist()
+            # result[base_col] = result[cols].values.tolist()
+
+        return result

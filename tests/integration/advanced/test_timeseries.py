@@ -95,7 +95,7 @@ class TestTimeseries(unittest.TestCase):
             pred = predictor_from_code(code)
 
             # Test with a short time aim
-            train_and_check_time_aim(pred, train)
+            train_and_check_time_aim(pred, train, ignore_time_aim=True)
             preds = pred.predict(test)
             self.check_ts_prediction_df(preds, horizon, [order_by])
 
@@ -414,7 +414,7 @@ class TestTimeseries(unittest.TestCase):
 
         # Test with a short time aim with inferring mode, check timestamps are further into the future than test dates
         test['__mdb_forecast_offset'] = 1
-        train_and_check_time_aim(pred, train)
+        train_and_check_time_aim(pred, train, ignore_time_aim=True)
         preds = pred.predict(test)
         self.check_ts_prediction_df(preds, horizon, [order_by])
 
