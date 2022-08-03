@@ -107,3 +107,26 @@ def align(code: str, indent: int) -> str:
     code_arr = code.split('\n')
     code = f'\n{add_space}'.join(code_arr)
     return code
+
+
+def _consolidate_analysis_blocks(jsonai, key):
+    """
+    Receives a list of analysis blocks (where applicable, already filed with `hidden` args) and modifies it so that:
+        1. All dependencies are correct
+        2. Execution order is such that all dependencies are met.
+    """
+    defaults = {
+        'ICP': {"deps": []},
+        'AccStats': {"deps": ['ICP']},
+        'ConfStats': {"deps": ['ICP']},
+        'GlobalFeatureImportance': {"disable_column_importance": False, "deps": ['AccStats']}
+    }
+    blocks = getattr(jsonai, key)
+    for i, block in enumerate(blocks):
+        if 'args' not in block:
+            blocks[i]['args'] = defaults[block['module']]
+
+    # dependency solver
+    # TODO: sort DAG based on dependencies
+
+    return blocks
