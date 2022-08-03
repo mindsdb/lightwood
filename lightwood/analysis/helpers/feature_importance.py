@@ -2,12 +2,10 @@ from copy import deepcopy
 from types import SimpleNamespace
 from typing import Dict
 
-import torch
 import numpy as np
 
 from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.helpers.general import evaluate_accuracy
-from lightwood.analysis.nc.util import t_softmax
 from lightwood.api.types import PredictionArguments
 
 
@@ -62,7 +60,7 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
             column_importances = {}
             acc_increases = np.zeros((len(ignorable_input_cols),))
             for i, col in enumerate(ignorable_input_cols):
-                accuracy_increase = (info['normal_accuracy'] - empty_input_accuracy[col]) # / info['normal_accuracy']
+                accuracy_increase = (info['normal_accuracy'] - empty_input_accuracy[col]) / info['normal_accuracy']
                 acc_increases[i] = max(0, accuracy_increase)
             acc_increases = (acc_increases / max(acc_increases))
             for col, inc in zip(ignorable_input_cols, acc_increases):
