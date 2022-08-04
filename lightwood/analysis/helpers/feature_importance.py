@@ -2,12 +2,10 @@ from copy import deepcopy
 from types import SimpleNamespace
 from typing import Dict
 
-import torch
 import numpy as np
 
 from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.helpers.general import evaluate_accuracy
-from lightwood.analysis.nc.util import t_softmax
 from lightwood.api.types import PredictionArguments
 
 
@@ -19,15 +17,16 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
         - iterates over all input columns
         - if the input column is optional, then make a predict with its values set to None
         - compare this accuracy with the accuracy obtained using all data
-        - all accuracy differences are passed through a softmax and reported as estimated column importance scores
+        - all accuracy differences are normalized with respect to the original accuracy (clipped at zero if negative)
+        - report these as estimated column importance scores
 
     Note that, crucially, this method does not refit the predictor at any point.
 
     Reference:
         https://compstat-lmu.github.io/iml_methods_limitations/pfi.html
     """
-    def __init__(self, disable_column_importance):
-        super().__init__()
+    def __init__(self, disable_column_importance=False, deps=tuple('AccStats',)):
+        super().__init__(deps=deps)
         self.disable_column_importance = disable_column_importance
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
@@ -37,9 +36,12 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
             info['column_importances'] = None
         else:
             empty_input_accuracy = {}
-            ignorable_input_cols = [x for x in ns.input_cols if (not ns.tss.is_timeseries or
-                                                                 (x != ns.tss.order_by and
-                                                                  x not in ns.tss.historical_columns))]
+            ignorable_input_cols = []
+            for x in ns.input_cols:
+                if ('__mdb' not in x) and \
+                        (not ns.tss.is_timeseries or (x != ns.tss.order_by and x not in ns.tss.historical_columns)):
+                    ignorable_input_cols.append(x)
+
             for col in ignorable_input_cols:
                 partial_data = deepcopy(ns.encoded_val_data)
                 partial_data.clear_cache()
@@ -56,13 +58,11 @@ class GlobalFeatureImportance(BaseAnalysisBlock):
                 ).values()))
 
             column_importances = {}
-            acc_increases = []
-            for col in ignorable_input_cols:
-                accuracy_increase = (info['normal_accuracy'] - empty_input_accuracy[col])
-                acc_increases.append(accuracy_increase)
-
-            # low 0.2 temperature to accentuate differences
-            acc_increases = t_softmax(torch.Tensor([acc_increases]), t=0.2).tolist()[0]
+            acc_increases = np.zeros((len(ignorable_input_cols),))
+            for i, col in enumerate(ignorable_input_cols):
+                accuracy_increase = (info['normal_accuracy'] - empty_input_accuracy[col]) / info['normal_accuracy']
+                acc_increases[i] = max(0, accuracy_increase)
+            acc_increases = (acc_increases / max(acc_increases))
             for col, inc in zip(ignorable_input_cols, acc_increases):
                 column_importances[col] = inc  # scores go from 0 to 1
 

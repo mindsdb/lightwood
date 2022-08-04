@@ -16,8 +16,8 @@ class TempScaler(BaseAnalysisBlock):
     Original reference (MIT Licensed): https://github.com/gpleiss/temperature_scaling
     NB: Output of the neural network should be the classification logits, NOT the softmax (or log softmax)! TODO
     """
-    def __init__(self):
-        super().__init__()
+    def __init__(self, deps=tuple()):
+        super().__init__(deps=deps)
         self.temperature = nn.Parameter(torch.ones(1))
         self.ordenc = OrdinalEncoder()
         self._softmax = torch.nn.Softmax(dim=1)

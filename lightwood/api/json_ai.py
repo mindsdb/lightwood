@@ -1,6 +1,7 @@
 # TODO: _add_implicit_values unit test ensures NO changes for a fully specified file.
 from copy import deepcopy
 from lightwood.helpers.templating import call, inline_dict, align
+from lightwood.helpers.templating import _consolidate_analysis_blocks
 from lightwood.api import dtype
 from lightwood.api.types import (
     JsonAI,
@@ -728,6 +729,15 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
 
     for field_name, implicit_value in hidden_fields.items():
         _populate_implicit_field(json_ai, field_name, implicit_value, tss.is_timeseries)
+
+    # further consolidation
+    to_inspect = ['analysis_blocks']
+    consolidation_methods = {
+        'analysis_blocks': _consolidate_analysis_blocks
+    }
+    for k in to_inspect:
+        method = consolidation_methods[k]
+        setattr(json_ai, k, method(json_ai, k))
 
     return json_ai
 
