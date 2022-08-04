@@ -12,13 +12,12 @@ class TestJsonAI(unittest.TestCase):
         jai = json_ai_from_problem(df, pdef)
         jai.analysis_blocks = [
             # args not needed (not even deps), they should be injected for default blocks
-            {"module": "GlobalFeatureImportance"}
+            {"module": "PermutationFeatureImportance"}
         ]
 
         predictor = predictor_from_json_ai(jai)
         predictor.learn(df)
         self.assertTrue(len(predictor.analysis_blocks) == 4)
-        self.assertTrue(all([0 <= colimp <= 1 for colimp in predictor.runtime_analyzer['column_importances'].values()]))
 
     def test_1_incorrect_chain(self):
         df = pd.read_csv('tests/data/concrete_strength.csv')[:500]

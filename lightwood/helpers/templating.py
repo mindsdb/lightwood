@@ -132,7 +132,7 @@ def _consolidate_analysis_blocks(jsonai, key):
         'ConfStats': {
             "deps": ['ICP']
         },
-        'GlobalFeatureImportance': {
+        'PermutationFeatureImportance': {
             "deps": ['AccStats']
         },
         'ShapleyValues': {

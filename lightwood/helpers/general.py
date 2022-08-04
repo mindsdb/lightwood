@@ -15,7 +15,8 @@ def evaluate_accuracy(data: pd.DataFrame,
                       predictions: pd.Series,
                       target: str,
                       accuracy_functions: List[str],
-                      ts_analysis: Optional[dict] = {}) -> Dict[str, float]:
+                      ts_analysis: Optional[dict] = {},
+                      n_decimals: Optional[int] = 3) -> Dict[str, float]:
     """
     Dispatcher for accuracy evaluation.
     
@@ -24,13 +25,14 @@ def evaluate_accuracy(data: pd.DataFrame,
     :param target: target column name.
     :param accuracy_functions: list of accuracy function names. Support currently exists for `scikit-learn`'s `metrics` module, plus any custom methods that Lightwood exposes.
     :param ts_analysis: `lightwood.data.timeseries_analyzer` output, used to compute time series task accuracy.
+    :param n_decimals: used to round accuracies.
     :return: accuracy metric for a dataset and predictions.
     """  # noqa
     score_dict = {}
 
     for accuracy_function_str in accuracy_functions:
         if 'array_accuracy' in accuracy_function_str or accuracy_function_str in ('bounded_ts_accuracy', ):
-            if ts_analysis is None or not ts_analysis['tss'].is_timeseries:
+            if ts_analysis is None or not ts_analysis.get('tss', False) or not ts_analysis['tss'].is_timeseries:
                 # normal array, needs to be expanded
                 cols = [target]
                 true_values = data[cols].apply(lambda x: pd.Series(x[target]), axis=1)
@@ -61,6 +63,9 @@ def evaluate_accuracy(data: pd.DataFrame,
             else:
                 accuracy_function = getattr(importlib.import_module('sklearn.metrics'), accuracy_function_str)
             score_dict[accuracy_function_str] = accuracy_function(list(true_values), list(predictions))
+
+    for fn, score in score_dict.items():
+        score_dict[fn] = round(score, n_decimals)
 
     return score_dict
 

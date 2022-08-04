@@ -704,6 +704,10 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "module": "ConfStats",
                 "args": {"deps": ["ICP"]},
             },
+            {
+                "module": "PermutationFeatureImportance",
+                "args": {"deps": ["AccStats"]},
+            },
         ] if problem_definition.use_default_analysis else [],
         "timeseries_transformer": {
             "module": "transform_timeseries",
