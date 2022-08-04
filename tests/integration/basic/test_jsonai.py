@@ -12,7 +12,7 @@ class TestJsonAI(unittest.TestCase):
         jai = json_ai_from_problem(df, pdef)
         jai.analysis_blocks = [
             # args not needed (not even deps), they should be injected for default blocks
-            {"module": "GlobalFeatureImportance"}
+            {"module": "PermutationFeatureImportance"}
         ]
 
         predictor = predictor_from_json_ai(jai)
