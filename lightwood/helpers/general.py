@@ -16,7 +16,7 @@ def evaluate_accuracy(data: pd.DataFrame,
                       target: str,
                       accuracy_functions: List[str],
                       ts_analysis: Optional[dict] = {},
-                      n_decimals = 3) -> Dict[str, float]:
+                      n_decimals: Optional[int] = 3) -> Dict[str, float]:
     """
     Dispatcher for accuracy evaluation.
     
