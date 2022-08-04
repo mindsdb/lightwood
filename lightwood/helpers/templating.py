@@ -132,7 +132,7 @@ def _consolidate_analysis_blocks(jsonai, key):
     blocks = getattr(jsonai, key)
     for i, block in enumerate(blocks):
         if 'args' not in block:
-            blocks[i]['args'] = defaults[block['module']]
+            blocks[i]['args'] = defaults.get(block['module'], {"deps": []})
         elif 'deps' not in block['args']:
             blocks[i]['args']['deps'] = []
 
@@ -146,8 +146,9 @@ def _consolidate_analysis_blocks(jsonai, key):
         for dep in b['args']['deps']:
             adj_M[block_ids[dep]][block_ids[k]] = 1
 
+    # get initial nodes without dependencies
+    frontier = deque(np.where(adj_M.sum(axis=0) == 0)[0].tolist())
     sorted_dag = []
-    frontier = deque(np.where(adj_M.sum(axis=0) == 0)[0].tolist())  # get initial nodes without dependencies
 
     while frontier:
         elt = frontier.pop()
