@@ -15,7 +15,8 @@ class AccStats(BaseAnalysisBlock):
     """ Computes accuracy stats and a confusion matrix for the validation dataset """
 
     def __init__(self, deps=('ICP',)):
-        super().__init__(deps=deps)  # @TODO: enforce that this actually prevents early execution somehow
+        super().__init__(deps=deps)
+        self.n_decimals = 3
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
@@ -29,7 +30,7 @@ class AccStats(BaseAnalysisBlock):
         info['score_dict'] = evaluate_accuracy(ns.data, ns.normal_predictions['prediction'],
                                                ns.target, accuracy_functions, ts_analysis=ns.ts_analysis)
 
-        info['normal_accuracy'] = np.mean(list(info['score_dict'].values()))
+        info['normal_accuracy'] = round(np.mean(list(info['score_dict'].values())), self.n_decimals)
         self.fit(ns, info['result_df'])
         info['val_overall_acc'], info['acc_histogram'], info['cm'], info['acc_samples'] = self.get_accuracy_stats()
         return info
@@ -99,7 +100,7 @@ class AccStats(BaseAnalysisBlock):
         for counts in list(bucket_acc_counts.values()):
             accuracy_count += counts
 
-        overall_accuracy = sum(accuracy_count) / len(accuracy_count)
+        overall_accuracy = round(sum(accuracy_count) / len(accuracy_count), self.n_decimals)
 
         for bucket in range(len(self.buckets)):
             if bucket not in bucket_accuracy:

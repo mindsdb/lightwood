@@ -30,6 +30,7 @@ class PermutationFeatureImportance(BaseAnalysisBlock):
     def __init__(self, disable_column_importance=False, deps=tuple('AccStats',)):
         super().__init__(deps=deps)
         self.disable_column_importance = disable_column_importance
+        self.n_decimals = 3
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
@@ -62,9 +63,8 @@ class PermutationFeatureImportance(BaseAnalysisBlock):
             column_importances = {}
             acc_increases = np.zeros((len(shuffled_cols),))
             for i, col in enumerate(shuffled_cols):
-                accuracy_increase = (info['normal_accuracy'] - shuffled_col_accuracy[col]) / info['normal_accuracy']
-                acc_increases[i] = max(0, accuracy_increase)
-            acc_increases = (acc_increases / max(acc_increases))
+                accuracy_increase = (info['normal_accuracy'] - shuffled_col_accuracy[col])
+                acc_increases[i] = round(accuracy_increase, self.n_decimals)
             for col, inc in zip(shuffled_cols, acc_increases):
                 column_importances[col] = inc  # scores go from 0 to 1
 

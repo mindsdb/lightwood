@@ -30,7 +30,7 @@ def timed(f):
         result = f(predictor, *args, **kw)
         te = time()
         log.debug(f' `{f.__name__}` runtime: {round(te - ts, 2)} seconds')
-        predictor.runtime_log[(f.__name__, datetime.fromtimestamp(ts))] = te - ts
+        predictor.runtime_log[(f.__name__, datetime.fromtimestamp(ts))] = round(te - ts, 2)
         return result
     return wrap
 
