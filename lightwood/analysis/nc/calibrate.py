@@ -28,9 +28,10 @@ class ICP(BaseAnalysisBlock):
     def __init__(self,
                  fixed_significance: float,
                  positive_domain: bool,
-                 confidence_normalizer: bool
+                 confidence_normalizer: bool,
+                 deps: tuple = tuple()
                  ):
-        super().__init__()
+        super().__init__(deps=deps)
         self.fixed_significance = fixed_significance
         self.positive_domain = positive_domain
         self.confidence_normalizer = confidence_normalizer

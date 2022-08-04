@@ -12,10 +12,7 @@ class TestJsonAI(unittest.TestCase):
         pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 80})
         jai = json_ai_from_problem(df, pdef)
         jai.analysis_blocks = [
-            # args not needed (not even deps) because they are injected for default blocks
-            {"module": "ICP"},
-            {"module": "AccStats"},
-            {"module": "ConfStats"},  # TODO: remove these three, they should always be enabled
+            # args not needed (not even deps), they should be injected for default blocks
             {"module": "GlobalFeatureImportance"}
         ]
 

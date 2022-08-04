@@ -1,4 +1,10 @@
+from collections import deque
+
+import numpy as np
+
 from lightwood.api.dtype import dtype
+
+
 '''
 def is_allowed(v):
     if v is None:
@@ -112,21 +118,51 @@ def align(code: str, indent: int) -> str:
 def _consolidate_analysis_blocks(jsonai, key):
     """
     Receives a list of analysis blocks (where applicable, already filed with `hidden` args) and modifies it so that:
-        1. All dependencies are correct
+        1. All dependencies are correct.
         2. Execution order is such that all dependencies are met.
+            - For this we use a topological sort over the DAG.
     """
+    # 1. all dependencies are correct
     defaults = {
         'ICP': {"deps": []},
         'AccStats': {"deps": ['ICP']},
         'ConfStats': {"deps": ['ICP']},
-        'GlobalFeatureImportance': {"disable_column_importance": False, "deps": ['AccStats']}
+        'GlobalFeatureImportance': {"deps": ['AccStats']}
     }
     blocks = getattr(jsonai, key)
     for i, block in enumerate(blocks):
         if 'args' not in block:
             blocks[i]['args'] = defaults[block['module']]
+        elif 'deps' not in block['args']:
+            blocks[i]['args']['deps'] = []
 
-    # dependency solver
-    # TODO: sort DAG based on dependencies
+    # 2. correct execution order -- build a DAG out of analysis blocks
+    block_objs = {b['module']: b for b in blocks}
+    block_ids = {k: i for i, k in enumerate(block_objs.keys())}
+    idx2block = {i: k for i, k in enumerate(block_objs.keys())}
 
-    return blocks
+    adj_M = np.zeros((len(block_ids), len(block_ids)))
+    for k, b in block_objs.items():
+        for dep in b['args']['deps']:
+            adj_M[block_ids[dep]][block_ids[k]] = 1
+
+    sorted_dag = []
+    frontier = deque(np.where(adj_M.sum(axis=0) == 0)[0].tolist())  # get initial nodes without dependencies
+
+    while frontier:
+        elt = frontier.pop()
+        sorted_dag.append(elt)
+        dependants = np.where(adj_M[elt, :])[0]
+        for dep in dependants:
+            adj_M[elt, dep] = 0
+            if not adj_M.sum(axis=0)[dep]:
+                frontier.append(dep)
+
+    if adj_M.sum() != 0:
+        raise Exception("Cycle detected in analysis blocks dependencies, please review and try again!")
+
+    sorted_blocks = []
+    for idx in sorted_dag:
+        sorted_blocks.append(block_objs[idx2block[idx]])
+
+    return sorted_blocks
