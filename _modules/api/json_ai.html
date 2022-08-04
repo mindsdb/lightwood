@@ -174,6 +174,7 @@
 <span></span><span class="c1"># TODO: _add_implicit_values unit test ensures NO changes for a fully specified file.</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.templating</span> <span class="kn">import</span> <span class="n">call</span><span class="p">,</span> <span class="n">inline_dict</span><span class="p">,</span> <span class="n">align</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.templating</span> <span class="kn">import</span> <span class="n">_consolidate_analysis_blocks</span>
 <span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">JsonAI</span><span class="p">,</span>
@@ -876,6 +877,10 @@
                 <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;ConfStats&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;deps&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ICP&quot;</span><span class="p">]},</span>
             <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;PermutationFeatureImportance&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;deps&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;AccStats&quot;</span><span class="p">]},</span>
+            <span class="p">},</span>
         <span class="p">]</span> <span class="k">if</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">use_default_analysis</span> <span class="k">else</span> <span class="p">[],</span>
         <span class="s2">&quot;timeseries_transformer&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;transform_timeseries&quot;</span><span class="p">,</span>
@@ -901,6 +906,15 @@
 
     <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">implicit_value</span> <span class="ow">in</span> <span class="n">hidden_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">_populate_implicit_field</span><span class="p">(</span><span class="n">json_ai</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">implicit_value</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">)</span>
+
+    <span class="c1"># further consolidation</span>
+    <span class="n">to_inspect</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;analysis_blocks&#39;</span><span class="p">]</span>
+    <span class="n">consolidation_methods</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;analysis_blocks&#39;</span><span class="p">:</span> <span class="n">_consolidate_analysis_blocks</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">to_inspect</span><span class="p">:</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">consolidation_methods</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">json_ai</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">method</span><span class="p">(</span><span class="n">json_ai</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">json_ai</span>
 

@@ -118,13 +118,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#analysis.ConfStats.analyze">analyze</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#analysis.GlobalFeatureImportance">GlobalFeatureImportance</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#analysis.GlobalFeatureImportance.analyze">analyze</a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="#analysis.ICP">ICP</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#analysis.ICP.analyze">analyze</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#analysis.ICP.explain">explain</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis.PermutationFeatureImportance">PermutationFeatureImportance</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analysis.PermutationFeatureImportance.analyze">analyze</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#analysis.TempScaler">TempScaler</a><ul>
@@ -344,50 +344,8 @@ pipeline.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="analysis.GlobalFeatureImportance">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">GlobalFeatureImportance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">disable_column_importance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/feature_importance.html#GlobalFeatureImportance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.GlobalFeatureImportance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Analysis block that estimates column importance with a variant of the LOCO (leave-one-covariate-out) algorithm.</p>
-<dl class="simple">
-<dt>Roughly speaking, the procedure:</dt><dd><ul class="simple">
-<li><p>iterates over all input columns</p></li>
-<li><p>if the input column is optional, then make a predict with its values set to None</p></li>
-<li><p>compare this accuracy with the accuracy obtained using all data</p></li>
-<li><p>all accuracy differences are passed through a softmax and reported as estimated column importance scores</p></li>
-</ul>
-</dd>
-</dl>
-<p>Note that, crucially, this method does not refit the predictor at any point.</p>
-<dl class="simple">
-<dt>Reference:</dt><dd><p><a class="reference external" href="https://compstat-lmu.github.io/iml_methods_limitations/pfi.html">https://compstat-lmu.github.io/iml_methods_limitations/pfi.html</a></p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="analysis.GlobalFeatureImportance.analyze">
-<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/feature_importance.html#GlobalFeatureImportance.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.GlobalFeatureImportance.analyze" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method should be called once during the analysis phase, or not called at all.
-It computes any information that the block may either output to the model analysis object,
-or use at inference time when <cite>.explain()</cite> is called (in this case, make sure all needed
-objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>info</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – Dictionary where any new information or objects are added. The next analysis block will use</p>
-</dd>
-</dl>
-<p>the output of the previous block as a starting point.
-:param kwargs: Dictionary with named variables from either the core analysis or the rest of the prediction
-pipeline.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="analysis.ICP">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">ICP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fixed_significance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_normalizer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nc/calibrate.html#ICP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ICP" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">ICP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_normalizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_significance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nc/calibrate.html#ICP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ICP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Confidence estimation block, uses inductive conformal predictors (ICPs) for model agnosticity</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="analysis.ICP.analyze">
@@ -440,8 +398,52 @@ For the former, return a data frame with any new insights. For the latter, a dic
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="analysis.PermutationFeatureImportance">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">PermutationFeatureImportance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">disable_column_importance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('A',</span> <span class="pre">'c',</span> <span class="pre">'c',</span> <span class="pre">'S',</span> <span class="pre">'t',</span> <span class="pre">'a',</span> <span class="pre">'t',</span> <span class="pre">'s')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/feature_importance.html#PermutationFeatureImportance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.PermutationFeatureImportance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analysis block that estimates column importances via permutation.</p>
+<dl class="simple">
+<dt>Roughly speaking, the procedure:</dt><dd><ul class="simple">
+<li><p>iterates over all input columns</p></li>
+<li><p>if the input column is optional, shuffle its values, then generate predictions for the input data</p></li>
+<li><p>compare this accuracy with the accuracy obtained using unshuffled data</p></li>
+<li><p>all accuracy differences are normalized with respect to the original accuracy (clipped at zero if negative)</p></li>
+<li><p>report these as estimated column importance scores</p></li>
+</ul>
+</dd>
+</dl>
+<p>Note that, crucially, this method does not refit the predictor at any point.</p>
+<dl class="simple">
+<dt>Reference:</dt><dd><p><a class="reference external" href="https://compstat-lmu.github.io/iml_methods_limitations/pfi.html">https://compstat-lmu.github.io/iml_methods_limitations/pfi.html</a>
+<a class="reference external" href="https://scikit-learn.org/stable/modules/permutation_importance.html">https://scikit-learn.org/stable/modules/permutation_importance.html</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="analysis.PermutationFeatureImportance.analyze">
+<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/feature_importance.html#PermutationFeatureImportance.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.PermutationFeatureImportance.analyze" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method should be called once during the analysis phase, or not called at all.
+It computes any information that the block may either output to the model analysis object,
+or use at inference time when <cite>.explain()</cite> is called (in this case, make sure all needed
+objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>info</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – Dictionary where any new information or objects are added. The next analysis block will use</p>
+</dd>
+</dl>
+<p>the output of the previous block as a starting point.
+:param kwargs: Dictionary with named variables from either the core analysis or the rest of the prediction
+pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="analysis.TempScaler">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">TempScaler</span></span><a class="reference internal" href="_modules/lightwood/analysis/nn_conf/temp_scale.html#TempScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.TempScaler" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">TempScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nn_conf/temp_scale.html#TempScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.TempScaler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Original reference (MIT Licensed): <a class="reference external" href="https://github.com/gpleiss/temperature_scaling">https://github.com/gpleiss/temperature_scaling</a>
 NB: Output of the neural network should be the classification logits, NOT the softmax (or log softmax)! TODO</p>
 <dl class="py method">

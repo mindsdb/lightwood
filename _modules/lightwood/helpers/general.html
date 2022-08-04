@@ -188,7 +188,8 @@
                       <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
                       <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                       <span class="n">accuracy_functions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-                      <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+                      <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+                      <span class="n">n_decimals</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dispatcher for accuracy evaluation.</span>
 <span class="sd">    </span>
@@ -197,13 +198,14 @@
 <span class="sd">    :param target: target column name.</span>
 <span class="sd">    :param accuracy_functions: list of accuracy function names. Support currently exists for `scikit-learn`&#39;s `metrics` module, plus any custom methods that Lightwood exposes.</span>
 <span class="sd">    :param ts_analysis: `lightwood.data.timeseries_analyzer` output, used to compute time series task accuracy.</span>
+<span class="sd">    :param n_decimals: used to round accuracies.</span>
 <span class="sd">    :return: accuracy metric for a dataset and predictions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
     <span class="n">score_dict</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">accuracy_function_str</span> <span class="ow">in</span> <span class="n">accuracy_functions</span><span class="p">:</span>
         <span class="k">if</span> <span class="s1">&#39;array_accuracy&#39;</span> <span class="ow">in</span> <span class="n">accuracy_function_str</span> <span class="ow">or</span> <span class="n">accuracy_function_str</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;bounded_ts_accuracy&#39;</span><span class="p">,</span> <span class="p">):</span>
-            <span class="k">if</span> <span class="n">ts_analysis</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ts_analysis</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tss&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
                 <span class="c1"># normal array, needs to be expanded</span>
                 <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">target</span><span class="p">]</span>
                 <span class="n">true_values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">target</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -234,6 +236,9 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">accuracy_function</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;sklearn.metrics&#39;</span><span class="p">),</span> <span class="n">accuracy_function_str</span><span class="p">)</span>
             <span class="n">score_dict</span><span class="p">[</span><span class="n">accuracy_function_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">accuracy_function</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">true_values</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">predictions</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">fn</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">score_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">score_dict</span><span class="p">[</span><span class="n">fn</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">n_decimals</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">score_dict</span></div>
 

@@ -173,7 +173,7 @@
   <h1>Source code for lightwood.analysis.nc.calibrate</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -199,11 +199,12 @@
     <span class="sd">&quot;&quot;&quot; Confidence estimation block, uses inductive conformal predictors (ICPs) for model agnosticity &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">fixed_significance</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-                 <span class="n">confidence_normalizer</span><span class="p">:</span> <span class="nb">bool</span>
+                 <span class="n">positive_domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">confidence_normalizer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">fixed_significance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">deps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
                  <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">deps</span><span class="o">=</span><span class="n">deps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fixed_significance</span> <span class="o">=</span> <span class="n">fixed_significance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">positive_domain</span> <span class="o">=</span> <span class="n">positive_domain</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">confidence_normalizer</span> <span class="o">=</span> <span class="n">confidence_normalizer</span>

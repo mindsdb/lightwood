@@ -189,8 +189,8 @@
 <span class="sd">    Original reference (MIT Licensed): https://github.com/gpleiss/temperature_scaling</span>
 <span class="sd">    NB: Output of the neural network should be the classification logits, NOT the softmax (or log softmax)! TODO</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deps</span><span class="o">=</span><span class="nb">tuple</span><span class="p">()):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">deps</span><span class="o">=</span><span class="n">deps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ordenc</span> <span class="o">=</span> <span class="n">OrdinalEncoder</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_softmax</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
