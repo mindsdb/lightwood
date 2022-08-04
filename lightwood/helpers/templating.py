@@ -130,11 +130,16 @@ def _consolidate_analysis_blocks(jsonai, key):
         'GlobalFeatureImportance': {"deps": ['AccStats']}
     }
     blocks = getattr(jsonai, key)
+    block_objs = {b['module']: b for b in blocks}
+
     for i, block in enumerate(blocks):
         if 'args' not in block:
             blocks[i]['args'] = defaults.get(block['module'], {"deps": []})
         elif 'deps' not in block['args']:
             blocks[i]['args']['deps'] = []
+        for dep in block['args']['deps']:
+            if dep not in block_objs.keys():
+                raise Exception(f'Analysis block "{dep}" not found but necessary for block "{block["module"]}". Please add it and try again.')  # noqa
 
     # 2. correct execution order -- build a DAG out of analysis blocks
     block_objs = {b['module']: b for b in blocks}
