@@ -122,19 +122,34 @@ def _consolidate_analysis_blocks(jsonai, key):
         2. Execution order is such that all dependencies are met.
             - For this we use a topological sort over the DAG.
     """
-    # 1. all dependencies are correct
-    defaults = {
-        'ICP': {"deps": []},
-        'AccStats': {"deps": ['ICP']},
-        'ConfStats': {"deps": ['ICP']},
-        'GlobalFeatureImportance': {"deps": ['AccStats']}
+    analysis_defaults = {  # non-optional plus dependencies
+        'ICP': {
+            "deps": [],
+        },
+        'AccStats': {
+            "deps": ['ICP']
+        },
+        'ConfStats': {
+            "deps": ['ICP']
+        },
+        'GlobalFeatureImportance': {
+            "deps": ['AccStats']
+        },
+        'ShapleyValues': {
+            "deps": []
+        },
+        'TempScaler': {
+            "deps": []
+        }
     }
+
+    # 1. all dependencies are correct
     blocks = getattr(jsonai, key)
     block_objs = {b['module']: b for b in blocks}
 
     for i, block in enumerate(blocks):
         if 'args' not in block:
-            blocks[i]['args'] = defaults.get(block['module'], {"deps": []})
+            blocks[i]['args'] = analysis_defaults.get(block['module'], {"deps": []})
         elif 'deps' not in block['args']:
             blocks[i]['args']['deps'] = []
         for dep in block['args']['deps']:

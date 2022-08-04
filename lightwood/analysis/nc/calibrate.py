@@ -1,6 +1,6 @@
 import inspect
 from copy import deepcopy
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 from types import SimpleNamespace
 
 import numpy as np
@@ -26,10 +26,10 @@ class ICP(BaseAnalysisBlock):
     """ Confidence estimation block, uses inductive conformal predictors (ICPs) for model agnosticity """
 
     def __init__(self,
-                 fixed_significance: float,
-                 positive_domain: bool,
-                 confidence_normalizer: bool,
-                 deps: tuple = tuple()
+                 positive_domain: Optional[bool] = False,
+                 confidence_normalizer: Optional[bool] = False,
+                 fixed_significance: Optional[float] = None,
+                 deps: Optional[tuple] = tuple()
                  ):
         super().__init__(deps=deps)
         self.fixed_significance = fixed_significance
