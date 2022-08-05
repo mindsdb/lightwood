@@ -399,7 +399,7 @@ For the former, return a data frame with any new insights. For the latter, a dic
 
 <dl class="py class">
 <dt class="sig sig-object py" id="analysis.PermutationFeatureImportance">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">PermutationFeatureImportance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">disable_column_importance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('A',</span> <span class="pre">'c',</span> <span class="pre">'c',</span> <span class="pre">'S',</span> <span class="pre">'t',</span> <span class="pre">'a',</span> <span class="pre">'t',</span> <span class="pre">'s')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/feature_importance.html#PermutationFeatureImportance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.PermutationFeatureImportance" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">PermutationFeatureImportance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">disable_column_importance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('A',</span> <span class="pre">'c',</span> <span class="pre">'c',</span> <span class="pre">'S',</span> <span class="pre">'t',</span> <span class="pre">'a',</span> <span class="pre">'t',</span> <span class="pre">'s')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/feature_importance.html#PermutationFeatureImportance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.PermutationFeatureImportance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Analysis block that estimates column importances via permutation.</p>
 <dl class="simple">
 <dt>Roughly speaking, the procedure:</dt><dd><ul class="simple">
@@ -412,9 +412,17 @@ For the former, return a data frame with any new insights. For the latter, a dic
 </dd>
 </dl>
 <p>Note that, crucially, this method does not refit the predictor at any point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row_limit</strong> – Set to 0 to use the entire validation dataset.</p></li>
+<li><p><strong>col_limit</strong> – Set to 0 to consider all possible columns.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="simple">
-<dt>Reference:</dt><dd><p><a class="reference external" href="https://compstat-lmu.github.io/iml_methods_limitations/pfi.html">https://compstat-lmu.github.io/iml_methods_limitations/pfi.html</a>
-<a class="reference external" href="https://scikit-learn.org/stable/modules/permutation_importance.html">https://scikit-learn.org/stable/modules/permutation_importance.html</a></p>
+<dt>Reference:</dt><dd><p><a class="reference external" href="https://scikit-learn.org/stable/modules/permutation_importance.html">https://scikit-learn.org/stable/modules/permutation_importance.html</a>
+<a class="reference external" href="https://compstat-lmu.github.io/iml_methods_limitations/pfi.html">https://compstat-lmu.github.io/iml_methods_limitations/pfi.html</a></p>
 </dd>
 </dl>
 <dl class="py method">
