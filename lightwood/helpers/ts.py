@@ -110,10 +110,12 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss) -> pd
 
 def add_tn_num_conf_bounds(data: pd.DataFrame, tss_args):
     """
+    Deprecated. Instead we now opt for the much better solution of having scores for each timestep (see all TS classes in analysis/nc)
+    
     Add confidence (and bounds if applicable) to t+n predictions, for n>1
     TODO: active research question: how to guarantee 1-e coverage for t+n, n>1
     For now, (conservatively) increases width by the confidence times the log of the time step (and a scaling factor).
-    """
+    """  # noqa
     for col in ['confidence', 'lower', 'upper']:
         data[col] = data[col].astype(object)
 

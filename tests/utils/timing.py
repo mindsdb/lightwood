@@ -3,7 +3,7 @@ import time
 import pandas as pd
 
 
-def train_and_check_time_aim(predictor: PredictorInterface, train_df: pd.DataFrame):
+def train_and_check_time_aim(predictor: PredictorInterface, train_df: pd.DataFrame, ignore_time_aim=False):
     """
     Trains the predictor with the desired data *and* checks that the time aim we set for it was respected.
     """
@@ -13,6 +13,6 @@ def train_and_check_time_aim(predictor: PredictorInterface, train_df: pd.DataFra
     time_aim_actual = (time.time() - start)
     # Current margin of error for time aim is 2x, but we should aim to lower this
     if time_aim_expected is not None:
-        if((time_aim_expected * 2.5) < time_aim_actual):
+        if not ignore_time_aim and ((time_aim_expected * 2.5) < time_aim_actual):
             error = f'time_aim is set to {time_aim_expected} seconds, however learning took {time_aim_actual}'
             raise ValueError(error)

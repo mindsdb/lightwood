@@ -1,6 +1,7 @@
 # TODO: _add_implicit_values unit test ensures NO changes for a fully specified file.
 from copy import deepcopy
 from lightwood.helpers.templating import call, inline_dict, align
+from lightwood.helpers.templating import _consolidate_analysis_blocks
 from lightwood.api import dtype
 from lightwood.api.types import (
     JsonAI,
@@ -594,6 +595,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
         elif mixers[i]["module"] == "NHitsMixer":
             mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
+            mixers[i]["args"]["window"] = "$problem_definition.timeseries_settings.window"
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
                 "ts_analysis", "$ts_analysis"
             )
@@ -702,6 +704,10 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "module": "ConfStats",
                 "args": {"deps": ["ICP"]},
             },
+            {
+                "module": "PermutationFeatureImportance",
+                "args": {"deps": ["AccStats"]},
+            },
         ] if problem_definition.use_default_analysis else [],
         "timeseries_transformer": {
             "module": "transform_timeseries",
@@ -727,6 +733,15 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
 
     for field_name, implicit_value in hidden_fields.items():
         _populate_implicit_field(json_ai, field_name, implicit_value, tss.is_timeseries)
+
+    # further consolidation
+    to_inspect = ['analysis_blocks']
+    consolidation_methods = {
+        'analysis_blocks': _consolidate_analysis_blocks
+    }
+    for k in to_inspect:
+        method = consolidation_methods[k]
+        setattr(json_ai, k, method(json_ai, k))
 
     return json_ai
 

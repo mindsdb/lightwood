@@ -18,6 +18,7 @@ class ConfStats(BaseAnalysisBlock):
         super().__init__(deps=deps)
         self.ece_bins = ece_bins
         self.ordenc = OrdinalEncoder()
+        self.n_decimals = 3
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
@@ -38,10 +39,10 @@ class ConfStats(BaseAnalysisBlock):
                                                 ns.data,
                                                 ns.target,
                                                 task_type)
-        info['maximum_calibration_error'] = mce
-        info['expected_calibration_error'] = ece
+        info['maximum_calibration_error'] = round(mce, self.n_decimals)
+        info['expected_calibration_error'] = round(ece, self.n_decimals)
         info['binned_conf_acc_difference'] = ces
-        info['global_calibration_score'] = gscore
+        info['global_calibration_score'] = round(gscore, self.n_decimals)
         return info
 
     def _get_stats(self, confs, preds, data, target, task_type='categorical'):

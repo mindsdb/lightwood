@@ -13,20 +13,25 @@ def t_softmax(x, t=1.0, axis=1):
     return softmax(torch.Tensor(x) / t, dim=axis).numpy()
 
 
-def clean_df(df, target, is_classification, label_encoders):
+def clean_df(df, namespace, label_encoders):
     """ Returns cleaned DF for nonconformist calibration """
     # @TODO: reevaluate whether this can be streamlined
     enc = label_encoders
+    ns = namespace
+    target = ns.target
 
-    y = df.pop(target).values
-
-    if is_classification:
+    if ns.is_classification:
+        y = df.pop(target).values
         if enc and isinstance(enc.categories_[0][0], str):
             cats = enc.categories_[0].tolist()
             # the last element is "__mdb_unknown_cat"
             y = np.array([cats.index(i) if i in cats else len(cats) - 1 for i in y])
         y = y.clip(-pow(2, 63), pow(2, 63)).astype(int)
+    elif ns.is_multi_ts:
+        target_cols = [ns.target] + [f'{ns.target}_timestep_{i}' for i in range(1, ns.tss.horizon)]
+        y = np.transpose(np.array([df.pop(col) for col in target_cols]))
     else:
+        y = df.pop(target).values
         y = y.astype(float)
 
     return df, y
@@ -57,7 +62,7 @@ def set_conf_range(
     :return: set confidence plus predictions regions (for numerical tasks) or pvalues (for categorical tasks).
     """  # noqa
     # numerical
-    if target_type in (dtype.integer, dtype.float, dtype.num_array, dtype.num_tsarray, dtype.quantity):
+    if target_type in (dtype.integer, dtype.float, dtype.quantity):
 
         # ICP gets all possible bounds (shape: (B, 2, 99))
         all_ranges = icp.predict(X.values)
@@ -83,6 +88,10 @@ def set_conf_range(
                 if positive_domain:
                     ranges[ranges < 0] = 0
                 return 0.9901, ranges
+
+    # time series
+    elif target_type in (dtype.num_array, dtype.num_tsarray):
+        pass
 
     # categorical
     elif target_type in (dtype.binary, dtype.categorical, dtype.cat_array, dtype.cat_tsarray):
@@ -114,8 +123,6 @@ def get_numeric_conf_range(
     
     :return: array with confidence for each data instance, along with lower and upper bounds for each prediction.
     """  # noqa
-    if not isinstance(fixed_conf, float):
-        error_rate = None
 
     if fixed_conf is None:
         significances = []
@@ -152,6 +159,31 @@ def get_numeric_conf_range(
     if positive_domain:
         conf_ranges[conf_ranges < 0] = 0
     return np.array(significances), conf_ranges
+
+
+def get_ts_conf_range(
+        all_confs: np.ndarray,
+        df_target_stddev: dict = {},
+        positive_domain: bool = False,
+        std_tol: int = 1,
+        group: Optional[str] = '__default',
+        fixed_conf: float = None
+):
+    all_significances = []
+    all_conf_ranges = []
+    for timestep in range(all_confs.shape[1]):
+        sigs, confs = get_numeric_conf_range(
+            all_confs[:, timestep, :, :],
+            df_target_stddev,
+            positive_domain,
+            std_tol,
+            group,
+            fixed_conf
+        )
+        all_significances.append(sigs)
+        all_conf_ranges.append(confs)
+
+    return np.vstack(all_significances).T, np.stack(all_conf_ranges).swapaxes(0, 1)
 
 
 def get_categorical_conf(raw_confs: np.ndarray):
@@ -197,7 +229,10 @@ def get_anomalies(insights: pd.DataFrame, observed_series: Union[pd.Series, list
 
     for (l, u), t in zip(zip(lower_bounds, upper_bounds), observed_series):
         if t is not None:
-            anomaly = not (l <= t <= u)
+            if isinstance(l, list):
+                anomaly = not (l[0] <= t <= u[0])
+            else:
+                anomaly = not (l <= t <= u)
 
             if anomaly and (counter == 0 or counter >= cooldown):
                 anomalies.append(anomaly)  # new anomaly event triggers, reset counter
