@@ -194,7 +194,7 @@ def generate_json_ai(
     tss = problem_definition.timeseries_settings
     dtype_dict = type_information.dtypes
     for k in type_information.identifiers:
-        if not (tss.is_timeseries and tss.group_by and k in tss.group_by):
+        if not (tss.is_timeseries and tss.group_by and k in tss.group_by) and k != target:
             del dtype_dict[k]
     dependency_dict = {}
 
