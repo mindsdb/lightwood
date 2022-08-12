@@ -49,7 +49,7 @@ class LightGBMArray(BaseMixer):
                                 dtype_dict,
                                 input_cols,
                                 False,  # fit_on_dev,
-                                True,  # use_optuna
+                                True if tss.horizon < 10 else False,  # use_optuna
                                 target_encoder)
                        for _, target_col in zip(range(self.horizon), [target] + self.offset_pred_cols)]
         self.ts_analysis = ts_analysis
