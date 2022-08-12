@@ -222,7 +222,7 @@
                                 <span class="n">dtype_dict</span><span class="p">,</span>
                                 <span class="n">input_cols</span><span class="p">,</span>
                                 <span class="kc">False</span><span class="p">,</span>  <span class="c1"># fit_on_dev,</span>
-                                <span class="kc">True</span><span class="p">,</span>  <span class="c1"># use_optuna</span>
+                                <span class="kc">True</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&lt;</span> <span class="mi">10</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># use_optuna</span>
                                 <span class="n">target_encoder</span><span class="p">)</span>
                        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">target_col</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">),</span> <span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset_pred_cols</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span> <span class="o">=</span> <span class="n">ts_analysis</span>
