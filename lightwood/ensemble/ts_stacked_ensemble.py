@@ -37,8 +37,8 @@ class TsStackedEnsemble(StackedEnsemble):
             actual[nan_mask] = 0
             all_preds[nan_mask, :] = 0
 
-            criterion = nn.MSELoss()
-            optimizer = SGD([self.mixer_weights], lr=0.01)
+            criterion = nn.SmoothL1Loss()
+            optimizer = SGD([self.mixer_weights], lr=1e-3)
 
             def _eval_loss():
                 optimizer.zero_grad()
