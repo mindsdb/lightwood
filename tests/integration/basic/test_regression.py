@@ -29,6 +29,10 @@ class TestBasic(unittest.TestCase):
             {
                 "module": "AccStats",
                 "args": {"deps": ["ICP"]}
+        },
+            {
+                "module": "ConfStats",
+                "args": {"deps": ["ICP"]}
         }]
 
         predictor = predictor_from_json_ai(jai)
@@ -49,20 +53,21 @@ class TestBasic(unittest.TestCase):
 
         assert all([v == fixed_conf for v in fixed_predictions['confidence'].values])
 
+        # test empty dataframe handling
+        with self.assertRaises(Exception) as ctx:
+            predictor.predict(pd.DataFrame())
+        self.assertTrue('Empty input' in str(ctx.exception))
+
     def test_1_stacked_ensemble(self):
+        from lightwood.ensemble.stacked_ensemble import StackedEnsemble
         df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
         target = 'concrete_strength'
 
         pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 80})
         jai = json_ai_from_problem(df, pdef)
-        jai.outputs[target].ensemble = {
-            "module": "StackedEnsemble",
-            "args": {
-                'dtype_dict': '$dtype_dict',
-                'pred_args': '$pred_args',
-            }
-        }
+        jai.model["module"] = "StackedEnsemble"
 
         predictor = predictor_from_json_ai(jai)
         predictor.learn(df)
         predictor.predict(df)
+        self.assertTrue(isinstance(predictor.ensemble, StackedEnsemble))

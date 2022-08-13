@@ -18,7 +18,7 @@ class TsNumericEncoder(NumericEncoder):
         self.normalizers = None
         self.group_combinations = None
         self.dependencies = grouped_by
-        self.output_size = 2 if is_target else 3
+        self.output_size = 1
 
     def encode(self, data, dependency_data={}):
         """
@@ -39,10 +39,10 @@ class TsNumericEncoder(NumericEncoder):
                 except Exception:
                     real = None
             if self.is_target:
-                vector = [0] * 2
+                vector = [0]
                 if group is not None and self.normalizers is not None:
                     try:
-                        mean = self.normalizers[frozenset(group)].abs_mean
+                        mean = self.normalizers[tuple(group)].abs_mean
                     except KeyError:
                         # novel group-by, we use default normalizer mean
                         mean = self.normalizers['__default'].abs_mean
@@ -50,20 +50,16 @@ class TsNumericEncoder(NumericEncoder):
                     mean = self._abs_mean
 
                 if not is_none(real):
-                    vector[0] = 1 if real < 0 and not self.positive_domain else 0
-                    vector[1] = real / mean if mean != 0 else real
+                    vector[0] = real / mean if mean != 0 else real
                 else:
                     pass
                     # This should raise an exception *once* we fix the TsEncoder such that this doesn't get feed `nan`
                     # raise Exception(f'Can\'t encode target value: {real}')
-
             else:
-                vector = [0] * 3
+                vector = [0]
                 try:
                     if not is_none(real):
-                        vector[0] = 1
-                        vector[1] = 1 if real < 0 and not self.positive_domain else 0
-                        vector[2] = real / self._abs_mean
+                        vector[0] = real / self._abs_mean
                 except Exception as e:
                     log.error(f'Can\'t encode input value: {real}, exception: {e}')
 
@@ -86,27 +82,27 @@ class TsNumericEncoder(NumericEncoder):
 
         for vector, group in zip(encoded_values, list(zip(*dependency_data.values()))):
             if self.is_target:
-                if np.isnan(vector[0]) or vector[0] == float('inf') or np.isnan(vector[1]) or vector[1] == float('inf'):
+                if np.isnan(vector[0]) or vector[0] == float('inf'):
                     log.error(f'Got weird target value to decode: {vector}')
                     real_value = pow(10, 63)
                 else:
                     if decode_log:
-                        sign = -1 if vector[0] > 0.5 else 1
+                        sign = -1 if vector[0] < 0 else 1
                         try:
-                            real_value = math.exp(vector[1]) * sign
+                            real_value = math.exp(vector[0]) * sign
                         except OverflowError:
                             real_value = pow(10, 63) * sign
                     else:
                         if group is not None and self.normalizers is not None:
                             try:
-                                mean = self.normalizers[frozenset(group)].abs_mean
+                                mean = self.normalizers[tuple(group)].abs_mean
                             except KeyError:
                                 # decode new group with default normalizer
                                 mean = self.normalizers['__default'].abs_mean
                         else:
                             mean = self._abs_mean
 
-                        real_value = vector[1] * mean if mean != 0 else vector[1]
+                        real_value = vector[0] * mean
 
                     if self.positive_domain:
                         real_value = abs(real_value)
@@ -115,11 +111,7 @@ class TsNumericEncoder(NumericEncoder):
                         real_value = int(round(real_value, 0))
 
             else:
-                if vector[0] < 0.5:
-                    ret.append(None)
-                    continue
-
-                real_value = vector[2] * self._abs_mean
+                real_value = vector[0] * self._abs_mean
 
                 if self._type == 'int':
                     real_value = round(real_value)

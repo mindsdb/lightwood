@@ -1,3 +1,3 @@
-from lightwood.encoder.time_series.rnn import TimeSeriesEncoder
+from lightwood.encoder.time_series.ts import TimeSeriesEncoder
 
 __all__ = ['TimeSeriesEncoder']

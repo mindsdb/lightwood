@@ -1,7 +1,7 @@
 import torch
 import pandas as pd
 from scipy.special import softmax
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
 
 from lightwood.helpers.log import log
 from lightwood.api.dtype import dtype
@@ -13,8 +13,8 @@ from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
 
 class Regression(BaseMixer):
     """
-    The `Regression` mixer inherits from scikit-learn's `LinearRegression` class
-    (https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html)
+    The `Regression` mixer inherits from scikit-learn's `Ridge` class
+    (https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html)
     
     This class performs Ordinary Least-squares Regression (OLS) under the hood; 
     this means it fits a set of coefficients (w_1, w_2, ..., w_N) for an N-length feature vector, that minimize the difference
@@ -22,7 +22,7 @@ class Regression(BaseMixer):
   
     This mixer intakes featurized (encoded) data to predict the target. It deploys if the target data-type is considered numerical/integer.
     """ # noqa
-    model: LinearRegression
+    model: Ridge
     label_map: dict
     supports_proba: bool
 
@@ -43,7 +43,7 @@ class Regression(BaseMixer):
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
-        Fits `LinearRegression` model on input feature data to provide predictions.
+        Fits `Ridge` model on input feature data to provide predictions.
 
         :param train_data: Regression if fit on this
         :param dev_data: This just gets concatenated to the ``train_data``
@@ -64,7 +64,7 @@ class Regression(BaseMixer):
         if self.supports_proba:
             self.label_map = self.target_encoder.rev_map
 
-        self.model = LinearRegression().fit(X, Y)
+        self.model = Ridge().fit(X, Y)
         log.info(f'Regression based correlation of: {self.model.score(X, Y)}')
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:

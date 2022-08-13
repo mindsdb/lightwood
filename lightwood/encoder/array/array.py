@@ -25,7 +25,7 @@ class ArrayEncoder(BaseEncoder):
         """
         :param stop_after: time budget in seconds.
         :param window: expected length of array data.
-        :param original_dtype: element-wise data type
+        :param original_type: element-wise data type
         """  # noqa
 
         super().__init__(is_target)
@@ -47,10 +47,12 @@ class ArrayEncoder(BaseEncoder):
     def prepare(self, train_priming_data: Iterable[Iterable], dev_priming_data: Iterable[Iterable]):
         """
         Prepare the array encoder for sequence data.
-
         :param train_priming_data: Training data of sequences
         :param dev_priming_data: Dev data of sequences
         """
+        if self.is_prepared:
+            raise Exception('You can only call "prepare" once for a given encoder.')
+
         priming_data = pd.concat([train_priming_data, dev_priming_data])
         priming_data = priming_data.values
 
@@ -60,13 +62,10 @@ class ArrayEncoder(BaseEncoder):
             if is_none(priming_data[i]):
                 priming_data[i] = [0] * self.output_size
 
-        if self.is_prepared:
-            raise Exception('You can only call "prepare" once for a given encoder.')
-
-        if self.original_type in (dtype.categorical, dtype.binary):
-            self._normalizer = CatNormalizer(encoder_class='ordinal')
+        if self.original_type in (dtype.categorical, dtype.binary, dtype.cat_array, dtype.cat_tsarray):
+            self._normalizer = CatNormalizer(encoder_class='ordinal')  # maybe turn into OHE encoder?
         else:
-            self._normalizer = MinMaxNormalizer()
+            self._normalizer = MinMaxNormalizer()  # maybe turn into numerical encoder?
 
         if isinstance(priming_data, pd.Series):
             priming_data = priming_data.values
@@ -93,7 +92,7 @@ class ArrayEncoder(BaseEncoder):
         for i in range(len(column_data)):
             if is_none(column_data[i]):
                 column_data[i] = [0] * self.output_size
-        column_data = [self._pad_and_strip(list(x)) for x in column_data]
+        column_data = np.array([self._pad_and_strip(list(x)) for x in column_data])
 
         data = torch.cat([self._normalizer.encode(column_data)], dim=-1)
         data[torch.isnan(data)] = 0.0
@@ -108,5 +107,25 @@ class ArrayEncoder(BaseEncoder):
         :param data: Encoded data prepared by this array encoder
         :returns: A list of iterable sequences in the original data space
         """
-        decoded = data.tolist()
+        decoded = self._normalizer.decode(data.tolist())
         return decoded
+
+
+class CatArrayEncoder(ArrayEncoder):
+    def __init__(self, stop_after: float, window: int = None, is_target: bool = False):
+        super(CatArrayEncoder, self).__init__(stop_after, window, is_target, original_type=dtype.cat_array)
+
+    def prepare(self, train_priming_data: Iterable[Iterable], dev_priming_data: Iterable[Iterable]):
+        super().prepare(train_priming_data, dev_priming_data)
+        self.index_weights = torch.ones(size=(self.output_size,))
+
+    def decode(self, data: torch.Tensor) -> List[Iterable]:
+        data = torch.round(data)  # improves accuracy as by default ordinal encoder will truncate
+        decoded = self._normalizer.decode(data.reshape(-1, 1).tolist()).reshape(1, -1)
+        return decoded
+
+
+class NumArrayEncoder(ArrayEncoder):
+    def __init__(self, stop_after: float, window: int = None, is_target: bool = False, positive_domain: bool = False):
+        self.positive_domain = positive_domain
+        super(NumArrayEncoder, self).__init__(stop_after, window, is_target, original_type=dtype.num_array)

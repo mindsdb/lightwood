@@ -11,7 +11,7 @@ from lightwood import dtype
 
 class MeanEnsemble(BaseEnsemble):
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict,
-                 fit: Optional[bool] = True) -> None:
+                 fit: Optional[bool] = True, **kwargs) -> None:
         super().__init__(target, mixers, data, fit=False)
         if dtype_dict[target] not in (dtype.float, dtype.integer, dtype.quantity):
             raise Exception(

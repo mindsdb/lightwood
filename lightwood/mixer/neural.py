@@ -21,7 +21,7 @@ from lightwood.data.encoded_ds import EncodedDs
 from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.helpers.ar_net import ArNet
 from lightwood.mixer.helpers.default_net import DefaultNet
-from lightwood.api.types import TimeseriesSettings, PredictionArguments
+from lightwood.api.types import PredictionArguments
 from lightwood.mixer.helpers.transform_corss_entropy_loss import TransformCrossEntropyLoss
 
 
@@ -34,16 +34,22 @@ class Neural(BaseMixer):
     supports_proba: bool
 
     def __init__(
-            self, stop_after: float, target: str, dtype_dict: Dict[str, str],
-            timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool,
-            search_hyperparameters: bool, n_epochs: Optional[int] = None):
+            self,
+            stop_after: float,
+            target: str,
+            dtype_dict: Dict[str, str],
+            target_encoder: BaseEncoder,
+            net: str,
+            fit_on_dev: bool,
+            search_hyperparameters: bool,
+            n_epochs: Optional[int] = None
+    ):
         """
         The Neural mixer trains a fully connected dense network from concatenated encoded outputs of each of the features in the dataset to predicted the encoded output. 
         
         :param stop_after: How long the total fitting process should take
         :param target: Name of the target column
         :param dtype_dict: Data type dictionary
-        :param timeseries_settings: TimeseriesSettings object for time-series tasks, refer to its documentation for available settings.
         :param target_encoder: Reference to the encoder used for the target
         :param net: The network type to use (`DeafultNet` or `ArNet`)
         :param fit_on_dev: If we should fit on the dev dataset
@@ -53,7 +59,6 @@ class Neural(BaseMixer):
         super().__init__(stop_after)
         self.dtype_dict = dtype_dict
         self.target = target
-        self.timeseries_settings = timeseries_settings
         self.target_encoder = target_encoder
         self.epochs_to_best = 0
         self.n_epochs = n_epochs
@@ -90,12 +95,11 @@ class Neural(BaseMixer):
     def _select_criterion(self) -> torch.nn.Module:
         if self.dtype_dict[self.target] in (dtype.categorical, dtype.binary):
             criterion = TransformCrossEntropyLoss(weight=self.target_encoder.index_weights.to(self.model.device))
-        elif self.dtype_dict[self.target] in (dtype.tags):
+        elif self.dtype_dict[self.target] in (dtype.tags, dtype.cat_tsarray):
             criterion = nn.BCEWithLogitsLoss()
-        elif (self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.tsarray, dtype.quantity)
-                and self.timeseries_settings.is_timeseries):
+        elif self.dtype_dict[self.target] in (dtype.cat_array, ):
             criterion = nn.L1Loss()
-        elif self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.quantity):
+        elif self.dtype_dict[self.target] in (dtype.integer, dtype.float, dtype.quantity, dtype.num_array):
             criterion = MSELoss()
         else:
             criterion = MSELoss()
@@ -103,13 +107,7 @@ class Neural(BaseMixer):
         return criterion
 
     def _select_optimizer(self) -> Optimizer:
-        # ad_optim.Ranger
-        # torch.optim.AdamW
-        if self.timeseries_settings.is_timeseries:
-            optimizer = ad_optim.Ranger(self.model.parameters(), lr=self.lr)
-        else:
-            optimizer = ad_optim.Ranger(self.model.parameters(), lr=self.lr, weight_decay=2e-2)
-
+        optimizer = ad_optim.Ranger(self.model.parameters(), lr=self.lr, weight_decay=2e-2)
         return optimizer
 
     def _find_lr(self, dl):
@@ -256,9 +254,9 @@ class Neural(BaseMixer):
 
     # @TODO: Compare partial fitting fully on and fully off on the benchmarks!
     # @TODO: Writeup on the methodology for partial fitting
-    def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def _fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
-        Fits the Neural mixer on some data, making it ready to predit
+        Fits the Neural mixer on some data, making it ready to predict
 
         :param train_data: The network is fit/trained on this
         :param dev_data: Data used for early stopping and hyperparameter determination
@@ -294,8 +292,9 @@ class Neural(BaseMixer):
         if self.fit_on_dev:
             self.partial_fit(dev_data, train_data)
 
-        if not self.timeseries_settings.is_timeseries:
-            self._final_tuning(dev_data)
+    def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        self._fit(train_data, dev_data)
+        self._final_tuning(dev_data)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
@@ -352,7 +351,8 @@ class Neural(BaseMixer):
             ydf = pd.DataFrame({'prediction': decoded_predictions})
 
             if args.predict_proba and self.supports_proba:
-                raw_predictions = np.array(all_probs).squeeze()
+                raw_predictions = np.array(all_probs).squeeze(axis=1)
+
                 for idx, label in enumerate(rev_map.values()):
                     ydf[f'__mdb_proba_{label}'] = raw_predictions[:, idx]
 

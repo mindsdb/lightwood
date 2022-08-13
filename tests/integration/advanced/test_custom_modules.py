@@ -62,8 +62,8 @@ def throwing_cleaner(data: pd.DataFrame, err_msg: str):
 from lightwood.analysis.base import BaseAnalysisBlock
 
 class {cname}(BaseAnalysisBlock):
-    def __init__(self):
-        super().__init__(deps=None)
+    def __init__(self, deps=tuple()):
+        super().__init__(deps=deps)
 
     def analyze(self, info, **kwargs):
         info['test'] = 'test'

@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import balanced_accuracy_score
 from lightwood.api.types import ProblemDefinition
-from lightwood.api.high_level import predictor_from_problem
+from lightwood.api.high_level import predictor_from_problem  # noqa
 np.random.seed(42)
 
 
@@ -68,3 +68,4 @@ class TestBasic(unittest.TestCase):
         predictions = predictor.predict(test)
         self.assertTrue(balanced_accuracy_score(test['target'], predictions['prediction']) > 0.5)
         self.assertTrue('confidence' not in predictions.columns)
+

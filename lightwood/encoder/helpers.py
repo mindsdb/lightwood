@@ -19,10 +19,10 @@ class MinMaxNormalizer:
         if len(x.shape) < 2:
             x = np.expand_dims(x, axis=1)
 
-        x = x.astype(float)
         x[x == None] = 0 # noqa
+        x = x.astype(float)
         self.abs_mean = np.mean(np.abs(x))
-        self.scaler.fit(x)
+        self.scaler.fit(x.reshape(x.size, -1))
 
     def encode(self, y: np.ndarray) -> torch.Tensor:
         if isinstance(y[0], list):
@@ -52,15 +52,17 @@ class CatNormalizer:
         self.unk = "<UNK>"
 
     def prepare(self, x):
-        X = []
+        X = set()
         for i in x:
             for j in i:
-                X.append(j if j is not None else self.unk)
-        self.scaler.fit(np.array(X).reshape(-1, 1))
+                X.add(j if j is not None else self.unk)
+        self.scaler.fit(np.array(list(X)).reshape(-1, 1))
         self.output_size = len(self.scaler.categories_[0]) if self.encoder_class == 'one_hot' else 1
 
     def encode(self, Y):
-        y = np.array([[str(j) if j is not None else self.unk for j in i] for i in Y])
+        y = [[str(j) if j is not None else self.unk for j in i] for i in Y]
+        y = [[j if j in self.scaler.categories_[0] else self.unk for j in i] for i in y]
+        y = np.array(y)
         out = []
         for i in y:
             transformed = self.scaler.transform(i.reshape(-1, 1))
@@ -71,4 +73,4 @@ class CatNormalizer:
         return torch.Tensor(out)
 
     def decode(self, y):
-        return [[i[0] for i in self.scaler.inverse_transform(o)] for o in y]
+        return self.scaler.inverse_transform(y)

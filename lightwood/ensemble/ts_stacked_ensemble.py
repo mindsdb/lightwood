@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List, Optional
 
 import torch
@@ -8,26 +9,29 @@ import pandas as pd
 
 from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.stacked_ensemble import StackedEnsemble
-from lightwood.encoder.numeric.ts_array_numeric import TsArrayNumericEncoder
+from lightwood.encoder.array.ts_num_array import TsArrayNumericEncoder
 from lightwood.api.types import PredictionArguments
+from lightwood.api.dtype import dtype
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.helpers.log import log
 
 
 class TsStackedEnsemble(StackedEnsemble):
-    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict, horizon: int,
-                 pred_args: PredictionArguments, fit: Optional[bool] = True) -> None:
-        super().__init__(target, mixers, data, dtype_dict, pred_args, fit=False)
+    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict, ts_analysis: dict,
+                 args: PredictionArguments, fit: Optional[bool] = True, **kwargs) -> None:
+        dtype_dict = deepcopy(dtype_dict)
+        dtype_dict[target] = dtype.float  # hijack to correctly initialize MeanEnsemble
+        super().__init__(target, mixers, data, dtype_dict, args, fit=False)
         if not isinstance(data.encoders[target], TsArrayNumericEncoder):
             raise Exception('This ensemble can only be used to forecast!')
-
-        self.horizon = horizon
+        self.ts_analysis = ts_analysis
+        self.horizon = self.ts_analysis['tss'].horizon
         self.target_cols = [target] + [f'{target}_timestep_{t+1}' for t in range(self.horizon - 1)]
         self.agg_dim = 2
         self.opt_max_iter = 1000
 
         if fit:
-            all_preds = torch.tensor(self.predict(data, pred_args)).squeeze().reshape(-1, self.horizon, len(mixers))
+            all_preds = torch.tensor(self.predict(data, args)).squeeze().reshape(-1, self.horizon, len(mixers))
             actual = torch.tensor(data.data_frame[self.target_cols].values)
             nan_mask = actual != actual
             actual[nan_mask] = 0

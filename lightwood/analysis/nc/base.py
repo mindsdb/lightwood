@@ -26,6 +26,15 @@ class ClassifierMixin(object):
         return 'classification'
 
 
+class TSMixin(object):
+    def __init__(self) -> None:
+        super(TSMixin, self).__init__()
+
+    @classmethod
+    def get_problem_type(cls):
+        return 'time-series'
+
+
 class BaseModelAdapter(BaseEstimator):
     __metaclass__ = abc.ABCMeta
 
@@ -114,6 +123,14 @@ class RegressorAdapter(BaseModelAdapter):
         return self.model.predict(x)
 
 
+class TSAdapter(BaseModelAdapter):
+    def __init__(self, model: object, fit_params: Dict[str, object] = None) -> None:
+        super(TSAdapter, self).__init__(model, fit_params)
+
+    def _underlying_predict(self, x: np.array) -> np.array:
+        return self.model.predict(x)
+
+
 class CachedRegressorAdapter(RegressorAdapter):
     def __init__(self, model, fit_params=None):
         super(CachedRegressorAdapter, self).__init__(model, fit_params)
@@ -148,3 +165,15 @@ class CachedClassifierAdapter(ClassifierAdapter):
             return t_softmax(self.prediction_cache, t=0.5)
         else:
             return self.prediction_cache
+
+
+class CachedTSAdapter(TSAdapter):
+    def __init__(self, model, fit_params=None):
+        super(CachedTSAdapter, self).__init__(model, fit_params)
+        self.prediction_cache = None
+
+    def fit(self, x=None, y=None):
+        pass
+
+    def predict(self, x=None):
+        return self.prediction_cache

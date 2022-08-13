@@ -16,7 +16,7 @@ from lightwood.helpers.log import log
 
 class StackedEnsemble(MeanEnsemble):
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict,
-                 pred_args: PredictionArguments, fit: Optional[bool] = True) -> None:
+                 args: PredictionArguments, fit: Optional[bool] = True, **kwargs) -> None:
         super().__init__(target, mixers, data, dtype_dict, fit=False)
 
         self.target_cols = [target]
@@ -27,7 +27,7 @@ class StackedEnsemble(MeanEnsemble):
         self.agg_dim = 1
 
         if fit:
-            all_preds = torch.tensor(self.predict(data, pred_args)).squeeze().reshape(-1, len(mixers))
+            all_preds = torch.tensor(self.predict(data, args)).squeeze().reshape(-1, len(mixers))
             actual = torch.tensor(data.data_frame[self.target_cols].values)
 
             def _eval_loss():

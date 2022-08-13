@@ -18,7 +18,7 @@ class ModeEnsemble(BaseEnsemble):
 
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict,
                  accuracy_functions, args: PredictionArguments, ts_analysis: Optional[dict] = None,
-                 fit: Optional[bool] = True) -> None:
+                 fit: Optional[bool] = True, **kwargs) -> None:
         super().__init__(target, mixers, data, fit=False)
         self.mixer_scores = {}
 

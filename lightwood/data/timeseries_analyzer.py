@@ -1,20 +1,26 @@
-from typing import Dict, Tuple, List
+from copy import deepcopy
+from typing import Dict, Tuple, List, Union
 
+import optuna
 import numpy as np
 import pandas as pd
+from sktime.transformations.series.detrend import Detrender
+from sktime.forecasting.trend import PolynomialTrendForecaster
+from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.api.dtype import dtype
+from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer
+from lightwood.helpers.log import log
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
-from lightwood.helpers.general import get_group_matches
 
 
-def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
+def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str],
                         timeseries_settings: TimeseriesSettings, target: str) -> Dict:
     """
     This module analyzes (pre-processed) time series data and stores a few useful insights used in the rest of Lightwood's pipeline.
     
-    :param data: dataframe with time series dataset. 
+    :param data: dictionary with the dataset split into train, val, test subsets. 
     :param dtype_dict: dictionary with inferred types for every column.
     :param timeseries_settings: A `TimeseriesSettings` object. For more details, check `lightwood.types.TimeseriesSettings`.
     :param target: name of the target column.
@@ -29,89 +35,40 @@ def timeseries_analyzer(data: pd.DataFrame, dtype_dict: Dict[str, str],
     :return: Dictionary with the aforementioned insights and the `TimeseriesSettings` object for future references.
     """  # noqa
     tss = timeseries_settings
-    info = {
-        'original_type': dtype_dict[target],
-        'data': data[target].values
-    }
-    if tss.group_by is not None:
-        info['group_info'] = {gcol: data[gcol] for gcol in tss.group_by}  # group col values
-    else:
-        info['group_info'] = {}
+    groups = get_ts_groups(data['train'], tss)
+    deltas, periods, freqs = get_delta(data['train'], dtype_dict, groups, target, tss)
 
-    # @TODO: maybe normalizers should fit using only the training subsets??
-    new_data = generate_target_group_normalizers(info)
+    normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
 
-    if dtype_dict[target] in (dtype.integer, dtype.float, dtype.tsarray):
-        naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(info, new_data['group_combinations'])
+    if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
+        naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'], target, tss, groups)
+        differencers = get_differencers(data['train'], target, groups, tss.group_by)
+        stl_transforms = get_stls(data['train'], data['dev'], target, periods, groups, tss)
     else:
         naive_forecast_residuals, scale_factor = {}, {}
+        differencers = {}
+        stl_transforms = {}
 
-    deltas = get_delta(data[tss.order_by],
-                       info,
-                       new_data['group_combinations'],
-                       tss.order_by)
-
-    # detect period
-    periods, freqs = detect_period(deltas, tss)
-
-    return {'target_normalizers': new_data['target_normalizers'],
+    return {'target_normalizers': normalizers,
             'deltas': deltas,
             'tss': tss,
-            'group_combinations': new_data['group_combinations'],
+            'group_combinations': groups,
             'ts_naive_residuals': naive_forecast_residuals,
             'ts_naive_mae': scale_factor,
             'periods': periods,
-            'sample_freqs': freqs
+            'sample_freqs': freqs,
+            'stl_transforms': stl_transforms,
+            'differencers': differencers
             }
-
-
-def get_delta(df: pd.DataFrame, ts_info: dict, group_combinations: list, order_cols: list) -> Dict[str, Dict]:
-    """
-    Infer the sampling interval of each time series, by picking the most popular time interval observed in the training data.
-    
-    :param df: Dataframe with time series data.
-    :param ts_info: Dictionary used internally by `timeseries_analyzer`. Contains group-wise series information, among other things.
-    :param group_combinations: all tuples with distinct values for `TimeseriesSettings.group_by` columns, defining all available time series.
-    :param order_cols: all columns specified in `TimeseriesSettings.order_by`. 
-    
-    :return:
-    Dictionary with group combination tuples as keys. Values are dictionaries with the inferred delta for each series, for each `order_col`.
-    """  # noqa
-    deltas = {"__default": {}}
-
-    # get default delta for all data
-    for col in order_cols:
-        series = pd.Series([x[-1] for x in df[col]])
-        series = series.drop_duplicates()  # by this point df is ordered so duplicate timestamps are either because of non-handled groups or repeated data that, for mode delta estimation, should be ignored  # noqa
-        rolling_diff = series.rolling(window=2).apply(lambda x: x.iloc[1] - x.iloc[0])
-        delta = rolling_diff.value_counts(ascending=False).keys()[0]  # pick most popular
-        deltas["__default"][col] = delta
-
-    # get group-wise deltas (if applicable)
-    if ts_info.get('group_info', False):
-        original_data = ts_info['data']
-        for group in group_combinations:
-            if group != "__default":
-                deltas[group] = {}
-                for col in order_cols:
-                    ts_info['data'] = pd.Series([x[-1] for x in df[col]])
-                    _, subset = get_group_matches(ts_info, group)
-                    if subset.size > 1:
-                        rolling_diff = pd.Series(
-                            subset.squeeze()).rolling(
-                            window=2).apply(
-                            lambda x: x.iloc[1] - x.iloc[0])
-                        delta = rolling_diff.value_counts(ascending=False).keys()[0]
-                        deltas[group][col] = delta
-        ts_info['data'] = original_data
-
-    return deltas
 
 
 def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, float]:
     """
     Computes forecasting residuals for the naive method (forecasts for time `t` is the value observed at `t-1`).
     Useful for computing MASE forecasting error.
+
+    As per arxiv.org/abs/2203.10716, we resort to a constant forecast based on the last-seen measurement across the entire horizon.
+    By following the original measure, the naive forecaster would have the advantage of knowing the actual values whereas the predictor would not.
 
     Note: method assumes predictions are all for the same group combination. For a dataframe that contains multiple
      series, use `get_grouped_naive_resiudals`.
@@ -121,76 +78,130 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
 
     :return: (list of naive residuals, average residual value)
     """  # noqa
-    residuals = target_data.rolling(window=m + 1).apply(lambda x: abs(x.iloc[m] - x.iloc[0]))[m:].values.flatten()
+    # @TODO: support categorical series as well
+    residuals = np.abs(target_data.values[1:] - target_data.values[0]).flatten()
     scale_factor = np.average(residuals)
     return residuals.tolist(), scale_factor
 
 
-def get_grouped_naive_residuals(info: Dict, group_combinations: List) -> Tuple[Dict, Dict]:
+def get_grouped_naive_residuals(
+        info: pd.DataFrame,
+        target: str,
+        tss: TimeseriesSettings,
+        group_combinations: List) -> Tuple[Dict, Dict]:
     """
     Wraps `get_naive_residuals` for a dataframe with multiple co-existing time series.
     """  # noqa
     group_residuals = {}
     group_scale_factors = {}
     for group in group_combinations:
-        idxs, subset = get_group_matches(info, group)
-        residuals, scale_factor = get_naive_residuals(pd.DataFrame(subset))  # @TODO: pass m once we handle seasonality
-        group_residuals[group] = residuals
-        group_scale_factors[group] = scale_factor
+        idxs, subset = get_group_matches(info, group, tss.group_by)
+        if subset.shape[0] > 1:
+            residuals, scale_factor = get_naive_residuals(subset[target])  # @TODO: pass m once we handle seasonality
+            group_residuals[group] = residuals
+            group_scale_factors[group] = scale_factor
     return group_residuals, group_scale_factors
 
 
-def detect_period(deltas: dict, tss: TimeseriesSettings) -> (Dict[str, float], Dict[str, str]):
+def get_differencers(data: pd.DataFrame, target: str, groups: List, group_cols: List):
+    differencers = {}
+    for group in groups:
+        idxs, subset = get_group_matches(data, group, group_cols)
+        differencer = Differencer()
+        differencer.fit(subset[target].values)
+        differencers[group] = differencer
+    return differencers
+
+
+def get_stls(train_df: pd.DataFrame,
+             dev_df: pd.DataFrame,
+             target: str,
+             sps: Dict,
+             groups: list,
+             tss: TimeseriesSettings
+             ) -> Dict[str, object]:
+    stls = {'__default': None}
+    for group in groups:
+        if group != '__default':
+            _, tr_subset = get_group_matches(train_df, group, tss.group_by)
+            _, dev_subset = get_group_matches(dev_df, group, tss.group_by)
+            if tr_subset.shape[0] > 0 and dev_subset.shape[0] > 0 and sps.get(group, False):
+                group_freq = tr_subset['__mdb_inferred_freq'].iloc[0]
+                tr_subset = deepcopy(tr_subset)[target]
+                dev_subset = deepcopy(dev_subset)[target]
+                tr_subset.index = pd.date_range(start=tr_subset.iloc[0], freq=group_freq,
+                                                periods=len(tr_subset)).to_period()
+                dev_subset.index = pd.date_range(start=dev_subset.iloc[0], freq=group_freq,
+                                                 periods=len(dev_subset)).to_period()
+                stl = _pick_ST(tr_subset, dev_subset, sps[group])
+                log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
+                stls[group] = stl
+    return stls
+
+
+def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: list):
     """
-    Helper method that, based on the most popular interval for a time series, determines its seasonal peridiocity (sp).
-    This bit of information can be crucial for good modelling with methods like ARIMA.
-    
-    Supported time intervals are:
-        * 'year'
-        * 'semestral'
-        * 'quarter'
-        * 'bimonthly'
-        * 'monthly'
-        * 'weekly'
-        * 'daily'
-        * 'hourly'
-        * 'minute'
-        * 'second'
+    Perform hyperparam search with optuna to find best combination of ST transforms for a time series.
 
-    Note: all computations assume that the first provided `order_by` column is the one that specifies the sp.
-
-    :param deltas: output of `get_delta`, has the most popular interval for each time series.
-    :param tss: timeseries settings.
-
-    :return: for all time series 1) a dictionary with its sp and 2) a dictionary with the detected sampling frequency
+    :param tr_subset: training series used for fitting blocks. Index should be datetime, and values are the actual time series.
+    :param dev_subset: dev series used for computing loss. Index should be datetime, and values are the actual time series.
+    :param sp: list of candidate seasonal periods
+    :return: best deseasonalizer and detrender combination based on dev_loss
     """  # noqa
-    interval_to_period = {interval: period for (interval, period) in tss.interval_periods}
-    secs_to_interval = {
-        'year': 60 * 60 * 24 * 365,
-        'semestral': 60 * 60 * 24 * 365 // 2,
-        'quarter': 60 * 60 * 24 * 365 // 4,
-        'bimonthly': 60 * 60 * 24 * 365 // 6,
-        'monthly': 60 * 60 * 24 * 31,
-        'weekly': 60 * 60 * 24 * 7,
-        'daily': 60 * 60 * 24,
-        'hourly': 60 * 60,
-        'minute': 60,
-        'second': 1
+
+    def _ST_objective(trial: optuna.Trial):
+        trend_degree = trial.suggest_categorical("trend_degree", [1, 2])
+        ds_sp = trial.suggest_categorical("ds_sp", sp)  # seasonality period to use in deseasonalizer
+        if min(min(tr_subset), min(dev_subset)) <= 0:
+            decomp_type = trial.suggest_categorical("decomp_type", ['additive'])
+        else:
+            decomp_type = trial.suggest_categorical("decomp_type", ['additive', 'multiplicative'])
+
+        detrender = Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))
+        deseasonalizer = ConditionalDeseasonalizer(sp=ds_sp, model=decomp_type)
+        transformer = STLTransformer(detrender=detrender, deseasonalizer=deseasonalizer, type=decomp_type)
+        transformer.fit(tr_subset)
+        residuals = transformer.transform(dev_subset)
+
+        trial.set_user_attr("transformer", transformer)
+        return np.power(residuals, 2).sum()
+
+    space = {"trend_degree": [1, 2], "ds_sp": sp, "decomp_type": ['additive', 'multiplicative']}
+    study = optuna.create_study(sampler=optuna.samplers.GridSampler(space))
+    study.optimize(_ST_objective, n_trials=8)
+
+    return {
+        "transformer": study.best_trial.user_attrs['transformer'],
+        "best_params": study.best_params
     }
 
-    for tag, period in (('year', 1), ('semestral', 2), ('quarter', 4), ('bimonthly', 6), ('monthly', 12),
-                        ('weekly', 4), ('daily', 1), ('hourly', 24), ('minute', 1), ('second', 1)):
-        if tag not in interval_to_period.keys():
-            interval_to_period[tag] = period
 
-    periods = {}
-    freqs = {}
-    order_col_idx = 0
-    for group in deltas.keys():
-        delta = deltas[group][tss.order_by[order_col_idx]]
-        diffs = [(tag, abs(delta - secs)) for tag, secs in secs_to_interval.items()]
-        min_tag, min_diff = sorted(diffs, key=lambda x: x[1])[0]
-        periods[group] = interval_to_period.get(min_tag, 1)
-        freqs[group] = min_tag
+class STLTransformer:
+    def __init__(self, detrender: Detrender, deseasonalizer: ConditionalDeseasonalizer, type: str = 'additive'):
+        """
+        Class that handles STL transformation and inverse, given specific detrender and deseasonalizer instances.
+        :param detrender: Already initialized. 
+        :param deseasonalizer: Already initialized. 
+        :param type: Either 'additive' or 'multiplicative'.
+        """  # noqa
+        self._type = type
+        self.detrender = detrender
+        self.deseasonalizer = deseasonalizer
+        self.op = {
+            'additive': lambda x, y: x - y,
+            'multiplicative': lambda x, y: x / y
+        }
+        self.iop = {
+            'additive': lambda x, y: x + y,
+            'multiplicative': lambda x, y: x * y
+        }
 
-    return periods, freqs
+    def fit(self, x: Union[pd.DataFrame, pd.Series]):
+        self.deseasonalizer.fit(x)
+        self.detrender.fit(self.op[self._type](x, self.deseasonalizer.transform(x)))
+
+    def transform(self, x: Union[pd.DataFrame, pd.Series]):
+        return self.detrender.transform(self.deseasonalizer.transform(x))
+
+    def inverse_transform(self, x: Union[pd.DataFrame, pd.Series]):
+        return self.deseasonalizer.inverse_transform(self.detrender.inverse_transform(x))

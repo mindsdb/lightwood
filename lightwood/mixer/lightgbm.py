@@ -1,4 +1,5 @@
 import time
+import inspect
 from typing import Dict, List, Set
 import torch
 import optuna
@@ -82,7 +83,10 @@ class LightGBM(BaseMixer):
         self.use_optuna = use_optuna
         self.params = {}
         self.fit_on_dev = fit_on_dev
-        self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
+        self.cls_dtypes = [dtype.categorical, dtype.binary, dtype.cat_tsarray]
+        self.float_dtypes = [dtype.float, dtype.quantity, dtype.num_tsarray]
+        self.num_dtypes = [dtype.integer] + self.float_dtypes
+        self.supports_proba = dtype_dict[target] in self.cls_dtypes
         self.stable = True
         self.target_encoder = target_encoder
 
@@ -122,7 +126,7 @@ class LightGBM(BaseMixer):
             label_data = data[subset_name]['ds'].get_column_original_data(self.target)
 
             data[subset_name]['weights'] = None
-            if output_dtype in (dtype.categorical, dtype.binary):
+            if output_dtype in self.cls_dtypes:
                 if subset_name == 'train':
                     self.ordinal_encoder = OrdinalEncoder()
                     self.label_set = set(label_data)
@@ -135,7 +139,7 @@ class LightGBM(BaseMixer):
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
             elif output_dtype == dtype.integer:
                 label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
-            elif output_dtype in (dtype.float, dtype.quantity):
+            elif output_dtype in self.float_dtypes:
                 label_data = label_data.astype(float)
 
             data[subset_name]['label_data'] = label_data
@@ -160,15 +164,14 @@ class LightGBM(BaseMixer):
         self.positive_domain = getattr(train_data.encoders.get(self.target, None), 'positive_domain', False)
 
         output_dtype = self.dtype_dict[self.target]
-
         data = self._to_dataset(data, output_dtype)
 
-        if output_dtype not in (dtype.categorical, dtype.integer, dtype.float, dtype.binary, dtype.quantity):
+        if output_dtype not in self.cls_dtypes + self.num_dtypes:
             log.error(f'Lightgbm mixer not supported for type: {output_dtype}')
             raise Exception(f'Lightgbm mixer not supported for type: {output_dtype}')
         else:
-            objective = 'regression' if output_dtype in (dtype.integer, dtype.float, dtype.quantity) else 'multiclass'
-            metric = 'l2' if output_dtype in (dtype.integer, dtype.float, dtype.quantity) else 'multi_logloss'
+            objective = 'regression' if output_dtype in self.num_dtypes else 'multiclass'
+            metric = 'l2' if output_dtype in self.num_dtypes else 'multi_logloss'
 
         self.params = {
             'objective': objective,
@@ -183,6 +186,8 @@ class LightGBM(BaseMixer):
         if objective == 'multiclass':
             self.all_classes = self.ordinal_encoder.categories_[0]
             self.params['num_class'] = self.all_classes.size
+        elif output_dtype == dtype.num_tsarray:
+            self.params['linear_tree'] = True
         if self.device_str == 'gpu':
             self.params['gpu_use_dp'] = True
 
@@ -202,9 +207,11 @@ class LightGBM(BaseMixer):
 
         Why does the following crash happen and what does it mean? No idea, closest relationships I can find is /w optuna modifying parameters after the dataset is create: https://github.com/microsoft/LightGBM/issues/4019 | But why this would apply here makes no sense. Could have to do with the `train` process of lightgbm itself setting a "set only once" property on a dataset when it starts. Dunno, if you find out replace this comment with the real reason.
         ''' # noqa
-
+        kwargs = {}
+        if 'verbose_eval' in inspect.getfullargspec(lightgbm.train).args:
+            kwargs['verbose_eval'] = False
         self.model = lightgbm.train(self.params, lightgbm.Dataset(data['train']['data'], label=data['train']
-                                    ['label_data'], weight=data['train']['weights']), verbose_eval=False)
+                                    ['label_data'], weight=data['train']['weights']), **kwargs)
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
 
@@ -239,10 +246,12 @@ class LightGBM(BaseMixer):
         dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'],
                                        weight=data['dev']['weights'])
 
+        if 'verbose_eval' in inspect.getfullargspec(lightgbm.train).args:
+            kwargs['verbose_eval'] = False
         self.model = model_generator.train(
             self.params, train_dataset, valid_sets=[dev_dataset, train_dataset],
             valid_names=['dev', 'train'],
-            verbose_eval=False, **kwargs)
+            **kwargs)
         self.num_iterations = self.model.best_iteration
         log.info(f'Lightgbm model contains {self.model.num_trees()} weak estimators')
 
@@ -271,13 +280,16 @@ class LightGBM(BaseMixer):
                                        weight=data['dev']['weights'])
 
         log.info(f'Updating lightgbm model with {iterations} iterations')
-        if iterations < 1:
-            iterations = 1
         self.params['num_iterations'] = int(iterations)
+
+        kwargs = {}
+        if 'verbose_eval' in inspect.getfullargspec(lightgbm.train).args:
+            kwargs['verbose_eval'] = False
+
         self.model = lightgbm.train(
             self.params, train_dataset, valid_sets=[dev_dataset, train_dataset],
             valid_names=['dev', 'retrain'],
-            verbose_eval=False, init_model=self.model)
+            init_model=self.model, **kwargs)
         log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
 
     def __call__(self, ds: EncodedDs,

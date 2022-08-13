@@ -13,7 +13,8 @@ test_column_types = {
     'categorical_str': dtype.categorical,
     'categorical_int': dtype.categorical,
     'categorical_binary': dtype.binary,
-    'sequential_array': dtype.array,
+    'sequential_numeric_array': dtype.num_array,
+    'sequential_categorical_array': dtype.cat_array,
     'multiple_categories_array_str': dtype.tags,
     'short_text': dtype.short_text,
     'rich_text': dtype.rich_text
