@@ -223,6 +223,11 @@
     <span class="c1"># infer frequency with get_delta</span>
     <span class="n">oby_col</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="n">get_ts_groups</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
+
+    <span class="c1"># initial stable sort and per-partition deduplication</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">oby_col</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;mergesort&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">oby_col</span><span class="p">,</span> <span class="o">*</span><span class="n">gb_arr</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">:</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">periods</span><span class="p">,</span> <span class="n">freqs</span> <span class="o">=</span> <span class="n">get_delta</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
