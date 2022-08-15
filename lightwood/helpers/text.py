@@ -16,7 +16,6 @@ import hashlib
 from typing import Iterable
 import numpy as np
 import scipy.stats as st
-from scipy.special import softmax
 from langid.langid import LanguageIdentifier
 from langid.langid import model as langid_model
 import nltk

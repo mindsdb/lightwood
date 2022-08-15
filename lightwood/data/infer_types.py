@@ -1,8 +1,7 @@
 from collections import Counter
 import random
 from typing import List
-import dateutil
-import ciso8601
+import zulu
 from scipy.stats import norm
 import pandas as pd
 import numpy as np
@@ -131,11 +130,9 @@ def type_check_sequence(element: object) -> str:
 
 def type_check_date(element: object) -> str:
     try:
-        # dt = dateutil.parser.parse(str(element))
-        dt = ciso8601.parse_datetime(str(element))
+        dt = zulu.parse(str(element))
 
-        # Not accurate 100% for a single datetime str,
-        # but should work in aggregate
+        # Not accurate 100% for a single datetime str, but should work in aggregate
         if dt.hour == 0 and dt.minute == 0 and dt.second == 0 and len(str(element)) <= 16:
             return dtype.date
         else:
@@ -380,7 +377,7 @@ def infer_types(data: pd.DataFrame, pct_invalid: float, seed_nr: int = 420) -> T
         f'from a total population of {population_size}, this is equivalent to {round(sample_size*100/population_size, 1)}% of your data.') # noqa
 
     nr_procs = get_nr_procs(data)
-    if False: # nr_procs > 1:
+    if nr_procs > 1:
         log.info(f'Using {nr_procs} processes to deduct types.')
         pool = mp.Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
@@ -410,7 +407,7 @@ def infer_types(data: pd.DataFrame, pct_invalid: float, seed_nr: int = 420) -> T
             'dtype_dist': data_dtype_dist
         }
 
-    if False: #nr_procs > 1:
+    if nr_procs > 1:
         pool = mp.Pool(processes=nr_procs)
         answer_arr = pool.map(get_identifier_description_mp, [
             (data[x], x, type_information.dtypes[x])
