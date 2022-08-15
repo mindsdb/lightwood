@@ -316,7 +316,7 @@ class SkTime(BaseMixer):
         try:
             self._fit(train_data)
             y_true = test_data.data_frame[self.target].values[:self.horizon]
-            y_pred = self(test_data)['prediction'].iloc[0][:len(y_true)]
+            y_pred = pd.DataFrame(self(test_data)['prediction'].iloc[0][:len(y_true)])
             error = self.trial_error_fn(y_true, y_pred)
         except Exception as e:
             log.debug(e)
