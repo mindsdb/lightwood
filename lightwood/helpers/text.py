@@ -16,7 +16,9 @@ import hashlib
 from typing import Iterable
 import numpy as np
 import scipy.stats as st
-import langdetect
+from scipy.special import softmax
+from langid.langid import LanguageIdentifier
+from langid.langid import model as langid_model
 import nltk
 from lightwood.api.dtype import dtype
 
@@ -34,23 +36,23 @@ except LookupError:
 
 
 def get_language_dist(data):
-    langdetect.DetectorFactory.seed = 0
     lang_dist = defaultdict(lambda: 0)
     lang_dist['Unknown'] = 0
     lang_probs_cache = dict()
+    identifier = LanguageIdentifier.from_modelstring(langid_model, norm_probs=True)
     for text in data:
         text = str(text)
         text = ''.join([c for c in text if c not in string.punctuation])
         if text not in lang_probs_cache:
             try:
-                lang_probs = langdetect.detect_langs(text)
-            except langdetect.lang_detect_exception.LangDetectException:
+                lang_probs = identifier.classify(text)
+            except Exception:
                 lang_probs = []
             lang_probs_cache[text] = lang_probs
 
         lang_probs = lang_probs_cache[text]
-        if len(lang_probs) > 0 and lang_probs[0].prob > 0.90:
-            lang_dist[lang_probs[0].lang] += 1
+        if len(lang_probs) > 0 and lang_probs[1] > 0.90:
+            lang_dist[lang_probs[0]] += 1
         else:
             lang_dist['Unknown'] += 1
 
