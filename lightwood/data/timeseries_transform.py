@@ -53,7 +53,7 @@ def transform_timeseries(
 
     # initial stable sort and per-partition deduplication
     data = data.sort_values(by=oby_col, kind='mergesort')
-    data = data.drop_duplicates(subset=[tss.order_by, *tss.group_by], keep='first')
+    data = data.drop_duplicates(subset=[oby_col, *gb_arr], keep='first')
 
     if not ts_analysis:
         _, periods, freqs = get_delta(data, dtype_dict, groups, target, tss)
