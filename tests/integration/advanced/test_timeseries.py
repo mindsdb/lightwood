@@ -427,27 +427,17 @@ class TestTimeseries(unittest.TestCase):
         """ Test time series de-duplication procedures """
         data = pd.read_csv('tests/data/arrivals.csv')
         data = data[data['Country'].isin(['US', 'Japan'])]
+        target_len = len(data)
         data = data.append(data[data['Country'] == 'Japan']).reset_index(drop=True)  # force duplication of one series
-        target = 'Traffic'
-        order_by = 'T'
-        gby = ['Country']
-        window = 8
-        horizon = 4
-        train, _, test = stratify(data, pct_train=0.8, pct_dev=0, pct_test=0.2, stratify_on=gby, seed=1,
-                                  reshuffle=False)
-        jai = json_ai_from_problem(train,
-                                   ProblemDefinition.from_dict({'target': target,
-                                                                'time_aim': 30,
-                                                                'timeseries_settings': {
-                                                                    'group_by': gby,
-                                                                    'horizon': horizon,
-                                                                    'order_by': order_by,
-                                                                    'window': window
-                                                                }}))
+        jai = json_ai_from_problem(data, ProblemDefinition.from_dict({'target': 'Traffic',
+                                                                      'time_aim': 30,
+                                                                      'timeseries_settings': {
+                                                                          'group_by': ['Country'],
+                                                                          'horizon': 8,
+                                                                          'order_by': 'T',
+                                                                          'window': 4
+                                                                      }}))
         code = code_from_json_ai(jai)
         pred = predictor_from_code(code)
-
-        # Test with a short time aim with inferring mode, check timestamps are further into the future than test dates
-        train_and_check_time_aim(pred, train, ignore_time_aim=True)
-        preds = pred.predict(test)
-        self.check_ts_prediction_df(preds, horizon, [order_by])
+        transformed = pred.preprocess(data)
+        assert len(transformed) == target_len

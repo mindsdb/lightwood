@@ -50,6 +50,11 @@ def transform_timeseries(
     # infer frequency with get_delta
     oby_col = tss.order_by
     groups = get_ts_groups(data, tss)
+
+    # initial stable sort and per-partition deduplication
+    data = data.sort_values(by=oby_col, kind='mergesort')
+    data = data.drop_duplicates(subset=[tss.order_by, *tss.group_by], keep='first')
+
     if not ts_analysis:
         _, periods, freqs = get_delta(data, dtype_dict, groups, target, tss)
     else:
