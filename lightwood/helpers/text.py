@@ -50,7 +50,7 @@ def get_language_dist(data):
             lang_probs_cache[text] = lang_probs
 
         lang_probs = lang_probs_cache[text]
-        if len(lang_probs) > 0 and lang_probs[1] > 0.90:
+        if len(lang_probs) > 0 and lang_probs[1] > 10 * (1 / len(identifier.nb_classes)):
             lang_dist[lang_probs[0]] += 1
         else:
             lang_dist['Unknown'] += 1
