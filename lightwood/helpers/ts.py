@@ -86,7 +86,7 @@ def get_delta(
 
 
 def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss, stat_analysis,
-                            use_original_format='') -> pd.DataFrame:
+                            time_format='') -> pd.DataFrame:
     horizon = tss.horizon
     if tss.group_by:
         gby = [f'group_{g}' for g in tss.group_by]
@@ -106,16 +106,15 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss, stat_
         if tss.horizon == 1:
             timestamps = timestamps[0]  # preserves original input format if horizon == 1
 
-        # format if needed
-        if use_original_format:
-            if use_original_format.lower() == 'infer':
-                original_format = stat_analysis.ts_stats['order_format']
+        if time_format:
+            if time_format.lower() == 'infer':
+                tformat = stat_analysis.ts_stats['order_format']
             else:
-                original_format = use_original_format
+                tformat = time_format
 
-            if original_format:
+            if tformat:
                 for i, ts in enumerate(timestamps):
-                    timestamps[i] = datetime.utcfromtimestamp(ts).strftime(original_format)
+                    timestamps[i] = datetime.utcfromtimestamp(ts).strftime(tformat)
 
         df[f'order_{col}'].iloc[idx] = timestamps
     return df[f'order_{col}']

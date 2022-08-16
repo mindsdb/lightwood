@@ -57,7 +57,7 @@ def explain(data: pd.DataFrame,
         row_insights[f'order_{tss.order_by}'] = data[tss.order_by]
         row_insights[f'order_{tss.order_by}'] = get_inferred_timestamps(
             row_insights, tss.order_by, ts_analysis['deltas'], tss, stat_analysis,
-            use_original_format=pred_args.preserve_time_format
+            time_format=pred_args.time_format
         )
 
     kwargs = {
