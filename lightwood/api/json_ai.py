@@ -673,13 +673,12 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
         "explainer": {
             "module": "explain",
             "args": {
-                "timeseries_settings": "$problem_definition.timeseries_settings",
-                "positive_domain": "$statistical_analysis.positive_domain",
-                "anomaly_detection": "$problem_definition.anomaly_detection",
+                "problem_definition": "$problem_definition",
+                "stat_analysis": "$statistical_analysis",
                 "data": "data",
                 "encoded_data": "encoded_data",
                 "predictions": "df",
-                "analysis": "$runtime_analyzer",
+                "runtime_analysis": "$runtime_analyzer",
                 "ts_analysis": "$ts_analysis" if is_ts else None,
                 "target_name": "$target",
                 "target_dtype": "$dtype_dict[self.target]",

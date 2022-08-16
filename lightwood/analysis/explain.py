@@ -3,7 +3,7 @@ import torch
 import pandas as pd
 
 from lightwood.helpers.log import log
-from lightwood.api.types import TimeseriesSettings, PredictionArguments
+from lightwood.api.types import ProblemDefinition, PredictionArguments, StatisticalAnalysis
 from lightwood.helpers.ts import get_inferred_timestamps
 from lightwood.analysis.base import BaseAnalysisBlock
 
@@ -11,14 +11,13 @@ from lightwood.analysis.base import BaseAnalysisBlock
 def explain(data: pd.DataFrame,
             encoded_data: torch.Tensor,
             predictions: pd.DataFrame,
-            timeseries_settings: TimeseriesSettings,
-            analysis: Dict,
             target_name: str,
             target_dtype: str,
 
-            positive_domain: bool,  # @TODO: pass inside a {} with params for each block to avoid signature overload
-            anomaly_detection: bool,
+            problem_definition: ProblemDefinition,
+            stat_analysis: StatisticalAnalysis,
             pred_args: PredictionArguments,
+            runtime_analysis: Dict,
 
             explainer_blocks: Optional[List[BaseAnalysisBlock]] = [],
             ts_analysis: Optional[Dict] = {}
@@ -49,25 +48,28 @@ def explain(data: pd.DataFrame,
             if '__mdb_proba' in col:
                 row_insights[col] = predictions[col]
 
-    if timeseries_settings.is_timeseries:
-        if timeseries_settings.group_by:
-            for col in timeseries_settings.group_by:
+    tss = problem_definition.timeseries_settings
+    if tss.is_timeseries:
+        if tss.group_by:
+            for col in tss.group_by:
                 row_insights[f'group_{col}'] = data[col]
 
-        row_insights[f'order_{timeseries_settings.order_by}'] = data[timeseries_settings.order_by]
-        row_insights[f'order_{timeseries_settings.order_by}'] = get_inferred_timestamps(
-            row_insights, timeseries_settings.order_by, ts_analysis['deltas'], timeseries_settings)
+        row_insights[f'order_{tss.order_by}'] = data[tss.order_by]
+        row_insights[f'order_{tss.order_by}'] = get_inferred_timestamps(
+            row_insights, tss.order_by, ts_analysis['deltas'], tss, stat_analysis,
+            use_original_format=pred_args.preserve_time_format
+        )
 
     kwargs = {
         'data': data,
         'encoded_data': encoded_data,
         'predictions': predictions,
-        'analysis': analysis,
+        'analysis': runtime_analysis,
         'target_name': target_name,
         'target_dtype': target_dtype,
-        'tss': timeseries_settings,
-        'positive_domain': positive_domain,
-        'anomaly_detection': anomaly_detection,
+        'tss': tss,
+        'positive_domain': stat_analysis.positive_domain,
+        'anomaly_detection': problem_definition.anomaly_detection,
         'pred_args': pred_args
     }
 

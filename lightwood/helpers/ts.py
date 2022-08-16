@@ -1,4 +1,5 @@
 from typing import List, Tuple, Union, Dict
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -84,7 +85,8 @@ def get_delta(
     return deltas, periods, freqs
 
 
-def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss) -> pd.DataFrame:
+def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss, stat_analysis,
+                            use_original_format=False) -> pd.DataFrame:
     horizon = tss.horizon
     if tss.group_by:
         gby = [f'group_{g}' for g in tss.group_by]
@@ -103,6 +105,12 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss) -> pd
 
         if tss.horizon == 1:
             timestamps = timestamps[0]  # preserves original input format if horizon == 1
+
+        # format if needed
+        if use_original_format:
+            original_format = stat_analysis.ts_stats['order_format']
+            for i, ts in enumerate(timestamps):
+                timestamps[i] = datetime.utcfromtimestamp(ts).strftime(original_format)
 
         df[f'order_{col}'].iloc[idx] = timestamps
     return df[f'order_{col}']
