@@ -491,5 +491,5 @@ class TestTimeseries(unittest.TestCase):
         preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
         self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012-07', '2012-10'])
 
-        preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': '%Y-%m-%d'})
-        self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012-07-16', '2012-10-15'])
+        preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': '%Y'})
+        self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012', '2012'])
