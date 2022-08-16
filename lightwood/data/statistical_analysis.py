@@ -94,7 +94,10 @@ def statistical_analysis(data: pd.DataFrame,
     tss = problem_definition.timeseries_settings
     if tss.is_timeseries:
         oby_col = tss.order_by
-        order_format = infer_date_format(data[oby_col])
+        try:
+            order_format = infer_date_format(data[oby_col])
+        except Exception:
+            order_format = None
 
     df = cleaner(data, dtypes, problem_definition.pct_invalid,
                  identifiers, problem_definition.target, 'train', tss,

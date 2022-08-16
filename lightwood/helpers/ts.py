@@ -109,8 +109,9 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss, stat_
         # format if needed
         if use_original_format:
             original_format = stat_analysis.ts_stats['order_format']
-            for i, ts in enumerate(timestamps):
-                timestamps[i] = datetime.utcfromtimestamp(ts).strftime(original_format)
+            if original_format:
+                for i, ts in enumerate(timestamps):
+                    timestamps[i] = datetime.utcfromtimestamp(ts).strftime(original_format)
 
         df[f'order_{col}'].iloc[idx] = timestamps
     return df[f'order_{col}']
