@@ -504,7 +504,7 @@ class PredictionArguments:
     :param fixed_confidence: Used in the ICP analyzer module, specifies an `alpha` fixed confidence so that predictions, in average, are correct `alpha` percent of the time. For unsupervised anomaly detection, this also translates into the expected error rate. Bounded between 0.01 and 0.99 (respectively implies wider and tighter bounds, all other parameters being equal).
     :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
         detector.
-    :param preserve_time_format: For time series predictors. If enabled, predicted `order_by` timestamps will be formatted back to the original dataset's `order_by` format.
+    :param preserve_time_format: For time series predictors. If set to `infer`, predicted `order_by` timestamps will be formatted back to the original dataset's `order_by` format. Any other string value will be used as a formatting string, unless empty (''), which disables the feature (this is the default behavior).
     """  # noqa
 
     predict_proba: bool = True
@@ -512,7 +512,7 @@ class PredictionArguments:
     fixed_confidence: Union[int, float, None] = None
     anomaly_cooldown: int = 1
     forecast_offset: int = 0
-    preserve_time_format: bool = False
+    preserve_time_format: str = ''
 
     @staticmethod
     def from_dict(obj: Dict):

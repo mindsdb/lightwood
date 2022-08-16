@@ -488,5 +488,8 @@ class TestTimeseries(unittest.TestCase):
                                                                                       'horizon': 2
                                                                                   }}))
         predictor.learn(train_df)
-        preds = predictor.predict(test_df.iloc[[-1]], args={'preserve_time_format': True})
+        preds = predictor.predict(test_df.iloc[[-1]], args={'preserve_time_format': 'infer'})
         self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012-07', '2012-10'])
+
+        preds = predictor.predict(test_df.iloc[[-1]], args={'preserve_time_format': '%Y-%m-%d'})
+        self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012-07-16', '2012-10-15'])
