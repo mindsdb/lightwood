@@ -442,18 +442,21 @@ class ICP(BaseAnalysisBlock):
             if ns.tss.is_timeseries and ns.tss.horizon > 1 and not is_numerical:
                 row_insights = add_tn_cat_conf_bounds(row_insights, ns.tss)
 
-            # clip bounds if necessary
+            # clip if necessary
             if is_numerical:
-                lower_limit = 0.0 if ns.positive_domain else -pow(2, 62)
+                lower_limit = 0.0 if self.positive_domain else -pow(2, 62)
                 upper_limit = pow(2, 62)
                 if not (ns.tss.is_timeseries and ns.tss.horizon > 1):
                     row_insights['upper'] = row_insights['upper'].clip(lower_limit, upper_limit)
                     row_insights['lower'] = row_insights['lower'].clip(lower_limit, upper_limit)
+                    row_insights['prediction'] = row_insights['prediction'].clip(lower_limit, upper_limit)
                 else:
                     row_insights['upper'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
                                              for row in row_insights['upper']]
                     row_insights['lower'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
                                              for row in row_insights['lower']]
+                    row_insights['prediction'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
+                                                  for row in row_insights['prediction']]
 
             # Make sure the target and real values are of an appropriate type
             if ns.target_dtype in (dtype.integer, ):
