@@ -172,6 +172,7 @@
             
   <h1>Source code for lightwood.helpers.ts</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -257,7 +258,8 @@
     <span class="k">return</span> <span class="n">deltas</span><span class="p">,</span> <span class="n">periods</span><span class="p">,</span> <span class="n">freqs</span>
 
 
-<span class="k">def</span> <span class="nf">get_inferred_timestamps</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">deltas</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">get_inferred_timestamps</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">deltas</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">tss</span><span class="p">,</span> <span class="n">stat_analysis</span><span class="p">,</span>
+                            <span class="n">time_format</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="n">horizon</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span>
     <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
         <span class="n">gby</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;group_</span><span class="si">{</span><span class="n">g</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">]</span>
@@ -276,6 +278,16 @@
 
         <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">timestamps</span> <span class="o">=</span> <span class="n">timestamps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># preserves original input format if horizon == 1</span>
+
+        <span class="k">if</span> <span class="n">time_format</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">time_format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;infer&#39;</span><span class="p">:</span>
+                <span class="n">tformat</span> <span class="o">=</span> <span class="n">stat_analysis</span><span class="o">.</span><span class="n">ts_stats</span><span class="p">[</span><span class="s1">&#39;order_format&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tformat</span> <span class="o">=</span> <span class="n">time_format</span>
+
+            <span class="k">if</span> <span class="n">tformat</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timestamps</span><span class="p">):</span>
+                    <span class="n">timestamps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">tformat</span><span class="p">)</span>
 
         <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;order_</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">timestamps</span>
     <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;order_</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>

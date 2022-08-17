@@ -176,7 +176,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">PredictionArguments</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> <span class="n">PredictionArguments</span><span class="p">,</span> <span class="n">StatisticalAnalysis</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">get_inferred_timestamps</span>
 <span class="kn">from</span> <span class="nn">lightwood.analysis.base</span> <span class="kn">import</span> <span class="n">BaseAnalysisBlock</span>
 
@@ -184,14 +184,13 @@
 <div class="viewcode-block" id="explain"><a class="viewcode-back" href="../../../analysis.html#analysis.explain">[docs]</a><span class="k">def</span> <span class="nf">explain</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
             <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
             <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-            <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span>
-            <span class="n">analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
             <span class="n">target_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">target_dtype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 
-            <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>  <span class="c1"># @TODO: pass inside a {} with params for each block to avoid signature overload</span>
-            <span class="n">anomaly_detection</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+            <span class="n">problem_definition</span><span class="p">:</span> <span class="n">ProblemDefinition</span><span class="p">,</span>
+            <span class="n">stat_analysis</span><span class="p">:</span> <span class="n">StatisticalAnalysis</span><span class="p">,</span>
             <span class="n">pred_args</span><span class="p">:</span> <span class="n">PredictionArguments</span><span class="p">,</span>
+            <span class="n">runtime_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
 
             <span class="n">explainer_blocks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">BaseAnalysisBlock</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
             <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -222,25 +221,28 @@
             <span class="k">if</span> <span class="s1">&#39;__mdb_proba&#39;</span> <span class="ow">in</span> <span class="n">col</span><span class="p">:</span>
                 <span class="n">row_insights</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
+    <span class="n">tss</span> <span class="o">=</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span>
+    <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
                 <span class="n">row_insights</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;group_</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
 
-        <span class="n">row_insights</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;order_</span><span class="si">{</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">order_by</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">order_by</span><span class="p">]</span>
-        <span class="n">row_insights</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;order_</span><span class="si">{</span><span class="n">timeseries_settings</span><span class="o">.</span><span class="n">order_by</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_inferred_timestamps</span><span class="p">(</span>
-            <span class="n">row_insights</span><span class="p">,</span> <span class="n">timeseries_settings</span><span class="o">.</span><span class="n">order_by</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;deltas&#39;</span><span class="p">],</span> <span class="n">timeseries_settings</span><span class="p">)</span>
+        <span class="n">row_insights</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;order_</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">]</span>
+        <span class="n">row_insights</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;order_</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_inferred_timestamps</span><span class="p">(</span>
+            <span class="n">row_insights</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;deltas&#39;</span><span class="p">],</span> <span class="n">tss</span><span class="p">,</span> <span class="n">stat_analysis</span><span class="p">,</span>
+            <span class="n">time_format</span><span class="o">=</span><span class="n">pred_args</span><span class="o">.</span><span class="n">time_format</span>
+        <span class="p">)</span>
 
     <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
         <span class="s1">&#39;encoded_data&#39;</span><span class="p">:</span> <span class="n">encoded_data</span><span class="p">,</span>
         <span class="s1">&#39;predictions&#39;</span><span class="p">:</span> <span class="n">predictions</span><span class="p">,</span>
-        <span class="s1">&#39;analysis&#39;</span><span class="p">:</span> <span class="n">analysis</span><span class="p">,</span>
+        <span class="s1">&#39;analysis&#39;</span><span class="p">:</span> <span class="n">runtime_analysis</span><span class="p">,</span>
         <span class="s1">&#39;target_name&#39;</span><span class="p">:</span> <span class="n">target_name</span><span class="p">,</span>
         <span class="s1">&#39;target_dtype&#39;</span><span class="p">:</span> <span class="n">target_dtype</span><span class="p">,</span>
-        <span class="s1">&#39;tss&#39;</span><span class="p">:</span> <span class="n">timeseries_settings</span><span class="p">,</span>
-        <span class="s1">&#39;positive_domain&#39;</span><span class="p">:</span> <span class="n">positive_domain</span><span class="p">,</span>
-        <span class="s1">&#39;anomaly_detection&#39;</span><span class="p">:</span> <span class="n">anomaly_detection</span><span class="p">,</span>
+        <span class="s1">&#39;tss&#39;</span><span class="p">:</span> <span class="n">tss</span><span class="p">,</span>
+        <span class="s1">&#39;positive_domain&#39;</span><span class="p">:</span> <span class="n">stat_analysis</span><span class="o">.</span><span class="n">positive_domain</span><span class="p">,</span>
+        <span class="s1">&#39;anomaly_detection&#39;</span><span class="p">:</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">anomaly_detection</span><span class="p">,</span>
         <span class="s1">&#39;pred_args&#39;</span><span class="p">:</span> <span class="n">pred_args</span>
     <span class="p">}</span>
 
