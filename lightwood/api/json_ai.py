@@ -551,13 +551,18 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
         if mixers[i]["module"] == "Unit":
             pass
 
-        elif mixers[i]["module"] in ("Neural", "NeuralTs"):
+        if not mixers[i].get("args", False):
+            mixers[i]["args"] = {}
+
+        # common
+        mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
+        mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get("dtype_dict", "$dtype_dict")
+        mixers[i]["args"]["stop_after"] = mixers[i]["args"].get("stop_after", "$problem_definition.seconds_per_mixer")
+
+        # specific
+        if mixers[i]["module"] in ("Neural", "NeuralTs"):
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
-            )
-            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
-            mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
-                "dtype_dict", "$dtype_dict"
             )
             mixers[i]["args"]["net"] = mixers[i]["args"].get(
                 "net",
@@ -572,10 +577,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get("ts_analysis", "$ts_analysis")
 
         elif mixers[i]["module"] == "LightGBM":
-            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
-            mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
-                "dtype_dict", "$dtype_dict"
-            )
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
                 "input_cols", "$input_cols"
             )
@@ -585,19 +586,11 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["use_optuna"] = True
 
         elif mixers[i]["module"] == "Regression":
-            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
-            mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
-                "dtype_dict", "$dtype_dict"
-            )
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
 
         elif mixers[i]["module"] == "LightGBMArray":
-            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
-            mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
-                "dtype_dict", "$dtype_dict"
-            )
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
                 "input_cols", "$input_cols"
             )
@@ -610,7 +603,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["use_stl"] = mixers[i]["args"].get("use_stl", "False")
 
         elif mixers[i]["module"] == "NHitsMixer":
-            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
             mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
             mixers[i]["args"]["window"] = "$problem_definition.timeseries_settings.window"
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
@@ -619,10 +611,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             problem_definition.fit_on_all = False  # takes too long otherwise
 
         elif mixers[i]["module"] in ("SkTime", "ProphetMixer", "ETSMixer", "ARIMAMixer"):
-            mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")
-            mixers[i]["args"]["dtype_dict"] = mixers[i]["args"].get(
-                "dtype_dict", "$dtype_dict"
-            )
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
                 "ts_analysis", "$ts_analysis"
             )
@@ -631,9 +619,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
 
             # enforce fit_on_all if this mixer is specified
             problem_definition.fit_on_all = True
-
-        if "stop_after" not in mixers[i]["args"]:
-            mixers[i]["args"]["stop_after"] = "$problem_definition.seconds_per_mixer"
 
     for name in json_ai.encoders:
         if name not in json_ai.dependency_dict:
