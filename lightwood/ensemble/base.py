@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
@@ -21,14 +21,16 @@ class BaseEnsemble:
     - mixers: List of mixers the ensemble will use.
     - supports_proba: For classification tasks, whether the ensemble supports yielding per-class scores rather than only returning the predicted label. 
 
+    NOTE: this ensemble is not functional. Do not use it when generating custom JsonAI objects, as the learning process will fail.
     """  # noqa
     data: EncodedDs
     mixers: List[BaseMixer]
     best_index: int  # @TODO: maybe only applicable to BestOf
     supports_proba: bool
+    prepared: bool
     submodel_data: List[SubmodelData]
 
-    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs) -> None:
+    def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, fit: Optional[bool] = True) -> None:
         self.data = data
         self.mixers = mixers
         self.best_index = 0

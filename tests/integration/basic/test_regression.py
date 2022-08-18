@@ -3,12 +3,11 @@ import unittest
 import pandas as pd
 from sklearn.metrics import r2_score
 from lightwood.api.types import ProblemDefinition
+from lightwood.api.high_level import json_ai_from_problem, predictor_from_json_ai
 
 
 class TestBasic(unittest.TestCase):
     def test_0_predict_file_flow(self):
-        from lightwood.api.high_level import json_ai_from_problem, predictor_from_json_ai
-
         df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
         # Mess with the names to also test if lightwood can deal /w weird names
         df = df.rename(columns={df.columns[1]: f'\'{df.columns[1]}\''})
@@ -58,3 +57,17 @@ class TestBasic(unittest.TestCase):
         with self.assertRaises(Exception) as ctx:
             predictor.predict(pd.DataFrame())
         self.assertTrue('Empty input' in str(ctx.exception))
+
+    def test_1_stacked_ensemble(self):
+        from lightwood.ensemble.stacked_ensemble import StackedEnsemble
+        df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
+        target = 'concrete_strength'
+
+        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 80})
+        jai = json_ai_from_problem(df, pdef)
+        jai.model["module"] = "StackedEnsemble"
+
+        predictor = predictor_from_json_ai(jai)
+        predictor.learn(df)
+        predictor.predict(df)
+        self.assertTrue(isinstance(predictor.ensemble, StackedEnsemble))

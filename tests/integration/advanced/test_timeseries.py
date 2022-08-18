@@ -11,7 +11,7 @@ from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
 
-from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
+from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem, predictor_from_json_ai  # noqa
 from lightwood.data.splitter import stratify
 from lightwood.mixer.sktime import SkTime
 
@@ -348,7 +348,8 @@ class TestTimeseries(unittest.TestCase):
             forecaster.fit(train[target], fh=fh)
             manual_preds = forecaster.predict(fh[1:horizon + 1]).tolist()
             lw_preds = [p[0] for p in ps['prediction']]
-            assert np.allclose(manual_preds, lw_preds, atol=1.5)
+
+            assert np.allclose(manual_preds, lw_preds, atol=1)
 
     def test_6_time_series_sktime_mixer(self):
         """ Sanity check with vanilla sktime mixer using a synthetic square wave """
@@ -473,7 +474,36 @@ class TestTimeseries(unittest.TestCase):
         transformed = pred.preprocess(data)
         assert len(transformed) == target_len
 
-    def test_10_output_date_format(self):
+    def test_10_ts_stacked_ensemble(self):
+        from lightwood.ensemble.ts_stacked_ensemble import TsStackedEnsemble
+        data = pd.read_csv('tests/data/arrivals.csv')
+        data = data[data['Country'] == 'UK']
+        train_df, test_df = self.split_arrivals(data, grouped=False)
+        target = 'Traffic'
+        order_by = 'T'
+        horizon = 2
+        json_ai = json_ai_from_problem(data,
+                                       ProblemDefinition.from_dict({'target': target,
+                                                                    'timeseries_settings': {
+                                                                        'horizon': horizon,
+                                                                        'order_by': order_by,
+                                                                        'window': 5}
+                                                                    }))
+        json_ai.model["module"] = "TsStackedEnsemble"
+        pred = predictor_from_json_ai(json_ai)
+        pred.learn(train_df)
+        preds = pred.predict(data.sample(frac=1)[0:10])
+        self.assertTrue(isinstance(pred.ensemble, TsStackedEnsemble))
+        self.check_ts_prediction_df(preds, horizon, [order_by])
+
+        # test weight bypassing
+        pred.ensemble.set_weights([0 for _ in range(len(pred.ensemble.mixers))])
+        self.assertEqual(
+            0,
+            sum([sum(row) for row in pred.predict(data.iloc[0:10])['prediction'].tolist()])
+        )
+
+    def test_11_output_date_format(self):
         """ Checks that predicted order_by values are timestamps """
         np.random.seed(0)
         data = pd.read_csv('tests/data/arrivals.csv')
