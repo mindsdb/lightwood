@@ -548,11 +548,11 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     # Add implicit mixer arguments
     mixers = json_ai.model['args']['submodels']
     for i in range(len(mixers)):
-        if mixers[i]["module"] == "Unit":
-            pass
-
         if not mixers[i].get("args", False):
             mixers[i]["args"] = {}
+
+        if mixers[i]["module"] == "Unit":
+            continue
 
         # common
         mixers[i]["args"]["target"] = mixers[i]["args"].get("target", "$target")

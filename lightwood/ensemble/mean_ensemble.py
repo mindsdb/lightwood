@@ -10,6 +10,11 @@ from lightwood import dtype
 
 
 class MeanEnsemble(BaseEnsemble):
+    """
+    When called, this ensemble will return the mean prediction from the entire list of underlying mixers.
+
+    NOTE: can only be used in regression tasks.
+    """
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict,
                  fit: Optional[bool] = True, **kwargs) -> None:
         super().__init__(target, mixers, data, fit=False)

@@ -21,6 +21,7 @@ class BaseEnsemble:
     - mixers: List of mixers the ensemble will use.
     - supports_proba: For classification tasks, whether the ensemble supports yielding per-class scores rather than only returning the predicted label. 
 
+    NOTE: this ensemble is not functional. Do not use it when generating custom JsonAI objects, as the learning process will fail.
     """  # noqa
     data: EncodedDs
     mixers: List[BaseMixer]

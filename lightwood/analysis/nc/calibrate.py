@@ -442,7 +442,7 @@ class ICP(BaseAnalysisBlock):
             if ns.tss.is_timeseries and ns.tss.horizon > 1:
                 if is_numerical and ns.pred_args.simple_ts_bounds:
                     row_insights = add_tn_num_conf_bounds(row_insights, ns.tss)
-                else:
+                elif not is_numerical:
                     row_insights = add_tn_cat_conf_bounds(row_insights, ns.tss)
 
             # clip if necessary

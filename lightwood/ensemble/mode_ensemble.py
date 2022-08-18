@@ -14,6 +14,13 @@ from lightwood.helpers.log import log
 
 
 class ModeEnsemble(BaseEnsemble):
+    """
+    When called, this ensemble will return the mode prediction from the entire list of underlying mixers.
+
+    If there are multiple modes, the mode whose voting mixers have the highest score will be returned.
+
+    NOTE: can only be used in categorical tasks.
+    """
     mixer_scores: Dict[str, float]
 
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict,

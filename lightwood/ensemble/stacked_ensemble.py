@@ -15,6 +15,18 @@ from lightwood.helpers.log import log
 
 
 class StackedEnsemble(MeanEnsemble):
+    """
+    This ensemble will learn an optimal weight vector via Stochastic Gradient Descent on the validation dataset and the respective mixer predictions.
+
+    Starting weights for the vector are uniformly set.
+
+    Note this mixer is still in experimental phase. Some features in the roadmap are:
+      - support for handling faulty mixers
+      - support for custom initial vector weights
+      - early stopping
+      - arbitrarily complex secondary model
+
+    """  # noqa
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict,
                  args: PredictionArguments, fit: Optional[bool] = True, **kwargs) -> None:
         super().__init__(target, mixers, data, dtype_dict, fit=False)

@@ -17,10 +17,13 @@ from lightwood.helpers.log import log
 
 
 class TsStackedEnsemble(StackedEnsemble):
+    """
+    Thin wrapper for `StackedEnsemble` that enables forecasting support.
+    """
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict, ts_analysis: dict,
                  args: PredictionArguments, fit: Optional[bool] = True, **kwargs) -> None:
         dtype_dict = deepcopy(dtype_dict)
-        dtype_dict[target] = dtype.float  # hijack to correctly initialize MeanEnsemble
+        dtype_dict[target] = dtype.float  # hijack to correctly initialize parent class
         super().__init__(target, mixers, data, dtype_dict, args, fit=False)
         if not isinstance(data.encoders[target], TsArrayNumericEncoder):
             raise Exception('This ensemble can only be used to forecast!')

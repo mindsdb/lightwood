@@ -14,7 +14,15 @@ from lightwood import dtype
 
 
 class WeightedMeanEnsemble(BaseEnsemble):
-    # @TODO: remove this one BUT rename then move stacked source into it to maintain contributors
+    """
+    This ensemble determines a weight vector to return a weighted mean of the underlying mixers.
+
+    More specifically, each model is evaluated on the validation dataset and assigned an accuracy score (as per the fixed accuracy function at the JsonAI level).
+
+    Afterwards, all the scores are softmaxed to obtain the final weights.
+
+    Note: this ensemble only supports regression tasks.
+    """  # noqa
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, args: PredictionArguments,
                  dtype_dict: dict, accuracy_functions, ts_analysis: Optional[dict] = None,
                  fit: Optional[bool] = True, **kwargs) -> None:
@@ -56,7 +64,8 @@ class WeightedMeanEnsemble(BaseEnsemble):
         avg_predictions_df = df.apply(lambda x: np.average(x, weights=self.weights), axis='columns')
         return pd.DataFrame(avg_predictions_df, columns=['prediction'])
 
-    def accuracies_to_weights(self, x: np.array) -> np.array:
+    @staticmethod
+    def accuracies_to_weights(x: np.array) -> np.array:
         # Converts accuracies to weights using the softmax function.
         e_x = np.exp(x - np.max(x))
         return e_x / e_x.sum()
