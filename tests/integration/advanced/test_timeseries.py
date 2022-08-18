@@ -502,3 +502,24 @@ class TestTimeseries(unittest.TestCase):
             0,
             sum([sum(row) for row in pred.predict(data.iloc[0:10])['prediction'].tolist()])
         )
+
+    def test_11_output_date_format(self):
+        """ Checks that predicted order_by values are timestamps """
+        np.random.seed(0)
+        data = pd.read_csv('tests/data/arrivals.csv')
+        data = data[data['Country'] == 'US']
+        order_by = 'T'
+        train_df, test_df = self.split_arrivals(data, grouped=False)
+        predictor = predictor_from_problem(train_df, ProblemDefinition.from_dict({'target': 'Traffic',
+                                                                                  'time_aim': 30,
+                                                                                  'timeseries_settings': {
+                                                                                      'order_by': order_by,
+                                                                                      'window': 5,
+                                                                                      'horizon': 2
+                                                                                  }}))
+        predictor.learn(train_df)
+        preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
+        self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012-07', '2012-10'])
+
+        preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': '%Y'})
+        self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012', '2012'])
