@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Ensemble &mdash; lightwood 22.8.1.0 documentation</title>
+  <title>Ensemble &mdash; lightwood 22.8.4.0 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                22.8.1.0
+                22.8.4.0
               </div>
             
           
@@ -108,6 +108,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#ensemble.BestOf">BestOf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ensemble.MeanEnsemble">MeanEnsemble</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ensemble.ModeEnsemble">ModeEnsemble</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ensemble.StackedEnsemble">StackedEnsemble</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ensemble.TsStackedEnsemble">TsStackedEnsemble</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ensemble.WeightedMeanEnsemble">WeightedMeanEnsemble</a></li>
 </ul>
 </li>
@@ -210,7 +212,7 @@
 <p>Ensemble mixers together in order to generate predictions</p>
 <span class="target" id="module-ensemble"></span><dl class="py class">
 <dt class="sig sig-object py" id="ensemble.BaseEnsemble">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">BaseEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/base.html#BaseEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.BaseEnsemble" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">BaseEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/base.html#BaseEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.BaseEnsemble" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for all ensembles.</p>
 <p>Ensembles wrap sets of Lightwood mixers, with the objective of generating better predictions based on the output of each mixer.</p>
 <dl class="simple">
@@ -223,29 +225,61 @@
 <p>Class Attributes:
 - mixers: List of mixers the ensemble will use.
 - supports_proba: For classification tasks, whether the ensemble supports yielding per-class scores rather than only returning the predicted label.</p>
+<p>NOTE: this ensemble is not functional. Do not use it when generating custom JsonAI objects, as the learning process will fail.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ensemble.BestOf">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">BestOf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/best_of.html#BestOf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.BestOf" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">BestOf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/best_of.html#BestOf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.BestOf" title="Permalink to this definition">¶</a></dt>
 <dd><p>This ensemble acts as a mixer selector.
 After evaluating accuracy for all internal mixers with the validation data, it sets the best mixer as the underlying model.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ensemble.MeanEnsemble">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">MeanEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/mean_ensemble.html#MeanEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.MeanEnsemble" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">MeanEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/mean_ensemble.html#MeanEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.MeanEnsemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>When called, this ensemble will return the mean prediction from the entire list of underlying mixers.</p>
+<p>NOTE: can only be used in regression tasks.</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ensemble.ModeEnsemble">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">ModeEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/mode_ensemble.html#ModeEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.ModeEnsemble" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">ModeEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/mode_ensemble.html#ModeEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.ModeEnsemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>When called, this ensemble will return the mode prediction from the entire list of underlying mixers.</p>
+<p>If there are multiple modes, the mode whose voting mixers have the highest score will be returned.</p>
+<p>NOTE: can only be used in categorical tasks.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ensemble.StackedEnsemble">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">StackedEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/stacked_ensemble.html#StackedEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.StackedEnsemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>This ensemble will learn an optimal weight vector via Stochastic Gradient Descent on the validation dataset and the respective mixer predictions.</p>
+<p>Starting weights for the vector are uniformly set.</p>
+<dl class="simple">
+<dt>Note this mixer is still in experimental phase. Some features in the roadmap are:</dt><dd><ul class="simple">
+<li><p>support for handling faulty mixers</p></li>
+<li><p>support for custom initial vector weights</p></li>
+<li><p>early stopping</p></li>
+<li><p>arbitrarily complex secondary model</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ensemble.TsStackedEnsemble">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">TsStackedEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/ts_stacked_ensemble.html#TsStackedEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.TsStackedEnsemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thin wrapper for <cite>StackedEnsemble</cite> that enables forecasting support.</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ensemble.WeightedMeanEnsemble">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">WeightedMeanEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/weighted_mean_ensemble.html#WeightedMeanEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.WeightedMeanEnsemble" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ensemble.</span></span><span class="sig-name descname"><span class="pre">WeightedMeanEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/ensemble/weighted_mean_ensemble.html#WeightedMeanEnsemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ensemble.WeightedMeanEnsemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>This ensemble determines a weight vector to return a weighted mean of the underlying mixers.</p>
+<p>More specifically, each model is evaluated on the validation dataset and assigned an accuracy score (as per the fixed accuracy function at the JsonAI level).</p>
+<p>Afterwards, all the scores are softmaxed to obtain the final weights.</p>
+<p>Note: this ensemble only supports regression tasks.</p>
+</dd></dl>
 
 </div>
 

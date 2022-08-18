@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Lightwood API Types &mdash; lightwood 22.8.1.0 documentation</title>
+  <title>Lightwood API Types &mdash; lightwood 22.8.4.0 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                22.8.1.0
+                22.8.4.0
               </div>
             
           
@@ -562,7 +562,7 @@ For each trained ML algorithm, we store:</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="api.types.PredictionArguments">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">PredictionArguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predict_proba</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_mixers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_cooldown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forecast_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#PredictionArguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.PredictionArguments" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">PredictionArguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predict_proba</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_mixers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_cooldown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forecast_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simple_ts_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#PredictionArguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.PredictionArguments" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class contains all possible arguments that can be passed to a Lightwood predictor at inference time.
 On each predict call, all arguments included in a parameter dictionary will update the respective fields
 in the <cite>PredictionArguments</cite> instance that the predictor will have.</p>
@@ -578,6 +578,9 @@ each class.
 :type fixed_confidence: <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]
 :param fixed_confidence: Used in the ICP analyzer module, specifies an <cite>alpha</cite> fixed confidence so that predictions, in average, are correct <cite>alpha</cite> percent of the time. For unsupervised anomaly detection, this also translates into the expected error rate. Bounded between 0.01 and 0.99 (respectively implies wider and tighter bounds, all other parameters being equal).
 :type anomaly_cooldown: <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>
+:param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly detector.
+:type simple_ts_bounds: <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>
+:param simple_ts_bounds: in forecasting contexts, enabling this parameter disables the usual conformal-based bounds (with Bonferroni correction) and resorts to a simpler way of scaling bounds through the horizon based on the uncertainty estimation for the first value in the forecast (see helpers.ts.add_tn_num_conf_bounds for the implementation).
 :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly         detector.
 :type time_format: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
 :param time_format: For time series predictors. If set to <cite>infer</cite>, predicted <cite>order_by</cite> timestamps will be formatted back to the original dataset’s <cite>order_by</cite> format. Any other string value will be used as a formatting string, unless empty (‘’), which disables the feature (this is the default behavior).</p>

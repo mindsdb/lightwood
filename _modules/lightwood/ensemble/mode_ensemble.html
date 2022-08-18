@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.ensemble.mode_ensemble &mdash; lightwood 22.8.1.0 documentation</title>
+  <title>lightwood.ensemble.mode_ensemble &mdash; lightwood 22.8.4.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                22.8.1.0
+                22.8.4.0
               </div>
             
           
@@ -187,34 +187,44 @@
 
 
 <div class="viewcode-block" id="ModeEnsemble"><a class="viewcode-back" href="../../../ensemble.html#ensemble.ModeEnsemble">[docs]</a><span class="k">class</span> <span class="nc">ModeEnsemble</span><span class="p">(</span><span class="n">BaseEnsemble</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    When called, this ensemble will return the mode prediction from the entire list of underlying mixers.</span>
+
+<span class="sd">    If there are multiple modes, the mode whose voting mixers have the highest score will be returned.</span>
+
+<span class="sd">    NOTE: can only be used in categorical tasks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mixer_scores</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseMixer</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-                 <span class="n">accuracy_functions</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                 <span class="n">accuracy_functions</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">fit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mixer_scores</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tags</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                <span class="s1">&#39;This ensemble can only be used in classification problems! &#39;</span> <span class="o">+</span>
-                <span class="sa">f</span><span class="s1">&#39;Got target dtype </span><span class="si">{</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="si">}</span><span class="s1"> instead!&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fit</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">tags</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s1">&#39;This ensemble can only be used in classification problems! &#39;</span> <span class="o">+</span>
+                    <span class="sa">f</span><span class="s1">&#39;Got target dtype </span><span class="si">{</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="si">}</span><span class="s1"> instead!&#39;</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">mixer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mixers</span><span class="p">):</span>
-            <span class="n">score_dict</span> <span class="o">=</span> <span class="n">evaluate_accuracy</span><span class="p">(</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">,</span>
-                <span class="n">mixer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">)[</span><span class="s1">&#39;prediction&#39;</span><span class="p">],</span>
-                <span class="n">target</span><span class="p">,</span>
-                <span class="n">accuracy_functions</span><span class="p">,</span>
-                <span class="n">ts_analysis</span><span class="o">=</span><span class="n">ts_analysis</span>
-            <span class="p">)</span>
-            <span class="n">avg_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">score_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mixer: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> got accuracy: </span><span class="si">{</span><span class="n">avg_score</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">mixer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mixers</span><span class="p">):</span>
+                <span class="n">score_dict</span> <span class="o">=</span> <span class="n">evaluate_accuracy</span><span class="p">(</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">,</span>
+                    <span class="n">mixer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">)[</span><span class="s1">&#39;prediction&#39;</span><span class="p">],</span>
+                    <span class="n">target</span><span class="p">,</span>
+                    <span class="n">accuracy_functions</span><span class="p">,</span>
+                    <span class="n">ts_analysis</span><span class="o">=</span><span class="n">ts_analysis</span>
+                <span class="p">)</span>
+                <span class="n">avg_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">score_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mixer: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> got accuracy: </span><span class="si">{</span><span class="n">avg_score</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">is_nan_numeric</span><span class="p">(</span><span class="n">avg_score</span><span class="p">):</span>
-                <span class="n">avg_score</span> <span class="o">=</span> <span class="o">-</span><span class="nb">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">63</span><span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Change the accuracy of mixer </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> to valid value: </span><span class="si">{</span><span class="n">avg_score</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">is_nan_numeric</span><span class="p">(</span><span class="n">avg_score</span><span class="p">):</span>
+                    <span class="n">avg_score</span> <span class="o">=</span> <span class="o">-</span><span class="nb">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">63</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Change the accuracy of mixer </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> to valid value: </span><span class="si">{</span><span class="n">avg_score</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">mixer_scores</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;__mdb_mixer_</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">avg_score</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mixer_scores</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;__mdb_mixer_</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">avg_score</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prepared</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">_pick_mode_highest_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;If the predictions are unimodal, return the mode. If there are multiple modes, return the mode whose voting</span>
@@ -244,6 +254,7 @@
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">modes_predictions_scores</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">modes_predictions_scores</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepared</span>
         <span class="n">predictions_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">mixer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixers</span><span class="p">:</span>
             <span class="n">predictions_df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;__mdb_mixer_</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixer</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span>

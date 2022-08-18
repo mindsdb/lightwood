@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.ensemble.base &mdash; lightwood 22.8.1.0 documentation</title>
+  <title>lightwood.ensemble.base &mdash; lightwood 22.8.4.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                22.8.1.0
+                22.8.4.0
               </div>
             
           
@@ -171,7 +171,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.ensemble.base</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
@@ -194,14 +194,16 @@
 <span class="sd">    - mixers: List of mixers the ensemble will use.</span>
 <span class="sd">    - supports_proba: For classification tasks, whether the ensemble supports yielding per-class scores rather than only returning the predicted label. </span>
 
+<span class="sd">    NOTE: this ensemble is not functional. Do not use it when generating custom JsonAI objects, as the learning process will fail.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">EncodedDs</span>
     <span class="n">mixers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseMixer</span><span class="p">]</span>
     <span class="n">best_index</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># @TODO: maybe only applicable to BestOf</span>
     <span class="n">supports_proba</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">prepared</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">submodel_data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SubmodelData</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseMixer</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseMixer</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">fit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mixers</span> <span class="o">=</span> <span class="n">mixers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_index</span> <span class="o">=</span> <span class="mi">0</span>

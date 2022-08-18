@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.ensemble.mean_ensemble &mdash; lightwood 22.8.1.0 documentation</title>
+  <title>lightwood.ensemble.mean_ensemble &mdash; lightwood 22.8.4.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                22.8.1.0
+                22.8.4.0
               </div>
             
           
@@ -171,7 +171,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.ensemble.mean_ensemble</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
@@ -183,8 +183,14 @@
 
 
 <div class="viewcode-block" id="MeanEnsemble"><a class="viewcode-back" href="../../../ensemble.html#ensemble.MeanEnsemble">[docs]</a><span class="k">class</span> <span class="nc">MeanEnsemble</span><span class="p">(</span><span class="n">BaseEnsemble</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseMixer</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    When called, this ensemble will return the mean prediction from the entire list of underlying mixers.</span>
+
+<span class="sd">    NOTE: can only be used in regression tasks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseMixer</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                 <span class="n">fit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;This ensemble can only be used regression problems! Got target dtype </span><span class="si">{</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="si">}</span><span class="s1"> instead!&#39;</span><span class="p">)</span>
