@@ -120,13 +120,13 @@ def add_tn_num_conf_bounds(data: pd.DataFrame, tss_args):
         data[col] = data[col].astype(object)
 
     for idx, row in data.iterrows():
-        error_increase = [row['confidence']] + \
-                         [row['confidence'] * np.log(np.e + t / 2)  # offset by e so that y intercept is 1
+        error_increase = [row['confidence'][0]] + \
+                         [row['confidence'][0] * np.log(np.e + t / 2)  # offset by e so that y intercept is 1
                           for t in range(1, tss_args.horizon)]
-        data['confidence'].iloc[idx] = [row['confidence'] for _ in range(tss_args.horizon)]
+        data['confidence'].iloc[idx] = [row['confidence'][0] for _ in range(tss_args.horizon)]
 
         preds = row['prediction']
-        width = row['upper'] - row['lower']
+        width = row['upper'][0] - row['lower'][0]
         data['lower'].iloc[idx] = [pred - (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
         data['upper'].iloc[idx] = [pred + (width / 2) * modifier for pred, modifier in zip(preds, error_increase)]
 
@@ -219,7 +219,7 @@ def detect_freq_period(deltas: pd.DataFrame, tss, n_points) -> tuple:
     }
     freq_to_period = {interval: period for (interval, period) in tss.interval_periods}
     for tag, period in (('yearly', 1), ('quarterly', 4), ('bimonthly', 6), ('monthly', 12),
-                        ('weekly', 52), ('daily', 7), ('hourly', 24), ('minute', 60), ('second', 60), ('constant', 0)):
+                        ('weekly', 52), ('daily', 7), ('hourly', 24), ('minute', 1), ('second', 1), ('constant', 0)):
         if tag not in freq_to_period.keys():
             if period <= n_points:
                 freq_to_period[tag] = period
