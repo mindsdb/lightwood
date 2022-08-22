@@ -14,34 +14,44 @@ from lightwood.helpers.log import log
 
 
 class ModeEnsemble(BaseEnsemble):
+    """
+    When called, this ensemble will return the mode prediction from the entire list of underlying mixers.
+
+    If there are multiple modes, the mode whose voting mixers have the highest score will be returned.
+
+    NOTE: can only be used in categorical tasks.
+    """
     mixer_scores: Dict[str, float]
 
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, dtype_dict: dict,
-                 accuracy_functions, args: PredictionArguments, ts_analysis: Optional[dict] = None) -> None:
-        super().__init__(target, mixers, data)
+                 accuracy_functions, args: PredictionArguments, ts_analysis: Optional[dict] = None,
+                 fit: Optional[bool] = True, **kwargs) -> None:
+        super().__init__(target, mixers, data, fit=False)
         self.mixer_scores = {}
 
-        if dtype_dict[target] not in (dtype.binary, dtype.categorical, dtype.tags):
-            raise Exception(
-                'This ensemble can only be used in classification problems! ' +
-                f'Got target dtype {dtype_dict[target]} instead!')
+        if fit:
+            if dtype_dict[target] not in (dtype.binary, dtype.categorical, dtype.tags):
+                raise Exception(
+                    'This ensemble can only be used in classification problems! ' +
+                    f'Got target dtype {dtype_dict[target]} instead!')
 
-        for _, mixer in enumerate(mixers):
-            score_dict = evaluate_accuracy(
-                data.data_frame,
-                mixer(data, args)['prediction'],
-                target,
-                accuracy_functions,
-                ts_analysis=ts_analysis
-            )
-            avg_score = np.mean(list(score_dict.values()))
-            log.info(f'Mixer: {type(mixer).__name__} got accuracy: {avg_score}')
+            for _, mixer in enumerate(mixers):
+                score_dict = evaluate_accuracy(
+                    data.data_frame,
+                    mixer(data, args)['prediction'],
+                    target,
+                    accuracy_functions,
+                    ts_analysis=ts_analysis
+                )
+                avg_score = np.mean(list(score_dict.values()))
+                log.info(f'Mixer: {type(mixer).__name__} got accuracy: {avg_score}')
 
-            if is_nan_numeric(avg_score):
-                avg_score = -pow(2, 63)
-                log.warning(f'Change the accuracy of mixer {type(mixer).__name__} to valid value: {avg_score}')
+                if is_nan_numeric(avg_score):
+                    avg_score = -pow(2, 63)
+                    log.warning(f'Change the accuracy of mixer {type(mixer).__name__} to valid value: {avg_score}')
 
-            self.mixer_scores[f'__mdb_mixer_{type(mixer).__name__}'] = avg_score
+                self.mixer_scores[f'__mdb_mixer_{type(mixer).__name__}'] = avg_score
+            self.prepared = True
 
     def _pick_mode_highest_score(self, prediction: pd.Series):
         """If the predictions are unimodal, return the mode. If there are multiple modes, return the mode whose voting
@@ -71,6 +81,7 @@ class ModeEnsemble(BaseEnsemble):
         return max(modes_predictions_scores, key=modes_predictions_scores.get)
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
+        assert self.prepared
         predictions_df = pd.DataFrame()
         for mixer in self.mixers:
             predictions_df[f'__mdb_mixer_{type(mixer).__name__}'] = mixer(ds, args=args)['prediction']

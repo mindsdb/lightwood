@@ -50,6 +50,11 @@ def transform_timeseries(
     # infer frequency with get_delta
     oby_col = tss.order_by
     groups = get_ts_groups(data, tss)
+
+    # initial stable sort and per-partition deduplication
+    data = data.sort_values(by=oby_col, kind='mergesort')
+    data = data.drop_duplicates(subset=[oby_col, *gb_arr], keep='first')
+
     if not ts_analysis:
         _, periods, freqs = get_delta(data, dtype_dict, groups, target, tss)
     else:
@@ -144,13 +149,10 @@ def transform_timeseries(
         pool = mp.Pool(processes=nr_procs)
         # Make type `object` so that dataframe cells can be python lists
         df_arr = pool.map(partial(_ts_to_obj, historical_columns=[oby] + tss.historical_columns), df_arr)
-        df_arr = pool.map(partial(_ts_order_col_to_cell_lists,
-                          order_cols=[oby] + tss.historical_columns), df_arr)
         df_arr = pool.map(
             partial(
                 _ts_add_previous_rows, order_cols=[oby] + tss.historical_columns, window=window),
             df_arr)
-
         df_arr = pool.map(partial(_ts_add_future_target, target=target, horizon=tss.horizon,
                                   data_dtype=tss.target_type, mode=mode),
                           df_arr)
@@ -164,7 +166,6 @@ def transform_timeseries(
     else:
         for i in range(n_groups):
             df_arr[i] = _ts_to_obj(df_arr[i], historical_columns=[oby] + tss.historical_columns)
-            df_arr[i] = _ts_order_col_to_cell_lists(df_arr[i], order_cols=[oby] + tss.historical_columns)
             df_arr[i] = _ts_add_previous_rows(df_arr[i],
                                               order_cols=[oby] + tss.historical_columns, window=window)
             df_arr[i] = _ts_add_future_target(df_arr[i], target=target, horizon=tss.horizon,
@@ -195,7 +196,8 @@ def transform_timeseries(
     idx = 0
 
     if df_gb_map is None:
-        for _, row in combined_df.iterrows():
+        for i in range(len(combined_df)):
+            row = combined_df.iloc[i]
             if not infer_mode:
                 timeseries_row_mapping[idx] = int(
                     row['original_index']) if row['original_index'] is not None and not np.isnan(
@@ -205,7 +207,8 @@ def transform_timeseries(
             idx += 1
     else:
         for gb in df_gb_map:
-            for _, row in df_gb_map[gb].iterrows():
+            for i in range(len(df_gb_map[gb])):
+                row = df_gb_map[gb].iloc[i]
                 if not infer_mode:
                     timeseries_row_mapping[idx] = int(
                         row['original_index']) if row['original_index'] is not None and not np.isnan(
@@ -268,22 +271,6 @@ def _ts_to_obj(df: pd.DataFrame, historical_columns: list) -> pd.DataFrame:
     return df
 
 
-def _ts_order_col_to_cell_lists(df: pd.DataFrame, order_cols: list) -> pd.DataFrame:
-    """
-    Casts all data in the `order_by` column into cells.
-
-    :param df: Input dataframe
-    :param order_cols: `order_by` column and other columns flagged as `historical`.
-
-    :return: Dataframe with all `order_cols` modified so that their values are cells, e.g. `1` -> `[1]`
-    """
-    for order_col in order_cols:
-        col_idx = df.columns.tolist().index(order_col)
-        for i in range(len(df)):
-            df.iat[i, col_idx] = [df.iat[i, col_idx]]
-    return df
-
-
 def _ts_add_previous_rows(df: pd.DataFrame, order_cols: list, window: int) -> pd.DataFrame:
     """
     Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of the `order_by` column.
@@ -295,20 +282,14 @@ def _ts_add_previous_rows(df: pd.DataFrame, order_cols: list, window: int) -> pd
     :return: Dataframe with all `order_cols` modified so that their values are now arrays of historical context.
     """  # noqa
     for order_col in order_cols:
+        new_vals = np.zeros((len(df), window))
+        for i in range(window, 0, -1):
+            new_vals[:, i - 1] = df[order_col].shift(window - i).values
+
+        new_vals = np.nan_to_num(new_vals, nan=0.0)
         for i in range(len(df)):
-            previous_indexes = [*range(max(0, i - window), i)]
+            df.at[df.index[i], order_col] = new_vals[i, :]
 
-            for prev_i in reversed(previous_indexes):
-                df.iloc[i][order_col].append(
-                    df.iloc[prev_i][order_col][-1]
-                )
-
-            # Zero pad
-            # @TODO: Remove since RNN encoder can do without (???)
-            df.iloc[i][order_col].extend(
-                [0] * (1 + window - len(df.iloc[i][order_col]))
-            )
-            df.iloc[i][order_col].reverse()
     return df
 
 

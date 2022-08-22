@@ -502,8 +502,11 @@ class PredictionArguments:
     each class.   
     :param all_mixers: forces an ensemble to return predictions emitted by all its internal mixers. 
     :param fixed_confidence: Used in the ICP analyzer module, specifies an `alpha` fixed confidence so that predictions, in average, are correct `alpha` percent of the time. For unsupervised anomaly detection, this also translates into the expected error rate. Bounded between 0.01 and 0.99 (respectively implies wider and tighter bounds, all other parameters being equal).
+    :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly detector.
+    :param simple_ts_bounds: in forecasting contexts, enabling this parameter disables the usual conformal-based bounds (with Bonferroni correction) and resorts to a simpler way of scaling bounds through the horizon based on the uncertainty estimation for the first value in the forecast (see helpers.ts.add_tn_num_conf_bounds for the implementation).
     :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
         detector.
+    :param time_format: For time series predictors. If set to `infer`, predicted `order_by` timestamps will be formatted back to the original dataset's `order_by` format. Any other string value will be used as a formatting string, unless empty (''), which disables the feature (this is the default behavior).
     """  # noqa
 
     predict_proba: bool = True
@@ -511,6 +514,8 @@ class PredictionArguments:
     fixed_confidence: Union[int, float, None] = None
     anomaly_cooldown: int = 1
     forecast_offset: int = 0
+    simple_ts_bounds: bool = False
+    time_format: str = ''
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -528,6 +533,8 @@ class PredictionArguments:
         fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
         anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
         forecast_offset = obj.get('forecast_offset', PredictionArguments.forecast_offset)
+        simple_ts_bounds = obj.get('simple_ts_bounds', PredictionArguments.simple_ts_bounds)
+        time_format = obj.get('time_format', PredictionArguments.time_format)
 
         pred_args = PredictionArguments(
             predict_proba=predict_proba,
@@ -535,6 +542,8 @@ class PredictionArguments:
             fixed_confidence=fixed_confidence,
             anomaly_cooldown=anomaly_cooldown,
             forecast_offset=forecast_offset,
+            simple_ts_bounds=simple_ts_bounds,
+            time_format=time_format,
         )
 
         return pred_args

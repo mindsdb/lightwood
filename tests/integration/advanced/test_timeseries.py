@@ -11,7 +11,7 @@ from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
 
-from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem  # noqa
+from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem, predictor_from_json_ai  # noqa
 from lightwood.data.splitter import stratify
 from lightwood.mixer.sktime import SkTime
 
@@ -257,16 +257,16 @@ class TestTimeseries(unittest.TestCase):
         predictor.learn(train)
         predictor.predict(test)
 
-    def test_5_time_series_sktime_mixer(self):
+    def test_5_time_series_arima_mixer(self):
         """
-        Tests `sktime` mixer individually, as it has a special notion of
-        timestamps that we need to ensure are being used correctly. In
-        particular, given a train-dev-test split, any forecasts coming from a sktime
+        Tests `AutoARIMA` mixer individually, as it has a special notion of
+        timestamps that we need to ensure are being used correctly (along with all other `sktime` mixers). 
+        In particular, given a train-dev-test split, any forecasts coming from any sktime
         mixer should start from the latest observed data in the entire dataset.
         
         This test also compares:
          - correct propagation of offset by K if the special `__mdb_forecast_offset` column is present
-         - results against manual use of sktime to ensure equal results.
+         - results against manual use of AutoARIMA to ensure equal results.
         """  # noqa
 
         # synth square wave
@@ -294,7 +294,7 @@ class TestTimeseries(unittest.TestCase):
 
         json_ai = json_ai_from_problem(df, problem_definition=pdef)
         json_ai.model['args']['submodels'] = [{
-            "module": "SkTime",
+            "module": "ARIMAMixer",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
                 "horizon": "$problem_definition.timeseries_settings.horizon",
@@ -348,9 +348,41 @@ class TestTimeseries(unittest.TestCase):
             forecaster.fit(train[target], fh=fh)
             manual_preds = forecaster.predict(fh[1:horizon + 1]).tolist()
             lw_preds = [p[0] for p in ps['prediction']]
-            assert np.allclose(manual_preds, lw_preds, atol=1.5)
 
-    def test_6_irregular_series(self):
+            assert np.allclose(manual_preds, lw_preds, atol=1)
+
+    def test_6_time_series_sktime_mixer(self):
+        """ Sanity check with vanilla sktime mixer using a synthetic square wave """
+        tsteps = 100
+        target = 'Value'
+        horizon = 20
+        df = pd.DataFrame(columns=['Time', target])
+        df['Time'] = np.linspace(0, 100, tsteps, endpoint=False)
+        df[target] = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * df['Time'].values, width=0.5))]
+        df[f'{target}_2x'] = [2 * elt for elt in df[target].values]
+        train = df[:int(len(df) * 0.8)]
+        test = df[int(len(df) * 0.8):]
+        pdef = ProblemDefinition.from_dict({'target': target,
+                                            'time_aim': 200,
+                                            'timeseries_settings': {
+                                                'order_by': 'Time',
+                                                'window': 5,
+                                                'horizon': horizon,
+                                                'historical_columns': [f'{target}_2x']
+                                            }})
+        json_ai = json_ai_from_problem(df, problem_definition=pdef)
+        json_ai.model['args']['submodels'] = [{
+            "module": "SkTime",
+            "args": {
+                "stop_after": "$problem_definition.seconds_per_mixer",
+                "horizon": "$problem_definition.timeseries_settings.horizon",
+            }}]
+        predictor = predictor_from_code(code_from_json_ai(json_ai))
+        train_and_check_time_aim(predictor, train)
+        ps = predictor.predict(test)
+        assert r2_score(test[target].values, ps['prediction'].iloc[0]) >= 0.5
+
+    def test_7_irregular_series(self):
         """
         Even though the suggestion is to feed regularly sampled series into predictors, this test can still help us
         catch undesired behavior when the recommendation is not followed.
@@ -390,7 +422,7 @@ class TestTimeseries(unittest.TestCase):
         test['__mdb_forecast_offset'] = 1
         predictor.predict(test)
 
-    def test_7_time_series_double_grouped_regression(self):
+    def test_8_time_series_double_grouped_regression(self):
         """Test double-grouped numerical predictions, replicates quick start guide in cloud.mindsdb.com """
         data = pd.read_csv('tests/data/house_sales.csv')
         gby = ['bedrooms', 'type']
@@ -422,3 +454,72 @@ class TestTimeseries(unittest.TestCase):
             row[f'order_{order_by}'] = [row[f'order_{order_by}']] if horizon == 1 else row[f'order_{order_by}']
             for timestamp in row[f'order_{order_by}']:
                 assert timestamp > pd.to_datetime(test[order_by]).max().timestamp()
+
+    def test_9_ts_dedupe(self):
+        """ Test time series de-duplication procedures """
+        data = pd.read_csv('tests/data/arrivals.csv')
+        data = data[data['Country'].isin(['US', 'Japan'])]
+        target_len = len(data)
+        data = data.append(data[data['Country'] == 'Japan']).reset_index(drop=True)  # force duplication of one series
+        jai = json_ai_from_problem(data, ProblemDefinition.from_dict({'target': 'Traffic',
+                                                                      'time_aim': 30,
+                                                                      'timeseries_settings': {
+                                                                          'group_by': ['Country'],
+                                                                          'horizon': 8,
+                                                                          'order_by': 'T',
+                                                                          'window': 4
+                                                                      }}))
+        code = code_from_json_ai(jai)
+        pred = predictor_from_code(code)
+        transformed = pred.preprocess(data)
+        assert len(transformed) == target_len
+
+    def test_10_ts_stacked_ensemble(self):
+        from lightwood.ensemble.ts_stacked_ensemble import TsStackedEnsemble
+        data = pd.read_csv('tests/data/arrivals.csv')
+        data = data[data['Country'] == 'UK']
+        train_df, test_df = self.split_arrivals(data, grouped=False)
+        target = 'Traffic'
+        order_by = 'T'
+        horizon = 2
+        json_ai = json_ai_from_problem(data,
+                                       ProblemDefinition.from_dict({'target': target,
+                                                                    'timeseries_settings': {
+                                                                        'horizon': horizon,
+                                                                        'order_by': order_by,
+                                                                        'window': 5}
+                                                                    }))
+        json_ai.model["module"] = "TsStackedEnsemble"
+        pred = predictor_from_json_ai(json_ai)
+        pred.learn(train_df)
+        preds = pred.predict(data.sample(frac=1)[0:10])
+        self.assertTrue(isinstance(pred.ensemble, TsStackedEnsemble))
+        self.check_ts_prediction_df(preds, horizon, [order_by])
+
+        # test weight bypassing
+        pred.ensemble.set_weights([0 for _ in range(len(pred.ensemble.mixers))])
+        self.assertEqual(
+            0,
+            sum([sum(row) for row in pred.predict(data.iloc[0:10])['prediction'].tolist()])
+        )
+
+    def test_11_output_date_format(self):
+        """ Checks that predicted order_by values are timestamps """
+        np.random.seed(0)
+        data = pd.read_csv('tests/data/arrivals.csv')
+        data = data[data['Country'] == 'US']
+        order_by = 'T'
+        train_df, test_df = self.split_arrivals(data, grouped=False)
+        predictor = predictor_from_problem(train_df, ProblemDefinition.from_dict({'target': 'Traffic',
+                                                                                  'time_aim': 30,
+                                                                                  'timeseries_settings': {
+                                                                                      'order_by': order_by,
+                                                                                      'window': 5,
+                                                                                      'horizon': 2
+                                                                                  }}))
+        predictor.learn(train_df)
+        preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
+        self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012-07', '2012-10'])
+
+        preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': '%Y'})
+        self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012', '2012'])

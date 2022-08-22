@@ -2,6 +2,7 @@ from typing import Dict
 import pandas as pd
 import numpy as np
 import datetime
+import dateinfer
 from dateutil.parser import parse as parse_dt
 from lightwood.api import StatisticalAnalysis, ProblemDefinition
 from lightwood.helpers.numeric import filter_nan_and_none
@@ -74,6 +75,13 @@ def compute_entropy_biased_buckets(histogram):
     return S, biased_buckets
 
 
+def infer_date_format(values: pd.DataFrame, n_samples=50) -> str:
+    """ infer date format based on a small sample """
+    return dateinfer.infer(
+        values.sample(n=min(n_samples, len(values))).tolist()
+    )
+
+
 def statistical_analysis(data: pd.DataFrame,
                          dtypes: Dict[str, str],
                          identifiers: Dict[str, object],
@@ -82,8 +90,17 @@ def statistical_analysis(data: pd.DataFrame,
                          seed_nr: int = 420) -> StatisticalAnalysis:
     seed(seed_nr)
     log.info('Starting statistical analysis')
+
+    tss = problem_definition.timeseries_settings
+    if tss.is_timeseries:
+        oby_col = tss.order_by
+        try:
+            order_format = infer_date_format(data[oby_col])
+        except Exception:
+            order_format = None
+
     df = cleaner(data, dtypes, problem_definition.pct_invalid,
-                 identifiers, problem_definition.target, 'train', problem_definition.timeseries_settings,
+                 identifiers, problem_definition.target, 'train', tss,
                  problem_definition.anomaly_detection)
     columns = [col for col in df.columns if col not in exceptions]
 
@@ -175,9 +192,12 @@ def statistical_analysis(data: pd.DataFrame,
         else:
             avg_words_per_sentence[col] = None
 
-    if problem_definition.timeseries_settings.is_timeseries:
-        groups = get_ts_groups(data, problem_definition.timeseries_settings)
-        ts_stats = {'groups': groups}
+    if tss.is_timeseries:
+        groups = get_ts_groups(data, tss)
+        ts_stats = {
+            'groups': groups,
+            'order_format': order_format
+        }
     else:
         ts_stats = {}
 
