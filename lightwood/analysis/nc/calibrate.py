@@ -443,7 +443,9 @@ class ICP(BaseAnalysisBlock):
                 elif not is_numerical:
                     row_insights = add_tn_cat_conf_bounds(row_insights, ns.tss)
 
-            return self._formatted(row_insights, global_insights, ns, is_numerical)
+            row_insights, global_insights = self._formatted(row_insights, global_insights, ns, is_numerical)
+
+        return row_insights, global_insights
 
     @staticmethod
     def _formatted(row_insights, global_insights, ns, is_numerical):
