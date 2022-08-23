@@ -24,7 +24,6 @@ class TestBasic(unittest.TestCase):
             "args": {
                 "fixed_significance": None,
                 "confidence_normalizer": True,  # explicitly test the ICP normalizer in an integration test
-                "positive_domain": "$statistical_analysis.positive_domain",
             }},
             {
                 "module": "AccStats",
