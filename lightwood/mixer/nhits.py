@@ -27,6 +27,7 @@ class NHitsMixer(BaseMixer):
             target: str,
             horizon: int,
             window: int,
+            dtype_dict: Dict,
             ts_analysis: Dict,
             pretrained: bool = False
     ):
@@ -46,6 +47,7 @@ class NHitsMixer(BaseMixer):
         self.target = target
         self.window = window
         self.horizon = horizon
+        self.dtype_dict = dtype_dict
         self.ts_analysis = ts_analysis
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
 
