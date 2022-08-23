@@ -78,7 +78,6 @@ class SkTime(BaseMixer):
             'theta.ThetaForecaster',
             'trend.STLForecaster',
             'trend.PolynomialTrendForecaster',
-            'naive.NaiveForecaster'
         ]
 
         self.dtype_dict = dtype_dict
@@ -283,7 +282,8 @@ class SkTime(BaseMixer):
 
         if hasattr(submodel, '_cutoff') and hasattr(submodel, 'd'):
             model_d = 0 if submodel.d is None else submodel.d
-            min_offset = -submodel._cutoff + model_d + 1
+            cutoff = submodel._cutoff.values[0] if isinstance(submodel._cutoff, pd.Int64Index) else submodel._cutoff
+            min_offset = -cutoff + model_d + 1
         else:
             min_offset = -np.inf
 
