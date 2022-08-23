@@ -26,14 +26,12 @@ class ICP(BaseAnalysisBlock):
     """ Confidence estimation block, uses inductive conformal predictors (ICPs) for model agnosticity """
 
     def __init__(self,
-                 positive_domain: Optional[bool] = False,
                  confidence_normalizer: Optional[bool] = False,
                  fixed_significance: Optional[float] = None,
                  deps: Optional[tuple] = tuple()
                  ):
         super().__init__(deps=deps)
         self.fixed_significance = fixed_significance
-        self.positive_domain = positive_domain
         self.confidence_normalizer = confidence_normalizer
         self.validation_size = 100  # determines size of nonconformity score arrays (has sizable impact in runtime)
 
@@ -154,7 +152,7 @@ class ICP(BaseAnalysisBlock):
             # get confidence estimation for validation dataset
             conf, ranges = set_conf_range(
                 icp_df, icp, ns.dtype_dict[ns.target],
-                output, positive_domain=self.positive_domain, significance=self.fixed_significance)
+                output, positive_domain=ns.stats_info.positive_domain, significance=self.fixed_significance)
             if not ns.is_classification:
                 result_df = pd.DataFrame(index=icp_df.index, columns=['confidence', 'lower', 'upper'], dtype=float)
                 result_df.loc[icp_df.index, 'lower'] = ranges[:, 0]
@@ -219,7 +217,7 @@ class ICP(BaseAnalysisBlock):
                         icp_df, icps[tuple(group)],
                         ns.dtype_dict[ns.target],
                         output, group=tuple(group),
-                        positive_domain=self.positive_domain, significance=self.fixed_significance)
+                        positive_domain=ns.stats_info.positive_domain, significance=self.fixed_significance)
                     # save group bounds
                     if not ns.is_classification:
                         result_df.loc[icp_df.index, 'lower'] = group_ranges[:, 0]
@@ -240,6 +238,12 @@ class ICP(BaseAnalysisBlock):
                 **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
         ns = SimpleNamespace(**kwargs)
 
+        is_categorical = ns.target_dtype in (dtype.binary, dtype.categorical, dtype.cat_array, dtype.cat_tsarray)
+        is_numerical = ns.target_dtype in (dtype.integer, dtype.float,
+                                           dtype.quantity, dtype.num_array, dtype.num_tsarray)
+        is_multi_ts = ns.tss.is_timeseries and ns.tss.horizon > 1
+        is_anomaly_task = is_numerical and ns.tss.is_timeseries and ns.anomaly_detection
+
         if 'confidence' in ns.predictions.columns:
             # bypass calibrator if model already outputs confidence
             row_insights['prediction'] = ns.predictions['prediction']
@@ -247,16 +251,10 @@ class ICP(BaseAnalysisBlock):
             if 'upper' in ns.predictions.columns and 'lower' in ns.predictions.columns:
                 row_insights['upper'] = ns.predictions['upper']
                 row_insights['lower'] = ns.predictions['lower']
-            return row_insights, global_insights
+            return self._formatted(row_insights, global_insights, ns, is_numerical)
 
         if ns.analysis['icp']['__mdb_active']:
             icp_X = deepcopy(ns.data)
-
-            is_categorical = ns.target_dtype in (dtype.binary, dtype.categorical, dtype.cat_array, dtype.cat_tsarray)
-            is_numerical = ns.target_dtype in (dtype.integer, dtype.float,
-                                               dtype.quantity, dtype.num_array, dtype.num_tsarray)
-            is_multi_ts = ns.tss.is_timeseries and ns.tss.horizon > 1
-            is_anomaly_task = is_numerical and ns.tss.is_timeseries and ns.anomaly_detection
 
             # replace observed data w/predictions
             preds = ns.predictions['prediction']
@@ -336,7 +334,7 @@ class ICP(BaseAnalysisBlock):
                 if is_multi_ts and is_numerical:
                     significances, confs = get_ts_conf_range(all_confs,
                                                              df_target_stddev=ns.analysis['df_target_stddev'],
-                                                             positive_domain=self.positive_domain,
+                                                             positive_domain=ns.positive_domain,
                                                              fixed_conf=ns.pred_args.fixed_confidence)
 
                     result = self._ts_assign_confs(result, X, confs, significances, ns.tss)
@@ -344,7 +342,7 @@ class ICP(BaseAnalysisBlock):
                 elif is_numerical:
                     significances, confs = get_numeric_conf_range(all_confs,
                                                                   df_target_stddev=ns.analysis['df_target_stddev'],
-                                                                  positive_domain=self.positive_domain,
+                                                                  positive_domain=ns.positive_domain,
                                                                   fixed_conf=ns.pred_args.fixed_confidence)
                     result.loc[X.index, 'lower'] = confs[:, 0]
                     result.loc[X.index, 'upper'] = confs[:, 1]
@@ -389,7 +387,7 @@ class ICP(BaseAnalysisBlock):
                                     significances, confs = get_ts_conf_range(
                                         all_confs,
                                         df_target_stddev=ns.analysis['df_target_stddev'],
-                                        positive_domain=self.positive_domain,
+                                        positive_domain=ns.positive_domain,
                                         group=tuple(group),
                                         fixed_conf=fixed_conf
                                     )
@@ -401,7 +399,7 @@ class ICP(BaseAnalysisBlock):
                                     significances, confs = get_numeric_conf_range(
                                         all_confs,
                                         df_target_stddev=ns.analysis['df_target_stddev'],
-                                        positive_domain=self.positive_domain,
+                                        positive_domain=ns.positive_domain,
                                         group=tuple(group),
                                         fixed_conf=fixed_conf
                                     )
@@ -445,35 +443,39 @@ class ICP(BaseAnalysisBlock):
                 elif not is_numerical:
                     row_insights = add_tn_cat_conf_bounds(row_insights, ns.tss)
 
-            # clip if necessary
-            if is_numerical:
-                lower_limit = 0.0 if self.positive_domain else -pow(2, 62)
-                upper_limit = pow(2, 62)
-                if not (ns.tss.is_timeseries and ns.tss.horizon > 1):
-                    row_insights['upper'] = row_insights['upper'].clip(lower_limit, upper_limit)
-                    row_insights['lower'] = row_insights['lower'].clip(lower_limit, upper_limit)
-                    row_insights['prediction'] = row_insights['prediction'].clip(lower_limit, upper_limit)
-                else:
-                    row_insights['upper'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
-                                             for row in row_insights['upper']]
-                    row_insights['lower'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
-                                             for row in row_insights['lower']]
-                    row_insights['prediction'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
-                                                  for row in row_insights['prediction']]
+            return self._formatted(row_insights, global_insights, ns, is_numerical)
 
-            # Make sure the target and real values are of an appropriate type
-            if ns.target_dtype in (dtype.integer, ):
-                row_insights['prediction'] = row_insights['prediction'].astype(int)
-                row_insights['upper'] = row_insights['upper'].astype(int)
-                row_insights['lower'] = row_insights['lower'].astype(int)
+    @staticmethod
+    def _formatted(row_insights, global_insights, ns, is_numerical):
+        # clip if necessary
+        if is_numerical:
+            lower_limit = 0.0 if ns.positive_domain else -pow(2, 62)
+            upper_limit = pow(2, 62)
+            if not (ns.tss.is_timeseries and ns.tss.horizon > 1):
+                row_insights['upper'] = row_insights['upper'].clip(lower_limit, upper_limit)
+                row_insights['lower'] = row_insights['lower'].clip(lower_limit, upper_limit)
+                row_insights['prediction'] = row_insights['prediction'].clip(lower_limit, upper_limit)
+            else:
+                row_insights['upper'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
+                                         for row in row_insights['upper']]
+                row_insights['lower'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
+                                         for row in row_insights['lower']]
+                row_insights['prediction'] = [np.array(row).clip(lower_limit, upper_limit).tolist()
+                                              for row in row_insights['prediction']]
 
-            elif ns.target_dtype in (dtype.float, dtype.quantity):
-                row_insights['prediction'] = row_insights['prediction'].astype(float)
-                row_insights['upper'] = row_insights['upper'].astype(float)
-                row_insights['lower'] = row_insights['lower'].astype(float)
+        # Make sure the target and real values are of an appropriate type
+        if ns.target_dtype in (dtype.integer, ):
+            row_insights['prediction'] = row_insights['prediction'].astype(int)
+            row_insights['upper'] = row_insights['upper'].astype(int)
+            row_insights['lower'] = row_insights['lower'].astype(int)
 
-            elif ns.target_dtype in (dtype.short_text, dtype.rich_text, dtype.binary, dtype.categorical):
-                row_insights['prediction'] = row_insights['prediction'].astype(str)
+        elif ns.target_dtype in (dtype.float, dtype.quantity):
+            row_insights['prediction'] = row_insights['prediction'].astype(float)
+            row_insights['upper'] = row_insights['upper'].astype(float)
+            row_insights['lower'] = row_insights['lower'].astype(float)
+
+        elif ns.target_dtype in (dtype.short_text, dtype.rich_text, dtype.binary, dtype.categorical):
+            row_insights['prediction'] = row_insights['prediction'].astype(str)
 
         return row_insights, global_insights
 

@@ -690,7 +690,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "args": {
                     "fixed_significance": None,
                     "confidence_normalizer": False,
-                    "positive_domain": "$statistical_analysis.positive_domain",
                 },
             },
             {
