@@ -12,12 +12,13 @@ class ETSMixer(SkTime):
                  ts_analysis: Dict,
                  model_path: str = 'ets.AutoETS',
                  auto_size: bool = True,
+                 sp: int = None,
                  hyperparam_search: bool = False,
                  use_stl: bool = True
                  ):
         hyperparam_search = False
         super().__init__(stop_after, target, dtype_dict, horizon, ts_analysis,
-                         model_path, auto_size, hyperparam_search, use_stl)
+                         model_path, auto_size, sp, hyperparam_search, use_stl)
         self.name = 'AutoETS'
         self.stable = False
         self.model_path = model_path
