@@ -29,6 +29,8 @@ class ShapleyValues(BaseAnalysisBlock):
     def __init__(self, deps: Optional[Tuple] = ...):
         super().__init__(deps=deps)
         self.label_encoder = LabelEncoder()
+        self.columns = []
+        self.target = None
 
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         log.info('Preparing to compute feature importance values with SHAP')
@@ -45,9 +47,13 @@ class ShapleyValues(BaseAnalysisBlock):
             log.warning(f'ShapleyValues analyzers not supported for type: {output_dtype}')
             return info
 
+        self.target = ns.target
+        self.columns = list(set(ns.dtype_dict.keys()) - {self.target})
+        input_df = train_data.data_frame[self.columns]
+
         def model(x: np.ndarray) -> np.ndarray:
             assert(isinstance(x, np.ndarray))
-            df = pd.DataFrame(data=x, columns=train_data.data_frame.columns)
+            df = pd.DataFrame(data=x, columns=self.columns)
             ds = EncodedDs(encoders=train_data.encoders, data_frame=df, target=train_data.target)
 
             decoded_predictions = ns.predictor(ds=ds, args=PredictionArguments())
@@ -58,7 +64,7 @@ class ShapleyValues(BaseAnalysisBlock):
 
             return encoded_predictions
 
-        info['shap_explainer'] = shap.KernelExplainer(model=model, data=train_data.data_frame)
+        info['shap_explainer'] = shap.KernelExplainer(model=model, data=input_df)
 
         return info
 
@@ -76,10 +82,10 @@ class ShapleyValues(BaseAnalysisBlock):
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning)
-            shap_values = shap_explainer.shap_values(ns.data, silent=True)
+            shap_values = shap_explainer.shap_values(ns.data[self.columns], silent=True)
 
         shap_values_df = pd.DataFrame(shap_values).rename(
-            mapper=lambda i: f"feature_{i}_impact", axis='columns')
+            mapper=lambda i: f"shap_contribution_{self.columns[i]}", axis='columns')
 
         if kwargs.get('target_dtype', None) in (dtype.binary, dtype.categorical, dtype.tags):
             predictions = self.label_encoder.transform(row_insights['prediction'])
@@ -87,8 +93,9 @@ class ShapleyValues(BaseAnalysisBlock):
             predictions = row_insights['prediction']
 
         base_response = (predictions - shap_values_df.sum(axis='columns')).mean()
-        global_insights['base_response'] = base_response
 
         row_insights = pd.concat([row_insights, shap_values_df], axis='columns')
+        row_insights['shap_base_response'] = base_response
+        row_insights['shap_final_response'] = predictions
 
         return row_insights, global_insights
