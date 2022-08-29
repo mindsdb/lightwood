@@ -29,6 +29,9 @@ class TestBasic(unittest.TestCase):
         predictions = predictor.predict(df.head())
 
         self.assertIn('shap_explainer', predictor.runtime_analyzer)
-        self.assertIn('feature_4_impact', predictions.columns)
-        # TODO: once global_insights is exposed, check that all feature impacts
-        # plus base_response sum up to the prediction value
+
+        self.assertIn('shap_base_response', predictions.columns)
+        self.assertIn('shap_final_response', predictions.columns)
+        for input_col in df.columns:
+            if input_col != target:
+                self.assertIn(f'shap_contribution_{input_col}', predictions.columns)

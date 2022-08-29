@@ -12,11 +12,12 @@ class ProphetMixer(SkTime):
                  ts_analysis: Dict,
                  model_path: str = 'fbprophet.Prophet',
                  auto_size: bool = True,
+                 sp: int = None,
                  hyperparam_search: bool = False,
                  use_decomposers: Dict[str, Union[int, str]] = {}
                  ):
         super().__init__(stop_after, target, dtype_dict, horizon, ts_analysis,
-                         model_path, auto_size, hyperparam_search, use_decomposers)
+                         model_path, auto_size, sp, hyperparam_search, use_decomposers)
         self.stable = False
         self.model_path = model_path
         self.possible_models = [self.model_path]
