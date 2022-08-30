@@ -57,8 +57,6 @@ class PyOD(BaseAnalysisBlock):
             for i in range(1, ns.tss.horizon):
                 self.exceptions.append(f'{self.target}_timestep_{i}')
 
-            self.input_cols.append(f'__mdb_original_{ns.tss.order_by}')
-            self.input_cols.append(f'__mdb_ts_previous_{self.target}')
             self.exceptions.append(ns.tss.order_by)
             df = self._preprocess_ts_df(df, ns)
 
@@ -66,7 +64,8 @@ class PyOD(BaseAnalysisBlock):
             if col != self.target and '__mdb' not in col and col not in self.exceptions:
                 self.input_cols.append(col)
 
-        clf.fit(df.loc[:, self.input_cols].values)
+        df = df.loc[:, self.input_cols].dropna()
+        clf.fit(df.values)
         info['pyod_explainer'] = clf
         return info
 
@@ -81,16 +80,18 @@ class PyOD(BaseAnalysisBlock):
         if pyod_explainer is None:
             return row_insights, global_insights
 
-        df = deepcopy(ns.data[self.input_cols])
+        df = deepcopy(ns.data)
         if ns.tss.is_timeseries:
             df = self._preprocess_ts_df(df, ns)
 
+        df = df[self.input_cols].fillna(0)
         row_insights['pyod_anomaly'] = pyod_explainer.predict(df).astype(bool)  # binary labels (0: inlier, 1: outlier)
         return row_insights, global_insights
 
     def _preprocess_ts_df(self, df: pd.DataFrame, ns: SimpleNamespace) -> pd.DataFrame:
-        # TODO: currently, no inter-row analysis to detect anomalies. this should be improved.
         for gcol in ns.tss.group_by:
             df[gcol] = self.ordinal_encoders[gcol].transform(df[gcol].values.reshape(-1, 1)).flatten()
-        df[f'__mdb_ts_previous_{self.target}'] = df[f'__mdb_ts_previous_{self.target}'].apply(lambda x: x[-1]).fillna(method='bfill')  # noqa
+
+        for w in range(ns.tss.window + 1):
+            df[f'__pyod_window_{ns.tss.window - w}'] = df[f'__mdb_ts_previous_{self.target}'].apply(lambda x: x[w])
         return df
