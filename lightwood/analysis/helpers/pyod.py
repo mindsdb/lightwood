@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from typing import Dict, Optional, Tuple
 
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import OrdinalEncoder
 
 from pyod.models.lof import LOF
@@ -52,7 +53,7 @@ class PyOD(BaseAnalysisBlock):
 
         if ns.tss.is_timeseries:
             for gcol in ns.tss.group_by:
-                self.ordinal_encoders[gcol] = OrdinalEncoder()
+                self.ordinal_encoders[gcol] = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
                 self.ordinal_encoders[gcol].fit(df[gcol].values.reshape(-1, 1))
             for i in range(1, ns.tss.horizon):
                 self.exceptions.append(f'{self.target}_timestep_{i}')
@@ -90,7 +91,7 @@ class PyOD(BaseAnalysisBlock):
 
     def _preprocess_ts_df(self, df: pd.DataFrame, ns: SimpleNamespace) -> pd.DataFrame:
         for gcol in ns.tss.group_by:
-            df[gcol] = self.ordinal_encoders[gcol].transform(df[gcol].values.reshape(-1, 1)).flatten()
+            df[gcol] = self.ordinal_encoders[gcol].transform(df[gcol].values.reshape(-1, 1).astype(np.object)).flatten()
 
         for w in range(ns.tss.window + 1):
             df[f'__pyod_window_{ns.tss.window - w}'] = df[f'__mdb_ts_previous_{self.target}'].apply(lambda x: x[w])
