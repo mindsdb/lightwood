@@ -5,7 +5,7 @@ from lightwood.api.high_level import ProblemDefinition, json_ai_from_problem
 from lightwood.api.high_level import code_from_json_ai, predictor_from_code
 
 
-class TestBasic(unittest.TestCase):
+class TestSHAP(unittest.TestCase):
     def test_0_shap_analysis(self):
         if ShapleyValues is None:
             print('Skipping this test since the Shapley values library is not installed')
