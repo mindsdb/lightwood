@@ -259,7 +259,6 @@ class SkTime(BaseMixer):
                     delta = (start_ts - self.cutoffs[group]).total_seconds()
                     offset = int(delta // freq)
                     forecaster = self.models[group]
-                    print(group, start_ts, self.models[group].cutoff, offset)
                     ydf = self._call_groupmodel(ydf, forecaster, series, offset=offset)
                 else:
                     log.warning(f"Applying naive forecaster for novel group {group}. Performance might not be optimal.")
