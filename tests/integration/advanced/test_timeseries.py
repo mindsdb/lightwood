@@ -261,8 +261,8 @@ class TestTimeseries(unittest.TestCase):
         """
         Tests `AutoARIMA` mixer individually, as it has a special notion of
         timestamps that we need to ensure are being used correctly (along with all other `sktime` mixers). 
-        In particular, given a train-dev-test split, any forecasts coming from any sktime
-        mixer should start from the latest observed data in the entire dataset.
+        In particular, given a train-dev-test split, forecasts coming from any sktime
+        mixer will start from the inferred relative offset w.r.t. the latest observed timestamp in the training set.
         
         This test also compares:
          - correct propagation of offset by K if the special `__mdb_forecast_offset` column is present
@@ -308,13 +308,10 @@ class TestTimeseries(unittest.TestCase):
         ps = predictor.predict(test)
         assert r2_score(test[target].values, ps['prediction'].iloc[0]) >= 0.95
 
-        # test offset for infer mode
-        test['__mdb_forecast_offset'] = 1  # one step after latest (inferred)
-        ps1 = predictor.predict(test)
-        test['__mdb_forecast_offset'] = 0  # at latest
-        ps0 = predictor.predict(test)
-        test['__mdb_forecast_offset'] = -1  # one step before latest
-        psm1 = predictor.predict(test)
+        # test offsets
+        ps1 = predictor.predict(test[1:])  # one step after latest (inferred)
+        ps0 = predictor.predict(test)  # normal
+        psm1 = predictor.predict(train.iloc[[-1]])  # one step before latest
         times_1 = psm1['order_Time'].tolist()[0]
         values_1 = psm1['prediction'].tolist()[0]
         times0 = ps0['order_Time'].tolist()[0]
@@ -492,7 +489,7 @@ class TestTimeseries(unittest.TestCase):
         json_ai.model["module"] = "TsStackedEnsemble"
         pred = predictor_from_json_ai(json_ai)
         pred.learn(train_df)
-        preds = pred.predict(data.sample(frac=1)[0:10])
+        preds = pred.predict(test_df[0:10])
         self.assertTrue(isinstance(pred.ensemble, TsStackedEnsemble))
         self.check_ts_prediction_df(preds, horizon, [order_by])
 
@@ -500,7 +497,7 @@ class TestTimeseries(unittest.TestCase):
         pred.ensemble.set_weights([0 for _ in range(len(pred.ensemble.mixers))])
         self.assertEqual(
             0,
-            sum([sum(row) for row in pred.predict(data.iloc[0:10])['prediction'].tolist()])
+            sum([sum(row) for row in pred.predict(test_df[0:10])['prediction'].tolist()])
         )
 
     def test_11_output_date_format(self):
