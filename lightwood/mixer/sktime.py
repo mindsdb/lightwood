@@ -93,6 +93,7 @@ class SkTime(BaseMixer):
 
         # optuna hyperparameter tuning
         self.models = {}
+        self.cutoffs = {}  # last seen timestamp per each model
         self.study = None
         self.hyperparam_dict = {}
         self.model_path = model_path if model_path else 'trend.STLForecaster'
@@ -175,9 +176,11 @@ class SkTime(BaseMixer):
             if self.grouped_by == ['__default']:
                 series_data = df
                 series_oby = df[oby_col]
+                self.cutoffs[group] = series_oby.index[-1]
             else:
                 series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
                 series_oby = series_data[oby_col]
+                self.cutoffs[group] = series_idxs[-1]
 
             series = series_data[self.target]
             if series_data.size > self.ts_analysis['tss'].window:
@@ -222,17 +225,13 @@ class SkTime(BaseMixer):
         
         If there are groups that were not observed at training, a default forecaster (trained on all available data) is used, warning the user that performance might not be optimal.
         
-        Latest data point in `train_data` passed to `fit()` determines the starting point for predictions. Relative offsets can be provided to forecast through the `args.forecast_offset` argument.
+        Latest data point in `train_data` passed to `fit()` determines the starting point for predictions. Relative offsets will be automatically determined when predicting for other starting points.
         """  # noqa
         if args.predict_proba:
             log.warning('This mixer does not output probability estimates')
 
-        df = deepcopy(ds.data_frame).reset_index(drop=True)
-
-        forecast_offset = args.forecast_offset
-        if '__mdb_forecast_offset' in df.columns:
-            if df['__mdb_forecast_offset'].nunique() == 1:
-                forecast_offset = int(df['__mdb_forecast_offset'].unique()[0])
+        df = deepcopy(ds.data_frame)
+        df = df.rename_axis('__sktime_index').reset_index()
 
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
@@ -252,11 +251,16 @@ class SkTime(BaseMixer):
             series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
 
             if series_data.size > 0:
+                start_ts = series_data['__sktime_index'].iloc[0]
                 series = series_data[self.target]
                 series_idxs = sorted(series_idxs)
                 if self.models.get(group, False) and self.models[group].is_fitted:
+                    freq = self.ts_analysis['deltas'][group]
+                    delta = (start_ts - self.cutoffs[group]).total_seconds()
+                    offset = int(delta // freq)
                     forecaster = self.models[group]
-                    ydf = self._call_groupmodel(ydf, forecaster, series, offset=forecast_offset)
+                    ydf = self._call_groupmodel(ydf, forecaster, series, offset=offset)
+                    log.debug(f'[SkTime] Forecasting for group {group}, start at {start_ts} (offset by {offset} for cutoff at {self.cutoffs[group]} (relative {self.models[group].cutoff}))')  # noqa
                 else:
                     log.warning(f"Applying naive forecaster for novel group {group}. Performance might not be optimal.")
                     ydf = self._call_default(ydf, series.values, series_idxs)
