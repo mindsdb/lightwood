@@ -30,7 +30,7 @@ class TsStackedEnsemble(StackedEnsemble):
         self.ts_analysis = ts_analysis
         self.horizon = self.ts_analysis['tss'].horizon
         self.target_cols = [target] + [f'{target}_timestep_{t+1}' for t in range(self.horizon - 1)]
-        self.agg_dim = 2
+        self.agg_dim = 1
         self.opt_max_iter = 1000
 
         if fit:
