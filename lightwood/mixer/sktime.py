@@ -176,11 +176,11 @@ class SkTime(BaseMixer):
             if self.grouped_by == ['__default']:
                 series_data = df
                 series_oby = df[oby_col]
-                self.cutoffs[group] = series_oby.index[-1]
+                self.cutoffs[group] = series_oby.index[-1]  # defines the 'present' time for each partition
             else:
                 series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
                 series_oby = series_data[oby_col]
-                self.cutoffs[group] = series_idxs[-1]
+                self.cutoffs[group] = series_idxs[-1]  # defines the 'present' time for each partition
 
             series = series_data[self.target]
             if series_data.size > self.ts_analysis['tss'].window:
@@ -257,7 +257,7 @@ class SkTime(BaseMixer):
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     freq = self.ts_analysis['deltas'][group]
                     delta = (start_ts - self.cutoffs[group]).total_seconds()
-                    offset = int(delta // freq)
+                    offset = round(delta / freq)
                     forecaster = self.models[group]
                     ydf = self._call_groupmodel(ydf, forecaster, series, offset=offset)
                     log.debug(f'[SkTime] Forecasting for group {group}, start at {start_ts} (offset by {offset} for cutoff at {self.cutoffs[group]} (relative {self.models[group].cutoff}))')  # noqa
@@ -295,8 +295,8 @@ class SkTime(BaseMixer):
         else:
             min_offset = -np.inf
 
-        start = max(1 + offset, min_offset)
-        end = 1 + series.shape[0] + offset + self.horizon
+        start = max(offset, min_offset)
+        end = series.shape[0] + offset + self.horizon
         all_preds = model.predict(np.arange(start, end)).tolist()
         for true_idx, (idx, _) in enumerate(series.items()):
             start_idx = 0 if max(1 + true_idx + offset, min_offset) < 0 else true_idx
