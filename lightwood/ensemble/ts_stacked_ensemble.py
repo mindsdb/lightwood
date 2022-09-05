@@ -30,7 +30,7 @@ class TsStackedEnsemble(StackedEnsemble):
         self.ts_analysis = ts_analysis
         self.horizon = self.ts_analysis['tss'].horizon
         self.target_cols = [target] + [f'{target}_timestep_{t+1}' for t in range(self.horizon - 1)]
-        self.agg_dim = 1
+        self.agg_dim = 2
         self.opt_max_iter = 1000
 
         if fit:
@@ -59,7 +59,7 @@ class TsStackedEnsemble(StackedEnsemble):
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         assert self.prepared
         output = pd.DataFrame()
-        predictions = torch.tensor(np.stack(self.predict(ds, args), axis=2).squeeze())
+        predictions = torch.tensor(np.concatenate(self.predict(ds, args), axis=2))
         predictions = (predictions * self.mixer_weights).sum(axis=self.agg_dim)
         output['prediction'] = predictions.detach().numpy().tolist()
         return output
