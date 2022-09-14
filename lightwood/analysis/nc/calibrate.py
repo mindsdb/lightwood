@@ -445,6 +445,13 @@ class ICP(BaseAnalysisBlock):
 
             row_insights, global_insights = self._formatted(row_insights, global_insights, ns, is_numerical)
 
+            if ns.tss.is_timeseries and is_numerical:
+                # horizon collapse
+                row_insights['prediction_sum'] = row_insights['prediction'].apply(lambda x: sum(x))
+                row_insights['lower_sum'] = row_insights['lower'].apply(lambda x: sum(x))
+                row_insights['upper_sum'] = row_insights['upper'].apply(lambda x: sum(x))
+                row_insights['confidence_mean'] = row_insights['confidence'].apply(lambda x: np.mean(x))
+
         return row_insights, global_insights
 
     @staticmethod
