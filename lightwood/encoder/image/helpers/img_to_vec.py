@@ -36,7 +36,7 @@ class Img2Vec(nn.Module):
     def __init__(self, device=''):
         super(Img2Vec, self).__init__()
 
-        if(self.device == ''):
+        if(device == ''):
             self.device, _ = get_devices()
         else:
             self.device = torch.device(device)
