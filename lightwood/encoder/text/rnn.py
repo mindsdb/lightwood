@@ -1,5 +1,6 @@
 # flake8: noqa
 from lightwood.encoder.text.helpers.rnn_helpers import *
+#from lightwood.encoder.text.helpers.rnn_helpers import device as default_device
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 import math
@@ -7,8 +8,13 @@ import math
 
 class RnnEncoder(BaseEncoder):
 
-    def __init__(self, encoded_vector_size=256, train_iters=75000, stop_on_error=0.0001,
-                 learning_rate=0.01, is_target=False):
+    def __init__(self,
+                 encoded_vector_size=256,
+                 train_iters=75000,
+                 stop_on_error=0.0001,
+                 learning_rate=0.01,
+                 is_target=False,
+                 device=''):
         super().__init__(is_target)
         self._stop_on_error = stop_on_error
         self._learning_rate = learning_rate
@@ -18,6 +24,11 @@ class RnnEncoder(BaseEncoder):
         self._output_lang = None
         self._encoder = None
         self._decoder = None
+        if(device == ''):
+            device = default_device
+        else:
+            device = torch.device(device)
+        self.device = device
 
     def prepare(self, priming_data):
         if self.is_prepared:
@@ -39,12 +50,21 @@ class RnnEncoder(BaseEncoder):
         max_length = max(map(len, no_null_sentences))
 
         hidden_size = self._encoded_vector_size
-        self._encoder = EncoderRNN(self._input_lang.n_words, hidden_size).to(device)
-        self._decoder = DecoderRNN(hidden_size, self._output_lang.n_words).to(device)
+        self._encoder = EncoderRNN(self._input_lang.n_words, hidden_size).to(self.device)
+        self._decoder = DecoderRNN(hidden_size, self._output_lang.n_words).to(self.device)
 
-        trainIters(self._encoder, self._decoder, self._input_lang, self._output_lang, no_null_sentences,
-                   no_null_sentences, self._train_iters, int(log_every),
-                   self._learning_rate, self._stop_on_error, max_length)
+        trainIters(self._encoder,
+                   self._decoder,
+                   self._input_lang,
+                   self._output_lang,
+                   no_null_sentences,
+                   no_null_sentences,
+                   self._train_iters,
+                   print_every=int(log_every),
+                   learning_rate=self._learning_rate,
+                   loss_breakpoint=self._stop_on_error,
+                   max_length=max_length,
+                   device=self.device)
 
         self.is_prepared = True
 
@@ -58,10 +78,10 @@ class RnnEncoder(BaseEncoder):
             for row in no_null_sentences:
 
                 encoder_hidden = self._encoder.initHidden()
-                input_tensor = tensorFromSentence(self._input_lang, row)
+                input_tensor = tensorFromSentence(self._input_lang, row, device=self.device)
                 input_length = input_tensor.size(0)
 
-                #encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=device)
+                #encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device=self.device)
 
                 loss = 0
 
@@ -80,9 +100,9 @@ class RnnEncoder(BaseEncoder):
         ret = []
         with torch.no_grad():
             for decoder_hiddens in encoded_values_tensor:
-                decoder_hidden = torch.FloatTensor([[decoder_hiddens.tolist()]]).to(device)
+                decoder_hidden = torch.FloatTensor([[decoder_hiddens.tolist()]]).to(self.device)
 
-                decoder_input = torch.tensor([[SOS_token]], device=device)  # SOS
+                decoder_input = torch.tensor([[SOS_token]], device=self.device)  # SOS
 
                 decoded_words = []
 
