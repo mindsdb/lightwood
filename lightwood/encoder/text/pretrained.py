@@ -42,6 +42,7 @@ class PretrainedLangEncoder(BaseEncoder):
         epochs: int = 1,
         output_type: str = None,
         embed_mode: bool = True,
+        device: str = '',
     ):
         """
         :param is_target: Whether this encoder represents the target. NOT functional for text generation yet.
@@ -52,6 +53,7 @@ class PretrainedLangEncoder(BaseEncoder):
         :param epochs: number of epochs to train model with
         :param output_type: Data dtype of the target; if categorical/binary, the option to return logits is possible.
         :param embed_mode: If True, assumes the output of the encode() step is the CLS embedding (this can be trained or not). If False, returns the logits of the tuned task.
+        :param device: name of the device to use (empty string=use output of `get_devices()`)
         """ # noqa
         super().__init__(is_target)
 
@@ -73,7 +75,11 @@ class PretrainedLangEncoder(BaseEncoder):
         self._pretrained_model_name = "distilbert-base-uncased"
         self._tokenizer = DistilBertTokenizerFast.from_pretrained(self._pretrained_model_name)
 
-        self.device, _ = get_devices()
+        if(device == ''):
+            self.device, _ = get_devices()
+        else:
+            self.device = torch.device(device)
+
         self.stop_after = stop_after
 
         self.embed_mode = embed_mode

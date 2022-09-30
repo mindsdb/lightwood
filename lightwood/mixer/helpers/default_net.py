@@ -19,9 +19,11 @@ class DefaultNet(torch.nn.Module):
                  shape: list = None,
                  max_params: int = int(3e7),
                  num_hidden: int = 1,
-                 dropout: float = 0) -> None:
+                 dropout: float = 0,
+                 device: str = '') -> None:
 
         super(DefaultNet, self).__init__()
+
         if input_size is not None and output_size is not None:
             self.input_size = input_size
             self.output_size = output_size
@@ -49,7 +51,10 @@ class DefaultNet(torch.nn.Module):
             raise Exception('You must specify other a shape or an input and output size when creating a DefaultNet!')
 
         self.net = torch.nn.Sequential(*layers)
-        self.to(get_devices()[0])
+
+        if(device == ''):
+            device, _ = get_devices()
+        self.to(device)
 
     def to(self, device: torch.device) -> torch.nn.Module:
         if 'cuda' not in str(torch.device) == 0:
