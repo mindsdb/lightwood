@@ -31,10 +31,18 @@ class TimeSeriesEncoder(BaseEncoder):
     is_trainable_encoder: bool = True
 
     def __init__(self,
-                 stop_after: float, is_target=False, original_type: str = None, target: str = None,
-                 grouped_by: List[str] = [], encoder_type='rnn'):
+                 stop_after: float,
+                 is_target: bool = False,
+                 original_type: str = None,
+                 target: str = None,
+                 grouped_by: List[str] = [],
+                 encoder_type: str = 'rnn',
+                 device: str = ''):
         super().__init__(is_target)
-        self.device, _ = get_devices()
+        if(device == ''):
+            self.device, _ = get_devices()
+        else:
+            self.device = torch.device(device)
         self.target = target
         self.grouped_by = grouped_by
         self._learning_rate = 0.01
