@@ -54,6 +54,8 @@ class DefaultNet(torch.nn.Module):
 
         if(device == ''):
             device, _ = get_devices()
+        else:
+            device = torch.device(device)
         self.to(device)
 
     def to(self, device: torch.device) -> torch.nn.Module:
