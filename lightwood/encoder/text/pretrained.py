@@ -53,7 +53,7 @@ class PretrainedLangEncoder(BaseEncoder):
         :param epochs: number of epochs to train model with
         :param output_type: Data dtype of the target; if categorical/binary, the option to return logits is possible.
         :param embed_mode: If True, assumes the output of the encode() step is the CLS embedding (this can be trained or not). If False, returns the logits of the tuned task.
-        :param device: name of the device to use (empty string=use output of `get_devices()`)
+        :param device: name of the device to use (default is an empty string), if is an empty string will use the output of `get_devices()` instead.
         """ # noqa
         super().__init__(is_target)
 
