@@ -47,10 +47,17 @@ class ResidualNet(torch.nn.Module):
              [nn.Linear(input_size, max([input_size * 2, output_size * 2, 400])),
               nn.Linear(max([input_size * 2, output_size * 2, 400]),
                         output_size)]))
-        available_device_type, available_devices = get_devices()
+
         if(device == ''):
-            device = available_device_type
-        self.to(device, available_devices)
+            device, _ = get_devices()
+        else:
+            device = torch.device(device)
+        self.to(device)
+        #self.to(*get_devices()) # not sure this code is supposed to work as is?
+        #available_device_type, available_devices = get_devices()
+        #if(device == ''):
+        #    device = available_device_type
+        #self.to(device, available_devices)
 
     def to(self, device: torch.device, available_devices: int) -> torch.nn.Module:
         self.net = self.net.to(device)
