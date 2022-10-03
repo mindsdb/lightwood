@@ -208,7 +208,7 @@ def generate_json_ai(
         ):
             if col_name != problem_definition.target:
                 input_cols.append(col_name)
-
+    original_col_amount = len(input_cols)
     is_target_predicting_encoder = False
     is_ts = problem_definition.timeseries_settings.is_timeseries
     imputers = []
