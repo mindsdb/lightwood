@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import os
 import pandas as pd
 from lightwood.encoder.text.helpers.pretrained_helpers import TextEmbed
-from lightwood.helpers.device import get_devices
+from lightwood.helpers.device import get_device_from_name
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.helpers.torch import LightwoodAutocast
@@ -75,10 +75,7 @@ class PretrainedLangEncoder(BaseEncoder):
         self._pretrained_model_name = "distilbert-base-uncased"
         self._tokenizer = DistilBertTokenizerFast.from_pretrained(self._pretrained_model_name)
 
-        if(device == ''):
-            self.device, _ = get_devices()
-        else:
-            self.device = torch.device(device)
+        self.device = get_device_from_name(device)
 
         self.stop_after = stop_after
 
