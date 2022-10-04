@@ -2,7 +2,7 @@ from typing import List
 import torch
 from torch import nn
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.helpers.device import get_devices
+from lightwood.helpers.device import get_device_from_name
 from lightwood.helpers.log import log
 
 
@@ -48,11 +48,7 @@ class ResidualNet(torch.nn.Module):
               nn.Linear(max([input_size * 2, output_size * 2, 400]),
                         output_size)]))
 
-        if(device == ''):
-            device, _ = get_devices()
-        else:
-            device = torch.device(device)
-        self.to(device)
+        self.to(get_device_from_name(device))
         # self.to(*get_devices()) # not sure this code is supposed to work as is?
         # available_device_type, available_devices = get_devices()
         # if(device == ''):
