@@ -84,3 +84,13 @@ class TestRnnEncoder(unittest.TestCase):
         preds = torch.reshape(preds, (1, -1)).tolist()[-1]
         for ans, pred in zip(answer, preds):
             self.assertGreater(error_margin, abs(pred - ans))
+
+    def check_encoder_on_device(self, device):
+        encoder = TimeSeriesEncoder(stop_after=10, device=device)
+        self.assertEqual(list(encoder._encoder.parameters())[0].device.type, device)
+
+    def test_encoder_on_cpu(self):
+        self.check_encoder_on_device('cpu')
+
+    def test_encoder_on_cuda(self):
+        self.check_encoder_on_device('cuda')
