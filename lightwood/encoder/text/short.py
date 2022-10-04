@@ -8,7 +8,7 @@ import pandas as pd
 
 
 class ShortTextEncoder(BaseEncoder):
-    def __init__(self, is_target=False, mode=None):
+    def __init__(self, is_target=False, mode=None, device=''):
         """
         :param is_target:
         :param mode:
@@ -16,6 +16,7 @@ class ShortTextEncoder(BaseEncoder):
             When None, it will be set automatically based on is_target:
             (is_target) -> 'concat'
             (not is_target) -> 'mean'
+        :param device: Device type, empty string means using the 1st available GPU if possible
         """
         super().__init__(is_target)
 
@@ -36,7 +37,7 @@ class ShortTextEncoder(BaseEncoder):
         # Defined in self.prepare()
         self._combine_fn = None
         self.max_words_per_sent = None
-        self.cae = CategoricalAutoEncoder(is_target=is_target, max_encoded_length=100)
+        self.cae = CategoricalAutoEncoder(is_target=is_target, max_encoded_length=100, device=device)
         self.is_prepared = False
 
     def _unexpected_mode(self):
