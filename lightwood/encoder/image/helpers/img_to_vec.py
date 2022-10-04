@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from lightwood.helpers.device import get_devices
+from lightwood.helpers.device import get_device_from_name
 from lightwood.helpers.torch import LightwoodAutocast
 
 from lightwood.helpers.log import log
@@ -36,10 +36,7 @@ class Img2Vec(nn.Module):
     def __init__(self, device=''):
         super(Img2Vec, self).__init__()
 
-        if(device == ''):
-            self.device, _ = get_devices()
-        else:
-            self.device = torch.device(device)
+        self.device = get_device_from_name(device)
 
         self.output_size = 512
         self.model = torch.nn.Sequential(*list(models.resnext50_32x4d(pretrained=True).children())[: -1],
