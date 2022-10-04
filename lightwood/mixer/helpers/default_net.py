@@ -1,7 +1,7 @@
 import math
 import torch
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.helpers.device import get_devices
+from lightwood.helpers.device import get_device_from_name
 from lightwood.helpers.log import log
 import numpy as np
 
@@ -52,11 +52,7 @@ class DefaultNet(torch.nn.Module):
 
         self.net = torch.nn.Sequential(*layers)
 
-        if(device == ''):
-            device, _ = get_devices()
-        else:
-            device = torch.device(device)
-        self.to(device)
+        self.to(get_device_from_name(device))
 
     def to(self, device: torch.device) -> torch.nn.Module:
         if 'cuda' not in str(torch.device) == 0:
