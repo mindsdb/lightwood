@@ -39,7 +39,7 @@ def get_devices():
 
 def get_device_from_name(device_name=''):
     if(device_name != ''):
-        device = torch.device(device)
+        device = torch.device(device_name)
     else:
         device, _ = get_devices()
     return device
