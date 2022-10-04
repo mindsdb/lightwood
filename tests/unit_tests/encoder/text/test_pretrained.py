@@ -151,4 +151,17 @@ class TestPretrainedLangEncoder(unittest.TestCase):
         assert(embeddings.shape[0] == test.shape[0])
         assert(embeddings.shape[1] == N_embed_dim)
 
+    def run_test_encoder_on_device(self, device):
+        train, _ = create_synthetic_data(20, ptrain=1)
+        output_enc = BinaryEncoder(is_target=True)
+        output_enc.prepare(train["label"])
+        encoded_target_values = output_enc.encode(train["label"])
+        enc = PretrainedLangEncoder(stop_after=10, embed_mode=False, output_type=dtype.binary, device=device)
+        enc.prepare(train["text"], pd.DataFrame(), encoded_target_values=encoded_target_values)
+        self.assertEqual(list(enc._model.parameters())[0].device.type, device)
 
+    def test_encoder_on_cpu(self):
+        self.run_test_encoder_on_device('cpu')
+
+    def test_encoder_on_cuda(self):
+        self.run_test_encoder_on_device('cuda')
