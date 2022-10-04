@@ -50,6 +50,7 @@ class TestAutoencoder(unittest.TestCase):
 
     def check_encoder_on_device(self, device):
         enc = CategoricalAutoEncoder(stop_after=20, device=device)
+        enc.prepare(pd.Series(priming_data), pd.Series(priming_data))
         self.assertEqual(list(enc.net.parameters())[0].device.type, device)
     
     def test_encoder_on_cpu(self):
