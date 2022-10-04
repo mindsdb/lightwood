@@ -38,7 +38,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         :param max_encoded_length: Maximum length of vector represented
         :param desired_error: Threshold for reconstruction accuracy error
         :param batch_size: Minimum batch size while training
-        :param device: Device on which the model will reside (use empty string to use first available GPU if possible)
+        :param device: Device type, empty string means using the 1st available GPU if possible
         """  # noqa
         super().__init__(is_target)
         self.is_prepared = False
