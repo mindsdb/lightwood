@@ -46,3 +46,14 @@ class TestAutoencoder(unittest.TestCase):
         encoder_accuracy = accuracy_score(list(map(str, test_data)), list(map(str, decoded_data)))
         print(f'Categorical encoder accuracy for: {encoder_accuracy} on testing dataset')
         self.assertTrue(encoder_accuracy > 0.70)
+
+
+    def check_encoder_on_device(self, device):
+        enc = CategoricalAutoEncoder(stop_after=20, device=device)
+        self.assertEqual(list(enc.net.parameters())[0].device.type, device)
+    
+    def test_encoder_on_cpu(self):
+        self.check_encoder_on_device('cpu')
+
+    def test_encoder_on_cuda(self):
+        self.check_encoder_on_device('cuda')
