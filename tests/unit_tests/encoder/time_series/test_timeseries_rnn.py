@@ -87,6 +87,14 @@ class TestRnnEncoder(unittest.TestCase):
 
     def check_encoder_on_device(self, device):
         encoder = TimeSeriesEncoder(stop_after=10, device=device)
+        series = [[1, 2, 3, 4, 5, 6],
+                  [2, 3, 4, 5, 6, 7],
+                  [3, 4, 5, 6, 7, 8],
+                  [4, 5, 6, 7, 8, 9]]
+        data = series * 5
+        batch_size = 1
+        encoder.prepare(pd.Series(data), pd.Series(data),
+                        feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
         self.assertEqual(list(encoder._encoder.parameters())[0].device.type, device)
 
     def test_encoder_on_cpu(self):
