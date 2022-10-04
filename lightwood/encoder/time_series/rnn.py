@@ -12,7 +12,7 @@ from torch import optim
 from lightwood.api import dtype
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
-from lightwood.helpers.device import get_devices
+from lightwood.helpers.device import get_device_from_name
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.encoder.datetime import DatetimeNormalizerEncoder
 from lightwood.encoder.time_series.helpers.rnn_helpers import EncoderRNNNumerical, DecoderRNNNumerical
@@ -39,10 +39,7 @@ class TimeSeriesEncoder(BaseEncoder):
                  encoder_type: str = 'rnn',
                  device: str = ''):
         super().__init__(is_target)
-        if(device == ''):
-            self.device, _ = get_devices()
-        else:
-            self.device = torch.device(device)
+        self.device = get_device_from_name(device)
         self.target = target
         self.grouped_by = grouped_by
         self._learning_rate = 0.01
