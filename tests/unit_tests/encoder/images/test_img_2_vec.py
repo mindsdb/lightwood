@@ -37,6 +37,6 @@ class TestImg2VecEncoder(unittest.TestCase):
     def test_encoder_on_cpu(self):
         self.run_test_encoder_on_device('cpu')
 
-    @unittest.skipIf(not torch.cuda.is_available())
+    @unittest.skipIf(not torch.cuda.is_available(), 'CUDA unavailable')
     def test_encoder_on_cuda(self):
         self.run_test_encoder_on_device('cuda')
