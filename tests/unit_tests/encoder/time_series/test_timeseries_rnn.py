@@ -93,6 +93,7 @@ class TestRnnEncoder(unittest.TestCase):
                   [4, 5, 6, 7, 8, 9]]
         data = series * 5
         batch_size = 1
+        encoder._epochs = 1 # don't waste time on training
         encoder.prepare(pd.Series(data), pd.Series(data),
                         feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
         self.assertEqual(list(encoder._encoder.parameters())[0].device.type, device)
