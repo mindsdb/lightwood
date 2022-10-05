@@ -2,6 +2,7 @@ import random
 import unittest
 from lightwood.encoder.text.short import ShortTextEncoder
 from lightwood.helpers.text import tokenize_text
+import torch
 
 VOCAB = [
     'do', 'not', 'remember', 'men', 'pretty', 'break', 'know', 'an', 'forward', 'whose', 'plant', 'decide', 'fit', 'so',
@@ -217,5 +218,6 @@ class TestShortTextEncoder(unittest.TestCase):
     def test_encoder_on_cpu(self):
         self.check_encoder_on_device('cpu')
     
+    @unittest.skipIf(not torch.cuda.is_available())
     def test_encoder_on_cuda(self):
         self.check_encoder_on_device('cuda')
