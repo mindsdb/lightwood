@@ -57,7 +57,6 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.desired_error = desired_error
         self.stop_after = stop_after
 
-
     def prepare(self, train_priming_data: pd.Series, dev_priming_data: pd.Series):
         """
         Creates inputs and prepares a categorical autoencoder (CatAE) for input data. Currently, does not support a dev set; inputs for train and dev are concatenated together to train an autoencoder.

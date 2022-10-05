@@ -29,8 +29,8 @@ class TestRnnEncoder(unittest.TestCase):
 
     @unittest.skip("Currently not using this encoder.")
     def test_encoder_on_cpu(self):
-        pass # TODO
+        pass
 
     @unittest.skip("Currently not using this encoder.")
     def test_encoder_on_cuda(self):
-        pass # TODO
+        pass

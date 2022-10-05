@@ -47,7 +47,6 @@ class TestAutoencoder(unittest.TestCase):
         print(f'Categorical encoder accuracy for: {encoder_accuracy} on testing dataset')
         self.assertTrue(encoder_accuracy > 0.70)
 
-
     def check_encoder_on_device(self, device):
         enc = CategoricalAutoEncoder(stop_after=5, device=device)
         cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits,
@@ -65,7 +64,7 @@ class TestAutoencoder(unittest.TestCase):
                     test_data.append(category)
         enc.prepare(pd.Series(priming_data), pd.Series(priming_data))
         self.assertEqual(list(enc.net.parameters())[0].device.type, device)
-    
+
     def test_encoder_on_cpu(self):
         self.check_encoder_on_device('cpu')
 

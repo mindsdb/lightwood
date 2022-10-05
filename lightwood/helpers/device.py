@@ -37,6 +37,7 @@ def get_devices():
 
     return torch.device(device_str), available_devices
 
+
 def get_device_from_name(device_name=''):
     if(device_name != ''):
         device = torch.device(device_name)
