@@ -7,6 +7,7 @@ from lightwood.mixer.lightgbm_array import LightGBMArray
 from lightwood.mixer.sktime import SkTime
 from lightwood.mixer.arima import ARIMAMixer
 from lightwood.mixer.ets import ETSMixer
+from lightwood.mixer.gluonts import GluonTSMixer
 from lightwood.mixer.nhits import NHitsMixer
 from lightwood.mixer.prophet import ProphetMixer
 from lightwood.mixer.regression import Regression
@@ -17,4 +18,4 @@ except Exception:
     QClassic = None
 
 __all__ = ['BaseMixer', 'Neural', 'NeuralTs', 'LightGBM', 'LightGBMArray', 'Unit', 'Regression',
-           'SkTime', 'QClassic', 'ProphetMixer', 'ETSMixer', 'ARIMAMixer', 'NHitsMixer']
+           'SkTime', 'QClassic', 'ProphetMixer', 'ETSMixer', 'ARIMAMixer', 'NHitsMixer', 'GluonTSMixer']
