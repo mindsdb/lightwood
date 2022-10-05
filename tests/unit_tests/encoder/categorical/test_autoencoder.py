@@ -49,12 +49,26 @@ class TestAutoencoder(unittest.TestCase):
 
 
     def check_encoder_on_device(self, device):
-        enc = CategoricalAutoEncoder(stop_after=20, device=device)
+        enc = CategoricalAutoEncoder(stop_after=5, device=device)
+        cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits,
+                              k=random.randint(7, 8))) for x in range(50)]
+        for i in range(len(cateogries)):
+            if i % 10 == 0:
+                cateogries[i] = random.randint(1, 20)
+        priming_data = []
+        test_data = []
+        for category in cateogries:
+            times = random.randint(1, 20)
+            for i in range(times):
+                priming_data.append(category)
+                if i % 3 == 0 or i == 1:
+                    test_data.append(category)
         enc.prepare(pd.Series(priming_data), pd.Series(priming_data))
         self.assertEqual(list(enc.net.parameters())[0].device.type, device)
     
     def test_encoder_on_cpu(self):
         self.check_encoder_on_device('cpu')
 
+    @unittest.skipIf(not torch.cuda.is_available())
     def test_encoder_on_cuda(self):
         self.check_encoder_on_device('cuda')
