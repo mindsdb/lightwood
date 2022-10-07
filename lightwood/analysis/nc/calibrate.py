@@ -448,8 +448,8 @@ class ICP(BaseAnalysisBlock):
             if ns.tss.is_timeseries and is_numerical and ns.tss.horizon > 1:
                 # horizon collapse
                 row_insights['prediction_sum'] = row_insights['prediction'].apply(lambda x: sum(x))
-                row_insights['lower_sum'] = row_insights['lower'].apply(lambda x: sum(x))
-                row_insights['upper_sum'] = row_insights['upper'].apply(lambda x: sum(x))
+                row_insights['lower_sum'] = row_insights['lower'].apply(lambda x: min(x))
+                row_insights['upper_sum'] = row_insights['upper'].apply(lambda x: max(x))
                 row_insights['confidence_mean'] = row_insights['confidence'].apply(lambda x: np.mean(x))
 
         return row_insights, global_insights

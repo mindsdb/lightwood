@@ -133,7 +133,7 @@ def add_tn_num_conf_bounds(data: pd.DataFrame, tss_args):
 
     for idx, row in data.iterrows():
         error_increase = [row['confidence'][0]] + \
-                         [row['confidence'][0] * np.log(np.e + t / 2)  # offset by e so that y intercept is 1
+                         [row['confidence'][0] * 1 # np.log(np.e + t / 2)  # offset by e so that y intercept is 1
                           for t in range(1, tss_args.horizon)]
         data['confidence'].iloc[idx] = [row['confidence'][0] for _ in range(tss_args.horizon)]
 

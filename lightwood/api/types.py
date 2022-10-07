@@ -347,7 +347,7 @@ class JsonAI:
     specifications are required internally.
 
     :param encoders: A dictionary of the form: `column_name -> encoder module`
-    :param dtype_dict: A dictionary of the form: `column_name -> data type`
+    # :param dtype_dict: A dictionary of the form: `column_name -> data type`
     :param dependency_dict: A dictionary of the form: `column_name -> list of columns it depends on`
     :param model: The ensemble and its submodels
     :param problem_definition: The ``ProblemDefinition`` criteria.
@@ -357,10 +357,10 @@ class JsonAI:
     :param analyzer: The Analyzer object is used to evaluate how well a model performed on the predictive task.
     :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.
     :param imputers: A list of objects that will impute missing data on each column. They are called inside the cleaner.
-    :param analysis_blocks: The blocks that get used in both analysis and inference inside the analyzer and explainer blocks.
+    # :param analysis_blocks: The blocks that get used in both analysis and inference inside the analyzer and explainer blocks.
     :param timeseries_transformer: Procedure used to transform any timeseries task dataframe into the format that lightwood expects for the rest of the pipeline.  
-    :param timeseries_analyzer: Procedure that extracts key insights from any timeseries in the data (e.g. measurement frequency, target distribution, etc).
-    :param accuracy_functions: A list of performance metrics used to evaluate the best mixers.
+    # :param timeseries_analyzer: Procedure that extracts key insights from any timeseries in the data (e.g. measurement frequency, target distribution, etc).
+    # :param accuracy_functions: A list of performance metrics used to evaluate the best mixers.
     """ # noqa
 
     encoders: Dict[str, Module]
