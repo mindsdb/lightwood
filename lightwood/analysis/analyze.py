@@ -75,7 +75,8 @@ def model_analyzer(
         'tss': tss,
         'ts_analysis': ts_analysis,
         'accuracy_functions': accuracy_functions,
-        'has_pretrained_text_enc': has_pretrained_text_enc
+        'has_pretrained_text_enc': has_pretrained_text_enc,
+        'library_version': lightwood.__version__
     }
 
     for block in analysis_blocks:
