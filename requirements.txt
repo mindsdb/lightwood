@@ -28,4 +28,4 @@ pytorch-lightning>=1.3.0
 langid==1.1.6
 pydateinfer==0.3.0
 shap >= 0.40.0
-
+protobuf<3.21.0
