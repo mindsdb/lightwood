@@ -151,7 +151,7 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         # Prepare a one-hot encoder for CatAE inputs
         self.onehot_encoder.prepare(priming_data)
-        self.batch_size = min(self.batch_size, int(len(priming_data) / 50))
+        self.batch_size = min(self.batch_size, int(len(priming_data) / 50), 1)
 
         train_loader = DataLoader(
             list(zip(priming_data, priming_data)),
