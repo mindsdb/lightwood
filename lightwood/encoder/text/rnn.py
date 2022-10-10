@@ -1,6 +1,5 @@
 # flake8: noqa
 from lightwood.encoder.text.helpers.rnn_helpers import *
-#from lightwood.encoder.text.helpers.rnn_helpers import device as default_device
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 import math

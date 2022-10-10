@@ -575,7 +575,6 @@ def train(
         max_length=MAX_LENGTH, device=default_device):
 
     encoder_hidden = encoder.initHidden()
-    #device = encoder.device
 
     encoder_optimizer.zero_grad()
     decoder_optimizer.zero_grad()
