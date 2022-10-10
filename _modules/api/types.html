@@ -235,6 +235,7 @@
 <span class="sd">             in the information.</span>
 
 <span class="sd">    :param nr_rows: Number of rows (samples) in the dataset</span>
+<span class="sd">    :param nr_columns: Number of columns (features) in the dataset</span>
 <span class="sd">    :param df_target_stddev: The standard deviation of the target of the dataset</span>
 <span class="sd">    :param train_observed_classes:</span>
 <span class="sd">    :param target_class_distribution:</span>
@@ -250,6 +251,7 @@
 <span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
 
     <span class="n">nr_rows</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">nr_columns</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">df_target_stddev</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
     <span class="n">train_observed_classes</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Union[None, List[str]]</span>
     <span class="n">target_class_distribution</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Dict[str, float]</span>
