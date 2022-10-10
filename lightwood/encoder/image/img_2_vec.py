@@ -78,7 +78,7 @@ class Img2VecEncoder(BaseEncoder):
         self.output_size = self.model.output_size
         self.is_prepared = True
 
-    def to(self, device, available_devices):
+    def to(self, device, available_devices=1):
         """
         Changes device of model to support CPU/GPU
 
@@ -87,7 +87,7 @@ class Img2VecEncoder(BaseEncoder):
 
         :return: same object but moved to the target device.
         """
-        self.model.to(device, available_devices)
+        self.model.to(device, available_devices=1)
         return self
 
     def encode(self, images: List[str]) -> torch.Tensor:

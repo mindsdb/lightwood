@@ -43,7 +43,7 @@ class Img2Vec(nn.Module):
                                          ChannelPoolAdaptiveAvg1d(output_size=self.output_size))
         self.model = self.model.to(self.device)
 
-    def to(self, device, available_devices):
+    def to(self, device, available_devices=1):
         self.device = device
         self.model = self.model.to(self.device)
         return self
