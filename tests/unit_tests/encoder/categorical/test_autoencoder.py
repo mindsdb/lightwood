@@ -32,7 +32,7 @@ class TestAutoencoder(unittest.TestCase):
         category_indexes = np.array(range(nb_categories), dtype=int)
         sample_category_indexes = np.repeat(category_indexes, category_sizes)
         np_random.shuffle(sample_category_indexes)
-        samples = [ categories[i] for i in sample_category_indexes ]
+        samples = [categories[i] for i in sample_category_indexes]
         data_size = len(samples)
         priming_data = samples
         test_data = []
