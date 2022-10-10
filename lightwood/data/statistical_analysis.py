@@ -100,7 +100,6 @@ def statistical_analysis(data: pd.DataFrame,
             order_format = None
 
     nr_columns = len(data.columns)
-    
     df = cleaner(data, dtypes, problem_definition.pct_invalid,
                  identifiers, problem_definition.target, 'train', tss,
                  problem_definition.anomaly_detection)
