@@ -28,7 +28,7 @@ class TestAutoencoder(unittest.TestCase):
             for category_i in range(nb_categories - nb_int_categories)
         ]
         categories = list(int_categories) + str_categories
-        category_sizes = np_random.integers(low=1, high=max_category_size, size=nb_int_categories)
+        category_sizes = np_random.integers(low=1, high=max_category_size, size=nb_categories)
         category_indexes = np.array(range(nb_categories), dtype=int)
         sample_category_indexes = np.repeat(category_indexes, category_sizes)
         np_random.shuffle(sample_category_indexes)
