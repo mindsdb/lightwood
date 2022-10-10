@@ -39,7 +39,7 @@ class Img2VecEncoder(BaseEncoder):
         :param scale: Resize scale of image (x, y)
         :param mean: Mean of pixel values
         :param std: Standard deviation of pixel values
-        :param device: Device on which the model resides (empty string means using the first available GPU if possible)
+        :param device: Name of the device that get_device_from_name will attempt to use
         """  # noqa
         assert not is_target
         super().__init__(is_target)

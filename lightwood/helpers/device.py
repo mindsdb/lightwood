@@ -39,6 +39,10 @@ def get_devices():
 
 
 def get_device_from_name(device_name=''):
+    """
+    Returns the device specified as an argument. If the argument is left empty it will returns the output of get_devices().
+    :param device_name: name of the device to use (default is an empty string), if is an empty string will use the output of get_devices() instead")
+    """
     if(device_name != ''):
         device = torch.device(device_name)
     else:

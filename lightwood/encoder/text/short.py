@@ -16,7 +16,7 @@ class ShortTextEncoder(BaseEncoder):
             When None, it will be set automatically based on is_target:
             (is_target) -> 'concat'
             (not is_target) -> 'mean'
-        :param device: Device type, empty string means using the 1st available GPU if possible
+        :param device: name of the device that get_device_from_name will attempt to use.
         """
         super().__init__(is_target)
 
