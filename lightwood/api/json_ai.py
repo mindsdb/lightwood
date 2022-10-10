@@ -193,7 +193,6 @@ def generate_json_ai(
     input_cols = []
     tss = problem_definition.timeseries_settings
     dtype_dict = type_information.dtypes
-    original_col_amount = len(dtype_dict)
     for k in type_information.identifiers:
         if not (tss.is_timeseries and tss.group_by and k in tss.group_by) and k != target:
             del dtype_dict[k]
@@ -431,7 +430,6 @@ def generate_json_ai(
         encoders=encoders,
         imputers=imputers,
         dtype_dict=dtype_dict,
-        original_col_amount=original_col_amount,
         dependency_dict=dependency_dict,
         model=model,
         problem_definition=problem_definition,

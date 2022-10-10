@@ -62,6 +62,7 @@ class StatisticalAnalysis:
              in the information.
 
     :param nr_rows: Number of rows (samples) in the dataset
+    :param nr_columns: Number of columns (features) in the dataset
     :param df_target_stddev: The standard deviation of the target of the dataset
     :param train_observed_classes:
     :param target_class_distribution:
@@ -77,6 +78,7 @@ class StatisticalAnalysis:
     """ # noqa
 
     nr_rows: int
+    nr_columns: int
     df_target_stddev: Optional[float]
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]
@@ -348,7 +350,6 @@ class JsonAI:
 
     :param encoders: A dictionary of the form: `column_name -> encoder module`
     :param dtype_dict: A dictionary of the form: `column_name -> data type`
-    :param original_col_amount: Original amount of columns
     :param dependency_dict: A dictionary of the form: `column_name -> list of columns it depends on`
     :param model: The ensemble and its submodels
     :param problem_definition: The ``ProblemDefinition`` criteria.
@@ -366,7 +367,6 @@ class JsonAI:
 
     encoders: Dict[str, Module]
     dtype_dict: Dict[str, dtype]
-    original_col_amount: int
     dependency_dict: Dict[str, List[str]]
     model: Dict[str, Module]
     problem_definition: ProblemDefinition
@@ -388,7 +388,6 @@ class JsonAI:
         """
         encoders = obj["encoders"]
         dtype_dict = obj["dtype_dict"]
-        original_col_amount = obj["original_col_amount"]
         dependency_dict = obj["dependency_dict"]
         model = obj["model"]
         problem_definition = ProblemDefinition.from_dict(obj["problem_definition"])
@@ -406,7 +405,6 @@ class JsonAI:
         json_ai = JsonAI(
             encoders=encoders,
             dtype_dict=dtype_dict,
-            original_col_amount=original_col_amount,
             dependency_dict=dependency_dict,
             model=model,
             problem_definition=problem_definition,

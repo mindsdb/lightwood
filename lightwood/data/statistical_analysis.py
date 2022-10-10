@@ -99,6 +99,8 @@ def statistical_analysis(data: pd.DataFrame,
         except Exception:
             order_format = None
 
+    nr_columns = len(data.columns)
+    
     df = cleaner(data, dtypes, problem_definition.pct_invalid,
                  identifiers, problem_definition.target, 'train', tss,
                  problem_definition.anomaly_detection)
@@ -204,6 +206,7 @@ def statistical_analysis(data: pd.DataFrame,
     log.info('Finished statistical analysis')
     return StatisticalAnalysis(
         nr_rows=nr_rows,
+        nr_columns=nr_columns,
         df_target_stddev=df_std,
         train_observed_classes=train_observed_classes,
         target_class_distribution=target_class_distribution,
