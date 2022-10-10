@@ -541,13 +541,6 @@ def tensorFromSentence(lang, sentence, device=default_device):
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
 
-# NOTE: the function below is never used?
-def tensorsFromPair(pair, input_lang, output_lang, device=default_device):
-    input_tensor = tensorFromSentence(input_lang, pair[0], device=device)
-    target_tensor = tensorFromSentence(output_lang, pair[1], device=device)
-    return (input_tensor, target_tensor)
-
-
 ######################################################################
 # Training the Model
 # ------------------
