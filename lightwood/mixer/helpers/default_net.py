@@ -1,7 +1,7 @@
 import math
 import torch
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.helpers.device import get_devices
+from lightwood.helpers.device import get_device_from_name
 from lightwood.helpers.log import log
 import numpy as np
 
@@ -19,9 +19,11 @@ class DefaultNet(torch.nn.Module):
                  shape: list = None,
                  max_params: int = int(3e7),
                  num_hidden: int = 1,
-                 dropout: float = 0) -> None:
+                 dropout: float = 0,
+                 device: str = '') -> None:
 
         super(DefaultNet, self).__init__()
+
         if input_size is not None and output_size is not None:
             self.input_size = input_size
             self.output_size = output_size
@@ -49,7 +51,8 @@ class DefaultNet(torch.nn.Module):
             raise Exception('You must specify other a shape or an input and output size when creating a DefaultNet!')
 
         self.net = torch.nn.Sequential(*layers)
-        self.to(get_devices()[0])
+
+        self.to(get_device_from_name(device))
 
     def to(self, device: torch.device) -> torch.nn.Module:
         if 'cuda' not in str(torch.device) == 0:
