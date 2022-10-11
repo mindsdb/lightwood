@@ -181,7 +181,7 @@
 
 
 <div class="viewcode-block" id="ShortTextEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.ShortTextEncoder">[docs]</a><span class="k">class</span> <span class="nc">ShortTextEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_target</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_target</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param is_target:</span>
 <span class="sd">        :param mode:</span>
@@ -189,6 +189,7 @@
 <span class="sd">            When None, it will be set automatically based on is_target:</span>
 <span class="sd">            (is_target) -&gt; &#39;concat&#39;</span>
 <span class="sd">            (not is_target) -&gt; &#39;mean&#39;</span>
+<span class="sd">        :param device: name of the device that get_device_from_name will attempt to use.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="p">)</span>
 
@@ -209,7 +210,7 @@
         <span class="c1"># Defined in self.prepare()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_combine_fn</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_words_per_sent</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cae</span> <span class="o">=</span> <span class="n">CategoricalAutoEncoder</span><span class="p">(</span><span class="n">is_target</span><span class="o">=</span><span class="n">is_target</span><span class="p">,</span> <span class="n">max_encoded_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cae</span> <span class="o">=</span> <span class="n">CategoricalAutoEncoder</span><span class="p">(</span><span class="n">is_target</span><span class="o">=</span><span class="n">is_target</span><span class="p">,</span> <span class="n">max_encoded_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">_unexpected_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
