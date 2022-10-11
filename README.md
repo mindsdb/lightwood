@@ -120,7 +120,7 @@ pip3 install lightwood
 However, we recommend creating a python virtual environment.
 
 #### Setting up a dev environment
-
+- Python version should be in the range >=3.7, < 3.10
 - Clone lightwood
 - `cd lightwood && pip install -r requirements.txt && pip install -r requirements_image.txt`
 - Add it to your python path (e.g. by adding `export PYTHONPATH='/where/you/cloned/lightwood':$PYTHONPATH` as a newline at the end of your `~/.bashrc` file)
