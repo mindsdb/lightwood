@@ -98,9 +98,12 @@ class GluonTSMixer(BaseMixer):
         conf = args.fixed_confidence if args.fixed_confidence else 0.9
         ydf['confidence'] = conf
 
+        gby = self.ts_analysis["tss"].group_by if self.ts_analysis["tss"].group_by else []
+        groups = ds.data_frame[gby[0]].unique() if gby else None
+
         for idx in range(length):
             df = ds.data_frame.iloc[:idx] if idx != 0 else None
-            input_ds = self._make_initial_ds(df)
+            input_ds = self._make_initial_ds(df, groups=groups)
             forecasts = list(self.model.predict(input_ds))[0]
             ydf.at[idx, 'prediction'] = [entry for entry in forecasts.mean]
             ydf.at[idx, 'lower'] = [entry for entry in forecasts.quantile(1 - conf)]
@@ -108,7 +111,7 @@ class GluonTSMixer(BaseMixer):
 
         return ydf
 
-    def _make_initial_ds(self, df=None, train=False):
+    def _make_initial_ds(self, df=None, train=False, groups=None):
         oby = self.ts_analysis["tss"].order_by
         gby = self.ts_analysis["tss"].group_by if self.ts_analysis["tss"].group_by else []
         freq = self.ts_analysis['sample_freqs']['__default']
@@ -116,6 +119,8 @@ class GluonTSMixer(BaseMixer):
 
         if df is None and not train:
             df = self.train_cache
+            if gby:
+                df = df[df[gby[0]].isin(groups)]
         else:
             sub_df = df[keep_cols]
             df = deepcopy(sub_df)
@@ -123,7 +128,12 @@ class GluonTSMixer(BaseMixer):
             if train:
                 self.train_cache = df
             else:
-                df = pd.concat([self.train_cache, df]).sort_index()
+                if gby:
+                    cache = self.train_cache[self.train_cache[gby[0]].isin(groups)]
+                else:
+                    cache = self.train_cache
+                df = pd.concat([cache, df]).sort_index()
+                df = df.drop_duplicates()
 
         if gby:
             # TODO: multiple group support
