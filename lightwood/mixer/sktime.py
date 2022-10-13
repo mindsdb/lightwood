@@ -162,13 +162,16 @@ class SkTime(BaseMixer):
             for k, v in options.items():
                 kwargs = self._add_forecaster_kwarg(model_class, kwargs, k, v)
 
-            model_pipeline = [("forecaster", model_class(**kwargs))]
+            model_pipeline = []
 
             if self.use_stl and self.ts_analysis['stl_transforms'].get(group, False):
                 model_pipeline.insert(0, ("detrender",
                                           self.ts_analysis['stl_transforms'][group]["transformer"].detrender))
                 model_pipeline.insert(0, ("deseasonalizer",
                                           self.ts_analysis['stl_transforms'][group]["transformer"].deseasonalizer))
+                kwargs['sp'] = None
+
+            model_pipeline.append(("forecaster", model_class(**kwargs)))
 
             self.models[group] = TransformedTargetForecaster(model_pipeline)
 
