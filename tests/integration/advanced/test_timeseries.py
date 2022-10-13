@@ -520,3 +520,23 @@ class TestTimeseries(unittest.TestCase):
 
         preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': '%Y'})
         self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012', '2012'])
+
+    def test_12_gluonts(self):
+        """ Tests GluonTS mixer """
+        data = pd.read_csv('tests/data/arrivals.csv')
+        data = data[data['Country'] == 'US']
+        order_by = 'T'
+        train_df, test_df = self.split_arrivals(data, grouped=False)
+        jai = json_ai_from_problem(train_df, ProblemDefinition.from_dict({'target': 'Traffic',
+                                                                          'timeseries_settings': {
+                                                                              'order_by': order_by,
+                                                                              'window': 4*5,
+                                                                              'horizon': 4*2
+                                                                          }}))
+        jai.model['args']['submodels'] = [{
+            "module": "GluonTSMixer",
+            "args": {}
+        }]
+        predictor = predictor_from_json_ai(jai)
+        predictor.learn(train_df)
+        preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})

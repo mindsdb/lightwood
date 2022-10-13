@@ -5,8 +5,6 @@ import numpy as np
 import pandas as pd
 
 from gluonts.dataset.pandas import PandasDataset
-from gluonts.dataset.split.splitter import OffsetSplitter
-from gluonts.evaluation import Evaluator, make_evaluation_predictions
 
 # from gluonts.model.simple_feedforward import SimpleFeedForwardEstimator
 from gluonts.model.deepar import DeepAREstimator
@@ -65,7 +63,7 @@ class GluonTSMixer(BaseMixer):
 
         # prepare data
         cat_ds = ConcatedEncodedDs([train_data, dev_data])
-        train_ds = self._make_initial_ds(cat_ds, train=True)
+        train_ds = self._make_initial_ds(cat_ds.data_frame, train=True)
 
         estimator = DeepAREstimator(
             freq=train_ds.freq,
@@ -91,38 +89,41 @@ class GluonTSMixer(BaseMixer):
         """ 
         Calls the mixer to emit forecasts.
         """  # noqa
-        input_ds = self._make_initial_ds(ds)
-        forecast_it, _ = make_evaluation_predictions(dataset=input_ds, predictor=self.model, num_samples=100)
-        forecasts = list(forecast_it)
-
         length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),
                            columns=['prediction', 'lower', 'upper'],
                            dtype=object)
-
-        conf = args.fixed_confidence if args.fixed_confidence else 0.9
-        lower_conf = 1 - conf
-        upper_conf = conf
-
         ydf['index'] = ds.data_frame.index
+        conf = args.fixed_confidence if args.fixed_confidence else 0.9
         ydf['confidence'] = conf
-        preds = [list(entry.mean) for entry in forecasts]
-        lower = [list(entry.quantile(lower_conf)) for entry in forecasts]
-        upper = [list(entry.quantile(upper_conf)) for entry in forecasts]
+
+        for idx in range(length):
+            df = ds.data_frame.iloc[:idx] if idx != 0 else None
+            input_ds = self._make_initial_ds(df)
+            forecasts = list(self.model.predict(input_ds))[0]
+            ydf.at[idx, 'prediction'] = [entry for entry in forecasts.mean]
+            ydf.at[idx, 'lower'] = [entry for entry in forecasts.quantile(1 - conf)]
+            ydf.at[idx, 'upper'] = [entry for entry in forecasts.quantile(conf)]
+
         return ydf
 
-    def _make_initial_ds(self, ds, train=False):
+    def _make_initial_ds(self, df=None, train=False):
         oby = self.ts_analysis["tss"].order_by
         gby = self.ts_analysis["tss"].group_by if self.ts_analysis["tss"].group_by else []
         freq = self.ts_analysis['sample_freqs']['__default']
         keep_cols = [f'__mdb_original_{oby}', self.target] + [col for col in gby]
-        sub_df = ds.data_frame[keep_cols]
-        df = deepcopy(sub_df)
-        if train:
-            self.train_cache = df
+
+        if df is None and not train:
+            df = self.train_cache
         else:
-            df = pd.concat([self.train_cache, df]).sort_index()
+            sub_df = df[keep_cols]
+            df = deepcopy(sub_df)
+
+            if train:
+                self.train_cache = df
+            else:
+                df = pd.concat([self.train_cache, df]).sort_index()
 
         if gby:
             # TODO: multiple group support
@@ -131,6 +132,9 @@ class GluonTSMixer(BaseMixer):
                 if len(df[df[gby[0]] == g]) < self.horizon:
                     invalid_groups.append(g)
             df = df[~df[gby[0]].isin(invalid_groups)]
+        else:
+            gby = '__default_group'
+            df[gby] = '__default_group'
 
         ds = PandasDataset.from_long_dataframe(df, target=self.target, item_id=gby, freq=freq)
         return ds
