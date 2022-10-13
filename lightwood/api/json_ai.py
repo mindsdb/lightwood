@@ -1186,6 +1186,7 @@ class Predictor(PredictorInterface):
         self.accuracy_functions = {json_ai.accuracy_functions}
         self.identifiers = {json_ai.identifiers}
         self.dtype_dict = {inline_dict(dtype_dict)}
+        self.lightwood_version = lightwood_version
 
         # Any feature-column dependencies
         self.dependencies = {inline_dict(json_ai.dependency_dict)}
