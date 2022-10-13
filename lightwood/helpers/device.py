@@ -36,3 +36,17 @@ def get_devices():
         available_devices = 0
 
     return torch.device(device_str), available_devices
+
+
+def get_device_from_name(device_name=''):
+    """
+    Returns the device specified as an argument.
+    If the argument is left empty it will returns the output of get_devices().
+    
+    :param device_name: name of the device to use (default is an empty string), if is an empty string will use the output of get_devices() instead")
+    """ # noqa E501
+    if(device_name != ''):
+        device = torch.device(device_name)
+    else:
+        device, _ = get_devices()
+    return device

@@ -84,3 +84,23 @@ class TestRnnEncoder(unittest.TestCase):
         preds = torch.reshape(preds, (1, -1)).tolist()[-1]
         for ans, pred in zip(answer, preds):
             self.assertGreater(error_margin, abs(pred - ans))
+
+    def check_encoder_on_device(self, device):
+        encoder = TimeSeriesEncoder(stop_after=10, device=device)
+        series = [[1, 2, 3, 4, 5, 6],
+                  [2, 3, 4, 5, 6, 7],
+                  [3, 4, 5, 6, 7, 8],
+                  [4, 5, 6, 7, 8, 9]]
+        data = series * 5
+        batch_size = 1
+        encoder._epochs = 1
+        encoder.prepare(pd.Series(data), pd.Series(data),
+                        feedback_hoop_function=lambda x: print(x), batch_size=batch_size)
+        self.assertEqual(list(encoder._encoder.parameters())[0].device.type, device)
+
+    def test_encoder_on_cpu(self):
+        self.check_encoder_on_device('cpu')
+
+    @unittest.skipIf(not torch.cuda.is_available(), 'CUDA unavailable')
+    def test_encoder_on_cuda(self):
+        self.check_encoder_on_device('cuda')

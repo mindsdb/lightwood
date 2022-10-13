@@ -101,7 +101,7 @@ import torch.nn.functional as F
 from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.log import log
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+default_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 ######################################################################
 # Loading data files
@@ -344,12 +344,21 @@ def prepareData(lang1, lang2, reverse=False):
 #
 
 class EncoderRNN(nn.Module):
-    def __init__(self, input_size, hidden_size):
+    def __init__(self,
+                 input_size,
+                 hidden_size,
+                 device=''):
         super(EncoderRNN, self).__init__()
         self.hidden_size = hidden_size
 
         self.embedding = nn.Embedding(input_size, hidden_size)
         self.gru = nn.GRU(hidden_size, hidden_size)
+
+        if(device == ''):
+            device = default_device
+        else:
+            device = torch.device(device)
+        self.device = device
 
     def forward(self, input, hidden):
         with LightwoodAutocast():
@@ -359,7 +368,7 @@ class EncoderRNN(nn.Module):
         return output, hidden
 
     def initHidden(self):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+        return torch.zeros(1, 1, self.hidden_size, device=self.device)
 
 ######################################################################
 # The Decoder
@@ -390,7 +399,7 @@ class EncoderRNN(nn.Module):
 #
 
 class DecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size):
+    def __init__(self, hidden_size, output_size, device=''):
         super(DecoderRNN, self).__init__()
         self.hidden_size = hidden_size
 
@@ -398,6 +407,12 @@ class DecoderRNN(nn.Module):
         self.gru = nn.GRU(hidden_size, hidden_size)
         self.out = nn.Linear(hidden_size, output_size)
         self.softmax = nn.LogSoftmax(dim=1)
+
+        if(device == ''):
+            device = default_device
+        else:
+            device = torch.device(device)
+        self.device = device
 
     def forward(self, input, hidden):
         with LightwoodAutocast():
@@ -408,7 +423,7 @@ class DecoderRNN(nn.Module):
         return output, hidden
 
     def initHidden(self):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+        return torch.zeros(1, 1, self.hidden_size, device=self.device)
 
 ######################################################################
 # I encourage you to train and observe the results of this model, but to
@@ -449,7 +464,12 @@ class DecoderRNN(nn.Module):
 #
 
 class AttnDecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size, dropout_p=0.1, max_length=MAX_LENGTH):
+    def __init__(self,
+                 hidden_size,
+                 output_size,
+                 dropout_p=0.1,
+                 max_length=MAX_LENGTH,
+                 device=''):
         super(AttnDecoderRNN, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
@@ -462,6 +482,12 @@ class AttnDecoderRNN(nn.Module):
         self.dropout = nn.Dropout(self.dropout_p)
         self.gru = nn.GRU(self.hidden_size, self.hidden_size)
         self.out = nn.Linear(self.hidden_size, self.output_size)
+
+        if(device == ''):
+            device = default_device
+        else: 
+            device = torch.device(device)
+        self.device = device
 
     def forward(self, input, hidden, encoder_outputs):
         with LightwoodAutocast():
@@ -483,7 +509,7 @@ class AttnDecoderRNN(nn.Module):
         return output, hidden, attn_weights
 
     def initHidden(self):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+        return torch.zeros(1, 1, self.hidden_size, device=self.device)
 
 
 ######################################################################
@@ -509,16 +535,10 @@ def indexesFromSentence(lang, sentence):
     return [lang.word2index[word] if word in lang.word2index else UNK_TOKEN for word in (str(sentence).split(' ') if sentence is not None else [None])]
 
 
-def tensorFromSentence(lang, sentence):
+def tensorFromSentence(lang, sentence, device=default_device):
     indexes = indexesFromSentence(lang, sentence)
     indexes.append(EOS_token)
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
-
-
-def tensorsFromPair(pair, input_lang, output_lang):
-    input_tensor = tensorFromSentence(input_lang, pair[0])
-    target_tensor = tensorFromSentence(output_lang, pair[1])
-    return (input_tensor, target_tensor)
 
 
 ######################################################################
@@ -552,7 +572,8 @@ teacher_forcing_ratio = 0.5
 
 def train(
         input_tensor, target_tensor, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion,
-        max_length=MAX_LENGTH):
+        max_length=MAX_LENGTH, device=default_device):
+
     encoder_hidden = encoder.initHidden()
 
     encoder_optimizer.zero_grad()
@@ -645,8 +666,19 @@ def timeSince(since, percent):
 # of examples, time so far, estimated time) and average loss.
 #
 
-def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_rows, n_iters, print_every=1000,
-               plot_every=100, learning_rate=0.01, loss_breakpoint=0.0001, max_length=MAX_LENGTH):
+def trainIters(encoder,
+               decoder,
+               input_lang,
+               output_lang,
+               input_rows,
+               output_rows,
+               n_iters,
+               print_every=1000,
+               plot_every=100,
+               learning_rate=0.01,
+               loss_breakpoint=0.0001,
+               max_length=MAX_LENGTH,
+               device=default_device):
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
@@ -657,8 +689,11 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
 
     random_index = random.randint(0, len(input_rows))
 
-    training_pairs = [[tensorFromSentence(input_lang, input_rows[random_index]), tensorFromSentence(
-        output_lang, output_rows[random_index])] for i in range(n_iters)]
+    training_pairs = [
+        [
+            tensorFromSentence(input_lang, input_rows[random_index], device=device),
+            tensorFromSentence(output_lang, output_rows[random_index], device=device)
+        ] for i in range(n_iters) ]
     criterion = nn.NLLLoss()
 
     for iter in range(1, n_iters + 1):
@@ -667,7 +702,7 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
         target_tensor = training_pair[1]
 
         loss = train(input_tensor, target_tensor, encoder,
-                     decoder, encoder_optimizer, decoder_optimizer, criterion, max_length)
+                     decoder, encoder_optimizer, decoder_optimizer, criterion, max_length, device=device)
         print_loss_total += loss
         plot_loss_total += loss
 
@@ -705,9 +740,9 @@ def trainIters(encoder, decoder, input_lang, output_lang, input_rows, output_row
 # attention outputs for display later.
 #
 
-def evaluate(encoder, decoder, input_lang, output_lang, sentence, max_length=MAX_LENGTH):
+def evaluate(encoder, decoder, input_lang, output_lang, sentence, max_length=MAX_LENGTH, device=default_device):
     with torch.no_grad():
-        input_tensor = tensorFromSentence(input_lang, sentence)
+        input_tensor = tensorFromSentence(input_lang, sentence, device=device)
         input_length = input_tensor.size()[0]
         encoder_hidden = encoder.initHidden()
 
@@ -746,12 +781,13 @@ def evaluate(encoder, decoder, input_lang, output_lang, sentence, max_length=MAX
 # input, target, and output to make some subjective quality judgements:
 #
 
-def evaluateRandomly(encoder, pairs, decoder, n=10, max_length=MAX_LENGTH):
+# this function is never used?
+def evaluateRandomly(encoder, pairs, decoder, n=10, max_length=MAX_LENGTH, device=default_device):
     for i in range(n):
         pair = random.choice(pairs)
         log.debug('>', pair[0])
         log.debug('=', pair[1])
-        output_words, attentions = evaluate(encoder, decoder, pair[0], max_length=MAX_LENGTH)
+        output_words, attentions = evaluate(encoder, decoder, pair[0], max_length=MAX_LENGTH, device=device)
         output_sentence = ' '.join(output_words)
         log.debug('<', output_sentence)
         log.debug('')

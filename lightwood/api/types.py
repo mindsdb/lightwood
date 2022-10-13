@@ -62,6 +62,7 @@ class StatisticalAnalysis:
              in the information.
 
     :param nr_rows: Number of rows (samples) in the dataset
+    :param nr_columns: Number of columns (features) in the dataset
     :param df_target_stddev: The standard deviation of the target of the dataset
     :param train_observed_classes:
     :param target_class_distribution:
@@ -77,6 +78,7 @@ class StatisticalAnalysis:
     """ # noqa
 
     nr_rows: int
+    nr_columns: int
     df_target_stddev: Optional[float]
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]
