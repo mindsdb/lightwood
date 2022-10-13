@@ -530,8 +530,8 @@ class TestTimeseries(unittest.TestCase):
         jai = json_ai_from_problem(train_df, ProblemDefinition.from_dict({'target': 'Traffic',
                                                                           'timeseries_settings': {
                                                                               'order_by': order_by,
-                                                                              'window': 4*5,
-                                                                              'horizon': 4*2
+                                                                              'window': 4 * 5,
+                                                                              'horizon': 4 * 2
                                                                           }}))
         jai.model['args']['submodels'] = [{
             "module": "GluonTSMixer",
@@ -539,4 +539,4 @@ class TestTimeseries(unittest.TestCase):
         }]
         predictor = predictor_from_json_ai(jai)
         predictor.learn(train_df)
-        preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
+        predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
