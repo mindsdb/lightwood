@@ -4,6 +4,7 @@ import pandas as pd
 from sklearn.metrics import r2_score
 from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import json_ai_from_problem, predictor_from_json_ai
+from lightwood import __version__ as lightwood_version
 
 
 class TestBasic(unittest.TestCase):
@@ -38,6 +39,8 @@ class TestBasic(unittest.TestCase):
         predictor.learn(df)
 
         assert predictor.model_analysis.dtypes[target] == dtype.quantity
+
+        assert predictor.lightwood_version == lightwood_version
 
         predictions = predictor.predict(df)
 
