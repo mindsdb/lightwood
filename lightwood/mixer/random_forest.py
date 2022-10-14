@@ -5,8 +5,7 @@ import pandas as pd
 import optuna
 from optuna import trial as trial_module
 from sklearn.model_selection import cross_val_score
-from sklearn.metrics import r2_score, accuracy_score
-from typing import Dict, List, Set, Optional, Union
+from typing import Dict, Union
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import RandomForestClassifier
 
@@ -35,6 +34,18 @@ class RandomForest(BaseMixer):
             use_optuna: bool,
             target_encoder: BaseEncoder
     ):
+        """
+        The `RandomForest` mixer supports both regression and classification tasks. 
+        It inherits from sklearn.ensemble.RandomForestRegressor and sklearn.ensemble.RandomForestClassifier.
+        (https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html)
+        (https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html)
+        
+        :param stop_after: time budget in seconds.
+        :param target: name of the target column that the mixer will learn to predict.
+        :param dtype_dict: dictionary with dtypes of all columns in the data.
+        :param fit_on_dev: whether to perform a `partial_fit()` at the end of `fit()` using the `dev` data split.
+        :param use_optuna: whether to activate the automated hyperparameter search. 
+        """  # noqa
         super().__init__(stop_after)
         self.target = target
         self.dtype_dict = dtype_dict
@@ -54,8 +65,14 @@ class RandomForest(BaseMixer):
         self.stable = True
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        """
+        Fits the RandomForest model.
+
+        :param train_data: encoded features for training dataset
+        :param dev_data: encoded features for dev dataset
+        """
+        started = time.time()
         log.info('Started fitting RandomForest model')
-        self.stop_after *= self.num_trials  # need to be improved
 
         output_dtype = self.dtype_dict[self.target]
 
@@ -66,42 +83,52 @@ class RandomForest(BaseMixer):
         if self.fit_on_dev:
             train_data = ConcatedEncodedDs([train_data, dev_data])
 
-        # =========================================== regression ===========================================
         if output_dtype in self.num_dtypes:
-            self.train_data = train_data
             X = train_data.get_encoded_data(include_target=False)
             try:
                 Y = train_data.get_encoded_column_data(self.target)
-            except:
+            except Exception as e:
+                log.warning(e)
                 Y = train_data.get_column_original_data(self.target)  # ts: to be fixed
 
             self.model = RandomForestRegressor(
-                n_estimators=50, max_depth=5, max_features=1.,
-                bootstrap=True, n_jobs=-1, random_state=0
+                n_estimators=50,
+                max_depth=5,
+                max_features=1.,
+                bootstrap=True,
+                n_jobs=-1,
+                random_state=0
             )
 
             self.model.fit(X, Y)  # sample_weight
-            log.info(f'RandomForest based correlation of train: {self.model.score(X, Y)}')
 
-        # ========================================= classification =========================================
         elif output_dtype in self.cls_dtypes:
             X = train_data.get_encoded_data(include_target=False)
             Y = train_data.get_column_original_data(self.target)
 
             self.model = RandomForestClassifier(
-                            n_estimators=50, max_depth=5, max_features=1.,
-                            bootstrap=True, n_jobs=-1, random_state=0)
+                n_estimators=50,
+                max_depth=5,
+                max_features=1.,
+                bootstrap=True,
+                n_jobs=-1,
+                random_state=0
+            )
 
             self.model.fit(X, Y)  # sample_weight
-            log.info(f'RandomForest based accuracy of train: {self.model.score(X, Y)}')
 
-        # ========================================= params optimization =========================================
         # need to be improved
+        elapsed = time.time() - started
+        num_trials = max(min(int(self.stop_after / elapsed) - 1, self.num_trials), 0)
+        if self.use_optuna:
+            log.info(f'The number of trials (Optuna) is {num_trials}.')
+
         direction, metric = ('maximize', 'r2') if output_dtype in self.num_dtypes else ('maximize', 'neg_log_loss')
 
         def objective(trial: trial_module.Trial):
-            criterion = 'squared_error' if output_dtype in self.num_dtypes else trial.suggest_categorical("criterion",
-                                                                                                ["gini", "entropy"])
+            criterion = 'squared_error' if output_dtype in self.num_dtypes \
+                else trial.suggest_categorical("criterion", ["gini", "entropy"])
+
             params = {
                 'n_estimators': trial.suggest_int('num_estimators', 2, 512),
                 'max_depth': trial.suggest_int('max_depth', 2, 15),
@@ -115,20 +142,37 @@ class RandomForest(BaseMixer):
 
             return cross_val_score(self.model, X, Y, cv=3, n_jobs=-1, scoring=metric).mean()
 
-        if self.use_optuna:
+        if self.use_optuna and num_trials > 0:
             study = optuna.create_study(direction=direction)
-            study.optimize(objective, n_trials=self.num_trials)
+            study.optimize(objective, n_trials=num_trials)
+            # study.optimize(objective, n_trials=self.num_trials)
             # to be fixed
             # print(study.trials_dataframe().tail())
             # log.info(f'RandomForest parameters of the best trial: {study.best_params}')
             log.info(f'RandomForest n_estimators: {self.model.n_estimators},  max_depth: {self.model.max_depth}')
 
+        log.info(f'RandomForest based correlation of: {self.model.score(X, Y)}')
+
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+        """
+        The RandomForest mixer does not support updates. If the model does not exist, a new one will be created and fitted. 
+        
+        :param train_data: encoded features for (new) training dataset
+        :param dev_data: encoded features for (new) dev dataset
+        """  # noqa
         if self.model is None:
             self.fit(train_data, dev_data)
 
     def __call__(self, ds: EncodedDs,
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
+        """
+        Call a trained RandomForest mixer to output predictions for the target column.
+
+        :param ds: input data with values for all non-target columns.
+        :param args: inference-time arguments (e.g. whether to output predicted labels or probabilities).
+
+        :return: dataframe with predictions.
+        """
         data = ds.get_encoded_data(include_target=False).tolist()
 
         if self.dtype_dict[self.target] in self.num_dtypes:
