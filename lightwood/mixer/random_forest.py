@@ -44,7 +44,7 @@ class RandomForest(BaseMixer):
         :param target: name of the target column that the mixer will learn to predict.
         :param dtype_dict: dictionary with dtypes of all columns in the data.
         :param fit_on_dev: whether to perform a `partial_fit()` at the end of `fit()` using the `dev` data split.
-        :param use_optuna: whether to activate the automated hyperparameter search. 
+        :param use_optuna: whether to activate the automated hyperparameter search (optuna-based). Note that setting this flag to `True` does not guarantee the search will run, rather, the speed criteria will be checked first (i.e., if a single iteration is too slow with respect to the time budget, the search will not take place). 
         """  # noqa
         super().__init__(stop_after)
         self.target = target
@@ -145,7 +145,6 @@ class RandomForest(BaseMixer):
         if self.use_optuna and num_trials > 0:
             study = optuna.create_study(direction=direction)
             study.optimize(objective, n_trials=num_trials)
-            # study.optimize(objective, n_trials=self.num_trials)
             # to be fixed
             # print(study.trials_dataframe().tail())
             # log.info(f'RandomForest parameters of the best trial: {study.best_params}')
