@@ -11,6 +11,7 @@ from lightwood.api.types import (
 )
 import inspect
 from lightwood.helpers.log import log
+from lightwood import __version__ as lightwood_version
 
 
 # For custom modules, we create a module loader with necessary imports below
@@ -1186,7 +1187,7 @@ class Predictor(PredictorInterface):
         self.accuracy_functions = {json_ai.accuracy_functions}
         self.identifiers = {json_ai.identifiers}
         self.dtype_dict = {inline_dict(dtype_dict)}
-        self.lightwood_version = lightwood_version
+        self.lightwood_version = '{lightwood_version}'
 
         # Any feature-column dependencies
         self.dependencies = {inline_dict(json_ai.dependency_dict)}
