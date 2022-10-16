@@ -1,0 +1,27 @@
+name: Static Code Analysis Of Codebase
+on: [push, pull_request]
+
+jobs:
+  static_analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout and set up
+        uses: actions/checkout@v3
+
+      - name: Install Python for analysis
+        uses: actions/setup-python@v4
+        with:
+          python-version: 'pypy3.9'
+
+      - name: Install dependencies for analysis
+        run: |
+          python -m pip install --upgrade pip
+          pip install prospector
+      - name: Run static code analysis using Prospector tool
+        run: prospector --zero-exit > static_analyis.json
+
+      - name: Deploy Static Analysis Result to GitHub Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: static_analysis_result
+          path: static_analyis.json
