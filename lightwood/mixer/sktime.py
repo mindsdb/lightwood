@@ -297,7 +297,16 @@ class SkTime(BaseMixer):
 
         start = max(offset, min_offset)
         end = series.shape[0] + offset + self.horizon
-        all_preds = model.predict(np.arange(start, end)).tolist()
+        # all_preds = model.predict(np.arange(start, end)).tolist()
+        # StatsForcastAutoARIMA return wrong prediction with data point leq zero
+        # Here a WA proposed by getting prediction for ALL trained data and
+        # slice it again from the last data point
+        if start == 0:
+            start = min_offset
+            all_preds = model.predict(np.arange(start, end)).tolist()[-min_offset:]
+        else:
+            all_preds = model.predict(np.arange(start, end)).tolist()
+
         for true_idx, (idx, _) in enumerate(series.items()):
             start_idx = 0 if max(1 + true_idx + offset, min_offset) < 0 else true_idx
             end_idx = start_idx + self.horizon
