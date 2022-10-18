@@ -136,6 +136,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#mixer.ProphetMixer">ProphetMixer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.RandomForest">RandomForest</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.RandomForest.fit">fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.RandomForest.partial_fit">partial_fit</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#mixer.Regression">Regression</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mixer.Regression.fit">fit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mixer.Regression.partial_fit">partial_fit</a></li>
@@ -659,6 +664,60 @@ based on the global SMAPE error across all groups.</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mixer.RandomForest">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">RandomForest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_optuna</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/random_forest.html#RandomForest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.RandomForest" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <cite>RandomForest</cite> mixer supports both regression and classification tasks.
+It inherits from sklearn.ensemble.RandomForestRegressor and sklearn.ensemble.RandomForestClassifier.
+(<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html">https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html</a>)
+(<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html">https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html</a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the target column that the mixer will learn to predict.</p></li>
+<li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dictionary with dtypes of all columns in the data.</p></li>
+<li><p><strong>fit_on_dev</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to perform a <cite>partial_fit()</cite> at the end of <cite>fit()</cite> using the <cite>dev</cite> data split.</p></li>
+<li><p><strong>use_optuna</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to activate the automated hyperparameter search (optuna-based). Note that setting this flag to <cite>True</cite> does not guarantee the search will run, rather, the speed criteria will be checked first (i.e., if a single iteration is too slow with respect to the time budget, the search will not take place).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.RandomForest.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/random_forest.html#RandomForest.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.RandomForest.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits the RandomForest model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for training dataset</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for dev dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.RandomForest.partial_fit">
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/random_forest.html#RandomForest.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.RandomForest.partial_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>The RandomForest mixer does not support updates. If the model does not exist, a new one will be created and fitted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for (new) training dataset</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for (new) dev dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
