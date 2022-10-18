@@ -33,6 +33,7 @@ class GluonTSMixer(BaseMixer):
             window: int,
             dtype_dict: Dict,
             ts_analysis: Dict,
+            n_epochs: int = 10,
     ):
         """
         Wrapper around GlounTS probabilistic deep learning models. For now, only DeepAR is supported.
@@ -50,7 +51,7 @@ class GluonTSMixer(BaseMixer):
         self.target = target
         self.window = window
         self.horizon = horizon
-        self.n_epochs = 10
+        self.n_epochs = n_epochs
         self.dtype_dict = dtype_dict
         self.ts_analysis = ts_analysis
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
@@ -133,16 +134,14 @@ class GluonTSMixer(BaseMixer):
                 else:
                     cache = self.train_cache
                 df = pd.concat([cache, df]).sort_index()
-                df = df.drop_duplicates()
+
+        df = df.drop_duplicates()  # .reset_index(drop=True)
 
         if gby:
-            # TODO: multiple group support
-            invalid_groups = []
-            for g in df[gby[0]].unique():
-                if len(df[df[gby[0]] == g]) < self.horizon:
-                    invalid_groups.append(g)
-            df = df[~df[gby[0]].isin(invalid_groups)]
+            df = df.groupby(by=gby[0]).resample(freq).sum().reset_index(level=[0])
+            # @TODO: multiple group support and remove groups without enough data
         else:
+            df = df.resample(freq).sum()
             gby = '__default_group'
             df[gby] = '__default_group'
 
