@@ -445,13 +445,6 @@ class ICP(BaseAnalysisBlock):
 
             row_insights, global_insights = self._formatted(row_insights, global_insights, ns, is_numerical)
 
-            if ns.tss.is_timeseries and is_numerical and ns.tss.horizon > 1:
-                # horizon collapse
-                row_insights['prediction_sum'] = row_insights['prediction'].apply(lambda x: sum(x))
-                row_insights['lower_sum'] = row_insights['lower'].apply(lambda x: min(x))
-                row_insights['upper_sum'] = row_insights['upper'].apply(lambda x: max(x))
-                row_insights['confidence_mean'] = row_insights['confidence'].apply(lambda x: np.mean(x))
-
         return row_insights, global_insights
 
     @staticmethod
@@ -485,6 +478,13 @@ class ICP(BaseAnalysisBlock):
 
         elif ns.target_dtype in (dtype.short_text, dtype.rich_text, dtype.binary, dtype.categorical):
             row_insights['prediction'] = row_insights['prediction'].astype(str)
+
+        # horizon collapse
+        if ns.tss.is_timeseries and is_numerical and ns.tss.horizon > 1:
+            row_insights['prediction_sum'] = row_insights['prediction'].apply(lambda x: sum(x))
+            row_insights['lower_sum'] = row_insights['lower'].apply(lambda x: min(x))
+            row_insights['upper_sum'] = row_insights['upper'].apply(lambda x: max(x))
+            row_insights['confidence_mean'] = row_insights['confidence'].apply(lambda x: np.mean(x))
 
         return row_insights, global_insights
 
