@@ -413,7 +413,7 @@ class TestTimeseries(unittest.TestCase):
             assert len(ps) == 1
             assert ps.iloc[0]['original_index'] == (len(train) - 1)  # fixed at the last seen training point
             start_predtime = datetime.utcfromtimestamp(ps.iloc[0][f'order_{oby}'][0])
-            start_test = datetime.utcfromtimestamp(pd.to_datetime(test.iloc[0][oby]).value//1e9)
+            start_test = datetime.utcfromtimestamp(pd.to_datetime(test.iloc[0][oby]).value // 1e9)
             assert start_test - start_predtime <= timedelta(days=2)
 
     def test_7_irregular_series(self):
