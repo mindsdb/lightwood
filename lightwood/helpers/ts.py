@@ -73,10 +73,10 @@ def get_delta(
                     deltas[group] = subset[order_col].rolling(window=2).apply(np.diff).value_counts().index[0]
                     freq, period = detect_freq_period(deltas[group], tss, len(subset))
                     freqs[group] = freq
-                    # if period:
-                    #     periods[group] = [period]
-                    # else:
-                    periods[group] = [max_pacf(df, group_combinations, target, tss)[group][0]]
+                    if period:
+                        periods[group] = [period]
+                    else:
+                        periods[group] = [max_pacf(df, group_combinations, target, tss)[group][0]]
                 else:
                     deltas[group] = 1.0
                     periods[group] = [1]
@@ -133,7 +133,7 @@ def add_tn_num_conf_bounds(data: pd.DataFrame, tss_args):
 
     for idx, row in data.iterrows():
         error_increase = [row['confidence'][0]] + \
-                         [row['confidence'][0] * 1  # np.log(np.e + t / 2)  # offset by e so that y intercept is 1
+                         [row['confidence'][0] * np.log(np.e + t / 2)  # offset by e so that y intercept is 1
                           for t in range(1, tss_args.horizon)]
         data['confidence'].iloc[idx] = [row['confidence'][0] for _ in range(tss_args.horizon)]
 
