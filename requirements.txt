@@ -1,6 +1,6 @@
 type_infer>=0.0.4
 numpy >=1.18.0,<=1.22.0
-NLTK >=3,<3.6
+NLTK >=3
 python-dateutil <2.8.1,>=2.1
 pandas >=1.1.5,<=1.3.3
 schema >=0.6.8
