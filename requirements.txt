@@ -1,3 +1,4 @@
+type_infer>=0.0.4
 numpy >=1.18.0,<=1.22.0
 NLTK >=3,<3.6
 python-dateutil <2.8.1,>=2.1

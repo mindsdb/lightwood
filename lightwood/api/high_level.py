@@ -5,7 +5,7 @@ import dill
 import pandas as pd
 from lightwood.api.types import DataAnalysis, JsonAI, ProblemDefinition
 from lightwood.data import statistical_analysis
-from lightwood.data import infer_types
+from type_infer.infer import infer_types
 from lightwood.api.predictor import PredictorInterface
 from lightwood.api.json_ai import generate_json_ai
 import tempfile

@@ -36,7 +36,7 @@ class TypeInformation:
     """
     For a dataset, provides information on columns types, how they're used, and any other potential identifiers.
 
-    TypeInformation is generated within ``data.infer_types``, where small samples of each column are evaluated in a custom framework to understand what kind of data type the model is. The user may override data types, but it is recommended to do so within a JSON-AI config file.
+    TypeInformation is generated in the dependency ``type_infer``, where small samples of each column are evaluated to understand what kind of data type each column is. The user may override data types, but it is recommended to do so within a JSON-AI config file.
 
     :param dtypes: For each column's name, the associated data type inferred.
     :param additional_info: Any possible sub-categories or additional descriptive information.
