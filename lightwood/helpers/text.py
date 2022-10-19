@@ -8,18 +8,9 @@
  * permission of MindsDB Inc
  *******************************************************
 """
-from collections import Counter, defaultdict
-import string
 import json
-import re
 import hashlib
-from typing import Iterable
-import numpy as np
-import scipy.stats as st
-from langid.langid import LanguageIdentifier
-from langid.langid import model as langid_model
 import nltk
-from type_infer.dtype import dtype
 
 
 try:
