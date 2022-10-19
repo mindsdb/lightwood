@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
 from dataclasses_json.core import _asdict, Json
+from type_infer.base import TypeInformation
 import json
 
 
@@ -28,29 +29,6 @@ class Module(TypedDict):
     """ # noqa
     module: str
     args: Dict[str, str]
-
-
-@dataclass_json
-@dataclass
-class TypeInformation:
-    """
-    For a dataset, provides information on columns types, how they're used, and any other potential identifiers.
-
-    TypeInformation is generated in the dependency ``type_infer``, where small samples of each column are evaluated to understand what kind of data type each column is. The user may override data types, but it is recommended to do so within a JSON-AI config file.
-
-    :param dtypes: For each column's name, the associated data type inferred.
-    :param additional_info: Any possible sub-categories or additional descriptive information.
-    :param identifiers: Columns within the dataset highly suspected of being identifiers or IDs. These do not contain informatic value, therefore will be ignored in subsequent training/analysis procedures unless manually indicated.
-    """ # noqa
-
-    dtypes: Dict[str, str]
-    additional_info: Dict[str, object]
-    identifiers: Dict[str, str]
-
-    def __init__(self):
-        self.dtypes = dict()
-        self.additional_info = dict()
-        self.identifiers = dict()
 
 
 @dataclass_json

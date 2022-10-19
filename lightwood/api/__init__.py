@@ -1,7 +1,6 @@
 from lightwood.api.dtype import dtype
 from lightwood.api.types import (
     JsonAI,
-    TypeInformation,
     StatisticalAnalysis,
     ProblemDefinition,
     TimeseriesSettings,
@@ -29,7 +28,6 @@ __all__ = [
     "code_from_json_ai",
     "json_ai_from_problem",
     "JsonAI",
-    "TypeInformation",
     "StatisticalAnalysis",
     "ProblemDefinition",
     "TimeseriesSettings",
