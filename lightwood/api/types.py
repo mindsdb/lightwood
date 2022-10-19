@@ -3,7 +3,7 @@
 from typing import Dict, List, Optional, Union
 import sys
 
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict

@@ -19,7 +19,7 @@ import scipy.stats as st
 from langid.langid import LanguageIdentifier
 from langid.langid import model as langid_model
 import nltk
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 
 
 try:

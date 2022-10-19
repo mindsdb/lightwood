@@ -9,7 +9,7 @@ from sktime.forecasting.trend import PolynomialTrendForecaster
 from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer
 from lightwood.helpers.log import log
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers

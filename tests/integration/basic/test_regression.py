@@ -1,4 +1,4 @@
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 import unittest
 import pandas as pd
 from sklearn.metrics import r2_score

@@ -5,7 +5,7 @@ from typing import Dict, Optional
 import numpy as np
 from sklearn.metrics import confusion_matrix
 
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.helpers.general import evaluate_accuracy
 from lightwood.helpers.log import log

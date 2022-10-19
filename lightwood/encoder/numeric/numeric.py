@@ -6,7 +6,7 @@ from torch.types import Number
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.helpers.general import is_none
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 
 
 class NumericEncoder(BaseEncoder):

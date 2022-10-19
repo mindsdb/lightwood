@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Tuple, Callable, Union
 import numpy as np
 import pandas as pd
 
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 from lightwood.helpers import text
 from lightwood.helpers.log import log
 from lightwood.helpers.imputers import BaseImputer

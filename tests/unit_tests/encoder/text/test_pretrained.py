@@ -6,7 +6,7 @@ from torch.nn.functional import softmax
 from sklearn.metrics import accuracy_score
 from lightwood.encoder import BinaryEncoder, NumericEncoder
 from lightwood.encoder.text import PretrainedLangEncoder
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 import pandas as pd
 import os
 import pathlib

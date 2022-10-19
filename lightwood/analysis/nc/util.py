@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from torch.nn.functional import softmax
 
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 
 
 def t_softmax(x, t=1.0, axis=1):

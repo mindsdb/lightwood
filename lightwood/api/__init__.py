@@ -1,4 +1,4 @@
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 from lightwood.api.types import (
     JsonAI,
     StatisticalAnalysis,

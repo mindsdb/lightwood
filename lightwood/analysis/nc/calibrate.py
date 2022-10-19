@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 from lightwood.api.types import PredictionArguments
 from lightwood.helpers.ts import add_tn_num_conf_bounds, add_tn_cat_conf_bounds, get_ts_groups
 
