@@ -8,11 +8,11 @@ import numpy as np
 import pandas as pd
 
 from type_infer.dtype import dtype
-from lightwood.helpers import text
+from type_infer.helpers import is_nan_numeric, clean_float
+
 from lightwood.helpers.log import log
 from lightwood.helpers.imputers import BaseImputer
 from lightwood.api.types import TimeseriesSettings
-from lightwood.helpers.numeric import is_nan_numeric
 
 
 def cleaner(
@@ -244,7 +244,7 @@ def _clean_float(element: object) -> Optional[float]:
     Given an element, converts it into float numeric format. If element is NaN, or inf, then returns None.
     """
     try:
-        cleaned_float = text.clean_float(element)
+        cleaned_float = clean_float(element)
         if is_nan_numeric(cleaned_float):
             return None
         return cleaned_float

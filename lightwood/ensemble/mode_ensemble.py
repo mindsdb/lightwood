@@ -9,7 +9,7 @@ from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood import dtype
 from lightwood.helpers.general import evaluate_accuracy
-from lightwood.helpers.numeric import is_nan_numeric
+from type_infer.helpers import is_nan_numeric
 from lightwood.helpers.log import log
 
 

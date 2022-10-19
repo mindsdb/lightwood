@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from lightwood.helpers.log import log
-from lightwood.helpers.numeric import is_nan_numeric
+from type_infer.helpers import is_nan_numeric
 from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
 from lightwood.api.types import PredictionArguments

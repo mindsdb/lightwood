@@ -1,7 +1,7 @@
 import random
 import unittest
 from lightwood.encoder.text.short import ShortTextEncoder
-from lightwood.helpers.text import tokenize_text
+from type_infer.helpers import tokenize_text
 import torch
 
 VOCAB = [
@@ -76,13 +76,6 @@ def generate_sentences(min_, max_, vocab_size):
 
 
 class TestShortTextEncoder(unittest.TestCase):
-    def test_get_tokens(self):
-        sentences = ['hello, world!', ' !hello! world!!,..#', '#hello!world']
-        for sent in sentences:
-            assert tokenize_text(sent) == ['hello', 'world']
-
-        assert tokenize_text("don't wouldn't") == ['do', 'not', 'would', 'not']
-
     def test_smallvocab_target_auto_mode(self):
         priming_data = generate_sentences(2, 6, vocab_size=99)
         test_data = random.sample(priming_data, len(priming_data) // 5)
