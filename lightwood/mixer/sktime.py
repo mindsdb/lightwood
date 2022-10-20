@@ -301,7 +301,7 @@ class SkTime(BaseMixer):
 
         # Workaround for StatsForecastAutoARIMA (see sktime#3600)
         if isinstance(submodel, AutoARIMA):
-            all_preds = model.predict(np.arange(min_offset, end)).tolist()[-(end-start):]
+            all_preds = model.predict(np.arange(min_offset, end)).tolist()[-(end - start):]
         else:
             all_preds = model.predict(np.arange(start, end)).tolist()
 
