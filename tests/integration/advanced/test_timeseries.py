@@ -1,5 +1,6 @@
 import random
 from datetime import datetime
+from datetime import timedelta
 import unittest
 import numpy as np
 import pandas as pd
@@ -378,6 +379,42 @@ class TestTimeseries(unittest.TestCase):
         train_and_check_time_aim(predictor, train)
         ps = predictor.predict(test)
         assert r2_score(test[target].values, ps['prediction'].iloc[0]) >= 0.5
+
+    def test_61_offset(self):
+        """ Checks __mdb_forecast_offset behavior using sktime mixer """
+        data = pd.read_csv('tests/data/house_sales.csv')
+        data = data[data['type'] == 'house']
+        data = data[data['bedrooms'] == 2]
+        train = data.iloc[0:-1]
+        test = data.iloc[[-1]]
+        oby = 'saledate'
+        pdef = ProblemDefinition.from_dict({'target': 'MA',
+                                            'timeseries_settings': {
+                                                'order_by': oby,
+                                                'window': 5,
+                                                'horizon': 5,
+                                            }})
+        json_ai = json_ai_from_problem(train, problem_definition=pdef)
+        json_ai.model['args']['submodels'] = [{"module": "SkTime", "args": {}}]
+        predictor = predictor_from_code(code_from_json_ai(json_ai))
+        train_and_check_time_aim(predictor, train)
+
+        for idx in [-2, -1, 0]:
+            # Should yield predictions starting on the date of the idx-most recent data point seen at training time.
+            train['__mdb_forecast_offset'] = idx
+            ps = predictor.predict(train)
+            assert len(ps) == 1
+            assert ps.iloc[0]['original_index'] == (len(train) - 1 + idx)
+
+        for idx in [1]:
+            # Should yield predictions starting one period after the most recent timestamp seen at training time.
+            train['__mdb_forecast_offset'] = idx
+            ps = predictor.predict(train)
+            assert len(ps) == 1
+            assert ps.iloc[0]['original_index'] == (len(train) - 1)  # fixed at the last seen training point
+            start_predtime = datetime.utcfromtimestamp(ps.iloc[0][f'order_{oby}'][0])
+            start_test = datetime.utcfromtimestamp(pd.to_datetime(test.iloc[0][oby]).value // 1e9)
+            assert start_test - start_predtime <= timedelta(days=2)
 
     def test_7_irregular_series(self):
         """

@@ -278,6 +278,13 @@ def generate_json_ai(
                             "stop_after": "$problem_definition.seconds_per_mixer",
                         },
                     },
+                    {
+                        "module": "RandomForest",
+                        "args": {
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "fit_on_dev": True,
+                        },
+                    },
                 ]
             )
         elif tss.is_timeseries and tss.horizon > 1:
@@ -589,6 +596,12 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
+
+        elif mixers[i]["module"] == "RandomForest":
+            mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
+                "target_encoder", "$encoders[self.target]"
+            )
+            mixers[i]["args"]["use_optuna"] = True
 
         elif mixers[i]["module"] == "LightGBMArray":
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
