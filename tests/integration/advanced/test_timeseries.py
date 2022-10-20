@@ -416,6 +416,28 @@ class TestTimeseries(unittest.TestCase):
             start_test = datetime.utcfromtimestamp(pd.to_datetime(test.iloc[0][oby]).value // 1e9)
             assert start_test - start_predtime <= timedelta(days=2)
 
+    def test_62_statsforecast_workaround(self):
+        data = pd.read_csv('tests/data/house_sales.csv')
+        data = data[data['type'] == 'house']
+        data = data[data['bedrooms'] == 2]
+        train = data.iloc[0:-4]
+        test = data.iloc[-4:]
+        oby = 'saledate'
+        pdef = ProblemDefinition.from_dict({'target': 'MA',
+                                            'timeseries_settings': {
+                                                'order_by': oby,
+                                                'window': 4,
+                                                'horizon': 4,
+                                            }})
+        json_ai = json_ai_from_problem(train, problem_definition=pdef)
+        json_ai.model['args']['submodels'] = [{"module": "ARIMAMixer", "args": {}}]
+        predictor = predictor_from_code(code_from_json_ai(json_ai))
+        train_and_check_time_aim(predictor, train)
+        tr_ps = predictor.predict(train)
+        te_ps = predictor.predict(test)
+        print("done")
+
+
     def test_7_irregular_series(self):
         """
         Even though the suggestion is to feed regularly sampled series into predictors, this test can still help us

@@ -294,19 +294,19 @@ class SkTime(BaseMixer):
         min_offset = -submodel._cutoff.values[0] if isinstance(submodel._cutoff, pd.Int64Index) else -submodel._cutoff
         if hasattr(submodel, 'd'):
             model_d = 0 if submodel.d is None else submodel.d
-            min_offset += model_d + 1
+            min_offset += model_d
 
         start = max(offset, min_offset)
         end = series.shape[0] + offset + self.horizon
 
         # Workaround for StatsForecastAutoARIMA (see sktime#3600)
-        if isinstance(model, AutoARIMA):
-            all_preds = model.predict(np.arange(min_offset, end)).tolist()[-min_offset:]
+        if isinstance(submodel, AutoARIMA):
+            all_preds = model.predict(np.arange(min_offset, end)).tolist()[-(end-start):]
         else:
             all_preds = model.predict(np.arange(start, end)).tolist()
 
         for true_idx, (idx, _) in enumerate(series.items()):
-            start_idx = 0 if max(1 + true_idx + offset, min_offset) < 0 else true_idx
+            start_idx = max(0, true_idx)
             end_idx = start_idx + self.horizon
             ydf['prediction'].loc[idx] = all_preds[start_idx:end_idx]
         return ydf
