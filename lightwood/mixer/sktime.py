@@ -69,7 +69,7 @@ class SkTime(BaseMixer):
         :param use_stl: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.
         """  # noqa
         super().__init__(stop_after)
-        self.stable = False
+        self.stable = True
         self.prepared = False
         self.supports_proba = False
         self.target = target
@@ -291,16 +291,20 @@ class SkTime(BaseMixer):
         else:
             submodel = model
 
-        if hasattr(submodel, '_cutoff') and hasattr(submodel, 'd'):
+        min_offset = -submodel._cutoff.values[0] if isinstance(submodel._cutoff, pd.Int64Index) else -submodel._cutoff
+        if hasattr(submodel, 'd'):
             model_d = 0 if submodel.d is None else submodel.d
-            cutoff = submodel._cutoff.values[0] if isinstance(submodel._cutoff, pd.Int64Index) else submodel._cutoff
-            min_offset = -cutoff + model_d + 1
-        else:
-            min_offset = -np.inf
+            min_offset += model_d + 1
 
         start = max(offset, min_offset)
         end = series.shape[0] + offset + self.horizon
-        all_preds = model.predict(np.arange(start, end)).tolist()
+
+        # Workaround for StatsForecastAutoARIMA (see sktime#3600)
+        if isinstance(model, AutoARIMA):
+            all_preds = model.predict(np.arange(min_offset, end)).tolist()[-min_offset:]
+        else:
+            all_preds = model.predict(np.arange(start, end)).tolist()
+
         for true_idx, (idx, _) in enumerate(series.items()):
             start_idx = 0 if max(1 + true_idx + offset, min_offset) < 0 else true_idx
             end_idx = start_idx + self.horizon
