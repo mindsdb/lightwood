@@ -1180,11 +1180,11 @@ else:
 
     predict_body = align(predict_body, 2)
 
-    test_body = f"""
+    test_body = """
 predictions = self.predict(data)
 values = [metric(data[self.target], predictions) for metric in metrics]
 names = [metric.__name__ for metric in metrics]
-return pd.DataFrame(list(zip(names, values)), columns=['Metric', 'Value']) 
+return pd.DataFrame(list(zip(names, values)), columns=['Metric', 'Value'])
 """
 
     test_body = align(test_body, 2)
