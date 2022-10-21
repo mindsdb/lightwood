@@ -291,8 +291,7 @@ class SkTime(BaseMixer):
         else:
             submodel = model
 
-        min_offset = -submodel._cutoff.values[0] if isinstance(submodel._cutoff, pd.Int64Index) else -submodel._cutoff
-        min_offset += 1  # shift by +1 due to how cutoff is determined
+        min_offset = -len(submodel._y) + 1
         if hasattr(submodel, 'd'):
             model_d = 0 if submodel.d is None else submodel.d
             min_offset += model_d
