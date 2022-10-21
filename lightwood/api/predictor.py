@@ -1,5 +1,5 @@
 import dill
-from typing import Dict, Optional
+from typing import Dict, Optional, List, Callable
 
 import pandas as pd
 from lightwood.api.types import ModelAnalysis
@@ -132,6 +132,9 @@ class PredictorInterface:
 
         :returns: A dataframe of predictions of the same length of input.
         """  # noqa
+        pass
+
+    def test(self, data: pd.DataFrame, metrics: List[Callable]) -> pd.DataFrame:
         pass
 
     def save(self, file_path: str) -> None:

@@ -1180,6 +1180,15 @@ else:
 
     predict_body = align(predict_body, 2)
 
+    test_body = f"""
+predictions = self.predict(data)
+values = [metric(data[self.target], predictions) for metric in metrics]
+names = [metric.__name__ for metric in metrics]
+return pd.DataFrame(list(zip(names, values)), columns=['Metric', 'Value']) 
+"""
+
+    test_body = align(test_body, 2)
+
     predictor_code = f"""
 {IMPORTS}
 {IMPORT_EXTERNAL_DIRS}
@@ -1265,6 +1274,10 @@ class Predictor(PredictorInterface):
     @timed
     def predict(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
 {predict_body}
+
+    @timed
+    def test(self, data: pd.DataFrame, metrics: List[Callable]) -> pd.DataFrame:
+{test_body}
 """
 
     try:
