@@ -40,7 +40,7 @@ class TestBasic(unittest.TestCase):
 
         assert predictor.model_analysis.dtypes[target] == dtype.quantity
 
-        assert predictor.lightwood_version == lightwood_version
+        assert predictor.lightwood_version == str(lightwood_version)
 
         predictions = predictor.predict(df)
 
