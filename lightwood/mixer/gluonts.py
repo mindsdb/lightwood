@@ -104,15 +104,20 @@ class GluonTSMixer(BaseMixer):
         ydf['confidence'] = conf
 
         gby = self.ts_analysis["tss"].group_by if self.ts_analysis["tss"].group_by else []
-        groups = ds.data_frame[gby[0]].unique() if gby else None
+        groups = ds.data_frame[gby[0]].unique().tolist() if gby else None
 
         for idx in range(length):
             df = ds.data_frame.iloc[:idx] if idx != 0 else None
             input_ds = self._make_initial_ds(df, groups=groups)
-            forecasts = list(self.model.predict(input_ds))[0]
-            ydf.at[idx, 'prediction'] = [entry for entry in forecasts.mean]
-            ydf.at[idx, 'lower'] = [entry for entry in forecasts.quantile(1 - conf)]
-            ydf.at[idx, 'upper'] = [entry for entry in forecasts.quantile(conf)]
+            if not input_ds:
+                # edge case: new group
+                for col in ['prediction', 'lower', 'upper']:
+                    ydf.at[idx, col] = [0 for _ in range(self.ts_analysis["tss"].horizon)]
+            else:
+                forecasts = list(self.model.predict(input_ds))[0]
+                ydf.at[idx, 'prediction'] = [entry for entry in forecasts.quantile(0.5)]
+                ydf.at[idx, 'lower'] = [entry for entry in forecasts.quantile(1 - conf)]
+                ydf.at[idx, 'upper'] = [entry for entry in forecasts.quantile(conf)]
 
         return ydf
 
@@ -140,6 +145,9 @@ class GluonTSMixer(BaseMixer):
                 df = pd.concat([cache, df]).sort_index()
 
         df = df.drop_duplicates()  # .reset_index(drop=True)
+
+        if len(df) == 0:
+            return None
 
         if gby:
             df = df.groupby(by=gby[0]).resample(freq).sum().reset_index(level=[0])
