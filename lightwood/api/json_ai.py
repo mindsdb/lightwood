@@ -11,7 +11,7 @@ from lightwood.api.types import (
 )
 import inspect
 from lightwood.helpers.log import log
-from lightwood import __version__ as lightwood_version
+from lightwood.__about__ import __version__ as lightwood_version
 
 
 # For custom modules, we create a module loader with necessary imports below
