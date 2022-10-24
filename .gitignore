@@ -57,6 +57,7 @@ test.pickle
 AI.json
 AI2.json
 
+# docs
 assert.sh
 docssrc/build
 docssrc/build/*
@@ -67,3 +68,4 @@ docs
 docs/*
 *.zip
 docs/*
+.ipynb_checkpoints
