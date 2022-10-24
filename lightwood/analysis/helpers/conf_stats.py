@@ -27,10 +27,10 @@ class ConfStats(BaseAnalysisBlock):
             possible_labels = ns.stats_info.train_observed_classes
             self.ordenc.fit([[label] for label in possible_labels])
             task_type = 'categorical'
-        elif ns.is_numerical:
-            task_type = 'numerical'
         elif ns.is_multi_ts:
             task_type = 'multi_ts'
+        elif ns.is_numerical:
+            task_type = 'numerical'
         else:
             return info
 
@@ -72,8 +72,8 @@ class ConfStats(BaseAnalysisBlock):
                 sorted_inp['__mdb_hits'] = (sorted_inp['__mdb_lower'] <= sorted_inp[target]) & \
                                            (sorted_inp[target] <= sorted_inp['__mdb_upper'])
             elif task_type == 'multi_ts':
-                sorted_inp['__mdb_hits'] = (sorted_inp['__mdb_lower'][0] <= sorted_inp[target]) & \
-                                           (sorted_inp[target] <= sorted_inp['__mdb_upper'][0])
+                sorted_inp['__mdb_hits'] = (sorted_inp['__mdb_lower'][0][0] <= sorted_inp[target]) & \
+                                           (sorted_inp[target] <= sorted_inp['__mdb_upper'][0][0])
 
         size = round(len(sorted_inp) / self.ece_bins)
         bins = []
