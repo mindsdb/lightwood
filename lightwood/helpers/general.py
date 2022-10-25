@@ -57,12 +57,6 @@ def evaluate_accuracy(data: pd.DataFrame,
             else:
                 acc_fn = bounded_ts_accuracy
 
-            # only evaluate accuracy for rows with complete window and target
-            if ts_analysis and ts_analysis.get('tss', False) and not ts_analysis['tss'].eval_incomplete:
-                mask = true_values.isnull().any(axis=1)
-                true_values = true_values[~mask]
-                predictions = predictions[~mask]
-
             score_dict[accuracy_function_str] = acc_fn(true_values,
                                                        predictions,
                                                        data=data[cols],
@@ -256,9 +250,20 @@ def complementary_smape_array_accuracy(
     """  # noqa
     y_true = deepcopy(true_values)
     y_pred = deepcopy(predictions)
-    if kwargs['ts_analysis']['tss'].group_by:
+    tss = kwargs.get('ts_analysis', {}).get('tss', False)
+    if tss and tss.group_by:
         [y_true.pop(gby_col) for gby_col in kwargs['ts_analysis']['tss'].group_by]
-    smape_score = mean_absolute_percentage_error(y_true.values, y_pred.values, symmetric=True)
+
+    # nan check
+    y_true = y_true.values
+    y_pred = y_pred.values
+    if np.isnan(y_true).any():
+        # convert all nan indexes to zero pairs that don't contribute to the metric
+        nans = np.isnan(y_true)
+        y_true[nans] = 0
+        y_pred[nans] = 0
+
+    smape_score = mean_absolute_percentage_error(y_true, y_pred, symmetric=True)
     return 1 - smape_score / 2
 
 
