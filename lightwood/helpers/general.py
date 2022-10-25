@@ -256,7 +256,9 @@ def complementary_smape_array_accuracy(
     """  # noqa
     y_true = deepcopy(true_values)
     y_pred = deepcopy(predictions)
-    smape_score = mean_absolute_percentage_error(y_true, y_pred, symmetric=True)
+    if kwargs['ts_analysis']['tss'].group_by:
+        [y_true.pop(gby_col) for gby_col in kwargs['ts_analysis']['tss'].group_by]
+    smape_score = mean_absolute_percentage_error(y_true.values, y_pred.values, symmetric=True)
     return 1 - smape_score / 2
 
 
