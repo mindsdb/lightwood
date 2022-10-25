@@ -381,7 +381,7 @@ def generate_json_ai(
     elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ["balanced_accuracy_score"]
     elif output_dtype in (dtype.num_array, dtype.num_tsarray):
-        accuracy_functions = ["bounded_ts_accuracy"]
+        accuracy_functions = ["complementary_smape_array_accuracy"]
     elif output_dtype in (dtype.cat_array, dtype.cat_tsarray):
         accuracy_functions = ["evaluate_cat_array_accuracy"]
     else:

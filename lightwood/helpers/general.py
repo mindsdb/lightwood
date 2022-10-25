@@ -4,6 +4,7 @@ from typing import List, Dict, Optional
 import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score, mean_absolute_error, balanced_accuracy_score
+from sktime.performance_metrics.forecasting import mean_absolute_percentage_error
 from lightwood.helpers.numeric import is_nan_numeric
 from lightwood.helpers.ts import get_group_matches
 
@@ -41,7 +42,9 @@ def evaluate_accuracy(data: pd.DataFrame,
                 gby = ts_analysis.get('tss', {}).group_by if ts_analysis.get('tss', {}).group_by else []
                 cols = [target] + [f'{target}_timestep_{i}' for i in range(1, horizon)] + gby
                 true_values = data[cols]
-            predictions = predictions.apply(pd.Series)  # split array cells into columns
+
+            true_values = true_values.reset_index(drop=True)
+            predictions = predictions.apply(pd.Series).reset_index(drop=True)  # split array cells into columns
 
             if accuracy_function_str == 'evaluate_array_accuracy':
                 acc_fn = evaluate_array_accuracy
@@ -49,8 +52,17 @@ def evaluate_accuracy(data: pd.DataFrame,
                 acc_fn = evaluate_num_array_accuracy
             elif accuracy_function_str == 'evaluate_cat_array_accuracy':
                 acc_fn = evaluate_cat_array_accuracy
+            elif accuracy_function_str == 'complementary_smape_array_accuracy':
+                acc_fn = complementary_smape_array_accuracy
             else:
                 acc_fn = bounded_ts_accuracy
+
+            # only evaluate accuracy for rows with complete window and target
+            if ts_analysis and ts_analysis.get('tss', False) and not ts_analysis['tss'].eval_incomplete:
+                mask = true_values.isnull().any(axis=1)
+                true_values = true_values[~mask]
+                predictions = predictions[~mask]
+
             score_dict[accuracy_function_str] = acc_fn(true_values,
                                                        predictions,
                                                        data=data[cols],
@@ -171,12 +183,6 @@ def evaluate_array_accuracy(
     base_acc_fn = kwargs.get('base_acc_fn', lambda t, p: max(0, r2_score(t, p)))
 
     fh = true_values.shape[1]
-    ts_analysis = kwargs.get('ts_analysis', None)
-
-    if ts_analysis and ts_analysis.get('tss', False) and not kwargs['ts_analysis']['tss'].eval_cold_start:
-        # only evaluate accuracy for rows with complete historical context
-        true_values = true_values[kwargs['ts_analysis']['tss'].window:]
-        predictions = predictions[kwargs['ts_analysis']['tss'].window:]
 
     aggregate = 0.0
     for i in range(fh):
@@ -236,6 +242,22 @@ def bounded_ts_accuracy(
         return step_base + (np.log(result) / np.log(sp)) * (0.99 - step_base)
     else:
         return result / 2  # worse than naive
+
+
+def complementary_smape_array_accuracy(
+        true_values: pd.Series,
+        predictions: pd.Series,
+        **kwargs
+) -> float:
+    """
+    This metric is used in forecasting tasks. It returns ``1 - (sMAPE/2)``, where ``sMAPE`` is the symmetrical mean absolute percentage error of the forecast versus actual measurements in the time series.
+
+    As such, its domain is 0-1 bounded.
+    """  # noqa
+    y_true = deepcopy(true_values)
+    y_pred = deepcopy(predictions)
+    smape_score = mean_absolute_percentage_error(y_true, y_pred, symmetric=True)
+    return 1 - smape_score / 2
 
 
 # ------------------------- #
