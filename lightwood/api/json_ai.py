@@ -40,6 +40,7 @@ from lightwood.encoder import *
 from lightwood.ensemble import *
 from lightwood.helpers.device import *
 from lightwood.helpers.general import *
+from lightwood.helpers.ts import *
 from lightwood.helpers.log import *
 from lightwood.helpers.numeric import *
 from lightwood.helpers.imputers import *
@@ -995,6 +996,8 @@ self.mode = 'train'
 encoded_train_data = enc_data['train']
 encoded_dev_data = enc_data['dev']
 encoded_test_data = enc_data['test']
+filtered_df = filter_ds(encoded_test_data, self.problem_definition.timeseries_settings)
+encoded_test_data = EncodedDs(encoded_test_data.encoders, filtered_df, encoded_test_data.target)
 
 log.info('Training the mixers')
 
