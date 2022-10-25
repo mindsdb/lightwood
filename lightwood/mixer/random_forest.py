@@ -92,7 +92,6 @@ class RandomForest(BaseMixer):
             raise Exception(f'RandomForest mixer not supported for type: {output_dtype}')
 
         # concat the data if fit on dev
-        self.fit_on_dev = False
         if self.fit_on_dev:
             train_data = ConcatedEncodedDs([train_data, dev_data])
 
