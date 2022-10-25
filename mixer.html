@@ -682,7 +682,7 @@ It inherits from sklearn.ensemble.RandomForestRegressor and sklearn.ensemble.Ran
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the target column that the mixer will learn to predict.</p></li>
 <li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dictionary with dtypes of all columns in the data.</p></li>
-<li><p><strong>fit_on_dev</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to perform a <cite>partial_fit()</cite> at the end of <cite>fit()</cite> using the <cite>dev</cite> data split.</p></li>
+<li><p><strong>fit_on_dev</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to fit on the dev dataset.</p></li>
 <li><p><strong>use_optuna</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to activate the automated hyperparameter search (optuna-based). Note that setting this flag to <cite>True</cite> does not guarantee the search will run, rather, the speed criteria will be checked first (i.e., if a single iteration is too slow with respect to the time budget, the search will not take place).</p></li>
 </ul>
 </dd>
