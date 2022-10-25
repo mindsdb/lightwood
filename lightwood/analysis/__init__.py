@@ -14,10 +14,11 @@ from lightwood.analysis.helpers.feature_importance import PermutationFeatureImpo
 try:
     from lightwood.analysis.helpers.shap import ShapleyValues
     from lightwood.analysis.helpers.pyod import PyOD
+    from lightwood.analysis.helpers.robbie import Robbie
 except Exception:
     ShapleyValues = None
     PyOD = None
 
 
-__all__ = ['model_analyzer', 'explain', 'BaseAnalysisBlock', 'TempScaler', 'PyOD',
+__all__ = ['model_analyzer', 'explain', 'BaseAnalysisBlock', 'TempScaler', 'PyOD', 'Robbie',
            'ICP', 'AccStats', 'ConfStats', 'PermutationFeatureImportance', 'ShapleyValues']
