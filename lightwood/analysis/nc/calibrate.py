@@ -41,6 +41,11 @@ class ICP(BaseAnalysisBlock):
         data_type = ns.dtype_dict[ns.target]
         output = {'icp': {'__mdb_active': False}}
 
+        if 'confidence' in ns.normal_predictions.columns:
+            #  bypass calibrator if model already outputs confidence
+            output['result_df'] = ns.normal_predictions[['confidence', 'lower', 'upper']]
+            return {**info, **output}
+
         fit_params = {'horizon': ns.tss.horizon or 0, 'columns_to_ignore': []}
         fit_params['columns_to_ignore'].extend([f'timestep_{i}' for i in range(1, fit_params['horizon'])])
 
