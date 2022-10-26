@@ -1,5 +1,6 @@
 import random
 from datetime import datetime
+from datetime import timedelta
 import unittest
 import numpy as np
 import pandas as pd
@@ -379,6 +380,42 @@ class TestTimeseries(unittest.TestCase):
         ps = predictor.predict(test)
         assert r2_score(test[target].values, ps['prediction'].iloc[0]) >= 0.5
 
+    def test_61_offset(self):
+        """ Checks __mdb_forecast_offset behavior using sktime mixer """
+        data = pd.read_csv('tests/data/house_sales.csv')
+        data = data[data['type'] == 'house']
+        data = data[data['bedrooms'] == 2]
+        train = data.iloc[0:-1]
+        test = data.iloc[[-1]]
+        oby = 'saledate'
+        pdef = ProblemDefinition.from_dict({'target': 'MA',
+                                            'timeseries_settings': {
+                                                'order_by': oby,
+                                                'window': 5,
+                                                'horizon': 5,
+                                            }})
+        json_ai = json_ai_from_problem(train, problem_definition=pdef)
+        json_ai.model['args']['submodels'] = [{"module": "SkTime", "args": {}}]
+        predictor = predictor_from_code(code_from_json_ai(json_ai))
+        train_and_check_time_aim(predictor, train)
+
+        for idx in [-2, -1, 0]:
+            # Should yield predictions starting on the date of the idx-most recent data point seen at training time.
+            train['__mdb_forecast_offset'] = idx
+            ps = predictor.predict(train)
+            assert len(ps) == 1
+            assert ps.iloc[0]['original_index'] == (len(train) - 1 + idx)
+
+        for idx in [1]:
+            # Should yield predictions starting one period after the most recent timestamp seen at training time.
+            train['__mdb_forecast_offset'] = idx
+            ps = predictor.predict(train)
+            assert len(ps) == 1
+            assert ps.iloc[0]['original_index'] == (len(train) - 1)  # fixed at the last seen training point
+            start_predtime = datetime.utcfromtimestamp(ps.iloc[0][f'order_{oby}'][0])
+            start_test = datetime.utcfromtimestamp(pd.to_datetime(test.iloc[0][oby]).value // 1e9)
+            assert start_test - start_predtime <= timedelta(days=2)
+
     def test_7_irregular_series(self):
         """
         Even though the suggestion is to feed regularly sampled series into predictors, this test can still help us
@@ -520,3 +557,23 @@ class TestTimeseries(unittest.TestCase):
 
         preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': '%Y'})
         self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012', '2012'])
+
+    def test_12_gluonts(self):
+        """ Tests GluonTS mixer """
+        data = pd.read_csv('tests/data/arrivals.csv')
+        data = data[data['Country'] == 'US']
+        order_by = 'T'
+        train_df, test_df = self.split_arrivals(data, grouped=False)
+        jai = json_ai_from_problem(train_df, ProblemDefinition.from_dict({'target': 'Traffic',
+                                                                          'timeseries_settings': {
+                                                                              'order_by': order_by,
+                                                                              'window': 4 * 5,
+                                                                              'horizon': 4 * 2
+                                                                          }}))
+        jai.model['args']['submodels'] = [{
+            "module": "GluonTSMixer",
+            "args": {}
+        }]
+        predictor = predictor_from_json_ai(jai)
+        predictor.learn(train_df)
+        predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})

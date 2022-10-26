@@ -286,3 +286,24 @@ def max_pacf(data: pd.DataFrame, group_combinations, target, tss):
                 candidate_sps[group] = [1]
 
     return candidate_sps
+
+
+def filter_ds(ds, tss, n_rows=1):
+    """
+    This method triggers only for timeseries datasets.
+
+    It returns a dataframe that filters out all but the first ``n_rows`` per group.
+    """  # noqa
+    df = ds.data_frame
+    if tss.is_timeseries:
+        gby = tss.group_by
+        if gby is None:
+            df = df.iloc[[0]]
+        else:
+            ndf = pd.DataFrame(columns=df.columns)
+            for group in get_ts_groups(df, tss):
+                if group != '__default':
+                    _, subdf = get_group_matches(df, group, tss.group_by)
+                    ndf = pd.concat([ndf, subdf.iloc[:n_rows]])
+            df = ndf
+    return df

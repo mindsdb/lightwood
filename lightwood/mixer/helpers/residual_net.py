@@ -2,7 +2,7 @@ from typing import List
 import torch
 from torch import nn
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.helpers.device import get_devices
+from lightwood.helpers.device import get_device_from_name, get_devices
 from lightwood.helpers.log import log
 
 
@@ -38,7 +38,8 @@ class ResidualNet(torch.nn.Module):
                  input_size: int = None,
                  output_size: int = None,
                  shape: List[int] = None,
-                 max_params: int = int(3e5)) -> None:
+                 max_params: int = int(3e5),
+                 device: str = '') -> None:
         super(ResidualNet, self).__init__()
         self.net = torch.nn.Sequential(
             *
@@ -46,9 +47,15 @@ class ResidualNet(torch.nn.Module):
              [nn.Linear(input_size, max([input_size * 2, output_size * 2, 400])),
               nn.Linear(max([input_size * 2, output_size * 2, 400]),
                         output_size)]))
-        self.to(*get_devices())
 
-    def to(self, device: torch.device, available_devices: int) -> torch.nn.Module:
+        if(device == ''):
+            device, available_devices = get_devices()
+        else:
+            device = get_device_from_name(device)
+            available_devices = 0
+        self.to(device, available_devices)
+
+    def to(self, device: torch.device, available_devices: int = 1) -> torch.nn.Module:
         self.net = self.net.to(device)
         if available_devices > 1:
             self.dp_wrapper_net = torch.nn.DataParallel(self.net)

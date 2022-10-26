@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import os
 import pandas as pd
 from lightwood.encoder.text.helpers.pretrained_helpers import TextEmbed
-from lightwood.helpers.device import get_devices
+from lightwood.helpers.device import get_device_from_name
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.helpers.torch import LightwoodAutocast
@@ -42,6 +42,7 @@ class PretrainedLangEncoder(BaseEncoder):
         epochs: int = 1,
         output_type: str = None,
         embed_mode: bool = True,
+        device: str = '',
     ):
         """
         :param is_target: Whether this encoder represents the target. NOT functional for text generation yet.
@@ -52,6 +53,7 @@ class PretrainedLangEncoder(BaseEncoder):
         :param epochs: number of epochs to train model with
         :param output_type: Data dtype of the target; if categorical/binary, the option to return logits is possible.
         :param embed_mode: If True, assumes the output of the encode() step is the CLS embedding (this can be trained or not). If False, returns the logits of the tuned task.
+        :param device: name of the device that get_device_from_name will attempt to use.
         """ # noqa
         super().__init__(is_target)
 
@@ -73,7 +75,8 @@ class PretrainedLangEncoder(BaseEncoder):
         self._pretrained_model_name = "distilbert-base-uncased"
         self._tokenizer = DistilBertTokenizerFast.from_pretrained(self._pretrained_model_name)
 
-        self.device, _ = get_devices()
+        self.device = get_device_from_name(device)
+
         self.stop_after = stop_after
 
         self.embed_mode = embed_mode

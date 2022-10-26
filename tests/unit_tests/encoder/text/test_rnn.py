@@ -26,3 +26,11 @@ class TestRnnEncoder(unittest.TestCase):
         print('decoded vector')
         ret2 = encoder.decode(ret)
         print(ret2)
+
+    @unittest.skip("Currently not using this encoder.")
+    def test_encoder_on_cpu(self):
+        pass
+
+    @unittest.skip("Currently not using this encoder.")
+    def test_encoder_on_cuda(self):
+        pass

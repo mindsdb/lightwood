@@ -14,7 +14,7 @@ class TestBasic(unittest.TestCase):
         target = 'airline_sentiment'
 
         predictor = predictor_from_problem(df, ProblemDefinition.from_dict({'target': target, 'time_aim': 80}))
-        train_and_check_time_aim(predictor, df)
+        train_and_check_time_aim(predictor, df, ignore_time_aim=True)
         predictions = predictor.predict(df)
 
         # sanity checks

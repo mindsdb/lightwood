@@ -31,6 +31,7 @@ class Img2VecEncoder(BaseEncoder):
         scale: Tuple[int, int] = (224, 224),
         mean: List[float] = [0.485, 0.456, 0.406],
         std: List[float] = [0.229, 0.224, 0.225],
+        device: str = '',
     ):
         """
         :param stop_after: time budget, in seconds. 
@@ -38,9 +39,11 @@ class Img2VecEncoder(BaseEncoder):
         :param scale: Resize scale of image (x, y)
         :param mean: Mean of pixel values
         :param std: Standard deviation of pixel values
+        :param device: Name of the device that get_device_from_name will attempt to use
         """  # noqa
         assert not is_target
         super().__init__(is_target)
+
         self.is_prepared = False
         self.scale = scale
         self.mean = mean
@@ -56,6 +59,8 @@ class Img2VecEncoder(BaseEncoder):
         ])
         self.stop_after = stop_after
 
+        self.device_name = device
+
         # pil_logger = logging.getLogger('PIL')  # noqa
         # pil_logger.setLevel(logging.ERROR)  # noqa
 
@@ -67,11 +72,13 @@ class Img2VecEncoder(BaseEncoder):
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        self.model = Img2Vec()
+        self.model = Img2Vec(device=self.device_name)
+        self.device = self.model.device
+        self.device_name = f'{self.device}'
         self.output_size = self.model.output_size
         self.is_prepared = True
 
-    def to(self, device, available_devices):
+    def to(self, device, available_devices=1):
         """
         Changes device of model to support CPU/GPU
 
@@ -80,7 +87,7 @@ class Img2VecEncoder(BaseEncoder):
 
         :return: same object but moved to the target device.
         """
-        self.model.to(device, available_devices)
+        self.model.to(device, available_devices=1)
         return self
 
     def encode(self, images: List[str]) -> torch.Tensor:

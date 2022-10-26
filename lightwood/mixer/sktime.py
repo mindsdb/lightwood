@@ -162,13 +162,16 @@ class SkTime(BaseMixer):
             for k, v in options.items():
                 kwargs = self._add_forecaster_kwarg(model_class, kwargs, k, v)
 
-            model_pipeline = [("forecaster", model_class(**kwargs))]
+            model_pipeline = []
 
             if self.use_stl and self.ts_analysis['stl_transforms'].get(group, False):
                 model_pipeline.insert(0, ("detrender",
                                           self.ts_analysis['stl_transforms'][group]["transformer"].detrender))
                 model_pipeline.insert(0, ("deseasonalizer",
                                           self.ts_analysis['stl_transforms'][group]["transformer"].deseasonalizer))
+                kwargs['sp'] = None
+
+            model_pipeline.append(("forecaster", model_class(**kwargs)))
 
             self.models[group] = TransformedTargetForecaster(model_pipeline)
 
@@ -260,7 +263,7 @@ class SkTime(BaseMixer):
                     offset = round(delta / freq)
                     forecaster = self.models[group]
                     ydf = self._call_groupmodel(ydf, forecaster, series, offset=offset)
-                    log.debug(f'[SkTime] Forecasting for group {group}, start at {start_ts} (offset by {offset} for cutoff at {self.cutoffs[group]} (relative {self.models[group].cutoff}))')  # noqa
+                    # log.debug(f'[SkTime] Forecasting for group {group}, start at {start_ts} (offset by {offset} for cutoff at {self.cutoffs[group]} (relative {self.models[group].cutoff}))')  # noqa
                 else:
                     log.warning(f"Applying naive forecaster for novel group {group}. Performance might not be optimal.")
                     ydf = self._call_default(ydf, series.values, series_idxs)
@@ -288,18 +291,22 @@ class SkTime(BaseMixer):
         else:
             submodel = model
 
-        if hasattr(submodel, '_cutoff') and hasattr(submodel, 'd'):
+        min_offset = -len(submodel._y) + 1
+        if hasattr(submodel, 'd'):
             model_d = 0 if submodel.d is None else submodel.d
-            cutoff = submodel._cutoff.values[0] if isinstance(submodel._cutoff, pd.Int64Index) else submodel._cutoff
-            min_offset = -cutoff + model_d + 1
-        else:
-            min_offset = -np.inf
+            min_offset += model_d
 
         start = max(offset, min_offset)
-        end = series.shape[0] + offset + self.horizon
-        all_preds = model.predict(np.arange(start, end)).tolist()
+        end = start + series.shape[0] + self.horizon
+
+        # Workaround for StatsForecastAutoARIMA (see sktime#3600)
+        if isinstance(submodel, AutoARIMA):
+            all_preds = model.predict(np.arange(min_offset, end)).tolist()[-(end - start):]
+        else:
+            all_preds = model.predict(np.arange(start, end)).tolist()
+
         for true_idx, (idx, _) in enumerate(series.items()):
-            start_idx = 0 if max(1 + true_idx + offset, min_offset) < 0 else true_idx
+            start_idx = max(0, true_idx)
             end_idx = start_idx + self.horizon
             ydf['prediction'].loc[idx] = all_preds[start_idx:end_idx]
         return ydf

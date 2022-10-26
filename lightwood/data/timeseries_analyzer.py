@@ -150,7 +150,7 @@ def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: list):
     """  # noqa
 
     def _ST_objective(trial: optuna.Trial):
-        trend_degree = trial.suggest_categorical("trend_degree", [1, 2])
+        trend_degree = trial.suggest_categorical("trend_degree", [1])
         ds_sp = trial.suggest_categorical("ds_sp", sp)  # seasonality period to use in deseasonalizer
         if min(min(tr_subset), min(dev_subset)) <= 0:
             decomp_type = trial.suggest_categorical("decomp_type", ['additive'])

@@ -16,14 +16,14 @@ class TestMixerSelection(unittest.TestCase):
     def test_0_regression_task(self):
         df = pd.read_csv('tests/data/concrete_strength.csv')
         target = 'concrete_strength'
-        expected_mixers = ['Neural', 'LightGBM', 'Regression']
+        expected_mixers = ['Neural', 'LightGBM', 'Regression', 'RandomForest']
         mixers = self.get_mixers(df, target)
         self.assertEqual(set(mixers), set(expected_mixers))
 
     def test_1_multiclass_task(self):
         df = pd.read_csv('tests/data/hdi.csv')
         target = 'Development Index'
-        expected_mixers = ['Neural', 'LightGBM', 'Regression']
+        expected_mixers = ['Neural', 'LightGBM', 'Regression', 'RandomForest']
         mixers = self.get_mixers(df, target)
         self.assertEqual(set(mixers), set(expected_mixers))
 
@@ -37,7 +37,7 @@ class TestMixerSelection(unittest.TestCase):
     def test_3_complex_text_task(self):
         df = pd.read_csv('tests/data/wine_reviews_binary_sample.csv')
         target = 'label'
-        expected_mixers = ['Neural', 'LightGBM', 'Regression']
+        expected_mixers = ['Neural', 'LightGBM', 'Regression', 'RandomForest']
         mixers = self.get_mixers(df, target)
         self.assertEqual(set(mixers), set(expected_mixers))
 
@@ -53,7 +53,7 @@ class TestMixerSelection(unittest.TestCase):
                 'window': 5
             }
         }
-        expected_mixers = ['NeuralTs', 'LightGBM', 'Regression']
+        expected_mixers = ['NeuralTs', 'LightGBM', 'Regression', 'RandomForest']
         mixers = self.get_mixers(df, target, prob_kwargs=prob_kwargs)
         self.assertEqual(set(mixers), set(expected_mixers))
 

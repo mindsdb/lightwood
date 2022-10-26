@@ -30,6 +30,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         max_encoded_length: int = 100,
         desired_error: float = 0.01,
         batch_size: int = 200,
+        device: str = '',
     ):
         """
         :param stop_after: Stops training with provided time limit (sec)
@@ -37,6 +38,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         :param max_encoded_length: Maximum length of vector represented
         :param desired_error: Threshold for reconstruction accuracy error
         :param batch_size: Minimum batch size while training
+        :param device: Name of the device that get_device_from_name will attempt to use
         """  # noqa
         super().__init__(is_target)
         self.is_prepared = False
@@ -48,6 +50,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.encoder = None
         self.decoder = None
         self.onehot_encoder = OneHotEncoder(is_target=self.is_target)
+        self.device_type = device
 
         # Training details
         self.batch_size = batch_size
@@ -148,7 +151,7 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         # Prepare a one-hot encoder for CatAE inputs
         self.onehot_encoder.prepare(priming_data)
-        self.batch_size = min(self.batch_size, int(len(priming_data) / 50))
+        self.batch_size = max(min(self.batch_size, int(len(priming_data) / 50)), 1)
 
         train_loader = DataLoader(
             list(zip(priming_data, priming_data)),
@@ -170,7 +173,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         """  # noqa
         input_len = self.onehot_encoder.output_size
 
-        self.net = DefaultNet(shape=[input_len, self.output_size, input_len])
+        self.net = DefaultNet(shape=[input_len, self.output_size, input_len], device=self.device_type)
 
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = Ranger(self.net.parameters())

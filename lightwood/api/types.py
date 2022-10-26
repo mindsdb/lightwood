@@ -62,6 +62,7 @@ class StatisticalAnalysis:
              in the information.
 
     :param nr_rows: Number of rows (samples) in the dataset
+    :param nr_columns: Number of columns (features) in the dataset
     :param df_target_stddev: The standard deviation of the target of the dataset
     :param train_observed_classes:
     :param target_class_distribution:
@@ -77,6 +78,7 @@ class StatisticalAnalysis:
     """ # noqa
 
     nr_rows: int
+    nr_columns: int
     df_target_stddev: Optional[float]
     train_observed_classes: object  # Union[None, List[str]]
     target_class_distribution: object  # Dict[str, float]
@@ -123,7 +125,7 @@ class TimeseriesSettings:
     :param target_type: Automatically inferred dtype of the target (e.g. `dtype.integer`, `dtype.float`).
     :param use_previous_target: Use the previous values of the target column to generate predictions. Defaults to True.
     :param allow_incomplete_history: whether predictions can be made for rows with incomplete historical context (i.e. less than `window` rows have been observed for the datetime that has to be forecasted).
-    :param eval_cold_start: whether to include predictions with incomplete history (thus part of the cold start region for certain mixers) when evaluating mixer scores with the validation dataset.
+    :param eval_incomplete: whether to consider predictions with incomplete history or target information when evaluating mixer accuracy with the validation dataset.
     :param interval_periods: tuple of tuples with user-provided period lengths for time intervals. Default values will be added for intervals left unspecified. For interval options, check the `timeseries_analyzer.detect_period()` method documentation. e.g.: (('daily', 7),).
     """  # noqa
 
@@ -139,7 +141,7 @@ class TimeseriesSettings:
         # @TODO: George: No, I don't think it is, we need to pass this some other way
     )
     allow_incomplete_history: bool = True
-    eval_cold_start: bool = True
+    eval_incomplete: bool = False
     interval_periods: tuple = tuple()
 
     @staticmethod
@@ -170,7 +172,7 @@ class TimeseriesSettings:
                 historical_columns=[],
                 horizon=obj.get("horizon", 1),
                 allow_incomplete_history=obj.get('allow_incomplete_history', True),
-                eval_cold_start=obj.get('eval_cold_start', True),
+                eval_incomplete=obj.get('eval_incomplete', False),
                 interval_periods=obj.get('interval_periods', tuple(tuple()))
             )
             for setting in obj:
