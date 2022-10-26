@@ -40,6 +40,7 @@ from lightwood.encoder import *
 from lightwood.ensemble import *
 from lightwood.helpers.device import *
 from lightwood.helpers.general import *
+from lightwood.helpers.ts import *
 from lightwood.helpers.log import *
 from lightwood.helpers.numeric import *
 from lightwood.helpers.imputers import *
@@ -380,8 +381,10 @@ def generate_json_ai(
         accuracy_functions = ["r2_score"]
     elif output_dtype in [dtype.categorical, dtype.tags, dtype.binary]:
         accuracy_functions = ["balanced_accuracy_score"]
-    elif output_dtype in (dtype.num_array, dtype.num_tsarray):
-        accuracy_functions = ["bounded_ts_accuracy"]
+    elif output_dtype in (dtype.num_tsarray, ):
+        accuracy_functions = ["complementary_smape_array_accuracy"]
+    elif output_dtype in (dtype.num_array, ):
+        accuracy_functions = ["evaluate_num_array_accuracy"]
     elif output_dtype in (dtype.cat_array, dtype.cat_tsarray):
         accuracy_functions = ["evaluate_cat_array_accuracy"]
     else:
@@ -391,7 +394,8 @@ def generate_json_ai(
 
     if is_ts:
         if output_dtype in [dtype.integer, dtype.float]:
-            accuracy_functions = ["bounded_ts_accuracy"]  # forces this acc fn for t+1 time series forecasters  # noqa
+            # forces this acc fn for t+1 time series forecasters
+            accuracy_functions = ["complementary_smape_array_accuracy"]
 
         if output_dtype in (dtype.integer, dtype.float, dtype.num_tsarray):
             imputers.append({"module": "NumericalImputer",
@@ -994,6 +998,8 @@ self.mode = 'train'
 encoded_train_data = enc_data['train']
 encoded_dev_data = enc_data['dev']
 encoded_test_data = enc_data['test']
+filtered_df = filter_ds(encoded_test_data, self.problem_definition.timeseries_settings)
+encoded_test_data = EncodedDs(encoded_test_data.encoders, filtered_df, encoded_test_data.target)
 
 log.info('Training the mixers')
 
