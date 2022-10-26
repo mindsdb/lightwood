@@ -177,6 +177,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span><span class="p">,</span> <span class="n">f1_score</span><span class="p">,</span> <span class="n">mean_absolute_error</span><span class="p">,</span> <span class="n">balanced_accuracy_score</span>
+<span class="kn">from</span> <span class="nn">sktime.performance_metrics.forecasting</span> <span class="kn">import</span> <span class="n">mean_absolute_percentage_error</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.numeric</span> <span class="kn">import</span> <span class="n">is_nan_numeric</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">get_group_matches</span>
 
@@ -214,7 +215,9 @@
                 <span class="n">gby</span> <span class="o">=</span> <span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tss&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">group_by</span> <span class="k">if</span> <span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tss&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="p">[]</span>
                 <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s1">_timestep_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">horizon</span><span class="p">)]</span> <span class="o">+</span> <span class="n">gby</span>
                 <span class="n">true_values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span>
-            <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span>  <span class="c1"># split array cells into columns</span>
+
+            <span class="n">true_values</span> <span class="o">=</span> <span class="n">true_values</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># split array cells into columns</span>
 
             <span class="k">if</span> <span class="n">accuracy_function_str</span> <span class="o">==</span> <span class="s1">&#39;evaluate_array_accuracy&#39;</span><span class="p">:</span>
                 <span class="n">acc_fn</span> <span class="o">=</span> <span class="n">evaluate_array_accuracy</span>
@@ -222,8 +225,11 @@
                 <span class="n">acc_fn</span> <span class="o">=</span> <span class="n">evaluate_num_array_accuracy</span>
             <span class="k">elif</span> <span class="n">accuracy_function_str</span> <span class="o">==</span> <span class="s1">&#39;evaluate_cat_array_accuracy&#39;</span><span class="p">:</span>
                 <span class="n">acc_fn</span> <span class="o">=</span> <span class="n">evaluate_cat_array_accuracy</span>
+            <span class="k">elif</span> <span class="n">accuracy_function_str</span> <span class="o">==</span> <span class="s1">&#39;complementary_smape_array_accuracy&#39;</span><span class="p">:</span>
+                <span class="n">acc_fn</span> <span class="o">=</span> <span class="n">complementary_smape_array_accuracy</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">acc_fn</span> <span class="o">=</span> <span class="n">bounded_ts_accuracy</span>
+
             <span class="n">score_dict</span><span class="p">[</span><span class="n">accuracy_function_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">acc_fn</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span>
                                                        <span class="n">predictions</span><span class="p">,</span>
                                                        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">],</span>
@@ -344,12 +350,6 @@
     <span class="n">base_acc_fn</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;base_acc_fn&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">)))</span>
 
     <span class="n">fh</span> <span class="o">=</span> <span class="n">true_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">ts_analysis</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">ts_analysis</span> <span class="ow">and</span> <span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tss&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">][</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">eval_cold_start</span><span class="p">:</span>
-        <span class="c1"># only evaluate accuracy for rows with complete historical context</span>
-        <span class="n">true_values</span> <span class="o">=</span> <span class="n">true_values</span><span class="p">[</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">][</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">window</span><span class="p">:]</span>
-        <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">][</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">window</span><span class="p">:]</span>
 
     <span class="n">aggregate</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fh</span><span class="p">):</span>
@@ -409,6 +409,35 @@
         <span class="k">return</span> <span class="n">step_base</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">sp</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.99</span> <span class="o">-</span> <span class="n">step_base</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">result</span> <span class="o">/</span> <span class="mi">2</span>  <span class="c1"># worse than naive</span></div>
+
+
+<span class="k">def</span> <span class="nf">complementary_smape_array_accuracy</span><span class="p">(</span>
+        <span class="n">true_values</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This metric is used in forecasting tasks. It returns ``1 - (sMAPE/2)``, where ``sMAPE`` is the symmetrical mean absolute percentage error of the forecast versus actual measurements in the time series.</span>
+
+<span class="sd">    As such, its domain is 0-1 bounded.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+    <span class="n">y_true</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">true_values</span><span class="p">)</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
+    <span class="n">tss</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tss&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tss</span> <span class="ow">and</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
+        <span class="p">[</span><span class="n">y_true</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">gby_col</span><span class="p">)</span> <span class="k">for</span> <span class="n">gby_col</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ts_analysis&#39;</span><span class="p">][</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span><span class="p">]</span>
+
+    <span class="c1"># nan check</span>
+    <span class="n">y_true</span> <span class="o">=</span> <span class="n">y_true</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="c1"># convert all nan indexes to zero pairs that don&#39;t contribute to the metric</span>
+        <span class="n">nans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+        <span class="n">y_true</span><span class="p">[</span><span class="n">nans</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">y_pred</span><span class="p">[</span><span class="n">nans</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">smape_score</span> <span class="o">=</span> <span class="n">mean_absolute_percentage_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">smape_score</span> <span class="o">/</span> <span class="mi">2</span>
 
 
 <span class="c1"># ------------------------- #</span>
