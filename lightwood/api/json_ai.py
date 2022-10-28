@@ -48,7 +48,7 @@ from lightwood.helpers.text import *
 from lightwood.helpers.torch import *
 from lightwood.mixer import *
 import pandas as pd
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Callable
 import os
 from types import ModuleType
 import importlib.machinery
