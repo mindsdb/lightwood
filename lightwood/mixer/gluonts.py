@@ -50,7 +50,7 @@ class GluonTSMixer(BaseMixer):
         super().__init__(stop_after)
         self.stable = True
         self.prepared = False
-        self.supports_proba = True
+        self.supports_proba = False
         self.target = target
         self.window = window
         self.horizon = horizon
