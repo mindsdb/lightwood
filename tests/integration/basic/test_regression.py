@@ -41,14 +41,10 @@ class TestBasic(unittest.TestCase):
 
         predictions = predictor.predict(df)
 
-        tests = predictor.test(df, [r2_score])
-
         # sanity checks
         self.assertTrue(r2_score([float(x.rstrip('$')) for x in df[target]], predictions['prediction']) > 0.8)
         self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
         self.assertTrue(all([p['lower'] <= p['prediction'] <= p['upper'] for _, p in predictions.iterrows()]))
-
-        self.assertTrue(tests['Value'].dtypes == 'float64')
 
         # check customizable ICP fixed confidence param
         fixed_conf = 0.8
@@ -73,4 +69,6 @@ class TestBasic(unittest.TestCase):
         predictor = predictor_from_json_ai(jai)
         predictor.learn(df)
         predictor.predict(df)
+        tests = predictor.test(df, [r2_score])
         self.assertTrue(isinstance(predictor.ensemble, StackedEnsemble))
+        self.assertTrue(tests['Value'].dtypes == 'float64')
