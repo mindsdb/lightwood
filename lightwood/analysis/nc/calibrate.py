@@ -252,10 +252,16 @@ class ICP(BaseAnalysisBlock):
         if 'confidence' in ns.predictions.columns:
             # bypass calibrator if model already outputs confidence
             row_insights['prediction'] = ns.predictions['prediction']
-            row_insights['confidence'] = ns.predictions['confidence']
             if 'upper' in ns.predictions.columns and 'lower' in ns.predictions.columns:
                 row_insights['upper'] = ns.predictions['upper']
                 row_insights['lower'] = ns.predictions['lower']
+
+            if not isinstance(ns.predictions['confidence'].iloc[0], list) and ns.tss.horizon > 1:
+                row_insights['confidence'] = ns.predictions['confidence'].astype(object)
+                row_insights['confidence'] = row_insights['confidence'].apply(
+                    lambda x: [x for _ in range(ns.tss.horizon)])
+            else:
+                row_insights['confidence'] = ns.predictions['confidence']
             return self._formatted(row_insights, global_insights, ns, is_numerical)
 
         if ns.analysis['icp']['__mdb_active']:
