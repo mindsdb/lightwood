@@ -3,9 +3,9 @@ from itertools import product
 
 import numpy as np
 import pandas as pd
+from type_infer.dtype import dtype
 
 from lightwood.helpers.log import log
-from lightwood.api.dtype import dtype
 from lightwood.api.types import TimeseriesSettings
 
 

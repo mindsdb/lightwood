@@ -11,7 +11,7 @@ from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.stacked_ensemble import StackedEnsemble
 from lightwood.encoder.array.ts_num_array import TsArrayNumericEncoder
 from lightwood.api.types import PredictionArguments
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.helpers.log import log
 

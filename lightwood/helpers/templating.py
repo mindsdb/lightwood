@@ -2,7 +2,7 @@ from collections import deque
 
 import numpy as np
 
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 
 
 def is_allowed(v):
