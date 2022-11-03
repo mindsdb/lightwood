@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Lightwood API Types &mdash; lightwood 22.10.4.2 documentation</title>
+  <title>Lightwood API Types &mdash; lightwood 22.10.4.3 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                22.10.4.2
+                22.10.4.3
               </div>
             
           
@@ -104,7 +104,6 @@
 <li class="toctree-l2"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Lightwood API Types</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#api.types.Module">Module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#api.types.TypeInformation">TypeInformation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#api.types.StatisticalAnalysis">StatisticalAnalysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#api.types.DataAnalysis">DataAnalysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#api.types.TimeseriesSettings">TimeseriesSettings</a><ul>
@@ -254,22 +253,6 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>module</strong> – Name of the module (function or class name)</p></li>
 <li><p><strong>args</strong> – Argument to pass to the function or constructor</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="api.types.TypeInformation">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">TypeInformation</span></span><a class="reference internal" href="../_modules/api/types.html#TypeInformation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TypeInformation" title="Permalink to this definition">¶</a></dt>
-<dd><p>For a dataset, provides information on columns types, how they’re used, and any other potential identifiers.</p>
-<p>TypeInformation is generated within <code class="docutils literal notranslate"><span class="pre">data.infer_types</span></code>, where small samples of each column are evaluated in a custom framework to understand what kind of data type the model is. The user may override data types, but it is recommended to do so within a JSON-AI config file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dtypes</strong> – For each column’s name, the associated data type inferred.</p></li>
-<li><p><strong>additional_info</strong> – Any possible sub-categories or additional descriptive information.</p></li>
-<li><p><strong>identifiers</strong> – Columns within the dataset highly suspected of being identifiers or IDs. These do not contain informatic value, therefore will be ignored in subsequent training/analysis procedures unless manually indicated.</p></li>
 </ul>
 </dd>
 </dl>

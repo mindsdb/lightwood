@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.mixer.random_forest &mdash; lightwood 22.10.4.2 documentation</title>
+  <title>lightwood.mixer.random_forest &mdash; lightwood 22.10.4.3 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                22.10.4.2
+                22.10.4.3
               </div>
             
           
@@ -179,8 +179,9 @@
 <span class="kn">import</span> <span class="nn">optuna</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">optuna</span> <span class="kn">import</span> <span class="n">trial</span> <span class="k">as</span> <span class="n">trial_module</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">check_cv</span><span class="p">,</span> <span class="n">cross_val_predict</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">clone</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">check_cv</span><span class="p">,</span> <span class="n">cross_val_predict</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="n">RandomForestClassifier</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
@@ -269,18 +270,20 @@
             <span class="n">train_data</span> <span class="o">=</span> <span class="n">ConcatedEncodedDs</span><span class="p">([</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">])</span>
 
         <span class="c1"># initialize the model</span>
+        <span class="n">init_params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+            <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="mf">1.</span><span class="p">,</span>
+            <span class="s1">&#39;bootstrap&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;n_jobs&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="mi">0</span>
+        <span class="p">}</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span><span class="p">:</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">train_data</span><span class="o">.</span><span class="n">get_encoded_data</span><span class="p">(</span><span class="n">include_target</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">Y</span> <span class="o">=</span> <span class="n">train_data</span><span class="o">.</span><span class="n">get_column_original_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
-                <span class="n">n_estimators</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-                <span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-                <span class="n">max_features</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
-                <span class="n">bootstrap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-                <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">init_params</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>  <span class="c1"># sample_weight</span>
 
@@ -289,14 +292,7 @@
             <span class="n">X</span> <span class="o">=</span> <span class="n">train_data</span><span class="o">.</span><span class="n">get_encoded_data</span><span class="p">(</span><span class="n">include_target</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">Y</span> <span class="o">=</span> <span class="n">train_data</span><span class="o">.</span><span class="n">get_encoded_column_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span>
-                <span class="n">n_estimators</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-                <span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-                <span class="n">max_features</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
-                <span class="n">bootstrap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-                <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="o">**</span><span class="n">init_params</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>  <span class="c1"># sample_weight</span>
 
@@ -309,7 +305,7 @@
                                                   <span class="p">[</span><span class="s2">&quot;gini&quot;</span><span class="p">,</span> <span class="s2">&quot;entropy&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span> <span class="k">else</span> <span class="s1">&#39;squared_error&#39;</span>
 
             <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">&#39;num_estimators&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span>
+                <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">&#39;n_estimators&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span>
                 <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">&#39;max_depth&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
                 <span class="s1">&#39;min_samples_split&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s2">&quot;min_samples_split&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
                 <span class="s1">&#39;min_samples_leaf&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s2">&quot;min_samples_leaf&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
@@ -326,14 +322,27 @@
             <span class="k">return</span> <span class="n">score</span>
 
         <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">started</span>
-        <span class="n">num_trials</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span> <span class="o">/</span> <span class="n">elapsed</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_trials</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">num_trials</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span> <span class="o">/</span> <span class="n">elapsed</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_trials</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_optuna</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The number of trials (Optuna) is </span><span class="si">{</span><span class="n">num_trials</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_optuna</span> <span class="ow">and</span> <span class="n">num_trials</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">init_score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">predict_method</span><span class="p">)(</span><span class="n">X</span><span class="p">))</span>
+
             <span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;minimize&#39;</span><span class="p">)</span>
             <span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="n">num_trials</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;RandomForest parameters of the best trial: </span><span class="si">{</span><span class="n">study</span><span class="o">.</span><span class="n">best_params</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="n">opt_model</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">opt_model</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">study</span><span class="o">.</span><span class="n">best_params</span><span class="p">)</span>
+            <span class="n">opt_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+            <span class="n">optuna_score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">opt_model</span><span class="p">,</span> <span class="n">predict_method</span><span class="p">)(</span><span class="n">X</span><span class="p">))</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;init_score: </span><span class="si">{</span><span class="n">init_score</span><span class="si">}</span><span class="s1">, optuna_score: </span><span class="si">{</span><span class="n">optuna_score</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">init_score</span> <span class="o">&lt;=</span> <span class="n">optuna_score</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">init_params</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">opt_model</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;RandomForest parameters of the best trial: </span><span class="si">{</span><span class="n">study</span><span class="o">.</span><span class="n">best_params</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="c1"># evaluate model effects</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_on_dev</span><span class="p">:</span>

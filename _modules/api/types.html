@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>api.types &mdash; lightwood 22.10.4.2 documentation</title>
+  <title>api.types &mdash; lightwood 22.10.4.3 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                22.10.4.2
+                22.10.4.3
               </div>
             
           
@@ -176,7 +176,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.api.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 
 <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
@@ -187,6 +187,7 @@
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">dataclasses_json</span> <span class="kn">import</span> <span class="n">dataclass_json</span>
 <span class="kn">from</span> <span class="nn">dataclasses_json.core</span> <span class="kn">import</span> <span class="n">_asdict</span><span class="p">,</span> <span class="n">Json</span>
+<span class="kn">from</span> <span class="nn">type_infer.base</span> <span class="kn">import</span> <span class="n">TypeInformation</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
 
@@ -201,29 +202,6 @@
 <span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
     <span class="n">module</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></div>
-
-
-<div class="viewcode-block" id="TypeInformation"><a class="viewcode-back" href="../../api/types.html#api.types.TypeInformation">[docs]</a><span class="nd">@dataclass_json</span>
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">TypeInformation</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    For a dataset, provides information on columns types, how they&#39;re used, and any other potential identifiers.</span>
-
-<span class="sd">    TypeInformation is generated within ``data.infer_types``, where small samples of each column are evaluated in a custom framework to understand what kind of data type the model is. The user may override data types, but it is recommended to do so within a JSON-AI config file.</span>
-
-<span class="sd">    :param dtypes: For each column&#39;s name, the associated data type inferred.</span>
-<span class="sd">    :param additional_info: Any possible sub-categories or additional descriptive information.</span>
-<span class="sd">    :param identifiers: Columns within the dataset highly suspected of being identifiers or IDs. These do not contain informatic value, therefore will be ignored in subsequent training/analysis procedures unless manually indicated.</span>
-<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
-
-    <span class="n">dtypes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
-    <span class="n">additional_info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span>
-    <span class="n">identifiers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">additional_info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">identifiers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="StatisticalAnalysis"><a class="viewcode-back" href="../../api/types.html#api.types.StatisticalAnalysis">[docs]</a><span class="nd">@dataclass_json</span>

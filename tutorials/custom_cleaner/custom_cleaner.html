@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Using your own pre-processing methods in Lightwood &mdash; lightwood 22.10.4.2 documentation</title>
+  <title>Using your own pre-processing methods in Lightwood &mdash; lightwood 22.10.4.3 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                22.10.4.2
+                22.10.4.3
               </div>
             
           
@@ -489,8 +489,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2476:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:No torchvision/pillow detected, image encoder not supported</span>
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/json.py:101: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/model/deepar/__init__.py:18: FutureWarning: The module gluonts.model.deepar has been moved to gluonts.mx.model.deepar. In GluonTS v0.12 it will be no longer possible to use the old path. Try to use &#39;from gluonts.mx import DeepAREstimator&#39;.
@@ -618,20 +618,20 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2476:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Analyzing a sample of 2478</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Doing text detection for column: id</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Column id has data type categorical</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Infering type for: excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Doing text detection for column: excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Column target has data type float</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2476:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:type_infer-2344:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -719,7 +719,7 @@ div.rendered_html tbody tr:hover {
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 15.890841484069824,
+        &#34;expected_additional_time&#34;: 13.028983116149902,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -772,7 +772,7 @@ ingredients for our ML pipeline.</p>
 </ol>
 <p>You can choose to omit many of these details and completely write this module from scratch, but the easiest way to introduce your custom changes is to borrow the <code class="docutils literal notranslate"><span class="pre">Cleaner</span></code> function, and add core changes in a custom block.</p>
 <p>This can be done as follows</p>
-<p>You can see individual cleaning functions in <code class="docutils literal notranslate"><span class="pre">lightwood.data.cleaner</span></code>. If you want to entirely replace a cleaning technique given a particular data-type, we invite you to change <code class="docutils literal notranslate"><span class="pre">lightwood.data.cleaner.get_cleaning_func</span></code> using the argument <code class="docutils literal notranslate"><span class="pre">custom_cleaning_functions</span></code>; in this dictionary, for a datatype (specified in <code class="docutils literal notranslate"><span class="pre">api.dtype</span></code>), you can assign your own function to override our defaults.</p>
+<p>You can see individual cleaning functions in <code class="docutils literal notranslate"><span class="pre">lightwood.data.cleaner</span></code>. If you want to entirely replace a cleaning technique given a particular data-type, we invite you to change <code class="docutils literal notranslate"><span class="pre">lightwood.data.cleaner.get_cleaning_func</span></code> using the argument <code class="docutils literal notranslate"><span class="pre">custom_cleaning_functions</span></code>; in this dictionary, for a datatype (specified in <code class="docutils literal notranslate"><span class="pre">type_infer.dtype</span></code>), you can assign your own function to override our defaults.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -781,8 +781,8 @@ ingredients for our ML pipeline.</p>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.api.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers</span> <span class="kn">import</span> <span class="n">text</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span>
@@ -955,7 +955,7 @@ Writing MyCustomCleaner.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2476:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1028,7 +1028,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 21384.0,
                 &#34;seconds_per_encoder&#34;: 85536.0,
-                &#34;expected_additional_time&#34;: 15.890841484069824,
+                &#34;expected_additional_time&#34;: 13.028983116149902,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -1056,7 +1056,7 @@ class Predictor(PredictorInterface):
         self.accuracy_functions = [&#34;r2_score&#34;]
         self.identifiers = {&#34;id&#34;: &#34;Hash-like identifier&#34;}
         self.dtype_dict = {&#34;excerpt&#34;: &#34;rich_text&#34;, &#34;target&#34;: &#34;float&#34;}
-        self.lightwood_version = &#34;22.10.4.2&#34;
+        self.lightwood_version = &#34;22.10.4.3&#34;
 
         # Any feature-column dependencies
         self.dependencies = {&#34;target&#34;: [], &#34;excerpt&#34;: []}
@@ -1540,16 +1540,16 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2476:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2476: `analyze_data` runtime: 0.06 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Cleaning column =excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Cleaning column =target</span>
-<span class="ansi-green-fg">INFO:lightwood-2476:Converted target into strictly non-negative</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2476: `preprocess` runtime: 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2344: `analyze_data` runtime: 0.04 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:Converted target into strictly non-negative</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2344: `preprocess` runtime: 0.07 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

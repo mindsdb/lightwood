@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Tutorial - Introduction to Lightwood’s statistical analysis &mdash; lightwood 22.10.4.2 documentation</title>
+  <title>Tutorial - Introduction to Lightwood’s statistical analysis &mdash; lightwood 22.10.4.3 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                22.10.4.2
+                22.10.4.3
               </div>
             
           
@@ -586,8 +586,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2661:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2489:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2489:No torchvision/pillow detected, image encoder not supported</span>
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/json.py:101: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/model/deepar/__init__.py:18: FutureWarning: The module gluonts.model.deepar has been moved to gluonts.mx.model.deepar. In GluonTS v0.12 it will be no longer possible to use the old path. Try to use &#39;from gluonts.mx import DeepAREstimator&#39;.
@@ -630,13 +630,13 @@ div.rendered_html tbody tr:hover {
 </pre></div></div>
 </div>
 <p>Notice how, even though we only defined what the <code class="docutils literal notranslate"><span class="pre">target</span></code> was, there are a bunch of additional parameters that have been assigned a default value. That is fine for our purposes, but remember that you can set any of these according to your own predictive needs.</p>
-<p>We also need to infer the type of each column. There is a method for this, <code class="docutils literal notranslate"><span class="pre">infer_types</span></code>, that we can use:</p>
+<p>We also need to infer the type of each column. There is a method for this, <code class="docutils literal notranslate"><span class="pre">type_infer.infer.infer_types</span></code>, that we can use:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.data</span> <span class="kn">import</span> <span class="n">infer_types</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TypeInformation</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">type_infer.infer</span> <span class="kn">import</span> <span class="n">infer_types</span>
+<span class="kn">from</span> <span class="nn">type_infer.base</span> <span class="kn">import</span> <span class="n">TypeInformation</span>
 
 <span class="n">type_information</span> <span class="o">=</span> <span class="n">infer_types</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">pct_invalid</span><span class="p">)</span>
 
@@ -649,22 +649,22 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2661:Analyzing a sample of 222</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:from a total population of 225, this is equivalent to 98.7% of your data.</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Infering type for: Population</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Column Population has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Infering type for: Area (sq. mi.)</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Column Area (sq. mi.) has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Infering type for: Pop. Density </span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Column Pop. Density  has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Infering type for: GDP ($ per capita)</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Column GDP ($ per capita) has data type integer</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Infering type for: Literacy (%)</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Column Literacy (%) has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Infering type for: Infant mortality </span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Column Infant mortality  has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Infering type for: Development Index</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Column Development Index has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Analyzing a sample of 222</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:from a total population of 225, this is equivalent to 98.7% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Infering type for: Population</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Column Population has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Infering type for: Area (sq. mi.)</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Column Area (sq. mi.) has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Infering type for: Pop. Density </span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Column Pop. Density  has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Infering type for: GDP ($ per capita)</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Column GDP ($ per capita) has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Infering type for: Literacy (%)</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Column Literacy (%) has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Infering type for: Infant mortality </span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Column Infant mortality  has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Infering type for: Development Index</span>
+<span class="ansi-green-fg">INFO:type_infer-2489:Column Development Index has data type categorical</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -726,8 +726,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2661:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2661:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2489:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2489:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </div>

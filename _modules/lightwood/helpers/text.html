@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.helpers.text &mdash; lightwood 22.10.4.2 documentation</title>
+  <title>lightwood.helpers.text &mdash; lightwood 22.10.4.3 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                22.10.4.2
+                22.10.4.3
               </div>
             
           
@@ -181,18 +181,9 @@
 <span class="sd"> * permission of MindsDB Inc</span>
 <span class="sd"> *******************************************************</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">defaultdict</span>
-<span class="kn">import</span> <span class="nn">string</span>
 <span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">hashlib</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">st</span>
-<span class="kn">from</span> <span class="nn">langid.langid</span> <span class="kn">import</span> <span class="n">LanguageIdentifier</span>
-<span class="kn">from</span> <span class="nn">langid.langid</span> <span class="kn">import</span> <span class="n">model</span> <span class="k">as</span> <span class="n">langid_model</span>
 <span class="kn">import</span> <span class="nn">nltk</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 
 
 <span class="k">try</span><span class="p">:</span>
@@ -207,57 +198,6 @@
     <span class="n">nltk</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;stopwords&#39;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">get_language_dist</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="n">lang_dist</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">lang_dist</span><span class="p">[</span><span class="s1">&#39;Unknown&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">lang_probs_cache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="n">identifier</span> <span class="o">=</span> <span class="n">LanguageIdentifier</span><span class="o">.</span><span class="n">from_modelstring</span><span class="p">(</span><span class="n">langid_model</span><span class="p">,</span> <span class="n">norm_probs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">text</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">text</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lang_probs_cache</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">lang_probs</span> <span class="o">=</span> <span class="n">identifier</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="n">lang_probs</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">lang_probs_cache</span><span class="p">[</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="n">lang_probs</span>
-
-        <span class="n">lang_probs</span> <span class="o">=</span> <span class="n">lang_probs_cache</span><span class="p">[</span><span class="n">text</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lang_probs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">lang_probs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">identifier</span><span class="o">.</span><span class="n">nb_classes</span><span class="p">)):</span>
-            <span class="n">lang_dist</span><span class="p">[</span><span class="n">lang_probs</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">lang_dist</span><span class="p">[</span><span class="s1">&#39;Unknown&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">lang_dist</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="analyze_sentences"><a class="viewcode-back" href="../../../helpers.html#helpers.analyze_sentences">[docs]</a><span class="k">def</span> <span class="nf">analyze_sentences</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :param data: list of str</span>
-
-<span class="sd">    :returns:</span>
-<span class="sd">    tuple(</span>
-<span class="sd">        int: nr words total,</span>
-<span class="sd">        dict: word_dist,</span>
-<span class="sd">        dict: nr_words_dist</span>
-<span class="sd">    )</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">nr_words</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">word_dist</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-    <span class="n">nr_words_dist</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-    <span class="n">stop_words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">stopwords</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="s1">&#39;english&#39;</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="n">tokens</span> <span class="o">=</span> <span class="n">tokenize_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-        <span class="n">tokens_no_stop</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tokens</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stop_words</span><span class="p">]</span>
-        <span class="n">nr_words_dist</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">nr_words</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">tokens_no_stop</span><span class="p">:</span>
-            <span class="n">word_dist</span><span class="p">[</span><span class="n">tok</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-
-    <span class="k">return</span> <span class="n">nr_words</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">word_dist</span><span class="p">),</span> <span class="nb">dict</span><span class="p">(</span><span class="n">nr_words_dist</span><span class="p">)</span></div>
-
-
 <span class="k">def</span> <span class="nf">word_tokenize</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
     <span class="n">sep_tag</span> <span class="o">=</span> <span class="s1">&#39;{#SEP#}&#39;</span>
     <span class="k">for</span> <span class="n">separator</span> <span class="ow">in</span> <span class="n">WORD_SEPARATORS</span><span class="p">:</span>
@@ -268,23 +208,6 @@
     <span class="k">return</span> <span class="n">num_words</span>
 
 
-<span class="k">def</span> <span class="nf">clean_float</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
-        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">val</span>
-
-    <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
-    <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
-    <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;nan&#39;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-
-
 <div class="viewcode-block" id="gen_chars"><a class="viewcode-back" href="../../../helpers.html#helpers.gen_chars">[docs]</a><span class="k">def</span> <span class="nf">gen_chars</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">character</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    # lambda to Generates a string consisting of `length` consiting of repeating `character`</span>
@@ -293,24 +216,6 @@
 <span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">character</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)])</span></div>
-
-
-<div class="viewcode-block" id="cast_string_to_python_type"><a class="viewcode-back" href="../../../helpers.html#helpers.cast_string_to_python_type">[docs]</a><span class="k">def</span> <span class="nf">cast_string_to_python_type</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Returns None, an integer, float or a string from a string&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">string</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">string</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="k">if</span> <span class="n">string</span><span class="o">.</span><span class="n">isnumeric</span><span class="p">():</span>
-        <span class="c1"># Did you know you can write fractions in unicode, and they are numeric but can&#39;t be cast to integers !?</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">clean_float</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">string</span></div>
 
 
 <span class="k">def</span> <span class="nf">splitRecursive</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
@@ -327,24 +232,6 @@
 <span class="k">def</span> <span class="nf">hashtext</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
-
-
-<span class="k">def</span> <span class="nf">_is_foreign_key_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">endings</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Id&#39;</span><span class="p">]:</span>
-        <span class="k">for</span> <span class="n">add</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">add</span> <span class="o">+</span> <span class="n">endings</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">for</span> <span class="n">endings</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Id&#39;</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">endings</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">return</span> <span class="kc">False</span>
-
-
-<span class="k">def</span> <span class="nf">_is_identifier_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;account&#39;</span><span class="p">,</span> <span class="s1">&#39;uuid&#39;</span><span class="p">,</span> <span class="s1">&#39;identifier&#39;</span><span class="p">,</span> <span class="s1">&#39;user&#39;</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">return</span> <span class="kc">False</span>
 
 
 <div class="viewcode-block" id="isascii"><a class="viewcode-back" href="../../../helpers.html#helpers.isascii">[docs]</a><span class="k">def</span> <span class="nf">isascii</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
@@ -376,97 +263,6 @@
         <span class="n">prev_nr</span> <span class="o">=</span> <span class="n">nr</span>
 
     <span class="k">return</span> <span class="n">increase_by_one</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">get_identifier_description_mp</span><span class="p">(</span><span class="n">arg_tup</span><span class="p">):</span>
-    <span class="n">data</span><span class="p">,</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">data_dtype</span> <span class="o">=</span> <span class="n">arg_tup</span>
-    <span class="k">return</span> <span class="n">get_identifier_description</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">get_identifier_description</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">:</span> <span class="n">dtype</span><span class="p">):</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="n">nr_unique</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">nr_unique</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="n">nr_unique</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;No Information&#39;</span>
-
-    <span class="n">unique_pct</span> <span class="o">=</span> <span class="n">nr_unique</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="n">spaces</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
-    <span class="n">mean_spaces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">spaces</span><span class="p">)</span>
-
-    <span class="c1"># Detect auto incrementing index</span>
-    <span class="c1"># -- some cases where I guess people do want to use this for learning, so ignoring this check for now...</span>
-    <span class="c1"># if data_dtype == dtype.integer:</span>
-    <span class="c1">#    if get_pct_auto_increment(data) &gt; 0.98 and unique_pct &gt; 0.99:</span>
-    <span class="c1">#        return &#39;Auto-incrementing identifier&#39;</span>
-
-    <span class="c1"># Detect hash</span>
-    <span class="n">all_same_length</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span>
-    <span class="n">uuid_charset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="s1">&#39;0123456789abcdefABCDEF-&#39;</span><span class="p">)</span>
-    <span class="n">all_uuid_charset</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">uuid_charset</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span>
-    <span class="n">is_uuid</span> <span class="o">=</span> <span class="n">all_uuid_charset</span> <span class="ow">and</span> <span class="n">all_same_length</span>
-
-    <span class="k">if</span> <span class="n">all_same_length</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="n">nr_unique</span> <span class="ow">and</span> <span class="n">data_dtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">):</span>
-        <span class="n">str_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
-        <span class="n">randomness_per_index</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">str_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">str_data</span><span class="p">))</span>
-            <span class="n">S</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">entropy</span><span class="p">([</span><span class="o">*</span><span class="n">Counter</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">str_data</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
-            <span class="n">randomness_per_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">S</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">randomness_per_index</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.95</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;Hash-like identifier&#39;</span>
-
-    <span class="c1"># Detect foreign key</span>
-    <span class="k">if</span> <span class="n">data_dtype</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">_is_foreign_key_name</span><span class="p">(</span><span class="n">column_name</span><span class="p">):</span>
-            <span class="k">return</span> <span class="s1">&#39;Foreign key&#39;</span>
-
-    <span class="k">if</span> <span class="n">_is_identifier_name</span><span class="p">(</span><span class="n">column_name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">unique_pct</span> <span class="o">&gt;</span> <span class="mf">0.98</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">is_uuid</span><span class="p">:</span>
-                <span class="k">return</span> <span class="s1">&#39;UUID&#39;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="s1">&#39;Unknown identifier&#39;</span>
-
-    <span class="c1"># Everything is unique and it&#39;s too short to be rich text</span>
-    <span class="k">if</span> <span class="n">data_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">short_text</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">)</span> <span class="ow">and</span> \
-            <span class="n">unique_pct</span> <span class="o">&gt;</span> <span class="mf">0.99999</span> <span class="ow">and</span> <span class="n">mean_spaces</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;Unknown identifier&#39;</span>
-
-    <span class="k">return</span> <span class="kc">None</span>
-
-
-<span class="k">def</span> <span class="nf">contains_alnum</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">():</span>
-            <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">return</span> <span class="kc">False</span>
-
-
-<span class="k">def</span> <span class="nf">decontracted</span><span class="p">(</span><span class="n">phrase</span><span class="p">):</span>
-    <span class="c1"># specific</span>
-    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;won\&#39;t&quot;</span><span class="p">,</span> <span class="s2">&quot;will not&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
-    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;can\&#39;t&quot;</span><span class="p">,</span> <span class="s2">&quot;can not&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
-
-    <span class="c1"># general</span>
-    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;n\&#39;t&quot;</span><span class="p">,</span> <span class="s2">&quot; not&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
-    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;re&quot;</span><span class="p">,</span> <span class="s2">&quot; are&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
-    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;s&quot;</span><span class="p">,</span> <span class="s2">&quot; is&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
-    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;d&quot;</span><span class="p">,</span> <span class="s2">&quot; would&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
-    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;ll&quot;</span><span class="p">,</span> <span class="s2">&quot; will&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
-    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;t&quot;</span><span class="p">,</span> <span class="s2">&quot; not&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
-    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;ve&quot;</span><span class="p">,</span> <span class="s2">&quot; have&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
-    <span class="n">phrase</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;m&quot;</span><span class="p">,</span> <span class="s2">&quot; am&quot;</span><span class="p">,</span> <span class="n">phrase</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">phrase</span>
-
-
-<span class="k">def</span> <span class="nf">tokenize_text</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">nltk</span><span class="o">.</span><span class="n">word_tokenize</span><span class="p">(</span><span class="n">decontracted</span><span class="p">(</span><span class="n">text</span><span class="p">))</span> <span class="k">if</span> <span class="n">contains_alnum</span><span class="p">(</span><span class="n">t</span><span class="p">)]</span>
 </pre></div>
 
            </div>

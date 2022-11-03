@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Data Types (dtypes) &mdash; lightwood 22.10.4.2 documentation</title>
+  <title>Data Types (dtypes) &mdash; lightwood 22.10.4.3 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                22.10.4.2
+                22.10.4.3
               </div>
             
           
@@ -101,10 +101,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="high_level.html">JSON-AI Config</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Data Types (dtypes)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#api.dtype.dtype">dtype</a></li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Data Types (dtypes)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="types.html">Lightwood API Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor Interface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="json_ai.html">JSON-AI Config</a></li>
@@ -215,22 +212,6 @@
 <h1>Data Types (dtypes)<a class="headerlink" href="#data-types-dtypes" title="Permalink to this headline">¶</a></h1>
 <p>Lightwood supports several data types used in standard machine learning pipelines. The <code class="docutils literal notranslate"><span class="pre">dtype</span></code> class is used to label columns of information as the right input format. The type inference procedure affects what feature engineering methodology is used on a labeled column.</p>
 <p>Currently, the supported way to encourage new data types is to include a custom tag in this file and to import a custom cleaning approach. Users may inherit the basic functionality of the cleaner and include their own flag specific to their data type. For steps on how to do this, please see the tutorials.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="api.dtype.dtype">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.dtype.</span></span><span class="sig-name descname"><span class="pre">dtype</span></span><a class="reference internal" href="../_modules/api/dtype.html#dtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.dtype.dtype" title="Permalink to this definition">¶</a></dt>
-<dd><p>Definitions of all data types currently supported. Dtypes currently supported include:</p>
-<ul class="simple">
-<li><p><strong>Numerical</strong>: Data that should be represented in the form of a number. Currently <code class="docutils literal notranslate"><span class="pre">integer</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code>, and <code class="docutils literal notranslate"><span class="pre">quantity</span></code> are supported.</p></li>
-<li><p><strong>Categorical</strong>: Data that represents a class or label and is discrete. Currently <code class="docutils literal notranslate"><span class="pre">binary</span></code>, <code class="docutils literal notranslate"><span class="pre">categorical</span></code>, and <code class="docutils literal notranslate"><span class="pre">tags</span></code> are supported.</p></li>
-<li><p><strong>Date/Time</strong>: Time-series data that is temporal/sequential. Currently <code class="docutils literal notranslate"><span class="pre">date</span></code>, and <code class="docutils literal notranslate"><span class="pre">datetime</span></code> are supported.</p></li>
-<li><p><strong>Text</strong>: Data that can be considered as language information.  Currently <code class="docutils literal notranslate"><span class="pre">short_text</span></code>, and <code class="docutils literal notranslate"><span class="pre">rich_text</span></code> are supported. Short text has a small vocabulary (~ 100 words) and is generally a limited number of characters. Rich text is anything with greater complexity.</p></li>
-<li><p><strong>Complex</strong>: Data types that require custom techniques. Currently <code class="docutils literal notranslate"><span class="pre">audio</span></code>, <code class="docutils literal notranslate"><span class="pre">video</span></code> and <code class="docutils literal notranslate"><span class="pre">image</span></code> are available, but highly experimental.</p></li>
-<li><p><strong>Array</strong>: Data in the form of a sequence where order must be preserved. <code class="docutils literal notranslate"><span class="pre">tsarray</span></code> dtypes are for “normal” columns that will be transformed to arrays at a row-level because they will be treated as time series.</p></li>
-<li><p><strong>Miscellaneous</strong>: Miscellaneous data descriptors include <code class="docutils literal notranslate"><span class="pre">empty</span></code>, an explicitly unknown value versus <code class="docutils literal notranslate"><span class="pre">invalid</span></code>, a data type not currently supported.</p></li>
-</ul>
-<p>Custom data types may be implemented here as a flag for subsequent treatment and processing. You are welcome to include your own definitions, so long as they do not override the existing type names (alternatively, if you do, please edit subsequent parts of the preprocessing pipeline to correctly indicate how you want to deal with these data types).</p>
-</dd></dl>
-
 </div>
 
 
