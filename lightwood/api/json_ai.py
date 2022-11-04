@@ -1182,7 +1182,7 @@ else:
 
     test_body = """
 predictions = self.predict(data)
-values = [metric(data[self.target], predictions) for metric in metrics]
+values = [metric(data[self.target], predictions[self.target]) for metric in metrics]
 names = [metric.__name__ for metric in metrics]
 return pd.DataFrame(list(zip(names, values)), columns=['Metric', 'Value'])
 """
