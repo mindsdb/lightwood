@@ -463,31 +463,31 @@ class TestTimeseries(unittest.TestCase):
         target = 'MA'
         order_by = 'saledate'
         window = 8
-        horizon = 4
-        train, _, test = stratify(data, pct_train=0.8, pct_dev=0, pct_test=0.2, stratify_on=gby, seed=1,
-                                  reshuffle=False)
-        jai = json_ai_from_problem(train,
-                                   ProblemDefinition.from_dict({'target': target,
-                                                                'time_aim': 30,
-                                                                'timeseries_settings': {
-                                                                    'group_by': gby,
-                                                                    'horizon': horizon,
-                                                                    'order_by': order_by,
-                                                                    'window': window
-                                                                }}))
-        code = code_from_json_ai(jai)
-        pred = predictor_from_code(code)
+        for horizon in [1, 4]:
+            train, _, test = stratify(data, pct_train=0.8, pct_dev=0, pct_test=0.2, stratify_on=gby, seed=1,
+                                      reshuffle=False)
+            jai = json_ai_from_problem(train,
+                                       ProblemDefinition.from_dict({'target': target,
+                                                                    'time_aim': 30,  # short time aim
+                                                                    'timeseries_settings': {
+                                                                        'group_by': gby,
+                                                                        'horizon': horizon,
+                                                                        'order_by': order_by,
+                                                                        'window': window
+                                                                    }}))
+            code = code_from_json_ai(jai)
+            pred = predictor_from_code(code)
 
-        # Test with a short time aim with inferring mode, check timestamps are further into the future than test dates
-        test['__mdb_forecast_offset'] = 1
-        train_and_check_time_aim(pred, train, ignore_time_aim=True)
-        preds = pred.predict(test)
-        self.check_ts_prediction_df(preds, horizon, [order_by])
+            # Test with inferring mode, check timestamps are further into the future than test dates
+            test['__mdb_forecast_offset'] = 1
+            train_and_check_time_aim(pred, train, ignore_time_aim=True)
+            preds = pred.predict(test)
+            self.check_ts_prediction_df(preds, horizon, [order_by])
 
-        for idx, row in preds.iterrows():
-            row[f'order_{order_by}'] = [row[f'order_{order_by}']] if horizon == 1 else row[f'order_{order_by}']
-            for timestamp in row[f'order_{order_by}']:
-                assert timestamp > pd.to_datetime(test[order_by]).max().timestamp()
+            for idx, row in preds.iterrows():
+                row[f'order_{order_by}'] = [row[f'order_{order_by}']] if horizon == 1 else row[f'order_{order_by}']
+                for timestamp in row[f'order_{order_by}']:
+                    assert timestamp > pd.to_datetime(test[order_by]).max().timestamp()
 
     def test_9_ts_dedupe(self):
         """ Test time series de-duplication procedures """
