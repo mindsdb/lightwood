@@ -1,3 +1,4 @@
+import importlib
 from copy import deepcopy
 from typing import Dict, Union
 
@@ -10,6 +11,7 @@ from gluonts.dataset.pandas import PandasDataset
 from gluonts.model.deepar import DeepAREstimator  # @TODO: support for other estimators
 from gluonts.mx import Trainer
 from gluonts.mx.trainer.callback import TrainingHistory
+from gluonts.mx.distribution.student_t import StudentTOutput
 
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
@@ -35,6 +37,7 @@ class GluonTSMixer(BaseMixer):
             ts_analysis: Dict,
             n_epochs: int = 10,
             early_stop_patience: int = 3,
+            distribution_output: str = '',
             seed: int = 0,
     ):
         """
@@ -66,6 +69,13 @@ class GluonTSMixer(BaseMixer):
         self.patience = early_stop_patience
         self.seed = seed
 
+        dist_module = importlib.import_module('.'.join(['gluonts.mx.distribution',
+                                                        *distribution_output.split(".")[:-1]]))
+        try:
+            self.distribution = getattr(dist_module, distribution_output.split(".")[-1])()
+        except AttributeError:
+            self.distribution = StudentTOutput()  # use StudentTOutput when the provided distribution does not exist
+
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """ Fits the model. """  # noqa
         log.info('Started fitting GluonTS forecasting model')
@@ -77,6 +87,7 @@ class GluonTSMixer(BaseMixer):
         estimator = DeepAREstimator(
             freq=train_ds.freq,
             prediction_length=self.horizon,
+            distr_output=self.distribution,
             trainer=Trainer(epochs=self.n_epochs, callbacks=[EarlyStop(patience=self.patience)])
         )
         self.model = estimator.train(train_ds)
