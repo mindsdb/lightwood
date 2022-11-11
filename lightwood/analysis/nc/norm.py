@@ -6,7 +6,7 @@ from scipy.stats import entropy
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
 
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 from lightwood.mixer import BaseMixer
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs

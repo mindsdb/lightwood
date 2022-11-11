@@ -3,7 +3,7 @@
 from typing import Dict, List, Optional, Union
 import sys
 
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict
@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
 from dataclasses_json.core import _asdict, Json
+from type_infer.base import TypeInformation
 import json
 
 
@@ -28,29 +29,6 @@ class Module(TypedDict):
     """ # noqa
     module: str
     args: Dict[str, str]
-
-
-@dataclass_json
-@dataclass
-class TypeInformation:
-    """
-    For a dataset, provides information on columns types, how they're used, and any other potential identifiers.
-
-    TypeInformation is generated within ``data.infer_types``, where small samples of each column are evaluated in a custom framework to understand what kind of data type the model is. The user may override data types, but it is recommended to do so within a JSON-AI config file.
-
-    :param dtypes: For each column's name, the associated data type inferred.
-    :param additional_info: Any possible sub-categories or additional descriptive information.
-    :param identifiers: Columns within the dataset highly suspected of being identifiers or IDs. These do not contain informatic value, therefore will be ignored in subsequent training/analysis procedures unless manually indicated.
-    """ # noqa
-
-    dtypes: Dict[str, str]
-    additional_info: Dict[str, object]
-    identifiers: Dict[str, str]
-
-    def __init__(self):
-        self.dtypes = dict()
-        self.additional_info = dict()
-        self.identifiers = dict()
 
 
 @dataclass_json
@@ -125,7 +103,7 @@ class TimeseriesSettings:
     :param target_type: Automatically inferred dtype of the target (e.g. `dtype.integer`, `dtype.float`).
     :param use_previous_target: Use the previous values of the target column to generate predictions. Defaults to True.
     :param allow_incomplete_history: whether predictions can be made for rows with incomplete historical context (i.e. less than `window` rows have been observed for the datetime that has to be forecasted).
-    :param eval_cold_start: whether to include predictions with incomplete history (thus part of the cold start region for certain mixers) when evaluating mixer scores with the validation dataset.
+    :param eval_incomplete: whether to consider predictions with incomplete history or target information when evaluating mixer accuracy with the validation dataset.
     :param interval_periods: tuple of tuples with user-provided period lengths for time intervals. Default values will be added for intervals left unspecified. For interval options, check the `timeseries_analyzer.detect_period()` method documentation. e.g.: (('daily', 7),).
     """  # noqa
 
@@ -141,7 +119,7 @@ class TimeseriesSettings:
         # @TODO: George: No, I don't think it is, we need to pass this some other way
     )
     allow_incomplete_history: bool = True
-    eval_cold_start: bool = True
+    eval_incomplete: bool = False
     interval_periods: tuple = tuple()
 
     @staticmethod
@@ -172,7 +150,7 @@ class TimeseriesSettings:
                 historical_columns=[],
                 horizon=obj.get("horizon", 1),
                 allow_incomplete_history=obj.get('allow_incomplete_history', True),
-                eval_cold_start=obj.get('eval_cold_start', True),
+                eval_incomplete=obj.get('eval_incomplete', False),
                 interval_periods=obj.get('interval_periods', tuple(tuple()))
             )
             for setting in obj:

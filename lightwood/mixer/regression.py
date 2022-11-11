@@ -4,7 +4,7 @@ from scipy.special import softmax
 from sklearn.linear_model import Ridge
 
 from lightwood.helpers.log import log
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 from lightwood.mixer import BaseMixer
 from lightwood.encoder.base import BaseEncoder
 from lightwood.api.types import PredictionArguments
