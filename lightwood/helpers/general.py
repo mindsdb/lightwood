@@ -4,8 +4,8 @@ from typing import List, Dict, Optional
 import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score, f1_score, mean_absolute_error, balanced_accuracy_score
+from type_infer.helpers import is_nan_numeric
 from sktime.performance_metrics.forecasting import mean_absolute_percentage_error
-from lightwood.helpers.numeric import is_nan_numeric
 from lightwood.helpers.ts import get_group_matches
 
 

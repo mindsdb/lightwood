@@ -6,8 +6,9 @@ import pandas as pd
 import optuna
 from typing import Dict, Union
 from optuna import trial as trial_module
-from sklearn.model_selection import check_cv, cross_val_predict
+from sklearn import clone
 from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import check_cv, cross_val_predict
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 
 from lightwood.api import dtype
@@ -96,18 +97,20 @@ class RandomForest(BaseMixer):
             train_data = ConcatedEncodedDs([train_data, dev_data])
 
         # initialize the model
+        init_params = {
+            'n_estimators': 50,
+            'max_depth': 5,
+            'max_features': 1.,
+            'bootstrap': True,
+            'n_jobs': -1,
+            'random_state': 0
+        }
+
         if self.is_classifier:
             X = train_data.get_encoded_data(include_target=False)
             Y = train_data.get_column_original_data(self.target)
 
-            self.model = RandomForestClassifier(
-                n_estimators=50,
-                max_depth=5,
-                max_features=1.,
-                bootstrap=True,
-                n_jobs=-1,
-                random_state=0
-            )
+            self.model = RandomForestClassifier(**init_params)
 
             self.model.fit(X, Y)  # sample_weight
 
@@ -116,14 +119,7 @@ class RandomForest(BaseMixer):
             X = train_data.get_encoded_data(include_target=False)
             Y = train_data.get_encoded_column_data(self.target)
 
-            self.model = RandomForestRegressor(
-                n_estimators=50,
-                max_depth=5,
-                max_features=1.,
-                bootstrap=True,
-                n_jobs=-1,
-                random_state=0
-            )
+            self.model = RandomForestRegressor(**init_params)
 
             self.model.fit(X, Y)  # sample_weight
 
@@ -136,7 +132,7 @@ class RandomForest(BaseMixer):
                                                   ["gini", "entropy"]) if self.is_classifier else 'squared_error'
 
             params = {
-                'n_estimators': trial.suggest_int('num_estimators', 2, 512),
+                'n_estimators': trial.suggest_int('n_estimators', 2, 512),
                 'max_depth': trial.suggest_int('max_depth', 2, 15),
                 'min_samples_split': trial.suggest_int("min_samples_split", 2, 20),
                 'min_samples_leaf': trial.suggest_int("min_samples_leaf", 1, 20),
@@ -153,14 +149,27 @@ class RandomForest(BaseMixer):
             return score
 
         elapsed = time.time() - started
-        num_trials = max(min(int(self.stop_after / elapsed) - 1, self.num_trials), 0)
+        num_trials = max(min(int(self.stop_after / elapsed) - 2, self.num_trials), 0)
         if self.use_optuna:
             log.info(f'The number of trials (Optuna) is {num_trials}.')
 
         if self.use_optuna and num_trials > 0:
+            init_score = metric(Y, getattr(self.model, predict_method)(X))
+
             study = optuna.create_study(direction='minimize')
             study.optimize(objective, n_trials=num_trials)
-            log.info(f'RandomForest parameters of the best trial: {study.best_params}')
+
+            opt_model = clone(self.model)
+            opt_model.set_params(**study.best_params)
+            opt_model.fit(X, Y)
+            optuna_score = metric(Y, getattr(opt_model, predict_method)(X))
+            log.info(f'init_score: {init_score}, optuna_score: {optuna_score}')
+
+            if init_score <= optuna_score:
+                self.model.set_params(**init_params)
+            else:
+                self.model = opt_model
+                log.info(f'RandomForest parameters of the best trial: {study.best_params}')
 
         # evaluate model effects
         if self.fit_on_dev:

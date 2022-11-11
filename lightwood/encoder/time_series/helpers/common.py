@@ -2,7 +2,7 @@
 import pandas as pd
 
 from lightwood.api.types import TimeseriesSettings
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
 from lightwood.helpers.ts import get_group_matches
 

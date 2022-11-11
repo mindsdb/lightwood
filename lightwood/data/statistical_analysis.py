@@ -10,7 +10,7 @@ from lightwood.helpers.ts import get_ts_groups
 from lightwood.helpers.seed import seed
 from lightwood.data.cleaner import cleaner
 from lightwood.helpers.log import log
-from lightwood.api.dtype import dtype
+from type_infer.dtype import dtype
 from scipy.stats import entropy
 from lightwood.data.cleaner import _clean_float
 
