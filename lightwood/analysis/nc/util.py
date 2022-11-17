@@ -204,7 +204,7 @@ def get_categorical_conf(raw_confs: np.ndarray):
     return confs
 
 
-def get_anomalies(insights: pd.DataFrame, observed_series: Union[pd.Series, list], cooldown: int = 1):
+def get_anomalies(insights: pd.DataFrame, observed_series: Union[pd.Series, list], cooldown: int = 1) -> np.ndarray:
     """
     Simple procedure for unsupervised anomaly detection in time series forecasting. 
     Uses ICP analysis block output so that any true value falling outside of the lower and upper bounds is tagged as anomalous.
@@ -213,7 +213,7 @@ def get_anomalies(insights: pd.DataFrame, observed_series: Union[pd.Series, list
     :param observed_series: true values from the predicted time series. If empty, no anomalies are flagged.
     :param cooldown: minimum amount of observations (assuming regular sampling frequency) that need to pass between two consecutive anomalies.
     
-    :return: list of boolean flags, indicating anomalous behavior for each predicted value.
+    :return: np.ndarray of boolean flags, indicating anomalous behavior for each predicted value.
     """  # noqa
     anomalies = []
     counter = 0
@@ -247,4 +247,4 @@ def get_anomalies(insights: pd.DataFrame, observed_series: Union[pd.Series, list
             anomalies.append(None)
             counter += 1
 
-    return anomalies
+    return np.array(anomalies)
