@@ -448,7 +448,7 @@ class ICP(BaseAnalysisBlock):
                                                   cooldown=ns.pred_args.anomaly_cooldown)
                         if '__mdb_ts_inferred' in ns.data.columns:
                             ignore_idxs = np.where(ns.data['__mdb_ts_inferred'].values)
-                            anomalies[ignore_idxs] = False
+                            anomalies[ignore_idxs] = None
                         row_insights['anomaly'] = list(anomalies)
 
             if ns.tss.is_timeseries and ns.tss.horizon > 1:
