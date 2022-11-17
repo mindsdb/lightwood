@@ -393,11 +393,11 @@ def generate_json_ai(
         )
 
     if is_ts:
-        if output_dtype in [dtype.integer, dtype.float]:
+        if output_dtype in [dtype.integer, dtype.float, dtype.quantity]:
             # forces this acc fn for t+1 time series forecasters
             accuracy_functions = ["complementary_smape_array_accuracy"]
 
-        if output_dtype in (dtype.integer, dtype.float, dtype.num_tsarray):
+        if output_dtype in (dtype.integer, dtype.float, dtype.quantity, dtype.num_tsarray):
             imputers.append({"module": "NumericalImputer",
                              "args": {
                                  "value": "'zero'",
