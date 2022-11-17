@@ -566,11 +566,11 @@
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">is_ts</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">]:</span>
             <span class="c1"># forces this acc fn for t+1 time series forecasters</span>
             <span class="n">accuracy_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;complementary_smape_array_accuracy&quot;</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">num_tsarray</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">output_dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">num_tsarray</span><span class="p">):</span>
             <span class="n">imputers</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;NumericalImputer&quot;</span><span class="p">,</span>
                              <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
                                  <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;&#39;zero&#39;&quot;</span><span class="p">,</span>
