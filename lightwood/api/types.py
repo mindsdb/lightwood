@@ -280,8 +280,8 @@ class JsonAI:
     :param model: The ensemble and its submodels
     :param problem_definition: The ``ProblemDefinition`` criteria.
     :param identifiers: A dictionary of column names and respective data types that are likely identifiers/IDs within the data. Through the default cleaning process, these are ignored.
-    :param cleaner: The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, "None" suggests Lightwood's default approach in ``data.cleaner``.
-    :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data.
+    :param cleaner: The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, "None" suggests the default approach in ``dataprep_ml.cleaners``.
+    :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data. For more details, refer to the `dataprep_ml` package documentation.
     :param analyzer: The Analyzer object is used to evaluate how well a model performed on the predictive task.
     :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.
     :param imputers: A list of objects that will impute missing data on each column. They are called inside the cleaner.
