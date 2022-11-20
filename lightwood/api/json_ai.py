@@ -5,7 +5,7 @@ from dataprep_ml import StatisticalAnalysis
 
 from lightwood.helpers.templating import call, inline_dict, align
 from lightwood.helpers.templating import _consolidate_analysis_blocks
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from lightwood.api.types import (
     JsonAI,
     ProblemDefinition,

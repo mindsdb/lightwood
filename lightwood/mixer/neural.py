@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 from torch.nn.modules.loss import MSELoss
 from torch.optim.optimizer import Optimizer
 
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.torch import LightwoodAutocast

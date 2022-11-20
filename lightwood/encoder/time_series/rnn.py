@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 from torch import optim
 
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.device import get_device_from_name
