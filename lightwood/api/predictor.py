@@ -111,15 +111,17 @@ class PredictorInterface:
         """  # noqa
         pass
 
-    def adjust(self, new_data: pd.DataFrame, old_data: Optional[pd.DataFrame] = None) -> None:
+    def adjust(self, new_data: pd.DataFrame, old_data: Optional[pd.DataFrame] = None, adjust_args: Optional[dict] = None
+               ) -> None:
         """
         Adjusts a previously trained model on new data. Adopts the same process as ``learn`` but with the exception that the `adjust` function expects the best model to have been already trained.
 
         .. warning:: This is experimental and subject to change. 
         :param new_data: New data used to adjust a previously trained model.
         :param old_data: In some situations, the old data is still required to train a model (i.e. Regression mixer) to ensure the new data doesn't entirely override it.
+        :param adjust_args: Optional dictionary with parameters to customize the finetuning process.
 
-        :returns: Nothing; adjusts best-fit model
+        :returns: Adjusts best-fit model in-place, doesn't return anything.
         """  # noqa
         pass
 

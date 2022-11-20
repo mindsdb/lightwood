@@ -577,3 +577,9 @@ class TestTimeseries(unittest.TestCase):
         predictor = predictor_from_json_ai(jai)
         predictor.learn(train_df)
         predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
+
+        # adjust
+        adjust_n_epochs = 5
+        predictor.adjust(test_df, adjust_args={'n_epochs': adjust_n_epochs})
+        predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
+        assert predictor.mixers[0].n_epochs == adjust_n_epochs

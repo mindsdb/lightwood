@@ -1068,7 +1068,7 @@ self.mode = 'train'
 # Prepare data
 # --------------- #
 if dev_data is None:
-    data = train_data if isinstance(train_data, pd.DataFrame) else train_data.data_frame
+    data = train_data
     split = splitter(data,
         self.problem_definition.timeseries_settings,
         self.dtype_dict,
@@ -1080,11 +1080,11 @@ if dev_data is None:
     train_data = split['train']
     dev_data = split['dev']
 
-if isinstance(dev_data, pd.DataFrame):
-    dev_data = EncodedDs(self.encoders, dev_data, self.target)
+train_data = self.preprocess(train_data)
+dev_data = self.preprocess(dev_data)
 
-if isinstance(train_data, pd.DataFrame):
-    train_data = EncodedDs(self.encoders, train_data, self.target)
+dev_data = EncodedDs(self.encoders, dev_data, self.target)
+train_data = EncodedDs(self.encoders, train_data, self.target)
 
 # --------------- #
 # Update/Adjust Mixers
@@ -1092,7 +1092,7 @@ if isinstance(train_data, pd.DataFrame):
 log.info('Updating the mixers')
 
 for mixer in self.mixers:
-    mixer.partial_fit(train_data, dev_data)
+    mixer.partial_fit(train_data, dev_data, adjust_args)
 """  # noqa
 
     adjust_body = align(adjust_body, 2)
@@ -1266,7 +1266,8 @@ class Predictor(PredictorInterface):
 
     @timed
     def adjust(self, train_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],
-        dev_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None) -> None:
+        dev_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None,
+        adjust_args: Optional[dict] = None) -> None:
         # Update mixers with new information
 {adjust_body}
 

@@ -1,3 +1,4 @@
+from typing import Optional
 import pandas as pd
 
 from lightwood.data.encoded_ds import EncodedDs
@@ -54,12 +55,13 @@ class BaseMixer:
         """  # noqa
         raise NotImplementedError()
 
-    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, adjust_args: Optional[dict] = None) -> None:
         """
         Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors. 
 
         :param train_data: encoded representations of the new training data subset. 
         :param dev_data: encoded representations of new the "dev" data subset. As in `fit()`, this can be used as an internal validation subset. 
+        :param adjust_args: optional arguments to customize the finetuning process.
 
         """  # noqa
         pass
