@@ -1142,7 +1142,7 @@ self.analyze_ensemble(enc_train_test)
 if self.problem_definition.fit_on_all:
 
     log.info(f'[Learn phase 8/{n_phases}] - Adjustment on validation requested')
-    self.adjust(enc_train_test["test"].data_frame, ConcatedEncodedDs([enc_train_test["train"], 
+    self.adjust(enc_train_test["test"].data_frame, ConcatedEncodedDs([enc_train_test["train"],
                                                                       enc_train_test["dev"]]).data_frame)
 
 """
