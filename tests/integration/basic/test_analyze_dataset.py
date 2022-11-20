@@ -1,5 +1,5 @@
 from lightwood import analyze_dataset
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 import unittest
 from itertools import cycle
 import random

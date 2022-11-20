@@ -2,7 +2,7 @@ import random
 import string
 import datetime
 from math import log
-from lightwood import dtype
+from type_infer.dtype import dtype
 
 
 test_column_types = {

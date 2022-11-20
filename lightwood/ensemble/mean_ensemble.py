@@ -6,7 +6,7 @@ from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs
-from lightwood import dtype
+from type_infer.dtype import dtype
 
 
 class MeanEnsemble(BaseEnsemble):

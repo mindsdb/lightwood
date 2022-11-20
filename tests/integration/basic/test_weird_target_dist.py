@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 from lightwood.api.types import ProblemDefinition
-from lightwood import dtype
+from type_infer.dtype import dtype
 
 
 class TestBasic(unittest.TestCase):
