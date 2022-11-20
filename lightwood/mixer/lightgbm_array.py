@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 
 import numpy as np
 import pandas as pd
@@ -75,7 +75,7 @@ class LightGBMArray(BaseMixer):
         log.info('Started fitting LGBM models for array prediction')
         self._fit(train_data, dev_data, submodel_method='fit')
 
-    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         log.info('Updating array of LGBM models...')
         self._fit(train_data, dev_data, submodel_method='partial_fit')
 

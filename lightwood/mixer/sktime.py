@@ -3,7 +3,7 @@ import importlib
 from copy import deepcopy
 from datetime import datetime
 from itertools import product
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 
 import optuna
 import numpy as np
@@ -206,7 +206,7 @@ class SkTime(BaseMixer):
                     self.models[group] = model_class()  # with default options (i.e. no seasonality, among others)
                     self.models[group].fit(series, fh=self.fh)
 
-    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         """
         Note: sktime asks for "specification of the time points for which forecasts are requested", and this mixer complies by assuming forecasts will start immediately after the last observed value.
 
