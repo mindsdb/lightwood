@@ -1,5 +1,7 @@
 from typing import Dict, List, Tuple, Optional
 
+from dataprep_ml import StatisticalAnalysis
+
 from lightwood.helpers.log import log
 from lightwood.helpers.ts import filter_ds
 from lightwood.api import dtype
@@ -7,7 +9,7 @@ from lightwood.ensemble import BaseEnsemble
 from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.encoder.text.pretrained import PretrainedLangEncoder
-from lightwood.api.types import ModelAnalysis, StatisticalAnalysis, TimeseriesSettings, PredictionArguments
+from lightwood.api.types import ModelAnalysis, TimeseriesSettings, PredictionArguments
 
 
 def model_analyzer(

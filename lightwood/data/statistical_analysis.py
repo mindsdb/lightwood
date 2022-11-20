@@ -4,13 +4,14 @@ import numpy as np
 import datetime
 import dateinfer
 from dateutil.parser import parse as parse_dt
-from lightwood.api import StatisticalAnalysis, ProblemDefinition
+from lightwood.api import ProblemDefinition
 from lightwood.helpers.numeric import filter_nan_and_none
 from lightwood.helpers.ts import get_ts_groups
 from lightwood.helpers.seed import seed
 from lightwood.data.cleaner import cleaner
 from lightwood.helpers.log import log
 from type_infer.dtype import dtype
+from dataprep_ml import StatisticalAnalysis
 from scipy.stats import entropy
 from lightwood.data.cleaner import _clean_float
 
