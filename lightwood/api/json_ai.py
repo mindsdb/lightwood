@@ -44,7 +44,6 @@ from lightwood.helpers.general import *
 from lightwood.helpers.ts import *
 from lightwood.helpers.log import *
 from lightwood.helpers.numeric import *
-from lightwood.helpers.imputers import *
 from lightwood.helpers.parallelism import *
 from lightwood.helpers.seed import *
 from lightwood.helpers.text import *
@@ -54,6 +53,7 @@ from lightwood.mixer import *
 from dataprep_ml.insights import statistical_analysis
 from dataprep_ml.cleaners import cleaner
 from dataprep_ml.splitters import splitter
+from dataprep_ml.imputers import *
 
 import pandas as pd
 from typing import Dict, List, Union
@@ -870,8 +870,8 @@ if encoder.is_target:
     analyze_data_body = f"""
 self.statistical_analysis = statistical_analysis(data,
                                                  self.dtype_dict,
-                                                 {json_ai.identifiers},
-                                                 self.problem_definition)
+                                                 self.problem_definition.to_dict(),
+                                                 {json_ai.identifiers})
 
 # Instantiate post-training evaluation
 self.analysis_blocks = [{', '.join([call(block) for block in json_ai.analysis_blocks])}]

@@ -73,7 +73,7 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
 
     type_information = infer_types(df, problem_definition.pct_invalid)
     stats = statistical_analysis(
-        df, type_information.dtypes, type_information.identifiers, problem_definition)
+        df, type_information.dtypes, problem_definition.to_dict(), type_information.identifiers)
 
     duration = time.time() - started
     if problem_definition.time_aim is not None:
