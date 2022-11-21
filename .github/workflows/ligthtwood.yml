@@ -27,7 +27,6 @@ jobs:
         pip install --no-cache-dir -e .
         pip install -r requirements_image.txt
         pip install flake8
-        pip install -r tests/requirements.txt
     - name: Install dependencies OSX
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
