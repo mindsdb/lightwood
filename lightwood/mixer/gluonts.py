@@ -62,6 +62,7 @@ class GluonTSMixer(BaseMixer):
         self.dtype_dict = dtype_dict
         self.ts_analysis = ts_analysis
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
+        self.groups = []  # list can grow using adjust() with new data
         self.estimator = None
         self.model = None
         self.train_cache = None
@@ -75,13 +76,17 @@ class GluonTSMixer(BaseMixer):
         except AttributeError:
             self.distribution = StudentTOutput()  # use StudentTOutput when the provided distribution does not exist
 
+        if len(self.grouped_by) > 1:
+            raise Exception("This mixer can only be used with 0 or 1 partition columns.")
+
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """ Fits the model. """  # noqa
         log.info('Started fitting GluonTS forecasting model')
 
         # prepare data
         cat_ds = ConcatedEncodedDs([train_data, dev_data])
-        train_ds = self._make_initial_ds(cat_ds.data_frame, train=True)
+        fit_groups = list(cat_ds.data_frame[self.grouped_by[0]].unique())
+        train_ds = self._make_initial_ds(cat_ds.data_frame, phase='train', groups=fit_groups)
 
         self.estimator = DeepAREstimator(
             freq=train_ds.freq,
@@ -112,9 +117,10 @@ class GluonTSMixer(BaseMixer):
             self.patience = args['patience']
         self.estimator.trainer = Trainer(epochs=self.n_epochs, callbacks=[EarlyStop(patience=self.patience)])
 
-        # prepare data and finetune
+        # prepare data and fine-tune
         ds = ConcatedEncodedDs([train_data, dev_data])
-        ds = self._make_initial_ds(ds.data_frame, train=False)
+        adjust_groups = list(ds.data_frame[self.grouped_by[0]].unique())
+        ds = self._make_initial_ds(ds.data_frame, phase='adjust', groups=adjust_groups)
         self.model = self.estimator.train_from(self.model, ds)
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
@@ -151,13 +157,19 @@ class GluonTSMixer(BaseMixer):
 
         return ydf
 
-    def _make_initial_ds(self, df=None, train=False, groups=None):
+    def _make_initial_ds(self, df=None, phase='predict', groups=None):
         oby = self.ts_analysis["tss"].order_by
         gby = self.ts_analysis["tss"].group_by if self.ts_analysis["tss"].group_by else []
         freq = self.ts_analysis['sample_freqs']['__default']
         keep_cols = [f'__mdb_original_{oby}', self.target] + [col for col in gby]
 
-        if df is None and not train:
+        if groups is None and gby:
+            groups = self.groups
+        elif gby and phase in ('train', 'adjust') and self.grouped_by != ['__default']:
+            # we extend all seen groups for subsequent adjustments
+            self.groups.extend(set(groups))
+
+        if df is None and phase not in ('train', 'adjust'):
             df = self.train_cache
             if gby:
                 df = df[df[gby[0]].isin(groups)]
@@ -165,16 +177,21 @@ class GluonTSMixer(BaseMixer):
             sub_df = df[keep_cols]
             df = deepcopy(sub_df)
 
-            if train:
-                self.train_cache = df
+            if phase == 'train':
+                self.train_cache = df.sort_index()
             else:
                 if gby:
                     cache = self.train_cache[self.train_cache[gby[0]].isin(groups)]
                 else:
                     cache = self.train_cache
+
+                if phase == 'adjust':
+                    # update cache to include all new information (pre-group filter)
+                    self.train_cache = pd.concat([self.train_cache, df]).drop_duplicates().sort_index()
+
                 df = pd.concat([cache, df]).sort_index()
 
-        df = df.drop_duplicates()  # .reset_index(drop=True)
+        df = df.drop_duplicates()
 
         if len(df) == 0:
             return None
