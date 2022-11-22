@@ -4,7 +4,6 @@ from typing import Union
 import dill
 import pandas as pd
 from lightwood.api.types import JsonAI, ProblemDefinition
-from dataprep_ml import DataAnalysis
 from dataprep_ml.insights import statistical_analysis
 from type_infer.infer import infer_types
 from lightwood.api.predictor import PredictorInterface
