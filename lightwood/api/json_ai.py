@@ -1080,8 +1080,9 @@ if dev_data is None:
     train_data = split['train']
     dev_data = split['dev']
 
-train_data = self.preprocess(train_data)
-dev_data = self.preprocess(dev_data)
+if not adjust_args.get('learn_call'):
+    train_data = self.preprocess(train_data)
+    dev_data = self.preprocess(dev_data)
 
 dev_data = EncodedDs(self.encoders, dev_data, self.target)
 train_data = EncodedDs(self.encoders, train_data, self.target)
@@ -1143,7 +1144,8 @@ if self.problem_definition.fit_on_all:
 
     log.info(f'[Learn phase 8/{n_phases}] - Adjustment on validation requested')
     self.adjust(enc_train_test["test"].data_frame, ConcatedEncodedDs([enc_train_test["train"],
-                                                                      enc_train_test["dev"]]).data_frame)
+                                                                      enc_train_test["dev"]]).data_frame,
+                                                                      adjust_args={'learn_call': True})
 
 """
     learn_body = align(learn_body, 2)
