@@ -1080,7 +1080,7 @@ if dev_data is None:
     train_data = split['train']
     dev_data = split['dev']
 
-if not adjust_args.get('learn_call'):
+if adjust_args is None or not adjust_args.get('learn_call'):
     train_data = self.preprocess(train_data)
     dev_data = self.preprocess(dev_data)
 
