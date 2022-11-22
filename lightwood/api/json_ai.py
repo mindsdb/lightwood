@@ -660,14 +660,14 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "target": "$target",
                 "mode": "$mode",
                 "imputers": "$imputers",
-                "timeseries_settings": "$problem_definition.timeseries_settings",
+                "timeseries_settings": "$problem_definition.timeseries_settings.to_dict()",
                 "anomaly_detection": "$problem_definition.anomaly_detection",
             },
         },
         "splitter": {
             "module": "splitter",
             "args": {
-                "tss": "$problem_definition.timeseries_settings",
+                "tss": "$problem_definition.timeseries_settings.to_dict()",
                 "data": "data",
                 "seed": "$problem_definition.seed_nr",
                 "target": "$target",
