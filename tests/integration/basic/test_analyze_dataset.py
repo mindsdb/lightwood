@@ -110,5 +110,3 @@ class TestInferTypes(unittest.TestCase):
         # 50 is a magic number, when we change this, tests must change
         assert len(set(stats.histograms['date_timestamp']['x'])) == 50
         assert len(set(stats.histograms['date_date']['x'])) == 50
-
-

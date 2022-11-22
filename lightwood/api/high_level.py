@@ -127,7 +127,7 @@ def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
 
     type_information = infer_types(df, problem_definition.pct_invalid)
     stats = statistical_analysis(
-        df, type_information.dtypes, type_information.identifiers, problem_definition)
+        df, type_information.dtypes, problem_definition.to_dict(), type_information.identifiers)
 
     return DataAnalysis(
         type_information=type_information,
