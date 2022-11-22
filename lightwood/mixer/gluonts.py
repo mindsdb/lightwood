@@ -85,7 +85,7 @@ class GluonTSMixer(BaseMixer):
 
         # prepare data
         cat_ds = ConcatedEncodedDs([train_data, dev_data])
-        fit_groups = list(cat_ds.data_frame[self.grouped_by[0]].unique())
+        fit_groups = list(cat_ds.data_frame[self.grouped_by[0]].unique()) if self.grouped_by != ['__default'] else None
         train_ds = self._make_initial_ds(cat_ds.data_frame, phase='train', groups=fit_groups)
 
         self.estimator = DeepAREstimator(
@@ -119,7 +119,7 @@ class GluonTSMixer(BaseMixer):
 
         # prepare data and fine-tune
         ds = ConcatedEncodedDs([train_data, dev_data])
-        adjust_groups = list(ds.data_frame[self.grouped_by[0]].unique())
+        adjust_groups = list(ds.data_frame[self.grouped_by[0]].unique()) if self.grouped_by != ['__default'] else None
         ds = self._make_initial_ds(ds.data_frame, phase='adjust', groups=adjust_groups)
         self.model = self.estimator.train_from(self.model, ds)
 
