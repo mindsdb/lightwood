@@ -7,7 +7,6 @@ from lightwood.api.types import (
 )
 from lightwood.api.predictor import PredictorInterface
 from lightwood.api.high_level import (
-    analyze_dataset,
     code_from_problem,
     predictor_from_problem,
     predictor_from_code,
@@ -18,7 +17,6 @@ from lightwood.api.high_level import (
 )
 
 __all__ = [
-    "analyze_dataset",
     "code_from_problem",
     "predictor_from_problem",
     "predictor_from_code",

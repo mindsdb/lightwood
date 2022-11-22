@@ -114,27 +114,6 @@ def predictor_from_code(code: str) -> PredictorInterface:
     return predictor
 
 
-def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
-    """
-    You can use this to understand and visualize the data, it's not a part of the pipeline one would use for creating and training predictive models.
-
-    :param df: The raw data
-
-    :returns: An object containing insights about the data (specifically the type information and statistical analysis)
-    """ # noqa
-
-    problem_definition = ProblemDefinition.from_dict({'target': str(df.columns[0])})
-
-    type_information = infer_types(df, problem_definition.pct_invalid)
-    stats = statistical_analysis(
-        df, type_information.dtypes, problem_definition.to_dict(), type_information.identifiers)
-
-    return DataAnalysis(
-        type_information=type_information,
-        statistical_analysis=stats
-    )
-
-
 def code_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]) -> str:
     """
     :param df: The raw data
