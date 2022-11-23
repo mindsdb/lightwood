@@ -561,19 +561,27 @@ class TestTimeseries(unittest.TestCase):
     def test_12_gluonts(self):
         """ Tests GluonTS mixer """
         data = pd.read_csv('tests/data/arrivals.csv')
-        data = data[data['Country'] == 'US']
-        order_by = 'T'
-        train_df, test_df = self.split_arrivals(data, grouped=False)
-        jai = json_ai_from_problem(train_df, ProblemDefinition.from_dict({'target': 'Traffic',
-                                                                          'timeseries_settings': {
-                                                                              'order_by': order_by,
-                                                                              'window': 4 * 5,
-                                                                              'horizon': 4 * 2
-                                                                          }}))
-        jai.model['args']['submodels'] = [{
-            "module": "GluonTSMixer",
-            "args": {}
-        }]
-        predictor = predictor_from_json_ai(jai)
-        predictor.learn(train_df)
-        predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
+        for i, subdata in enumerate([data, data[data['Country'] == 'US']]):
+            order_by = 'T'
+            train_df, test_df = self.split_arrivals(subdata, grouped=False)
+            pdef = {'target': 'Traffic',
+                    'timeseries_settings': {
+                        'order_by': order_by,
+                        'window': 4 * 5,
+                        'horizon': 4 * 2}}
+            if i == 0:
+                pdef['timeseries_settings']['group_by'] = ['Country']
+            jai = json_ai_from_problem(train_df, ProblemDefinition.from_dict(pdef))
+            jai.model['args']['submodels'] = [{
+                "module": "GluonTSMixer",
+                "args": {}
+            }]
+            predictor = predictor_from_json_ai(jai)
+            predictor.learn(train_df)
+            predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
+
+            # adjust
+            adjust_n_epochs = 5
+            predictor.adjust(test_df, adjust_args={'n_epochs': adjust_n_epochs})
+            predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
+            assert predictor.mixers[0].n_epochs == adjust_n_epochs

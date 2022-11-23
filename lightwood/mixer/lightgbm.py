@@ -1,6 +1,6 @@
 import time
 import inspect
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Optional
 import torch
 import optuna
 import lightgbm
@@ -258,7 +258,7 @@ class LightGBM(BaseMixer):
         if self.fit_on_dev:
             self.partial_fit(dev_data, train_data)
 
-    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         """
         Updates the LightGBM model.
 

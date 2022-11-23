@@ -296,7 +296,7 @@ class Neural(BaseMixer):
         self._fit(train_data, dev_data)
         self._final_tuning(dev_data)
 
-    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         """
         Augments the mixer's fit with new data, nr of epochs is based on the amount of epochs the original fitting took
 

@@ -60,6 +60,9 @@ class TestBasic(unittest.TestCase):
             predictor.predict(pd.DataFrame())
         self.assertTrue('Empty input' in str(ctx.exception))
 
+        # test adjust
+        predictor.adjust(df)
+
     def test_1_stacked_ensemble(self):
         from lightwood.ensemble.stacked_ensemble import StackedEnsemble
         df = pd.read_csv('tests/data/concrete_strength.csv')[:500]

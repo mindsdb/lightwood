@@ -1,3 +1,4 @@
+from typing import Optional
 import torch
 import pandas as pd
 from scipy.special import softmax
@@ -67,7 +68,7 @@ class Regression(BaseMixer):
         self.model = Ridge().fit(X, Y)
         log.info(f'Regression based correlation of: {self.model.score(X, Y)}')
 
-    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         """
         Fits the linear regression on some data, this refits the model entirely rather than updating it
 

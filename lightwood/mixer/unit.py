@@ -5,7 +5,7 @@ For encoders that already fine-tune on the targets (namely text)
 the unity mixer just arg-maxes the output of the encoder.
 """
 
-from typing import List
+from typing import List, Optional
 
 import torch
 import pandas as pd
@@ -27,7 +27,7 @@ class Unit(BaseMixer):
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         log.info("Unit Mixer just borrows from encoder")
 
-    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         pass
 
     def __call__(self, ds: EncodedDs,
