@@ -2,8 +2,10 @@ from typing import Optional, List, Dict
 import torch
 import pandas as pd
 
+from dataprep_ml import StatisticalAnalysis
+
 from lightwood.helpers.log import log
-from lightwood.api.types import ProblemDefinition, PredictionArguments, StatisticalAnalysis
+from lightwood.api.types import ProblemDefinition, PredictionArguments
 from lightwood.helpers.ts import get_inferred_timestamps
 from lightwood.analysis.base import BaseAnalysisBlock
 

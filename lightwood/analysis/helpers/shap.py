@@ -5,7 +5,7 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 import pandas as pd
 from lightwood.analysis.base import BaseAnalysisBlock
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.helpers.log import log

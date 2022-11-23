@@ -2,7 +2,7 @@ from typing import List, Iterable
 
 import torch
 
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from lightwood.encoder.array import ArrayEncoder
 
 

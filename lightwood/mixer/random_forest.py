@@ -11,7 +11,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import check_cv, cross_val_predict
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs

@@ -11,9 +11,9 @@ from lightwood.api.types import ProblemDefinition
 from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
+from dataprep_ml.splitters import stratify
 
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem, predictor_from_json_ai  # noqa
-from lightwood.data.splitter import stratify
 from lightwood.mixer.sktime import SkTime
 
 np.random.seed(0)
