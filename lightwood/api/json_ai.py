@@ -1075,14 +1075,15 @@ self.mode = 'train'
 # --------------- #
 if dev_data is None:
     data = train_data
-    split = splitter(data,
-        self.problem_definition.timeseries_settings,
-        self.dtype_dict,
-        self.problem_definition.seed_nr,
+    split = splitter(
+        data=data,
         pct_train=0.8,
         pct_dev=0.2,
         pct_test=0,
-        target=self.target)
+        tss=self.problem_definition.timeseries_settings.to_dict(),
+        seed=self.problem_definition.seed_nr,
+        target=self.target,
+        dtype_dict=self.dtype_dict)
     train_data = split['train']
     dev_data = split['dev']
 
