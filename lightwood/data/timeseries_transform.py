@@ -312,7 +312,7 @@ def _ts_add_previous_target(df: pd.DataFrame, target: str, window: int) -> pd.Da
     previous_target_values_arr = []
     for i in range(len(previous_target_values)):
         prev_vals = previous_target_values[max(i - window, 0):i + 1]
-        arr = [None] * (window - len(prev_vals) + 1)
+        arr = [None] * (window - len(prev_vals))
         arr.extend(prev_vals)
         previous_target_values_arr.append(arr)
 
