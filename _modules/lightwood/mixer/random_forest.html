@@ -177,14 +177,14 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">optuna</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">optuna</span> <span class="kn">import</span> <span class="n">trial</span> <span class="k">as</span> <span class="n">trial_module</span>
 <span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">clone</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">check_cv</span><span class="p">,</span> <span class="n">cross_val_predict</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="n">RandomForestClassifier</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">ConcatedEncodedDs</span><span class="p">,</span> <span class="n">EncodedDs</span>
@@ -356,7 +356,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;RandomForest based correlation of: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="RandomForest.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.RandomForest.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="RandomForest.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.RandomForest.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The RandomForest mixer does not support updates. If the model does not exist, a new one will be created and fitted. </span>
 

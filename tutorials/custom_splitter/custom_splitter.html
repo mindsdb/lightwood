@@ -468,24 +468,24 @@ as a final pass to see what models perform best.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">nltk</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
+import pandas as pd
+import torch
+import nltk
+import matplotlib.pyplot as plt
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+import os
+import sys
 
-<span class="c1"># Lightwood modules</span>
-<span class="kn">import</span> <span class="nn">lightwood</span> <span class="k">as</span> <span class="nn">lw</span>
-<span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> \
-                      <span class="n">JsonAI</span><span class="p">,</span> \
-                      <span class="n">json_ai_from_problem</span><span class="p">,</span> \
-                      <span class="n">code_from_json_ai</span><span class="p">,</span> \
-                      <span class="n">predictor_from_code</span>
+# Lightwood modules
+import lightwood as lw
+from lightwood import ProblemDefinition, \
+                      JsonAI, \
+                      json_ai_from_problem, \
+                      code_from_json_ai, \
+                      predictor_from_code
 
-<span class="kn">import</span> <span class="nn">imblearn</span> <span class="c1"># Vers 0.5.0 minimum requirement</span>
+import imblearn # Vers 0.5.0 minimum requirement
 </pre></div>
 </div>
 </div>
@@ -494,8 +494,8 @@ as a final pass to see what models perform best.</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-3157:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-3157:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2344:No torchvision/pillow detected, image encoder not supported</span>
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/json.py:101: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/model/deepar/__init__.py:18: FutureWarning: The module gluonts.model.deepar has been moved to gluonts.mx.model.deepar. In GluonTS v0.12 it will be no longer possible to use the old path. Try to use &#39;from gluonts.mx import DeepAREstimator&#39;.
@@ -509,9 +509,9 @@ as a final pass to see what models perform best.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the data</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/jupyter/creditcard.csv.zip&quot;</span><span class="p">)</span>
-<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Load the data
+data = pd.read_csv(&quot;https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/jupyter/creditcard.csv.zip&quot;)
+data.head()
 </pre></div>
 </div>
 </div>
@@ -693,14 +693,14 @@ as a final pass to see what models perform best.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Distribution of Classes&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>f = plt.figure()
+ax = f.add_subplot(1,1,1)
+ax.hist(data[&#39;Class&#39;], bins = [-0.1, 0.1, 0.9, 1.1], log=True)
+ax.set_ylabel(&quot;Log Counts&quot;)
+ax.set_xticks([0, 1])
+ax.set_xticklabels([&quot;0&quot;, &quot;1&quot;])
+ax.set_xlabel(&quot;Class&quot;)
+ax.set_title(&quot;Distribution of Classes&quot;)
 </pre></div>
 </div>
 </div>
@@ -730,13 +730,13 @@ Text(0.5, 1.0, &#39;Distribution of Classes&#39;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setup the problem definition</span>
-<span class="n">problem_definition</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;Class&#39;</span><span class="p">,</span>
-<span class="p">}</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Setup the problem definition
+problem_definition = {
+    &#39;target&#39;: &#39;Class&#39;,
+}
 
-<span class="c1"># Generate the j{ai}son syntax</span>
-<span class="n">json_ai</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
+# Generate the j{ai}son syntax
+json_ai = json_ai_from_problem(data, problem_definition)
 <br/></pre></div>
 </div>
 </div>
@@ -745,72 +745,72 @@ Text(0.5, 1.0, &#39;Distribution of Classes&#39;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-3157:Analyzing a sample of 18424</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:from a total population of 284807, this is equivalent to 6.5% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: Time</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column Time has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V1</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V1 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V2</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V2 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V3</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V3 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V4</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V4 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V5</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V5 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V6</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V6 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V7</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V7 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V8</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V8 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V9</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V9 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V10</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V10 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V11</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V11 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V12</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V12 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V13</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V13 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V14</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V14 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V15</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V15 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V16</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V16 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V17</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V17 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V18</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V18 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V19</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V19 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V20</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V20 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V21</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V21 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V22</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V22 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V23</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V23 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V24</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V24 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V25</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V25 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V26</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V26 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V27</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V27 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: V28</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column V28 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: Amount</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column Amount has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Infering type for: Class</span>
-<span class="ansi-green-fg">INFO:type_infer-3157:Column Class has data type binary</span>
-<span class="ansi-green-fg">INFO:lightwood-3157:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-3157:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Analyzing a sample of 18424</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:from a total population of 284807, this is equivalent to 6.5% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: Time</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column Time has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V1</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V1 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V2</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V2 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V3</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V3 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V4</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V4 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V5</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V5 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V6</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V6 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V7</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V7 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V8</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V8 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V9</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V9 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V10</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V10 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V11</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V11 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V12</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V12 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V13</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V13 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V14</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V14 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V15</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V15 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V16</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V16 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V17</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V17 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V18</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V18 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V19</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V19 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V20</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V20 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V21</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V21 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V22</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V22 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V23</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V23 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V24</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V24 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V25</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V25 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V26</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V26 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V27</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V27 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: V28</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column V28 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: Amount</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column Amount has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Infering type for: Class</span>
+<span class="ansi-green-fg">INFO:type_infer-2344:Column Class has data type binary</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2344:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2344:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood looks at each of the many columns and indicates they are mostly float, with exception of “<strong>Class</strong>” which is binary.</p>
@@ -827,67 +827,67 @@ Text(0.5, 1.0, &#39;Distribution of Classes&#39;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%writefile</span> MyCustomSplitter.py
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%writefile MyCustomSplitter.py
 
-<span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
-
-
-<span class="kn">from</span> <span class="nn">imblearn.over_sampling</span> <span class="kn">import</span> <span class="n">SMOTE</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+from type_infer.dtype import dtype
+import pandas as pd
+import numpy as np
+from typing import List, Dict
+from itertools import product
+from lightwood.api.types import TimeseriesSettings
+from lightwood.helpers.log import log
 
 
-<span class="k">def</span> <span class="nf">MySplitter</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">pct_train</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
-    <span class="n">pct_dev</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
-    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Custom splitting function</span>
+from imblearn.over_sampling import SMOTE
+from sklearn.model_selection import train_test_split
 
 
-<span class="sd">    :param data: Input data</span>
-<span class="sd">    :param target: Name of the target</span>
-<span class="sd">    :param pct_train: Percentage of data reserved for training, taken out of full data</span>
-<span class="sd">    :param pct_dev: Percentage of data reserved for dev, taken out of train data</span>
-<span class="sd">    :param seed: Random seed for reproducibility</span>
+def MySplitter(
+    data: pd.DataFrame,
+    target: str,
+    pct_train: float = 0.8,
+    pct_dev: float = 0.1,
+    seed: int = 1,
+) -&gt; Dict[str, pd.DataFrame]:
+    &quot;&quot;&quot;
+    Custom splitting function
 
-<span class="sd">    :returns: A dictionary containing the keys train, test and dev with their respective data frames.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Shuffle the data</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    :param data: Input data
+    :param target: Name of the target
+    :param pct_train: Percentage of data reserved for training, taken out of full data
+    :param pct_dev: Percentage of data reserved for dev, taken out of train data
+    :param seed: Random seed for reproducibility
 
-    <span class="c1"># Split into feature columns + target</span>
-    <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="o">!=</span> <span class="n">target</span><span class="p">]</span>  <span class="c1"># .values</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>  <span class="c1"># .values</span>
+    :returns: A dictionary containing the keys train, test and dev with their respective data frames.
+    &quot;&quot;&quot;
 
-    <span class="c1"># Create a train/test split</span>
-    <span class="n">X2</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
-        <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="n">pct_train</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
-    <span class="p">)</span>
+    # Shuffle the data
+    data = data.sample(frac=1, random_state=seed).reset_index(drop=True)
 
-    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_dev</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_dev</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
-        <span class="n">X2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="n">pct_dev</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y2</span>
-    <span class="p">)</span>
+    # Split into feature columns + target
+    X = data.iloc[:, data.columns != target]  # .values
+    y = data[target]  # .values
 
-    <span class="c1"># Create a SMOTE model and bump up underbalanced class JUST for train data</span>
-    <span class="n">SMOTE_model</span> <span class="o">=</span> <span class="n">SMOTE</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+    # Create a train/test split
+    X2, X_test, y2, y_test = train_test_split(
+        X, y, train_size=pct_train, random_state=seed, stratify=data[target]
+    )
 
-    <span class="n">Xtrain_mod</span><span class="p">,</span> <span class="n">ytrain_mod</span> <span class="o">=</span> <span class="n">SMOTE_model</span><span class="o">.</span><span class="n">fit_resample</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+    X_train, X_dev, y_train, y_dev = train_test_split(
+        X2, y2, test_size=pct_dev, random_state=seed, stratify=y2
+    )
 
-    <span class="n">Xtrain_mod</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">ytrain_mod</span>
-    <span class="n">X_test</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_test</span>
-    <span class="n">X_dev</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_dev</span>
+    # Create a SMOTE model and bump up underbalanced class JUST for train data
+    SMOTE_model = SMOTE(random_state=seed)
 
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="n">Xtrain_mod</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="n">X_test</span><span class="p">,</span> <span class="s2">&quot;dev&quot;</span><span class="p">:</span> <span class="n">X_dev</span><span class="p">}</span>
+    Xtrain_mod, ytrain_mod = SMOTE_model.fit_resample(X_train, y_train.ravel())
+
+    Xtrain_mod[target] = ytrain_mod
+    X_test[target] = y_test
+    X_dev[target] = y_dev
+
+    return {&quot;train&quot;: Xtrain_mod, &quot;test&quot;: X_test, &quot;dev&quot;: X_dev}
 <br/></pre></div>
 </div>
 </div>
@@ -908,9 +908,9 @@ Writing MyCustomSplitter.py
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">load_custom_module</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from lightwood import load_custom_module
 
-<span class="n">load_custom_module</span><span class="p">(</span><span class="s1">&#39;MyCustomSplitter.py&#39;</span><span class="p">)</span>
+load_custom_module(&#39;MyCustomSplitter.py&#39;)
 </pre></div>
 </div>
 </div>
@@ -940,25 +940,25 @@ Writing MyCustomSplitter.py
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">json_ai</span><span class="o">.</span><span class="n">splitter</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;MyCustomSplitter.MySplitter&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;pct_train&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
-            <span class="s2">&quot;pct_dev&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
-            <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="mi">1</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>json_ai.splitter = {
+        &quot;module&quot;: &quot;MyCustomSplitter.MySplitter&quot;,
+        &quot;args&quot;: {
+            &quot;data&quot;: &quot;data&quot;,
+            &quot;target&quot;: &quot;$target&quot;,
+            &quot;pct_train&quot;: 0.8,
+            &quot;pct_dev&quot;: 0.1,
+            &quot;seed&quot;: 1
+        }
+    }
 
-<span class="c1">#Generate python code that fills in your pipeline</span>
-<span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
+#Generate python code that fills in your pipeline
+code = code_from_json_ai(json_ai)
 
-<span class="nb">print</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+print(code)
 
-<span class="c1"># Save code to a file (Optional)</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;custom_splitter_pipeline.py&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
-    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+# Save code to a file (Optional)
+with open(&#39;custom_splitter_pipeline.py&#39;, &#39;w&#39;) as fp:
+    fp.write(code)
 </pre></div>
 </div>
 </div>
@@ -967,7 +967,7 @@ Writing MyCustomSplitter.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-3157:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2344:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -987,12 +987,17 @@ from lightwood.helpers.general import *
 from lightwood.helpers.ts import *
 from lightwood.helpers.log import *
 from lightwood.helpers.numeric import *
-from lightwood.helpers.imputers import *
 from lightwood.helpers.parallelism import *
 from lightwood.helpers.seed import *
 from lightwood.helpers.text import *
 from lightwood.helpers.torch import *
 from lightwood.mixer import *
+
+from dataprep_ml.insights import statistical_analysis
+from dataprep_ml.cleaners import cleaner
+from dataprep_ml.splitters import splitter
+from dataprep_ml.imputers import *
+
 import pandas as pd
 from typing import Dict, List, Union
 import os
@@ -1040,7 +1045,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 42768.0,
                 &#34;seconds_per_encoder&#34;: None,
-                &#34;expected_additional_time&#34;: 70.15057921409607,
+                &#34;expected_additional_time&#34;: 70.19299149513245,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -1179,8 +1184,8 @@ class Predictor(PredictorInterface):
     def analyze_data(self, data: pd.DataFrame) -&gt; None:
         # Perform a statistical analysis on the unprocessed data
 
-        self.statistical_analysis = lightwood.data.statistical_analysis(
-            data, self.dtype_dict, {}, self.problem_definition
+        self.statistical_analysis = statistical_analysis(
+            data, self.dtype_dict, self.problem_definition.to_dict(), {}
         )
 
         # Instantiate post-training evaluation
@@ -1205,7 +1210,7 @@ class Predictor(PredictorInterface):
             target=self.target,
             mode=self.mode,
             imputers=self.imputers,
-            timeseries_settings=self.problem_definition.timeseries_settings,
+            timeseries_settings=self.problem_definition.timeseries_settings.to_dict(),
             anomaly_detection=self.problem_definition.anomaly_detection,
         )
 
@@ -1512,8 +1517,11 @@ class Predictor(PredictorInterface):
 
             log.info(f&#34;[Learn phase 8/{n_phases}] - Adjustment on validation requested&#34;)
             self.adjust(
-                enc_train_test[&#34;test&#34;],
-                ConcatedEncodedDs([enc_train_test[&#34;train&#34;], enc_train_test[&#34;dev&#34;]]),
+                enc_train_test[&#34;test&#34;].data_frame,
+                ConcatedEncodedDs(
+                    [enc_train_test[&#34;train&#34;], enc_train_test[&#34;dev&#34;]]
+                ).data_frame,
+                adjust_args={&#34;learn_call&#34;: True},
             )
 
     @timed
@@ -1521,6 +1529,7 @@ class Predictor(PredictorInterface):
         self,
         train_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],
         dev_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None,
+        adjust_args: Optional[dict] = None,
     ) -&gt; None:
         # Update mixers with new information
 
@@ -1530,29 +1539,26 @@ class Predictor(PredictorInterface):
         # Prepare data
         # --------------- #
         if dev_data is None:
-            data = (
-                train_data
-                if isinstance(train_data, pd.DataFrame)
-                else train_data.data_frame
-            )
+            data = train_data
             split = splitter(
-                data,
-                self.problem_definition.timeseries_settings,
-                self.dtype_dict,
-                self.problem_definition.seed_nr,
+                data=data,
                 pct_train=0.8,
                 pct_dev=0.2,
                 pct_test=0,
+                tss=self.problem_definition.timeseries_settings.to_dict(),
+                seed=self.problem_definition.seed_nr,
                 target=self.target,
+                dtype_dict=self.dtype_dict,
             )
             train_data = split[&#34;train&#34;]
             dev_data = split[&#34;dev&#34;]
 
-        if isinstance(dev_data, pd.DataFrame):
-            dev_data = EncodedDs(self.encoders, dev_data, self.target)
+        if adjust_args is None or not adjust_args.get(&#34;learn_call&#34;):
+            train_data = self.preprocess(train_data)
+            dev_data = self.preprocess(dev_data)
 
-        if isinstance(train_data, pd.DataFrame):
-            train_data = EncodedDs(self.encoders, train_data, self.target)
+        dev_data = EncodedDs(self.encoders, dev_data, self.target)
+        train_data = EncodedDs(self.encoders, train_data, self.target)
 
         # --------------- #
         # Update/Adjust Mixers
@@ -1560,7 +1566,7 @@ class Predictor(PredictorInterface):
         log.info(&#34;Updating the mixers&#34;)
 
         for mixer in self.mixers:
-            mixer.partial_fit(train_data, dev_data)
+            mixer.partial_fit(train_data, dev_data, adjust_args)
 
     @timed
     def predict(self, data: pd.DataFrame, args: Dict = {}) -&gt; pd.DataFrame:
@@ -1638,8 +1644,8 @@ class Predictor(PredictorInterface):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Turn the code above into a predictor object</span>
-<span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Turn the code above into a predictor object
+predictor = predictor_from_code(code)
 </pre></div>
 </div>
 </div>
@@ -1647,9 +1653,9 @@ class Predictor(PredictorInterface):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pre-process the data</span>
-<span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-<span class="n">train_test_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">cleaned_data</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Pre-process the data
+cleaned_data = predictor.preprocess(data)
+train_test_data = predictor.split(cleaned_data)
 </pre></div>
 </div>
 </div>
@@ -1658,48 +1664,48 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-3157:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-3157: `preprocess` runtime: 13.78 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-3157:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-3157: `split` runtime: 3.28 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2344:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2344: `preprocess` runtime: 14.6 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2344:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2344: `split` runtime: 1.73 seconds</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">15</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plt.rcParams[&#39;font.size&#39;]=15
+f = plt.figure(figsize=(18, 5))
 
-<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">train_test_data</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Train:</span><span class="se">\n</span><span class="s2">Distribution of Classes&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">])</span>
+ax = f.add_subplot(1,3,1)
+ax.hist(train_test_data[&quot;train&quot;][&#39;Class&#39;], bins = [-0.1, 0.1, 0.9, 1.1], log=True)
+ax.set_ylabel(&quot;Log Counts&quot;)
+ax.set_xticks([0, 1])
+ax.set_xticklabels([&quot;0&quot;, &quot;1&quot;])
+ax.set_xlabel(&quot;Class&quot;)
+ax.set_title(&quot;Train:\nDistribution of Classes&quot;)
+ax.set_ylim([1, 1e6])
 
-<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">train_test_data</span><span class="p">[</span><span class="s2">&quot;dev&quot;</span><span class="p">][</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Dev:</span><span class="se">\n</span><span class="s2">Distribution of Classes&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">])</span>
+ax = f.add_subplot(1,3,2)
+ax.hist(train_test_data[&quot;dev&quot;][&#39;Class&#39;], bins = [-0.1, 0.1, 0.9, 1.1], log=True, color=&#39;k&#39;)
+ax.set_ylabel(&quot;Log Counts&quot;)
+ax.set_xticks([0, 1])
+ax.set_xticklabels([&quot;0&quot;, &quot;1&quot;])
+ax.set_xlabel(&quot;Class&quot;)
+ax.set_title(&quot;Dev:\nDistribution of Classes&quot;)
+ax.set_ylim([1, 1e6])
 
 
-<span class="n">ax</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">train_test_data</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">][</span><span class="s1">&#39;Class&#39;</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Log Counts&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Class&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Test:</span><span class="se">\n</span><span class="s2">Distribution of Classes&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">])</span>
+ax = f.add_subplot(1,3,3)
+ax.hist(train_test_data[&quot;test&quot;][&#39;Class&#39;], bins = [-0.1, 0.1, 0.9, 1.1], log=True, color=&#39;r&#39;)
+ax.set_ylabel(&quot;Log Counts&quot;)
+ax.set_xticks([0, 1])
+ax.set_xticklabels([&quot;0&quot;, &quot;1&quot;])
+ax.set_xlabel(&quot;Class&quot;)
+ax.set_title(&quot;Test:\nDistribution of Classes&quot;)
+ax.set_ylim([1, 1e6])
 
-<span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+f.tight_layout()
 </pre></div>
 </div>
 </div>

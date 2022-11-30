@@ -461,7 +461,7 @@ div.rendered_html tbody tr:hover {
 <li><p>To generate a Json AI object from some dataset and a problem definition</p></li>
 <li><p>To train a Lightwood predictor</p></li>
 </ul>
-<p>In both cases, we generate a <code class="docutils literal notranslate"><span class="pre">StatisticalAnalyzer</span></code> object to store key facts about the data we are using, and refer to them afterwards.</p>
+<p>In both cases, we leverage the <code class="docutils literal notranslate"><span class="pre">StatisticalAnalyzer</span></code> object from <code class="docutils literal notranslate"><span class="pre">dataprep_ml</span></code> (another ML package in the MindsDB ecosystem) to store key facts about the data we are using, and refer to them afterwards.</p>
 <div class="section" id="Objective">
 <h2>Objective<a class="headerlink" href="#Objective" title="Permalink to this headline">¶</a></h2>
 <p>In this tutorial, we will take a look at the automatically generated statistical analysis for a sample dataset.</p>
@@ -473,10 +473,10 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pandas as pd
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/mindsdb/lightwood/stable/tests/data/hdi.csv&#39;</span><span class="p">)</span>
-<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+df = pd.read_csv(&#39;https://raw.githubusercontent.com/mindsdb/lightwood/stable/tests/data/hdi.csv&#39;)
+df.head()
 </pre></div>
 </div>
 </div>
@@ -576,9 +576,9 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from lightwood.api.high_level import ProblemDefinition
 
-<span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;Development Index&#39;</span><span class="p">})</span>
+problem_definition = ProblemDefinition.from_dict({&#39;target&#39;: &#39;Development Index&#39;})
 </pre></div>
 </div>
 </div>
@@ -587,8 +587,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2543:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2543:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-3095:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-3095:No torchvision/pillow detected, image encoder not supported</span>
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/json.py:101: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/model/deepar/__init__.py:18: FutureWarning: The module gluonts.model.deepar has been moved to gluonts.mx.model.deepar. In GluonTS v0.12 it will be no longer possible to use the old path. Try to use &#39;from gluonts.mx import DeepAREstimator&#39;.
@@ -600,9 +600,9 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">fields</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from dataclasses import fields
 
-<span class="p">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">ProblemDefinition</span><span class="p">)}</span>
+{field.name: getattr(problem_definition, field.name) for field in fields(ProblemDefinition)}
 </pre></div>
 </div>
 </div>
@@ -631,17 +631,17 @@ div.rendered_html tbody tr:hover {
 </pre></div></div>
 </div>
 <p>Notice how, even though we only defined what the <code class="docutils literal notranslate"><span class="pre">target</span></code> was, there are a bunch of additional parameters that have been assigned a default value. That is fine for our purposes, but remember that you can set any of these according to your own predictive needs.</p>
-<p>We also need to infer the type of each column. There is a method for this, <code class="docutils literal notranslate"><span class="pre">type_infer.infer.infer_types</span></code>, that we can use:</p>
+<p>We also need to infer the type of each column. For this, we can use <code class="docutils literal notranslate"><span class="pre">type_infer</span></code> (another ML library from the MindsDB ecosystem), specialized in automated type inference for datasets. In particular, we’ll use <code class="docutils literal notranslate"><span class="pre">type_infer.infer.infer_types</span></code>:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">type_infer.infer</span> <span class="kn">import</span> <span class="n">infer_types</span>
-<span class="kn">from</span> <span class="nn">type_infer.base</span> <span class="kn">import</span> <span class="n">TypeInformation</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from type_infer.infer import infer_types
+from type_infer.base import TypeInformation
 
-<span class="n">type_information</span> <span class="o">=</span> <span class="n">infer_types</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">pct_invalid</span><span class="p">)</span>
+type_information = infer_types(df, problem_definition.pct_invalid)
 
-<span class="p">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">TypeInformation</span><span class="p">)}</span>  <span class="c1"># show the fields this dataclass has</span>
+{field.name for field in fields(TypeInformation)}  # show the fields this dataclass has
 </pre></div>
 </div>
 </div>
@@ -650,22 +650,22 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2543:Analyzing a sample of 222</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:from a total population of 225, this is equivalent to 98.7% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Infering type for: Population</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Column Population has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Infering type for: Area (sq. mi.)</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Column Area (sq. mi.) has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Infering type for: Pop. Density </span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Column Pop. Density  has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Infering type for: GDP ($ per capita)</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Column GDP ($ per capita) has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Infering type for: Literacy (%)</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Column Literacy (%) has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Infering type for: Infant mortality </span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Column Infant mortality  has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Infering type for: Development Index</span>
-<span class="ansi-green-fg">INFO:type_infer-2543:Column Development Index has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Analyzing a sample of 222</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:from a total population of 225, this is equivalent to 98.7% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Infering type for: Population</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Column Population has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Infering type for: Area (sq. mi.)</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Column Area (sq. mi.) has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Infering type for: Pop. Density </span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Column Pop. Density  has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Infering type for: GDP ($ per capita)</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Column GDP ($ per capita) has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Infering type for: Literacy (%)</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Column Literacy (%) has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Infering type for: Infant mortality </span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Column Infant mortality  has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Infering type for: Development Index</span>
+<span class="ansi-green-fg">INFO:type_infer-3095:Column Development Index has data type categorical</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -682,7 +682,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>type_information.dtypes
 </pre></div>
 </div>
 </div>
@@ -712,13 +712,13 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">StatisticalAnalysis</span>  <span class="c1"># the class where everything is stored</span>
-<span class="kn">from</span> <span class="nn">lightwood.data</span> <span class="kn">import</span> <span class="n">statistical_analysis</span>      <span class="c1"># generates an instance of the class</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from dataprep_ml.insights import StatisticalAnalysis  # the class where everything is stored
+from dataprep_ml.insights import statistical_analysis # generates an instance of the class
 
-<span class="n">stan</span> <span class="o">=</span> <span class="n">statistical_analysis</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
-                            <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span>
-                            <span class="n">type_information</span><span class="o">.</span><span class="n">identifiers</span><span class="p">,</span>
-                            <span class="n">problem_definition</span><span class="p">)</span>
+stan = statistical_analysis(df,
+                            type_information.dtypes,
+                            problem_definition.to_dict(),
+                            type_information.identifiers)
 </pre></div>
 </div>
 </div>
@@ -727,8 +727,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2543:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2543:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-3095:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-3095:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </div>
@@ -739,7 +739,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">StatisticalAnalysis</span><span class="p">)}</span>  <span class="c1"># show the fields this dataclass has</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>{field.name for field in fields(StatisticalAnalysis)}  # show the fields this dataclass has
 </pre></div>
 </div>
 </div>
@@ -771,7 +771,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stan</span><span class="o">.</span><span class="n">nr_rows</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>stan.nr_rows
 </pre></div>
 </div>
 </div>
@@ -792,7 +792,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stan</span><span class="o">.</span><span class="n">missing</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>stan.missing
 </pre></div>
 </div>
 </div>
@@ -829,7 +829,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stan</span><span class="o">.</span><span class="n">buckets</span><span class="p">[</span><span class="s1">&#39;Development Index&#39;</span><span class="p">]</span>  <span class="c1"># categorical</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>stan.buckets[&#39;Development Index&#39;]  # categorical
 </pre></div>
 </div>
 </div>
@@ -846,7 +846,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stan</span><span class="o">.</span><span class="n">buckets</span><span class="p">[</span><span class="s1">&#39;GDP ($ per capita)&#39;</span><span class="p">]</span>  <span class="c1"># numerical</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>stan.buckets[&#39;GDP ($ per capita)&#39;]  # numerical
 </pre></div>
 </div>
 </div>
@@ -916,9 +916,9 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">colname</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">stan</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">colname</span><span class="si">}</span><span class="s2">&#39; entropy: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="s1">&#39;entropy&#39;</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Biased buckets: </span><span class="si">{</span><span class="n">col</span><span class="p">[</span><span class="s1">&#39;biased_buckets&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="s1">&#39;biased_buckets&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for colname, col in stan.bias.items():
+    print(f&quot;&#39;{colname}&#39; entropy: {round(col[&#39;entropy&#39;], 3)}&quot;)
+    print(f&quot;Biased buckets: {col[&#39;biased_buckets&#39;]}\n&quot; if col[&#39;biased_buckets&#39;] else &#39;\n&#39;)
 </pre></div>
 </div>
 </div>
@@ -958,24 +958,24 @@ Biased buckets: [650.86, 6183.17, 976.29, 325.43, 0.0]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
+import matplotlib.pyplot as plt
 
-<span class="c1"># generate color map</span>
-<span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">tab10</span>
-<span class="n">colors</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span> <span class="o">%</span> <span class="n">cmap</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+# generate color map
+cmap = plt.cm.tab10
+colors = cmap(np.arange(len(df)) % cmap.N)
 
-<span class="c1"># column barplot</span>
-<span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">colname</span><span class="p">,</span> <span class="n">hist</span> <span class="ow">in</span> <span class="n">stan</span><span class="o">.</span><span class="n">histograms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+# column barplot
+columns = []
+for colname, hist in stan.histograms.items():
+    fig, ax = plt.subplots(figsize=(18, 6))
 
-    <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])),</span> <span class="n">hist</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])))</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Histogram for column </span><span class="si">{</span><span class="n">colname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    ax.bar(np.arange(len(hist[&#39;x&#39;])), hist[&#39;y&#39;], color=colors)
+    ax.set_xticks(np.arange(len(hist[&#39;x&#39;])))
+    ax.set_xticklabels(hist[&#39;x&#39;], rotation=60)
+    ax.set_title(f&quot;Histogram for column {colname}&quot;)
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    plt.show()
 </pre></div>
 </div>
 </div>

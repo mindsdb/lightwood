@@ -171,7 +171,8 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.mixer.base</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
@@ -227,12 +228,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
-<div class="viewcode-block" id="BaseMixer.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.BaseMixer.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="BaseMixer.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.BaseMixer.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">adjust_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors. </span>
 
 <span class="sd">        :param train_data: encoded representations of the new training data subset. </span>
 <span class="sd">        :param dev_data: encoded representations of new the &quot;dev&quot; data subset. As in `fit()`, this can be used as an internal validation subset. </span>
+<span class="sd">        :param adjust_args: optional arguments to customize the finetuning process.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">pass</span></div></div>

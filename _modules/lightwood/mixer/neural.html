@@ -186,7 +186,7 @@
 <span class="kn">from</span> <span class="nn">torch.nn.modules.loss</span> <span class="kn">import</span> <span class="n">MSELoss</span>
 <span class="kn">from</span> <span class="nn">torch.optim.optimizer</span> <span class="kn">import</span> <span class="n">Optimizer</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.torch</span> <span class="kn">import</span> <span class="n">LightwoodAutocast</span>
@@ -469,7 +469,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_final_tuning</span><span class="p">(</span><span class="n">dev_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Neural.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.Neural.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Neural.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.Neural.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Augments the mixer&#39;s fit with new data, nr of epochs is based on the amount of epochs the original fitting took</span>
 

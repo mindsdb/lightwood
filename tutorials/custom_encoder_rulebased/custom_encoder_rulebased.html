@@ -474,15 +474,15 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pandas as pd
 
-<span class="c1"># Lightwood modules</span>
-<span class="kn">import</span> <span class="nn">lightwood</span> <span class="k">as</span> <span class="nn">lw</span>
-<span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> \
-                      <span class="n">JsonAI</span><span class="p">,</span> \
-                      <span class="n">json_ai_from_problem</span><span class="p">,</span> \
-                      <span class="n">code_from_json_ai</span><span class="p">,</span> \
-                      <span class="n">predictor_from_code</span>
+# Lightwood modules
+import lightwood as lw
+from lightwood import ProblemDefinition, \
+                      JsonAI, \
+                      json_ai_from_problem, \
+                      code_from_json_ai, \
+                      predictor_from_code
 </pre></div>
 </div>
 </div>
@@ -491,8 +491,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2285:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:No torchvision/pillow detected, image encoder not supported</span>
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/json.py:101: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/model/deepar/__init__.py:18: FutureWarning: The module gluonts.model.deepar has been moved to gluonts.mx.model.deepar. In GluonTS v0.12 it will be no longer possible to use the old path. Try to use &#39;from gluonts.mx import DeepAREstimator&#39;.
@@ -507,9 +507,9 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/used_car_price/data.csv&#39;</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>filename = &#39;https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/used_car_price/data.csv&#39;
+df = pd.read_csv(filename)
+df.head()
 </pre></div>
 </div>
 </div>
@@ -628,14 +628,14 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the Problem Definition</span>
-<span class="n">pdef</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
-    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;price&#39;</span><span class="p">,</span> <span class="c1"># column you want to predict</span>
-    <span class="c1">#&#39;ignore_features&#39;: [&#39;year&#39;, &#39;mileage&#39;, &#39;tax&#39;, &#39;mpg&#39;, &#39;engineSize&#39;]</span>
-<span class="p">})</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Create the Problem Definition
+pdef = ProblemDefinition.from_dict({
+    &#39;target&#39;: &#39;price&#39;, # column you want to predict
+    #&#39;ignore_features&#39;: [&#39;year&#39;, &#39;mileage&#39;, &#39;tax&#39;, &#39;mpg&#39;, &#39;engineSize&#39;]
+})
 
-<span class="c1"># Generate a JSON-AI object</span>
-<span class="n">json_ai</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">=</span><span class="n">pdef</span><span class="p">)</span>
+# Generate a JSON-AI object
+json_ai = json_ai_from_problem(df, problem_definition=pdef)
 </pre></div>
 </div>
 </div>
@@ -644,28 +644,28 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2285:Analyzing a sample of 6920</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Infering type for: model</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Column model has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Infering type for: year</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Column year has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Infering type for: price</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Column price has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Infering type for: transmission</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Column transmission has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Infering type for: mileage</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Column mileage has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Infering type for: fuelType</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Column fuelType has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Infering type for: tax</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Column tax has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Infering type for: mpg</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Column mpg has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Infering type for: engineSize</span>
-<span class="ansi-green-fg">INFO:type_infer-2285:Column engineSize has data type float</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Analyzing a sample of 6920</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Infering type for: model</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Column model has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Infering type for: year</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Column year has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Infering type for: price</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Column price has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Infering type for: transmission</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Column transmission has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Infering type for: mileage</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Column mileage has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Infering type for: fuelType</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Column fuelType has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Infering type for: tax</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Column tax has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Infering type for: mpg</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Column mpg has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Infering type for: engineSize</span>
+<span class="ansi-green-fg">INFO:type_infer-2955:Column engineSize has data type float</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2955:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2955:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Let’s take a look at our JSON-AI and print to file.</p>
@@ -673,7 +673,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(json_ai.to_json())
 </pre></div>
 </div>
 </div>
@@ -777,7 +777,7 @@ div.rendered_html tbody tr:hover {
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 42768.0,
         &#34;seconds_per_encoder&#34;: null,
-        &#34;expected_additional_time&#34;: 1.7249572277069092,
+        &#34;expected_additional_time&#34;: 1.7481276988983154,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -853,94 +853,94 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%writefile</span> LabelEncoder.py
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%writefile LabelEncoder.py
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">2021.10.13</span>
+&quot;&quot;&quot;
+2021.10.13
 
-<span class="sd">Create a LabelEncoder that transforms categorical data into a label.</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+Create a LabelEncoder that transforms categorical data into a label.
+&quot;&quot;&quot;
+import pandas as pd
+import torch
 
-<span class="kn">from</span> <span class="nn">lightwood.encoder</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
+from lightwood.encoder import BaseEncoder
+from typing import List, Union
+from lightwood.helpers.log import log
 
 
-<span class="k">class</span> <span class="nc">LabelEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a label representation for categorical data. The data will rely on sorted to organize the order of the labels.</span>
+class LabelEncoder(BaseEncoder):
+    &quot;&quot;&quot;
+    Create a label representation for categorical data. The data will rely on sorted to organize the order of the labels.
 
-<span class="sd">    Class Attributes:</span>
-<span class="sd">    - is_target: Whether this is used to encode the target</span>
-<span class="sd">    - is_prepared: Whether the encoder rules have been set (after ``prepare`` is called)</span>
+    Class Attributes:
+    - is_target: Whether this is used to encode the target
+    - is_prepared: Whether the encoder rules have been set (after ``prepare`` is called)
 
-<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+    &quot;&quot;&quot;  # noqa
 
-    <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">is_prepared</span><span class="p">:</span> <span class="nb">bool</span>
+    is_target: bool
+    is_prepared: bool
 
-    <span class="n">is_timeseries_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">is_trainable_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    is_timeseries_encoder: bool = False
+    is_trainable_encoder: bool = False
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the Label Encoder</span>
+    def __init__(self, is_target: bool = False) -&gt; None:
+        &quot;&quot;&quot;
+        Initialize the Label Encoder
 
-<span class="sd">        :param is_target:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span> <span class="o">=</span> <span class="n">is_target</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">False</span>
+        :param is_target:
+        &quot;&quot;&quot;
+        self.is_target = is_target
+        self.is_prepared = False
 
-        <span class="c1"># Size of the output encoded dimension per data point</span>
-        <span class="c1"># For LabelEncoder, this is always 1 (1 label per category)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="mi">1</span>
+        # Size of the output encoded dimension per data point
+        # For LabelEncoder, this is always 1 (1 label per category)
+        self.output_size = 1
 
-    <span class="c1"># Not all encoders need to be prepared</span>
-    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a LabelEncoder for categorical data.</span>
+    # Not all encoders need to be prepared
+    def prepare(self, priming_data: pd.Series) -&gt; None:
+        &quot;&quot;&quot;
+        Create a LabelEncoder for categorical data.
 
-<span class="sd">        LabelDict creates a mapping where each index is associated to a category.</span>
+        LabelDict creates a mapping where each index is associated to a category.
 
-<span class="sd">        :param priming_data: Input column data that is categorical.</span>
+        :param priming_data: Input column data that is categorical.
 
-<span class="sd">        :returns: Nothing; prepares encoder rules with `label_dict` and `ilabel_dict`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        :returns: Nothing; prepares encoder rules with `label_dict` and `ilabel_dict`
+        &quot;&quot;&quot;
 
-        <span class="c1"># Find all unique categories in the dataset</span>
-        <span class="n">categories</span> <span class="o">=</span> <span class="n">priming_data</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        # Find all unique categories in the dataset
+        categories = priming_data.unique()
 
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Categories Detected = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">))</span>
+        log.info(&quot;Categories Detected = &quot; + str(self.output_size))
 
-        <span class="c1"># Create the Category labeller</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">label_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Unknown&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>  <span class="c1"># Include an unknown category</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">label_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">cat</span><span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">cat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">categories</span><span class="p">)})</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ilabel_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">idx</span><span class="p">:</span> <span class="n">cat</span> <span class="k">for</span> <span class="n">cat</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        # Create the Category labeller
+        self.label_dict = {&quot;Unknown&quot;: 0}  # Include an unknown category
+        self.label_dict.update({cat: idx + 1 for idx, cat in enumerate(categories)})
+        self.ilabel_dict = {idx: cat for cat, idx in self.label_dict.items()}
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span>
+        self.is_prepared = True
 
-    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="nb">list</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert pre-processed data into the labeled values</span>
+    def encode(self, column_data: Union[pd.Series, list]) -&gt; torch.Tensor:
+        &quot;&quot;&quot;
+        Convert pre-processed data into the labeled values
 
-<span class="sd">        :param column_data: Pandas series to convert into labels</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
-            <span class="n">enc</span> <span class="o">=</span> <span class="n">column_data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">enc</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">column_data</span><span class="p">]</span>
+        :param column_data: Pandas series to convert into labels
+        &quot;&quot;&quot;
+        if isinstance(column_data, pd.Series):
+            enc = column_data.apply(lambda x: self.label_dict.get(x, 0)).tolist()
+        else:
+            enc = [self.label_dict.get(x, 0) for x in column_data]
 
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">enc</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        return torch.Tensor(enc).int().unsqueeze(1)
 
-    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">object</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert torch.Tensor labels into categorical data</span>
+    def decode(self, encoded_data: torch.Tensor) -&gt; List[object]:
+        &quot;&quot;&quot;
+        Convert torch.Tensor labels into categorical data
 
-<span class="sd">        :param encoded_data: Encoded data in the form of a torch.Tensor</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ilabel_dict</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">item</span><span class="p">()]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">encoded_data</span><span class="p">]</span>
+        :param encoded_data: Encoded data in the form of a torch.Tensor
+        &quot;&quot;&quot;
+        return [self.ilabel_dict[i.item()] for i in encoded_data]
 <br/></pre></div>
 </div>
 </div>
@@ -958,8 +958,8 @@ Writing LabelEncoder.py
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">load_custom_module</span>
-<span class="n">load_custom_module</span><span class="p">(</span><span class="s1">&#39;LabelEncoder.py&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from lightwood import load_custom_module
+load_custom_module(&#39;LabelEncoder.py&#39;)
 </pre></div>
 </div>
 </div>
@@ -993,9 +993,9 @@ assignments for a data type</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">ft</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;transmission&quot;</span><span class="p">,</span> <span class="s2">&quot;fuelType&quot;</span><span class="p">]:</span> <span class="c1"># Features you want to replace</span>
-    <span class="c1"># Set each feature to the custom encoder</span>
-    <span class="n">json_ai</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">ft</span><span class="p">][</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;LabelEncoder.LabelEncoder&#39;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for ft in [&quot;model&quot;, &quot;transmission&quot;, &quot;fuelType&quot;]: # Features you want to replace
+    # Set each feature to the custom encoder
+    json_ai.encoders[ft][&#39;module&#39;] = &#39;LabelEncoder.LabelEncoder&#39;
 </pre></div>
 </div>
 </div>
@@ -1007,11 +1007,11 @@ assignments for a data type</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Generate python code that fills in your pipeline</span>
-<span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>#Generate python code that fills in your pipeline
+code = code_from_json_ai(json_ai)
 
-<span class="c1"># Turn the code above into a predictor object</span>
-<span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+# Turn the code above into a predictor object
+predictor = predictor_from_code(code)
 </pre></div>
 </div>
 </div>
@@ -1020,7 +1020,7 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2285:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2955:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <p>Now, let’s run our pipeline. To do so, let’s first:</p>
@@ -1034,20 +1034,20 @@ assignments for a data type</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Perform Stats Analysis</span>
-<span class="n">predictor</span><span class="o">.</span><span class="n">analyze_data</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Perform Stats Analysis
+predictor.analyze_data(df)
 
-<span class="c1"># Pre-process the data</span>
-<span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+# Pre-process the data
+cleaned_data = predictor.preprocess(data=df)
 
-<span class="c1"># Create a train/test split</span>
-<span class="n">split_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">cleaned_data</span><span class="p">)</span>
+# Create a train/test split
+split_data = predictor.split(cleaned_data)
 
-<span class="c1"># Prepare the encoders</span>
-<span class="n">predictor</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">split_data</span><span class="p">)</span>
+# Prepare the encoders
+predictor.prepare(split_data)
 
-<span class="c1"># Featurize the data</span>
-<span class="n">ft_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">featurize</span><span class="p">(</span><span class="n">split_data</span><span class="p">)</span>
+# Featurize the data
+ft_data = predictor.featurize(split_data)
 </pre></div>
 </div>
 </div>
@@ -1056,27 +1056,27 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2285:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2285: `analyze_data` runtime: 0.28 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2285: `preprocess` runtime: 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2285: `split` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Done running for: model</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Done running for: year</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Done running for: transmission</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Done running for: mileage</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Done running for: fuelType</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Done running for: tax</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Done running for: mpg</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Done running for: engineSize</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2285: `prepare` runtime: 0.28 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2285:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2285: `featurize` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2955:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2955:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2955: `analyze_data` runtime: 0.28 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2955:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2955: `preprocess` runtime: 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2955:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2955: `split` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:Done running for: model</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:Done running for: year</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:Done running for: transmission</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:Done running for: mileage</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:Done running for: fuelType</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:Done running for: tax</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:Done running for: mpg</span>
+<span class="ansi-green-fg">INFO:lightwood-2955:Done running for: engineSize</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2955: `prepare` runtime: 0.26 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2955:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2955: `featurize` runtime: 0.0 seconds</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>
@@ -1084,18 +1084,18 @@ assignments for a data type</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pick a categorical column name</span>
-<span class="n">col_name</span> <span class="o">=</span> <span class="s2">&quot;fuelType&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Pick a categorical column name
+col_name = &quot;fuelType&quot;
 
-<span class="c1"># Get the encoded feature data</span>
-<span class="n">enc_ft</span> <span class="o">=</span> <span class="n">ft_data</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_encoded_column_data</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1">#torch tensor (N_rows x N_output_dim)</span>
+# Get the encoded feature data
+enc_ft = ft_data[&quot;train&quot;].get_encoded_column_data(col_name).squeeze(1) #torch tensor (N_rows x N_output_dim)
 
-<span class="c1"># Get the original data from the dataset</span>
-<span class="n">orig_data</span> <span class="o">=</span> <span class="n">ft_data</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_column_original_data</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span> <span class="c1">#pandas dataframe</span>
+# Get the original data from the dataset
+orig_data = ft_data[&quot;train&quot;].get_column_original_data(col_name) #pandas dataframe
 
-<span class="c1"># Create a pandas data frame to compare encoded data and original data</span>
-<span class="n">compare_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">orig_data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">enc_ft</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;EncData&quot;</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">compare_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+# Create a pandas data frame to compare encoded data and original data
+compare_data = pd.concat([orig_data, pd.Series(enc_ft, name=&quot;EncData&quot;)], axis=1)
+compare_data.head()
 </pre></div>
 </div>
 </div>
@@ -1161,8 +1161,8 @@ assignments for a data type</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Label Name -&gt; Label Number</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">label_dict</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Label Name -&gt; Label Number
+print(predictor.encoders[col_name].label_dict)
 </pre></div>
 </div>
 </div>

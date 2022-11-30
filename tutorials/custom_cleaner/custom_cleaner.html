@@ -467,21 +467,21 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">nltk</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
+import pandas as pd
+import torch
+import nltk
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+import os
+import sys
 
-<span class="c1"># Lightwood modules</span>
-<span class="kn">import</span> <span class="nn">lightwood</span> <span class="k">as</span> <span class="nn">lw</span>
-<span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> \
-                      <span class="n">JsonAI</span><span class="p">,</span> \
-                      <span class="n">json_ai_from_problem</span><span class="p">,</span> \
-                      <span class="n">code_from_json_ai</span><span class="p">,</span> \
-                      <span class="n">predictor_from_code</span>
+# Lightwood modules
+import lightwood as lw
+from lightwood import ProblemDefinition, \
+                      JsonAI, \
+                      json_ai_from_problem, \
+                      code_from_json_ai, \
+                      predictor_from_code
 </pre></div>
 </div>
 </div>
@@ -490,8 +490,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2356:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2356:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2419:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2419:No torchvision/pillow detected, image encoder not supported</span>
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/json.py:101: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/model/deepar/__init__.py:18: FutureWarning: The module gluonts.model.deepar has been moved to gluonts.mx.model.deepar. In GluonTS v0.12 it will be no longer possible to use the old path. Try to use &#39;from gluonts.mx import DeepAREstimator&#39;.
@@ -505,9 +505,9 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the data</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/jupyter/train.csv.zip&quot;</span><span class="p">)</span>
-<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Load the data
+data = pd.read_csv(&quot;https://mindsdb-example-data.s3.eu-west-2.amazonaws.com/jupyter/train.csv.zip&quot;)
+data.head()
 </pre></div>
 </div>
 </div>
@@ -603,14 +603,14 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setup the problem definition</span>
-<span class="n">problem_definition</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span>
-    <span class="s2">&quot;ignore_features&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;url_legal&quot;</span><span class="p">,</span> <span class="s2">&quot;license&quot;</span><span class="p">,</span> <span class="s2">&quot;standard_error&quot;</span><span class="p">]</span>
-<span class="p">}</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Setup the problem definition
+problem_definition = {
+    &#39;target&#39;: &#39;target&#39;,
+    &quot;ignore_features&quot;: [&quot;url_legal&quot;, &quot;license&quot;, &quot;standard_error&quot;]
+}
 
-<span class="c1"># Generate the j{ai}son syntax</span>
-<span class="n">json_ai</span> <span class="o">=</span> <span class="n">json_ai_from_problem</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">)</span>
+# Generate the j{ai}son syntax
+json_ai = json_ai_from_problem(data, problem_definition)
 <br/></pre></div>
 </div>
 </div>
@@ -619,20 +619,20 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2356:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-<span class="ansi-green-fg">INFO:type_infer-2356:Analyzing a sample of 2478</span>
-<span class="ansi-green-fg">INFO:type_infer-2356:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2356:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2356:Doing text detection for column: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2356:Column id has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2356:Infering type for: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2356:Doing text detection for column: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2356:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:type_infer-2356:Column target has data type float</span>
-<span class="ansi-yellow-fg">WARNING:type_infer-2356:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-<span class="ansi-green-fg">INFO:lightwood-2356:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2356:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2356:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2419:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:type_infer-2419:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:type_infer-2419:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2419:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2419:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2419:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2419:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2419:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2419:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:type_infer-2419:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:type_infer-2419:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2419:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2419:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2419:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -648,7 +648,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(json_ai.to_json())
 </pre></div>
 </div>
 </div>
@@ -720,7 +720,7 @@ div.rendered_html tbody tr:hover {
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 19.348423957824707,
+        &#34;expected_additional_time&#34;: 16.73341679573059,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -764,7 +764,7 @@ ingredients for our ML pipeline.</p>
 </div>
 <div class="section" id="3)-Build-your-own-cleaner-module">
 <h3>3) Build your own cleaner module<a class="headerlink" href="#3)-Build-your-own-cleaner-module" title="Permalink to this headline">¶</a></h3>
-<p>Let’s make a file called <code class="docutils literal notranslate"><span class="pre">MyCustomCleaner.py</span></code>. To write this file, we will use <code class="docutils literal notranslate"><span class="pre">lightwood.data.cleaner.cleaner</span></code> as inspiration.</p>
+<p>Let’s make a file called <code class="docutils literal notranslate"><span class="pre">MyCustomCleaner.py</span></code>. To write this file, we will use <code class="docutils literal notranslate"><span class="pre">dataprep_ml.cleaners.cleaner</span></code> as inspiration. <code class="docutils literal notranslate"><span class="pre">dataprep_ml</span></code> is a companion library that is part of the broader MindsDB ecosystem, and specializes in data cleaning, data splitting and data analysis.</p>
 <p>The goal output of the cleaner is to provide pre-processing to your dataset - the output is only a pandas DataFrame. In theory, any pre-processing can be done here. However, data can be highly irregular - our default <code class="docutils literal notranslate"><span class="pre">Cleaner</span></code> function has several main goals:</p>
 <ol class="arabic simple">
 <li><p>Strip away any identifier, etc. unwanted columns</p></li>
@@ -773,103 +773,103 @@ ingredients for our ML pipeline.</p>
 </ol>
 <p>You can choose to omit many of these details and completely write this module from scratch, but the easiest way to introduce your custom changes is to borrow the <code class="docutils literal notranslate"><span class="pre">Cleaner</span></code> function, and add core changes in a custom block.</p>
 <p>This can be done as follows</p>
-<p>You can see individual cleaning functions in <code class="docutils literal notranslate"><span class="pre">lightwood.data.cleaner</span></code>. If you want to entirely replace a cleaning technique given a particular data-type, we invite you to change <code class="docutils literal notranslate"><span class="pre">lightwood.data.cleaner.get_cleaning_func</span></code> using the argument <code class="docutils literal notranslate"><span class="pre">custom_cleaning_functions</span></code>; in this dictionary, for a datatype (specified in <code class="docutils literal notranslate"><span class="pre">type_infer.dtype</span></code>), you can assign your own function to override our defaults.</p>
+<p>You can see individual cleaning functions in <code class="docutils literal notranslate"><span class="pre">dataprep_ml.cleaners</span></code>. If you want to entirely replace a cleaning technique given a particular data-type, we invite you to change <code class="docutils literal notranslate"><span class="pre">dataprep_ml.cleaners.get_cleaning_func</span></code> using the argument <code class="docutils literal notranslate"><span class="pre">custom_cleaning_functions</span></code>; in this dictionary, for a datatype (specified in <code class="docutils literal notranslate"><span class="pre">type_infer.dtype</span></code>), you can assign your own function to override our defaults.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%writefile</span> MyCustomCleaner.py
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%writefile MyCustomCleaner.py
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
+import numpy as np
+import pandas as pd
+from type_infer.dtype import dtype
 
-<span class="kn">from</span> <span class="nn">lightwood.helpers</span> <span class="kn">import</span> <span class="n">text</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span>
+from lightwood.helpers import text
+from lightwood.helpers.log import log
+from lightwood.api.types import TimeseriesSettings
 
-<span class="kn">from</span> <span class="nn">nltk.corpus</span> <span class="kn">import</span> <span class="n">stopwords</span>
+from nltk.corpus import stopwords
 
-<span class="n">stop_words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">stopwords</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="s2">&quot;english&quot;</span><span class="p">))</span>
+stop_words = set(stopwords.words(&quot;english&quot;))
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+from typing import Dict
 
-<span class="c1"># Borrow functions from Lightwood&#39;s cleaner</span>
-<span class="kn">from</span> <span class="nn">lightwood.data.cleaner</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">_remove_columns</span><span class="p">,</span>
-    <span class="n">_get_columns_to_clean</span><span class="p">,</span>
-    <span class="n">get_cleaning_func</span><span class="p">,</span>
-<span class="p">)</span>
+# Borrow cleaner functions
+from dataprep_ml.cleaners import (
+    _remove_columns,
+    _get_columns_to_clean,
+    get_cleaning_func,
+)
 
-<span class="c1"># Use for standardizing NaNs</span>
-<span class="n">VALUES_FOR_NAN_AND_NONE_IN_PANDAS</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s2">&quot;nan&quot;</span><span class="p">,</span> <span class="s2">&quot;NaN&quot;</span><span class="p">,</span> <span class="s2">&quot;Nan&quot;</span><span class="p">,</span> <span class="s2">&quot;None&quot;</span><span class="p">]</span>
+# Use for standardizing NaNs
+VALUES_FOR_NAN_AND_NONE_IN_PANDAS = [np.nan, &quot;nan&quot;, &quot;NaN&quot;, &quot;Nan&quot;, &quot;None&quot;]
 
 
-<span class="k">def</span> <span class="nf">cleaner</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-    <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-    <span class="n">identifiers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span>
-    <span class="n">anomaly_detection</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="n">custom_cleaning_functions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The cleaner is a function which takes in the raw data, plus additional information about it&#39;s types and about the problem. Based on this it generates a &quot;clean&quot; representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``</span>
+def cleaner(
+    data: pd.DataFrame,
+    dtype_dict: Dict[str, str],
+    identifiers: Dict[str, str],
+    target: str,
+    mode: str,
+    timeseries_settings: TimeseriesSettings,
+    anomaly_detection: bool,
+    custom_cleaning_functions: Dict[str, str] = {},
+) -&gt; pd.DataFrame:
+    &quot;&quot;&quot;
+    The cleaner is a function which takes in the raw data, plus additional information about it&#39;s types and about the problem. Based on this it generates a &quot;clean&quot; representation of the data, where each column has an ideal standardized type and all malformed or otherwise missing or invalid elements are turned into ``None``
 
-<span class="sd">    :param data: The raw data</span>
-<span class="sd">    :param dtype_dict: Type information for each column</span>
-<span class="sd">    :param identifiers: A dict containing all identifier typed columns</span>
-<span class="sd">    :param target: The target columns</span>
-<span class="sd">    :param mode: Can be &quot;predict&quot; or &quot;train&quot;</span>
-<span class="sd">    :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object</span>
-<span class="sd">    :param anomaly_detection: Are we detecting anomalies with this predictor?</span>
+    :param data: The raw data
+    :param dtype_dict: Type information for each column
+    :param identifiers: A dict containing all identifier typed columns
+    :param target: The target columns
+    :param mode: Can be &quot;predict&quot; or &quot;train&quot;
+    :param timeseries_settings: Timeseries related settings, only relevant for timeseries predictors, otherwise can be the default object
+    :param anomaly_detection: Are we detecting anomalies with this predictor?
 
-<span class="sd">    :returns: The cleaned data</span>
-<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+    :returns: The cleaned data
+    &quot;&quot;&quot;  # noqa
 
-    <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_columns</span><span class="p">(</span>
-        <span class="n">data</span><span class="p">,</span>
-        <span class="n">identifiers</span><span class="p">,</span>
-        <span class="n">target</span><span class="p">,</span>
-        <span class="n">mode</span><span class="p">,</span>
-        <span class="n">timeseries_settings</span><span class="p">,</span>
-        <span class="n">anomaly_detection</span><span class="p">,</span>
-        <span class="n">dtype_dict</span><span class="p">,</span>
-    <span class="p">)</span>
+    data = _remove_columns(
+        data,
+        identifiers,
+        target,
+        mode,
+        timeseries_settings,
+        anomaly_detection,
+        dtype_dict,
+    )
 
-    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">_get_columns_to_clean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+    for col in _get_columns_to_clean(data, dtype_dict, mode, target):
 
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cleaning column =&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">col</span><span class="p">))</span>
-        <span class="c1"># Get and apply a cleaning function for each data type</span>
-        <span class="c1"># If you want to customize the cleaner, it&#39;s likely you can to modify ``get_cleaning_func``</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
-            <span class="n">get_cleaning_func</span><span class="p">(</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">custom_cleaning_functions</span><span class="p">)</span>
-        <span class="p">)</span>
+        log.info(&quot;Cleaning column =&quot; + str(col))
+        # Get and apply a cleaning function for each data type
+        # If you want to customize the cleaner, it&#39;s likely you can to modify ``get_cleaning_func``
+        data[col] = data[col].apply(
+            get_cleaning_func(dtype_dict[col], custom_cleaning_functions)
+        )
 
-        <span class="c1"># ------------------------ #</span>
-        <span class="c1"># INTRODUCE YOUR CUSTOM BLOCK</span>
+        # ------------------------ #
+        # INTRODUCE YOUR CUSTOM BLOCK
 
-        <span class="c1"># If column data type is a text type, remove stop-words</span>
-        <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">rich_text</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">short_text</span><span class="p">):</span>
-            <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="p">[</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">if</span> <span class="n">word</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stop_words</span><span class="p">]</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
+        # If column data type is a text type, remove stop-words
+        if dtype_dict[col] in (dtype.rich_text, dtype.short_text):
+            data[col] = data[col].apply(
+                lambda x: &quot; &quot;.join(
+                    [word for word in x.split() if word not in stop_words]
+                )
+            )
 
-        <span class="c1"># Enforce numerical columns as non-negative</span>
-        <span class="k">if</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">):</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Converted &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; into strictly non-negative&quot;</span><span class="p">)</span>
-            <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">)</span>
+        # Enforce numerical columns as non-negative
+        if dtype_dict[col] in (dtype.integer, dtype.float):
+            log.info(&quot;Converted &quot; + str(col) + &quot; into strictly non-negative&quot;)
+            data[col] = data[col].apply(lambda x: x if x &gt; 0 else 0.0)
 
-        <span class="c1"># ------------------------ #</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-            <span class="n">to_replace</span><span class="o">=</span><span class="n">VALUES_FOR_NAN_AND_NONE_IN_PANDAS</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span>
-        <span class="p">)</span>
+        # ------------------------ #
+        data[col] = data[col].replace(
+            to_replace=VALUES_FOR_NAN_AND_NONE_IN_PANDAS, value=None
+        )
 
-    <span class="k">return</span> <span class="n">data</span>
+    return data
 <br/></pre></div>
 </div>
 </div>
@@ -890,16 +890,16 @@ Writing MyCustomCleaner.py
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">load_custom_module</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from lightwood import load_custom_module
 
-<span class="c1"># Lightwood automatically does this for us if we want</span>
-<span class="n">load_custom_module</span><span class="p">(</span><span class="s1">&#39;MyCustomCleaner.py&#39;</span><span class="p">)</span>
+# Lightwood automatically does this for us if we want
+load_custom_module(&#39;MyCustomCleaner.py&#39;)
 </pre></div>
 </div>
 </div>
 <div class="section" id="4)-Introduce-your-custom-cleaner-in-JSON-AI">
 <h3>4) Introduce your custom cleaner in JSON-AI<a class="headerlink" href="#4)-Introduce-your-custom-cleaner-in-JSON-AI" title="Permalink to this headline">¶</a></h3>
-<p>Now let’s introduce our custom cleaner. JSON-AI keeps a lightweight syntax but fills in many default modules (like splitting, cleaning).</p>
+<p>Now let’s introduce our custom cleaner. JSON-AI keeps a lightweight syntax but fills in many default modules (like splitting, cleaning). As you can see, it is also agnostic to the origin of the module, as long as it behaves as expected of the other modules that could be used in any given key.</p>
 <p>For the custom cleaner, we’ll work by editing the “cleaner” key. We will change properties within it as follows: (1) “module” - place the name of the function. In our case it will be “MyCustomCleaner.cleaner” (2) “args” - any keyword argument specific to your cleaner’s internals.</p>
 <p>This will look as follows:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;cleaner&quot;: {
@@ -926,28 +926,28 @@ Writing MyCustomCleaner.py
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make changes to your JSON-AI</span>
-<span class="n">json_ai</span><span class="o">.</span><span class="n">cleaner</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;MyCustomCleaner.cleaner&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;identifiers&quot;</span><span class="p">:</span> <span class="s2">&quot;$identifiers&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;$mode&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;timeseries_settings&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;anomaly_detection&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.anomaly_detection&quot;</span>
-        <span class="p">}</span>
-<span class="p">}</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Make changes to your JSON-AI
+json_ai.cleaner = {
+        &quot;module&quot;: &quot;MyCustomCleaner.cleaner&quot;,
+        &quot;args&quot;: {
+            &quot;identifiers&quot;: &quot;$identifiers&quot;,
+            &quot;data&quot;: &quot;data&quot;,
+            &quot;dtype_dict&quot;: &quot;$dtype_dict&quot;,
+            &quot;target&quot;: &quot;$target&quot;,
+            &quot;mode&quot;: &quot;$mode&quot;,
+            &quot;timeseries_settings&quot;: &quot;$problem_definition.timeseries_settings.to_dict()&quot;,
+            &quot;anomaly_detection&quot;: &quot;$problem_definition.anomaly_detection&quot;
+        }
+}
 
-<span class="c1">#Generate python code that fills in your pipeline</span>
-<span class="n">code</span> <span class="o">=</span> <span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">)</span>
+#Generate python code that fills in your pipeline
+code = code_from_json_ai(json_ai)
 
-<span class="nb">print</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+print(code)
 
-<span class="c1"># Save code to a file (Optional)</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;custom_cleaner_pipeline.py&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
-    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+# Save code to a file (Optional)
+with open(&#39;custom_cleaner_pipeline.py&#39;, &#39;w&#39;) as fp:
+    fp.write(code)
 </pre></div>
 </div>
 </div>
@@ -956,7 +956,7 @@ Writing MyCustomCleaner.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2356:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2419:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -976,12 +976,17 @@ from lightwood.helpers.general import *
 from lightwood.helpers.ts import *
 from lightwood.helpers.log import *
 from lightwood.helpers.numeric import *
-from lightwood.helpers.imputers import *
 from lightwood.helpers.parallelism import *
 from lightwood.helpers.seed import *
 from lightwood.helpers.text import *
 from lightwood.helpers.torch import *
 from lightwood.mixer import *
+
+from dataprep_ml.insights import statistical_analysis
+from dataprep_ml.cleaners import cleaner
+from dataprep_ml.splitters import splitter
+from dataprep_ml.imputers import *
+
 import pandas as pd
 from typing import Dict, List, Union
 import os
@@ -1029,7 +1034,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 21384.0,
                 &#34;seconds_per_encoder&#34;: 85536.0,
-                &#34;expected_additional_time&#34;: 19.348423957824707,
+                &#34;expected_additional_time&#34;: 16.73341679573059,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -1073,11 +1078,11 @@ class Predictor(PredictorInterface):
     def analyze_data(self, data: pd.DataFrame) -&gt; None:
         # Perform a statistical analysis on the unprocessed data
 
-        self.statistical_analysis = lightwood.data.statistical_analysis(
+        self.statistical_analysis = statistical_analysis(
             data,
             self.dtype_dict,
+            self.problem_definition.to_dict(),
             {&#34;id&#34;: &#34;Hash-like identifier&#34;},
-            self.problem_definition,
         )
 
         # Instantiate post-training evaluation
@@ -1100,7 +1105,7 @@ class Predictor(PredictorInterface):
             dtype_dict=self.dtype_dict,
             target=self.target,
             mode=self.mode,
-            timeseries_settings=self.problem_definition.timeseries_settings,
+            timeseries_settings=self.problem_definition.timeseries_settings.to_dict(),
             anomaly_detection=self.problem_definition.anomaly_detection,
         )
 
@@ -1118,7 +1123,7 @@ class Predictor(PredictorInterface):
             pct_train=0.8,
             pct_dev=0.1,
             pct_test=0.1,
-            tss=self.problem_definition.timeseries_settings,
+            tss=self.problem_definition.timeseries_settings.to_dict(),
             seed=self.problem_definition.seed_nr,
             target=self.target,
             dtype_dict=self.dtype_dict,
@@ -1389,8 +1394,11 @@ class Predictor(PredictorInterface):
 
             log.info(f&#34;[Learn phase 8/{n_phases}] - Adjustment on validation requested&#34;)
             self.adjust(
-                enc_train_test[&#34;test&#34;],
-                ConcatedEncodedDs([enc_train_test[&#34;train&#34;], enc_train_test[&#34;dev&#34;]]),
+                enc_train_test[&#34;test&#34;].data_frame,
+                ConcatedEncodedDs(
+                    [enc_train_test[&#34;train&#34;], enc_train_test[&#34;dev&#34;]]
+                ).data_frame,
+                adjust_args={&#34;learn_call&#34;: True},
             )
 
     @timed
@@ -1398,6 +1406,7 @@ class Predictor(PredictorInterface):
         self,
         train_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],
         dev_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None,
+        adjust_args: Optional[dict] = None,
     ) -&gt; None:
         # Update mixers with new information
 
@@ -1407,29 +1416,26 @@ class Predictor(PredictorInterface):
         # Prepare data
         # --------------- #
         if dev_data is None:
-            data = (
-                train_data
-                if isinstance(train_data, pd.DataFrame)
-                else train_data.data_frame
-            )
+            data = train_data
             split = splitter(
-                data,
-                self.problem_definition.timeseries_settings,
-                self.dtype_dict,
-                self.problem_definition.seed_nr,
+                data=data,
                 pct_train=0.8,
                 pct_dev=0.2,
                 pct_test=0,
+                tss=self.problem_definition.timeseries_settings.to_dict(),
+                seed=self.problem_definition.seed_nr,
                 target=self.target,
+                dtype_dict=self.dtype_dict,
             )
             train_data = split[&#34;train&#34;]
             dev_data = split[&#34;dev&#34;]
 
-        if isinstance(dev_data, pd.DataFrame):
-            dev_data = EncodedDs(self.encoders, dev_data, self.target)
+        if adjust_args is None or not adjust_args.get(&#34;learn_call&#34;):
+            train_data = self.preprocess(train_data)
+            dev_data = self.preprocess(dev_data)
 
-        if isinstance(train_data, pd.DataFrame):
-            train_data = EncodedDs(self.encoders, train_data, self.target)
+        dev_data = EncodedDs(self.encoders, dev_data, self.target)
+        train_data = EncodedDs(self.encoders, train_data, self.target)
 
         # --------------- #
         # Update/Adjust Mixers
@@ -1437,7 +1443,7 @@ class Predictor(PredictorInterface):
         log.info(&#34;Updating the mixers&#34;)
 
         for mixer in self.mixers:
-            mixer.partial_fit(train_data, dev_data)
+            mixer.partial_fit(train_data, dev_data, adjust_args)
 
     @timed
     def predict(self, data: pd.DataFrame, args: Dict = {}) -&gt; pd.DataFrame:
@@ -1515,8 +1521,8 @@ class Predictor(PredictorInterface):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Turn the code above into a predictor object</span>
-<span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Turn the code above into a predictor object
+predictor = predictor_from_code(code)
 </pre></div>
 </div>
 </div>
@@ -1524,15 +1530,15 @@ class Predictor(PredictorInterface):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predictor</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>predictor.mode = &quot;train&quot;
 
-<span class="c1"># Perform stats analysis</span>
-<span class="n">predictor</span><span class="o">.</span><span class="n">analyze_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+# Perform stats analysis
+predictor.analyze_data(data)
 
-<span class="c1"># Pre-process the data</span>
-<span class="n">cleaned_data</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+# Pre-process the data
+cleaned_data = predictor.preprocess(data)
 
-<span class="n">cleaned_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+cleaned_data.head()
 </pre></div>
 </div>
 </div>
@@ -1541,16 +1547,16 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2356:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:lightwood-2356:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2356:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2356: `analyze_data` runtime: 0.06 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2356:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:lightwood-2356:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2356:Cleaning column =excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2356:Cleaning column =target</span>
-<span class="ansi-green-fg">INFO:lightwood-2356:Converted target into strictly non-negative</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2356: `preprocess` runtime: 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2419:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2419:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2419:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2419: `analyze_data` runtime: 0.05 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2419:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2419:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2419:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2419:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2419:Converted target into strictly non-negative</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2419: `preprocess` runtime: 0.1 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1614,13 +1620,13 @@ class Predictor(PredictorInterface):
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>  <span class="o">+</span> <span class="s2">&quot;Original Data</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Excerpt:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;excerpt&quot;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Target:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;\033[1m&quot;  + &quot;Original Data\n&quot; + &quot;\033[0m&quot;)
+print(&quot;Excerpt:\n&quot;, data.iloc[0][&quot;excerpt&quot;])
+print(&quot;\nTarget:\n&quot;, data.iloc[0][&quot;target&quot;])
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1m&quot;</span>  <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Cleaned Data</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Excerpt:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;excerpt&quot;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Target:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;target&quot;</span><span class="p">])</span>
+print(&quot;\033[1m&quot;  + &quot;\n\nCleaned Data\n&quot; + &quot;\033[0m&quot;)
+print(&quot;Excerpt:\n&quot;, cleaned_data.iloc[0][&quot;excerpt&quot;])
+print(&quot;\nTarget:\n&quot;, cleaned_data.iloc[0][&quot;target&quot;])
 </pre></div>
 </div>
 </div>

@@ -284,15 +284,17 @@
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="PredictorInterface.adjust"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.adjust">[docs]</a>    <span class="k">def</span> <span class="nf">adjust</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">old_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="PredictorInterface.adjust"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.adjust">[docs]</a>    <span class="k">def</span> <span class="nf">adjust</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">old_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">adjust_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+               <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adjusts a previously trained model on new data. Adopts the same process as ``learn`` but with the exception that the `adjust` function expects the best model to have been already trained.</span>
 
 <span class="sd">        .. warning:: This is experimental and subject to change. </span>
 <span class="sd">        :param new_data: New data used to adjust a previously trained model.</span>
 <span class="sd">        :param old_data: In some situations, the old data is still required to train a model (i.e. Regression mixer) to ensure the new data doesn&#39;t entirely override it.</span>
+<span class="sd">        :param adjust_args: Optional dictionary with parameters to customize the finetuning process.</span>
 
-<span class="sd">        :returns: Nothing; adjusts best-fit model</span>
+<span class="sd">        :returns: Adjusts best-fit model in-place, doesn&#39;t return anything.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">pass</span></div>
 

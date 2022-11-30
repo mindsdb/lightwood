@@ -187,7 +187,6 @@
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">dataclasses_json</span> <span class="kn">import</span> <span class="n">dataclass_json</span>
 <span class="kn">from</span> <span class="nn">dataclasses_json.core</span> <span class="kn">import</span> <span class="n">_asdict</span><span class="p">,</span> <span class="n">Json</span>
-<span class="kn">from</span> <span class="nn">type_infer.base</span> <span class="kn">import</span> <span class="n">TypeInformation</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
 
@@ -202,57 +201,6 @@
 <span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
     <span class="n">module</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></div>
-
-
-<div class="viewcode-block" id="StatisticalAnalysis"><a class="viewcode-back" href="../../api/types.html#api.types.StatisticalAnalysis">[docs]</a><span class="nd">@dataclass_json</span>
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">StatisticalAnalysis</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The Statistical Analysis data class allows users to consider key descriptors of their data using simple \</span>
-<span class="sd">        techniques such as histograms, mean and standard deviation, word count, missing values, and any detected bias\</span>
-<span class="sd">             in the information.</span>
-
-<span class="sd">    :param nr_rows: Number of rows (samples) in the dataset</span>
-<span class="sd">    :param nr_columns: Number of columns (features) in the dataset</span>
-<span class="sd">    :param df_target_stddev: The standard deviation of the target of the dataset</span>
-<span class="sd">    :param train_observed_classes:</span>
-<span class="sd">    :param target_class_distribution:</span>
-<span class="sd">    :param target_weights: What weight the analysis suggests to assign each class by in the case of classification problems. Note: target_weights in the problem definition overides this</span>
-<span class="sd">    :param histograms:</span>
-<span class="sd">    :param buckets:</span>
-<span class="sd">    :param missing:</span>
-<span class="sd">    :param distinct:</span>
-<span class="sd">    :param bias:</span>
-<span class="sd">    :param avg_words_per_sentence:</span>
-<span class="sd">    :param positive_domain:</span>
-<span class="sd">    :param ts_stats:</span>
-<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
-
-    <span class="n">nr_rows</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">nr_columns</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">df_target_stddev</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
-    <span class="n">train_observed_classes</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Union[None, List[str]]</span>
-    <span class="n">target_class_distribution</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Dict[str, float]</span>
-    <span class="n">target_weights</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Dict[str, float]</span>
-    <span class="n">histograms</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Dict[str, Dict[str, List[object]]]</span>
-    <span class="n">buckets</span><span class="p">:</span> <span class="nb">object</span>  <span class="c1"># Dict[str, Dict[str, List[object]]]</span>
-    <span class="n">missing</span><span class="p">:</span> <span class="nb">object</span>
-    <span class="n">distinct</span><span class="p">:</span> <span class="nb">object</span>
-    <span class="n">bias</span><span class="p">:</span> <span class="nb">object</span>
-    <span class="n">avg_words_per_sentence</span><span class="p">:</span> <span class="nb">object</span>
-    <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">ts_stats</span><span class="p">:</span> <span class="nb">dict</span></div>
-
-
-<div class="viewcode-block" id="DataAnalysis"><a class="viewcode-back" href="../../api/types.html#api.types.DataAnalysis">[docs]</a><span class="nd">@dataclass_json</span>
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">DataAnalysis</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Data Analysis wraps :class: `.StatisticalAnalysis` and :class: `.TypeInformation` together. Further details can be seen in their respective documentation references.</span>
-<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
-
-    <span class="n">statistical_analysis</span><span class="p">:</span> <span class="n">StatisticalAnalysis</span>
-    <span class="n">type_information</span><span class="p">:</span> <span class="n">TypeInformation</span></div>
 
 
 <div class="viewcode-block" id="TimeseriesSettings"><a class="viewcode-back" href="../../api/types.html#api.types.TimeseriesSettings">[docs]</a><span class="nd">@dataclass</span>
@@ -505,8 +453,8 @@
 <span class="sd">    :param model: The ensemble and its submodels</span>
 <span class="sd">    :param problem_definition: The ``ProblemDefinition`` criteria.</span>
 <span class="sd">    :param identifiers: A dictionary of column names and respective data types that are likely identifiers/IDs within the data. Through the default cleaning process, these are ignored.</span>
-<span class="sd">    :param cleaner: The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, &quot;None&quot; suggests Lightwood&#39;s default approach in ``data.cleaner``.</span>
-<span class="sd">    :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data.</span>
+<span class="sd">    :param cleaner: The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, &quot;None&quot; suggests the default approach in ``dataprep_ml.cleaners``.</span>
+<span class="sd">    :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data. For more details, refer to the `dataprep_ml` package documentation.</span>
 <span class="sd">    :param analyzer: The Analyzer object is used to evaluate how well a model performed on the predictive task.</span>
 <span class="sd">    :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.</span>
 <span class="sd">    :param imputers: A list of objects that will impute missing data on each column. They are called inside the cleaner.</span>
