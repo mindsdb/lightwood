@@ -491,8 +491,8 @@ from lightwood import ProblemDefinition, \
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2923:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:No torchvision/pillow detected, image encoder not supported</span>
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/json.py:101: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/model/deepar/__init__.py:18: FutureWarning: The module gluonts.model.deepar has been moved to gluonts.mx.model.deepar. In GluonTS v0.12 it will be no longer possible to use the old path. Try to use &#39;from gluonts.mx import DeepAREstimator&#39;.
@@ -644,28 +644,28 @@ json_ai = json_ai_from_problem(df, problem_definition=pdef)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2923:Analyzing a sample of 6920</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Infering type for: model</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Column model has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Infering type for: year</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Column year has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Infering type for: price</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Column price has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Infering type for: transmission</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Column transmission has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Infering type for: mileage</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Column mileage has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Infering type for: fuelType</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Column fuelType has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Infering type for: tax</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Column tax has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Infering type for: mpg</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Column mpg has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Infering type for: engineSize</span>
-<span class="ansi-green-fg">INFO:type_infer-2923:Column engineSize has data type float</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2923:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2923:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Analyzing a sample of 6920</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Infering type for: model</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Column model has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Infering type for: year</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Column year has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Infering type for: price</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Column price has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Infering type for: transmission</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Column transmission has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Infering type for: mileage</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Column mileage has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Infering type for: fuelType</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Column fuelType has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Infering type for: tax</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Column tax has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Infering type for: mpg</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Column mpg has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Infering type for: engineSize</span>
+<span class="ansi-green-fg">INFO:type_infer-2895:Column engineSize has data type float</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2895:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2895:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Let’s take a look at our JSON-AI and print to file.</p>
@@ -777,7 +777,7 @@ json_ai = json_ai_from_problem(df, problem_definition=pdef)
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 42768.0,
         &#34;seconds_per_encoder&#34;: null,
-        &#34;expected_additional_time&#34;: 1.7054200172424316,
+        &#34;expected_additional_time&#34;: 1.9935038089752197,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -796,6 +796,7 @@ json_ai = json_ai_from_problem(df, problem_definition=pdef)
         },
         &#34;anomaly_detection&#34;: false,
         &#34;use_default_analysis&#34;: true,
+        &#34;dtype_dict&#34;: {},
         &#34;ignore_features&#34;: [],
         &#34;fit_on_all&#34;: true,
         &#34;strict_mode&#34;: true,
@@ -1020,7 +1021,7 @@ predictor = predictor_from_code(code)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2923:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2895:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <p>Now, let’s run our pipeline. To do so, let’s first:</p>
@@ -1056,27 +1057,27 @@ ft_data = predictor.featurize(split_data)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2923:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2923:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2923: `analyze_data` runtime: 0.28 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2923:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2923: `preprocess` runtime: 0.09 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2923:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2923: `split` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:Done running for: model</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:Done running for: year</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:Done running for: transmission</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:Done running for: mileage</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:Done running for: fuelType</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:Done running for: tax</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:Done running for: mpg</span>
-<span class="ansi-green-fg">INFO:lightwood-2923:Done running for: engineSize</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2923: `prepare` runtime: 0.27 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2923:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2923: `featurize` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2895:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2895:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2895: `analyze_data` runtime: 0.33 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2895:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2895: `preprocess` runtime: 0.12 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2895:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2895: `split` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:Done running for: model</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:Done running for: year</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:Done running for: transmission</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:Done running for: mileage</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:Done running for: fuelType</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:Done running for: tax</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:Done running for: mpg</span>
+<span class="ansi-green-fg">INFO:lightwood-2895:Done running for: engineSize</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2895: `prepare` runtime: 0.32 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2895:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2895: `featurize` runtime: 0.0 seconds</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>

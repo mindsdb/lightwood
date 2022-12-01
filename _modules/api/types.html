@@ -334,6 +334,8 @@
 <span class="sd">         available settings.</span>
 <span class="sd">    :param anomaly_detection: Whether to conduct unsupervised anomaly detection; currently supported only for time-\</span>
 <span class="sd">        series.</span>
+<span class="sd">    :param dtype_dict: Mapping of features to types (see `mindsdb.type_infer` for all possible values). This will \</span>
+<span class="sd">    override the automated type inference results.</span>
 <span class="sd">    :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \</span>
 <span class="sd">        found in this list will be automatically removed from subsequent steps in the ML pipeline.</span>
 <span class="sd">    :param use_default_analysis: whether default analysis blocks are enabled.</span>
@@ -356,6 +358,7 @@
     <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span>
     <span class="n">anomaly_detection</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">use_default_analysis</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span>
     <span class="n">ignore_features</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">fit_on_all</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">strict_mode</span><span class="p">:</span> <span class="nb">bool</span>
@@ -384,6 +387,7 @@
 
         <span class="n">target_weights</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_weights&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">positive_domain</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;positive_domain&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">dtype_dict</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dtype_dict&#39;</span><span class="p">,</span> <span class="p">{})</span>
         <span class="n">timeseries_settings</span> <span class="o">=</span> <span class="n">TimeseriesSettings</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timeseries_settings&#39;</span><span class="p">,</span> <span class="p">{}))</span>
         <span class="n">anomaly_detection</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anomaly_detection&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="n">ignore_features</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ignore_features&#39;</span><span class="p">,</span> <span class="p">[])</span>
@@ -403,6 +407,7 @@
             <span class="n">positive_domain</span><span class="o">=</span><span class="n">positive_domain</span><span class="p">,</span>
             <span class="n">timeseries_settings</span><span class="o">=</span><span class="n">timeseries_settings</span><span class="p">,</span>
             <span class="n">anomaly_detection</span><span class="o">=</span><span class="n">anomaly_detection</span><span class="p">,</span>
+            <span class="n">dtype_dict</span><span class="o">=</span><span class="n">dtype_dict</span><span class="p">,</span>
             <span class="n">ignore_features</span><span class="o">=</span><span class="n">ignore_features</span><span class="p">,</span>
             <span class="n">use_default_analysis</span><span class="o">=</span><span class="n">use_default_analysis</span><span class="p">,</span>
             <span class="n">fit_on_all</span><span class="o">=</span><span class="n">fit_on_all</span><span class="p">,</span>
