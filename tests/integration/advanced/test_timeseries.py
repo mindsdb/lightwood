@@ -350,13 +350,16 @@ class TestTimeseries(unittest.TestCase):
             assert np.allclose(manual_preds, lw_preds, atol=1)
 
     def test_6_time_series_sktime_mixer(self):
-        """ Sanity check with vanilla sktime mixer using a synthetic square wave """
+        """ Sanity check with vanilla sktime mixer using a synthetic square wave sampled at a 15 seconds interval"""
         tsteps = 100
         target = 'Value'
         horizon = 20
+        spacing = 15
         df = pd.DataFrame(columns=['Time', target])
-        df['Time'] = np.linspace(0, 100, tsteps, endpoint=False)
-        df[target] = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * df['Time'].values, width=0.5))]
+        start_ts = datetime(2022, 12, 31, 23, 59, 00)
+        ts_gen = np.linspace(0, 100 * spacing, tsteps, endpoint=False)
+        df['Time'] = [str(start_ts + timedelta(seconds=f)) for f in ts_gen]
+        df[target] = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * ts_gen, width=0.5))]
         df[f'{target}_2x'] = [2 * elt for elt in df[target].values]
         train = df[:int(len(df) * 0.8)]
         test = df[int(len(df) * 0.8):]
@@ -553,7 +556,7 @@ class TestTimeseries(unittest.TestCase):
                                                                                   }}))
         predictor.learn(train_df)
         preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
-        self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012-07', '2012-10'])
+        self.assertTrue(preds[f'order_{order_by}'].iloc[-1] in (['2012-06', '2012-09'], ['2012-07', '2012-10']))
 
         preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': '%Y'})
         self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012', '2012'])
