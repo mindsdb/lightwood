@@ -413,10 +413,13 @@
 
     <span class="n">diffs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">tag</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">deltas</span> <span class="o">-</span> <span class="n">secs</span><span class="p">))</span> <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">secs</span> <span class="ow">in</span> <span class="n">secs_to_interval</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
     <span class="n">freq</span><span class="p">,</span> <span class="n">min_diff</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">diffs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">freq_to_pandas</span><span class="p">(</span><span class="n">freq</span><span class="p">),</span> <span class="n">freq_to_period</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">multiplier</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">secs_to_interval</span><span class="p">[</span><span class="n">freq</span><span class="p">]:</span>
+        <span class="n">multiplier</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_diff</span> <span class="o">/</span> <span class="n">secs_to_interval</span><span class="p">[</span><span class="n">freq</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">freq_to_pandas</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="n">multiplier</span><span class="p">),</span> <span class="n">freq_to_period</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">freq_to_pandas</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">sample_row</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">freq_to_pandas</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sample_row</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;constant&#39;</span><span class="p">:</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span>
         <span class="s1">&#39;nanosecond&#39;</span><span class="p">:</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span>
@@ -435,7 +438,10 @@
 
     <span class="c1"># TODO: implement custom dispatch for better precision, use row sample if available:</span>
     <span class="c1">#  pandas.pydata.org/docs/user_guide/timeseries.html</span>
-    <span class="k">return</span> <span class="n">mapping</span><span class="p">[</span><span class="n">freq</span><span class="p">]</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">mapping</span><span class="p">[</span><span class="n">freq</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="n">multiplier</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">multiplier</span><span class="p">))</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">max_pacf</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">group_combinations</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">tss</span><span class="p">):</span>
