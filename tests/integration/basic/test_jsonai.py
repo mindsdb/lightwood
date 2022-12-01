@@ -8,7 +8,11 @@ class TestJsonAI(unittest.TestCase):
     def test_0_hidden_args_analysis(self):
         df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
         target = 'concrete_strength'
-        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 80})
+        pdef = ProblemDefinition.from_dict({
+            'target': target,
+            'time_aim': 80,
+            'dtype_dict': {'age': 'categorical'}  # tests overriding inferred types
+        })
         jai = json_ai_from_problem(df, pdef)
         jai.analysis_blocks = [
             # args not needed (not even deps), they should be injected for default blocks

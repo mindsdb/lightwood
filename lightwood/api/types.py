@@ -161,6 +161,8 @@ class ProblemDefinition:
          available settings.
     :param anomaly_detection: Whether to conduct unsupervised anomaly detection; currently supported only for time-\
         series.
+    :param dtype_dict: Mapping of features to types (see `mindsdb.type_infer` for all possible values). This will \
+    override the automated type inference results.
     :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \
         found in this list will be automatically removed from subsequent steps in the ML pipeline.
     :param use_default_analysis: whether default analysis blocks are enabled.
@@ -183,6 +185,7 @@ class ProblemDefinition:
     timeseries_settings: TimeseriesSettings
     anomaly_detection: bool
     use_default_analysis: bool
+    dtype_dict: Optional[dict]
     ignore_features: List[str]
     fit_on_all: bool
     strict_mode: bool
@@ -211,6 +214,7 @@ class ProblemDefinition:
 
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
+        dtype_dict = obj.get('dtype_dict', {})
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
         anomaly_detection = obj.get('anomaly_detection', False)
         ignore_features = obj.get('ignore_features', [])
@@ -230,6 +234,7 @@ class ProblemDefinition:
             positive_domain=positive_domain,
             timeseries_settings=timeseries_settings,
             anomaly_detection=anomaly_detection,
+            dtype_dict=dtype_dict,
             ignore_features=ignore_features,
             use_default_analysis=use_default_analysis,
             fit_on_all=fit_on_all,

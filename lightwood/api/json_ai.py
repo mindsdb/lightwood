@@ -199,12 +199,18 @@ def generate_json_ai(
     exec(IMPORT_EXTERNAL_DIRS, globals())
     target = problem_definition.target
     input_cols = []
+    dependency_dict = {}
     tss = problem_definition.timeseries_settings
+
+    dtype_dict_override = problem_definition.dtype_dict
     dtype_dict = type_information.dtypes
+
     for k in type_information.identifiers:
         if not (tss.is_timeseries and tss.group_by and k in tss.group_by) and k != target:
             del dtype_dict[k]
-    dependency_dict = {}
+
+    for k, v in dtype_dict_override.items():
+        dtype_dict[k] = v
 
     for col_name, col_dtype in dtype_dict.items():
         if (
