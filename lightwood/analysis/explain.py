@@ -67,7 +67,7 @@ def explain(data: pd.DataFrame,
         'encoded_data': encoded_data,
         'predictions': predictions,
         'analysis': runtime_analysis,
-        'target_name': target_name,
+        'target_name': target_name,  # TODO: refactor name to 'target'
         'target_dtype': target_dtype,
         'tss': tss,
         'positive_domain': stat_analysis.positive_domain,

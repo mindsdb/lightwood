@@ -47,14 +47,14 @@ class MAvg(BaseAnalysisBlock):
         assert 0 <= y <= 1
 
         n_points = round(len(df) * x)
-        obs_magnitude = abs(df[ns.target].max() - df[ns.target].min())
+        obs_magnitude = abs(df[ns.target_name].max() - df[ns.target_name].min())
 
-        ref_point = df[ns.target].iloc[-1]
+        ref_point = df[ns.target_name].iloc[-1]
 
         ub = ref_point + (obs_magnitude / 2) * y
         lb = ref_point - (obs_magnitude / 2) * y
 
-        sub_df = df[ns.target].iloc[-n_points:].values  # numpy array
+        sub_df = df[ns.target_name].iloc[-n_points:].values  # numpy array
 
         flag = False
 
