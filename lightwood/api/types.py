@@ -14,7 +14,6 @@ from dataclasses import dataclass
 from lightwood.helpers.log import log
 from dataclasses_json import dataclass_json
 from dataclasses_json.core import _asdict, Json
-from type_infer.base import TypeInformation
 import json
 
 
@@ -29,57 +28,6 @@ class Module(TypedDict):
     """ # noqa
     module: str
     args: Dict[str, str]
-
-
-@dataclass_json
-@dataclass
-class StatisticalAnalysis:
-    """
-    The Statistical Analysis data class allows users to consider key descriptors of their data using simple \
-        techniques such as histograms, mean and standard deviation, word count, missing values, and any detected bias\
-             in the information.
-
-    :param nr_rows: Number of rows (samples) in the dataset
-    :param nr_columns: Number of columns (features) in the dataset
-    :param df_target_stddev: The standard deviation of the target of the dataset
-    :param train_observed_classes:
-    :param target_class_distribution:
-    :param target_weights: What weight the analysis suggests to assign each class by in the case of classification problems. Note: target_weights in the problem definition overides this
-    :param histograms:
-    :param buckets:
-    :param missing:
-    :param distinct:
-    :param bias:
-    :param avg_words_per_sentence:
-    :param positive_domain:
-    :param ts_stats:
-    """ # noqa
-
-    nr_rows: int
-    nr_columns: int
-    df_target_stddev: Optional[float]
-    train_observed_classes: object  # Union[None, List[str]]
-    target_class_distribution: object  # Dict[str, float]
-    target_weights: object  # Dict[str, float]
-    histograms: object  # Dict[str, Dict[str, List[object]]]
-    buckets: object  # Dict[str, Dict[str, List[object]]]
-    missing: object
-    distinct: object
-    bias: object
-    avg_words_per_sentence: object
-    positive_domain: bool
-    ts_stats: dict
-
-
-@dataclass_json
-@dataclass
-class DataAnalysis:
-    """
-    Data Analysis wraps :class: `.StatisticalAnalysis` and :class: `.TypeInformation` together. Further details can be seen in their respective documentation references.
-    """ # noqa
-
-    statistical_analysis: StatisticalAnalysis
-    type_information: TypeInformation
 
 
 @dataclass
@@ -213,6 +161,8 @@ class ProblemDefinition:
          available settings.
     :param anomaly_detection: Whether to conduct unsupervised anomaly detection; currently supported only for time-\
         series.
+    :param dtype_dict: Mapping of features to types (see `mindsdb.type_infer` for all possible values). This will \
+    override the automated type inference results.
     :param ignore_features: The names of the columns the user wishes to ignore in the ML pipeline. Any column name \
         found in this list will be automatically removed from subsequent steps in the ML pipeline.
     :param use_default_analysis: whether default analysis blocks are enabled.
@@ -235,6 +185,7 @@ class ProblemDefinition:
     timeseries_settings: TimeseriesSettings
     anomaly_detection: bool
     use_default_analysis: bool
+    dtype_dict: Optional[dict]
     ignore_features: List[str]
     fit_on_all: bool
     strict_mode: bool
@@ -263,6 +214,7 @@ class ProblemDefinition:
 
         target_weights = obj.get('target_weights', None)
         positive_domain = obj.get('positive_domain', False)
+        dtype_dict = obj.get('dtype_dict', {})
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
         anomaly_detection = obj.get('anomaly_detection', False)
         ignore_features = obj.get('ignore_features', [])
@@ -282,6 +234,7 @@ class ProblemDefinition:
             positive_domain=positive_domain,
             timeseries_settings=timeseries_settings,
             anomaly_detection=anomaly_detection,
+            dtype_dict=dtype_dict,
             ignore_features=ignore_features,
             use_default_analysis=use_default_analysis,
             fit_on_all=fit_on_all,
@@ -332,8 +285,8 @@ class JsonAI:
     :param model: The ensemble and its submodels
     :param problem_definition: The ``ProblemDefinition`` criteria.
     :param identifiers: A dictionary of column names and respective data types that are likely identifiers/IDs within the data. Through the default cleaning process, these are ignored.
-    :param cleaner: The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, "None" suggests Lightwood's default approach in ``data.cleaner``.
-    :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data.
+    :param cleaner: The Cleaner object represents the pre-processing step on a dataframe. The user can specify custom subroutines, if they choose, on how to handle preprocessing. Alternatively, "None" suggests the default approach in ``dataprep_ml.cleaners``.
+    :param splitter: The Splitter object is the method in which the input data is split into training/validation/testing data. For more details, refer to the `dataprep_ml` package documentation.
     :param analyzer: The Analyzer object is used to evaluate how well a model performed on the predictive task.
     :param explainer: The Explainer object deploys explainability tools of interest on a model to indicate how well a model generalizes its predictions.
     :param imputers: A list of objects that will impute missing data on each column. They are called inside the cleaner.

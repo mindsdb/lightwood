@@ -1,6 +1,6 @@
 import time
 import inspect
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Optional
 import torch
 import optuna
 import lightgbm
@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 import optuna.integration.lightgbm as optuna_lightgbm
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
@@ -258,7 +258,7 @@ class LightGBM(BaseMixer):
         if self.fit_on_dev:
             self.partial_fit(dev_data, train_data)
 
-    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         """
         Updates the LightGBM model.
 

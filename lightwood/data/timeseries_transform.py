@@ -7,7 +7,7 @@ import pandas as pd
 from lightwood.helpers.parallelism import get_nr_procs
 from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches
 
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.log import log
 
@@ -312,7 +312,7 @@ def _ts_add_previous_target(df: pd.DataFrame, target: str, window: int) -> pd.Da
     previous_target_values_arr = []
     for i in range(len(previous_target_values)):
         prev_vals = previous_target_values[max(i - window, 0):i + 1]
-        arr = [None] * (window - len(prev_vals) + 1)
+        arr = [None] * (window - len(prev_vals))
         arr.extend(prev_vals)
         previous_target_values_arr.append(arr)
 

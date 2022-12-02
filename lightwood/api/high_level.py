@@ -3,8 +3,8 @@ from types import ModuleType
 from typing import Union
 import dill
 import pandas as pd
-from lightwood.api.types import DataAnalysis, JsonAI, ProblemDefinition
-from lightwood.data import statistical_analysis
+from lightwood.api.types import JsonAI, ProblemDefinition
+from dataprep_ml.insights import statistical_analysis
 from type_infer.infer import infer_types
 from lightwood.api.predictor import PredictorInterface
 from lightwood.api.json_ai import generate_json_ai
@@ -72,7 +72,7 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
 
     type_information = infer_types(df, problem_definition.pct_invalid)
     stats = statistical_analysis(
-        df, type_information.dtypes, type_information.identifiers, problem_definition)
+        df, type_information.dtypes, problem_definition.to_dict(), type_information.identifiers)
 
     duration = time.time() - started
     if problem_definition.time_aim is not None:
@@ -111,27 +111,6 @@ def predictor_from_code(code: str) -> PredictorInterface:
     module_name += str(time.time()).replace('.', '')
     predictor = _module_from_code(code, module_name).Predictor()
     return predictor
-
-
-def analyze_dataset(df: pd.DataFrame) -> DataAnalysis:
-    """
-    You can use this to understand and visualize the data, it's not a part of the pipeline one would use for creating and training predictive models.
-
-    :param df: The raw data
-
-    :returns: An object containing insights about the data (specifically the type information and statistical analysis)
-    """ # noqa
-
-    problem_definition = ProblemDefinition.from_dict({'target': str(df.columns[0])})
-
-    type_information = infer_types(df, problem_definition.pct_invalid)
-    stats = statistical_analysis(
-        df, type_information.dtypes, type_information.identifiers, problem_definition)
-
-    return DataAnalysis(
-        type_information=type_information,
-        statistical_analysis=stats
-    )
 
 
 def code_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefinition, dict]) -> str:
