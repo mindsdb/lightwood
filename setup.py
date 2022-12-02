@@ -53,7 +53,7 @@ setuptools.setup(
     description=about['__description__'],
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=["tests", "tests.*"]),
     package_data={'project': ['requirements.txt']},
     install_requires=requirements,
     extras_require=extra_requirements,

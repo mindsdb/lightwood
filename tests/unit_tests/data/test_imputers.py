@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from lightwood.helpers.imputers import NumericalImputer, CategoricalImputer
+from dataprep_ml.imputers import NumericalImputer, CategoricalImputer
 
 
 class TestImputers(unittest.TestCase):

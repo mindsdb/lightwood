@@ -27,7 +27,7 @@ class OneHotEncoder(BaseEncoder):
 
     An encoder can represent a feature column or target column; in this case it represents a target, `is_target` is `True`, and `target_weights`. The `target_weights` parameter enables users to specify how heavily each class should be weighted within a mixer - useful in imbalanced classes.
 
-    By default, the `StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/05/15 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
+    By default, `dataprep_ml.StatisticalAnalysis` phase will provide `target_weights` as the relative fraction of each class in the data which is important for imbalanced populations; for example, suppose there is a 80/05/15 imbalanced representation across 3 different classes - `target_weights` will be a vector as such::
 
     target_weights = {"class1": 0.8, "class2": 0.05, "class3": 0.15}
 

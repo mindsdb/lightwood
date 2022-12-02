@@ -4,14 +4,14 @@ import torch
 import numpy as np
 import pandas as pd
 import optuna
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 from optuna import trial as trial_module
 from sklearn import clone
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import check_cv, cross_val_predict
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
@@ -183,7 +183,7 @@ class RandomForest(BaseMixer):
         else:
             log.info(f'RandomForest based correlation of: {self.model.score(X, Y)}')
 
-    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         """
         The RandomForest mixer does not support updates. If the model does not exist, a new one will be created and fitted. 
 

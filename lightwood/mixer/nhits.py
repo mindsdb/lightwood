@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 from copy import deepcopy
 
 import numpy as np
@@ -139,7 +139,7 @@ class NHitsMixer(BaseMixer):
                            verbose=False)
             log.info('Successfully trained N-HITS forecasting model.')
 
-    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         """
         Due to how lightwood implements the `update` procedure, expected inputs for this method are:
         

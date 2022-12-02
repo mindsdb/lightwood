@@ -11,9 +11,9 @@ from lightwood.api.types import ProblemDefinition
 from tests.utils.timing import train_and_check_time_aim
 from sktime.forecasting.base import ForecastingHorizon
 from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
+from dataprep_ml.splitters import stratify
 
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code, predictor_from_problem, predictor_from_json_ai  # noqa
-from lightwood.data.splitter import stratify
 from lightwood.mixer.sktime import SkTime
 
 np.random.seed(0)
@@ -350,13 +350,16 @@ class TestTimeseries(unittest.TestCase):
             assert np.allclose(manual_preds, lw_preds, atol=1)
 
     def test_6_time_series_sktime_mixer(self):
-        """ Sanity check with vanilla sktime mixer using a synthetic square wave """
+        """ Sanity check with vanilla sktime mixer using a synthetic square wave sampled at a 15 seconds interval"""
         tsteps = 100
         target = 'Value'
         horizon = 20
+        spacing = 15
         df = pd.DataFrame(columns=['Time', target])
-        df['Time'] = np.linspace(0, 100, tsteps, endpoint=False)
-        df[target] = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * df['Time'].values, width=0.5))]
+        start_ts = datetime(2022, 12, 31, 23, 59, 00)
+        ts_gen = np.linspace(0, 100 * spacing, tsteps, endpoint=False)
+        df['Time'] = [str(start_ts + timedelta(seconds=f)) for f in ts_gen]
+        df[target] = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * ts_gen, width=0.5))]
         df[f'{target}_2x'] = [2 * elt for elt in df[target].values]
         train = df[:int(len(df) * 0.8)]
         test = df[int(len(df) * 0.8):]
@@ -553,7 +556,7 @@ class TestTimeseries(unittest.TestCase):
                                                                                   }}))
         predictor.learn(train_df)
         preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
-        self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012-07', '2012-10'])
+        self.assertTrue(preds[f'order_{order_by}'].iloc[-1] in (['2012-06', '2012-09'], ['2012-07', '2012-10']))
 
         preds = predictor.predict(test_df.iloc[[-1]], args={'time_format': '%Y'})
         self.assertEqual(preds[f'order_{order_by}'].iloc[-1], ['2012', '2012'])
@@ -561,19 +564,27 @@ class TestTimeseries(unittest.TestCase):
     def test_12_gluonts(self):
         """ Tests GluonTS mixer """
         data = pd.read_csv('tests/data/arrivals.csv')
-        data = data[data['Country'] == 'US']
-        order_by = 'T'
-        train_df, test_df = self.split_arrivals(data, grouped=False)
-        jai = json_ai_from_problem(train_df, ProblemDefinition.from_dict({'target': 'Traffic',
-                                                                          'timeseries_settings': {
-                                                                              'order_by': order_by,
-                                                                              'window': 4 * 5,
-                                                                              'horizon': 4 * 2
-                                                                          }}))
-        jai.model['args']['submodels'] = [{
-            "module": "GluonTSMixer",
-            "args": {}
-        }]
-        predictor = predictor_from_json_ai(jai)
-        predictor.learn(train_df)
-        predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
+        for i, subdata in enumerate([data, data[data['Country'] == 'US']]):
+            order_by = 'T'
+            train_df, test_df = self.split_arrivals(subdata, grouped=False)
+            pdef = {'target': 'Traffic',
+                    'timeseries_settings': {
+                        'order_by': order_by,
+                        'window': 4 * 5,
+                        'horizon': 4 * 2}}
+            if i == 0:
+                pdef['timeseries_settings']['group_by'] = ['Country']
+            jai = json_ai_from_problem(train_df, ProblemDefinition.from_dict(pdef))
+            jai.model['args']['submodels'] = [{
+                "module": "GluonTSMixer",
+                "args": {}
+            }]
+            predictor = predictor_from_json_ai(jai)
+            predictor.learn(train_df)
+            predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
+
+            # adjust
+            adjust_n_epochs = 5
+            predictor.adjust(test_df, adjust_args={'n_epochs': adjust_n_epochs})
+            predictor.predict(test_df.iloc[[-1]], args={'time_format': 'infer'})
+            assert predictor.mixers[0].n_epochs == adjust_n_epochs

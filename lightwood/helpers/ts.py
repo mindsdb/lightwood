@@ -240,10 +240,13 @@ def detect_freq_period(deltas: pd.DataFrame, tss, n_points) -> tuple:
 
     diffs = [(tag, abs(deltas - secs)) for tag, secs in secs_to_interval.items()]
     freq, min_diff = sorted(diffs, key=lambda x: x[1])[0]
-    return freq_to_pandas(freq), freq_to_period.get(freq, 1)
+    multiplier = 1
+    if secs_to_interval[freq]:
+        multiplier += int(min_diff / secs_to_interval[freq])
+    return freq_to_pandas(freq, multiplier=multiplier), freq_to_period.get(freq, 1)
 
 
-def freq_to_pandas(freq, sample_row=None):
+def freq_to_pandas(freq, multiplier=1, sample_row=None):
     mapping = {
         'constant': 'N',
         'nanosecond': 'N',
@@ -262,7 +265,10 @@ def freq_to_pandas(freq, sample_row=None):
 
     # TODO: implement custom dispatch for better precision, use row sample if available:
     #  pandas.pydata.org/docs/user_guide/timeseries.html
-    return mapping[freq]
+    items = [mapping[freq]]
+    if multiplier > 1:
+        items.insert(0, str(multiplier))
+    return ''.join(items)
 
 
 def max_pacf(data: pd.DataFrame, group_combinations, target, tss):

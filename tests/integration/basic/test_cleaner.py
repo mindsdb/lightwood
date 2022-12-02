@@ -4,7 +4,7 @@ import pandas as pd
 
 from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import json_ai_from_problem, predictor_from_json_ai
-from lightwood.helpers.imputers import NumericalImputer, CategoricalImputer
+from dataprep_ml.imputers import NumericalImputer, CategoricalImputer
 
 
 class TestCleaner(unittest.TestCase):

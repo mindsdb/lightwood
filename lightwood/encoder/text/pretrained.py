@@ -10,7 +10,7 @@ from lightwood.helpers.device import get_device_from_name
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
 from lightwood.helpers.torch import LightwoodAutocast
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from transformers import (
     DistilBertModel,
     DistilBertForSequenceClassification,

@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 from torch.nn.modules.loss import MSELoss
 from torch.optim.optimizer import Optimizer
 
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.torch import LightwoodAutocast
@@ -296,7 +296,7 @@ class Neural(BaseMixer):
         self._fit(train_data, dev_data)
         self._final_tuning(dev_data)
 
-    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
+    def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         """
         Augments the mixer's fit with new data, nr of epochs is based on the amount of epochs the original fitting took
 

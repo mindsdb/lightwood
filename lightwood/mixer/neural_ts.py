@@ -12,7 +12,7 @@ from torch.cuda.amp import GradScaler
 from torch.utils.data import DataLoader
 from torch.optim.optimizer import Optimizer
 
-from lightwood.api import dtype
+from type_infer.dtype import dtype
 from lightwood.api.types import PredictionArguments
 from lightwood.encoder.base import BaseEncoder
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
