@@ -5,11 +5,8 @@ from types import SimpleNamespace
 import pandas as pd
 import numpy as np
 
-# from sklearn.preprocessing import OrdinalEncoder
-
 from lightwood.analysis.base import BaseAnalysisBlock
 from lightwood.helpers.log import log
-# from lightwood.helpers.parallelism import get_nr_procs
 
 
 class MAvg(BaseAnalysisBlock):
@@ -28,14 +25,14 @@ class MAvg(BaseAnalysisBlock):
                 global_insights: Dict[str, object], **kwargs) -> Tuple[pd.DataFrame, Dict[str, object]]:
         """
         df: contains the entire time series to analyze.
-        box_dim: width & height relative to the observed magnitudes in the series (height) and the amount of observations (width). 
+        box_dim: width & height relative to the observed magnitudes in the series (height) and the amount of observations (width).
 
         The box is positioned at the end of the time series, and it alerts the user if the series "escapes" or "exits" the box via the y axis at any given point.
 
         TODO: Automated box_dim param estimation. How??
-        """
+        """  # noqa
         # TODO: box_dim (User defined)
-        box_dim= (0.1, 0.1)
+        box_dim = (0.1, 0.1)
 
         log.info('Anomaly detection...')
         ns = SimpleNamespace(**kwargs)
@@ -43,7 +40,7 @@ class MAvg(BaseAnalysisBlock):
 
         x, y = box_dim
 
-        assert 0 <= x <= 1  # raise Exception in lightwood
+        assert 0 <= x <= 1
         assert 0 <= y <= 1
 
         n_points = round(len(df) * x)
@@ -54,7 +51,7 @@ class MAvg(BaseAnalysisBlock):
         ub = ref_point + (obs_magnitude / 2) * y
         lb = ref_point - (obs_magnitude / 2) * y
 
-        sub_df = df[ns.target_name].iloc[-n_points:].values  # numpy array
+        sub_df = df[ns.target_name].iloc[-n_points:].values
 
         flag = False
 

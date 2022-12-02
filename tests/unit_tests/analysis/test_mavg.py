@@ -35,6 +35,6 @@ class TestMAvg(unittest.TestCase):
         predictor = predictor_from_code(code)
 
         predictor.learn(df)
-        preds = predictor.predict(df.head())
+        predictor.predict(df.head())
 
         # self.assertTrue(preds.columns)
