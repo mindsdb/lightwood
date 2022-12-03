@@ -1,6 +1,5 @@
-from typing import Dict, List, Set, Optional, Union
+from typing import Dict, List, Optional, Union
 import time
-import inspect
 
 import torch
 import optuna
@@ -27,7 +26,7 @@ def check_gpu_support():
         data = load_iris()
         x, _, y, _ = train_test_split(data['data'], data['target'], test_size=.2)
         bst = xgb.XGBClassifier(n_estimators=2, max_depth=2, learning_rate=1, objective='binary:logistic',
-                                    tree_method='gpu_hist', gpu_id=0)
+                                tree_method='gpu_hist', gpu_id=0)
         bst.fit(x, y)
         return True
     except xgb.core.XGBoostError:
@@ -81,8 +80,8 @@ class XGBoostMixer(BaseMixer):
         self.use_optuna = use_optuna
         self.params = {}
         self.fit_on_dev = fit_on_dev
-        self.cls_dtypes = [dtype.categorical, dtype.binary]  # , dtype.cat_tsarray]
-        self.float_dtypes = [dtype.float, dtype.quantity]  # , dtype.num_tsarray]
+        self.cls_dtypes = [dtype.categorical, dtype.binary]  # , dtype.cat_tsarray]  # TODO
+        self.float_dtypes = [dtype.float, dtype.quantity]  # , dtype.num_tsarray]  # TODO
         self.num_dtypes = [dtype.integer] + self.float_dtypes
         self.supports_proba = dtype_dict[target] in self.cls_dtypes
         self.stable = True
@@ -200,12 +199,12 @@ class XGBoostMixer(BaseMixer):
         # TODO: Turn on grid search if training doesn't take too long using it
         # kwargs = {}
         # if self.use_optuna and self.num_iterations >= 200:
-        #     model_generator = optuna_lightgbm
+        #     model_generator = None
         #     kwargs['time_budget'] = self.stop_after * 0.4
         #     self.num_iterations = int(self.num_iterations / 2)
         #     kwargs['optuna_seed'] = 0
         # else:
-        #     model_generator = lightgbm
+        #     model_generator = None
 
         # Train the models
         log.info(
@@ -227,7 +226,7 @@ class XGBoostMixer(BaseMixer):
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         # TODO: https://xgboost.readthedocs.io/en/stable/python/python_api.html#module-xgboost.sklearn
         # To resume training from a previous checkpoint, explicitly pass xgb_model argument.
-        log.info(f'XGBoost mixer does not have a `partial_fit` implementation')
+        log.info('XGBoost mixer does not have a `partial_fit` implementation')
 
     def __call__(self, ds: EncodedDs,
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
