@@ -287,6 +287,13 @@ def generate_json_ai(
                         },
                     },
                     {
+                        "module": "XGBoostMixer",
+                        "args": {
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "fit_on_dev": True,
+                        },
+                    },
+                    {
                         "module": "Regression",
                         "args": {
                             "stop_after": "$problem_definition.seconds_per_mixer",
@@ -600,12 +607,15 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 )
                 mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get("ts_analysis", "$ts_analysis")
 
-        elif mixers[i]["module"] == "LightGBM":
+        elif mixers[i]["module"] in ("LightGBM", "XGBoostMixer"):
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
                 "input_cols", "$input_cols"
             )
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
+            )
+            mixers[i]["args"]["fit_on_dev"] = mixers[i]["args"].get(
+                "fit_on_dev", True
             )
             mixers[i]["args"]["use_optuna"] = True
 

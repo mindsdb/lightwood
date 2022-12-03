@@ -76,3 +76,15 @@ class TestBasic(unittest.TestCase):
         predictor.learn(df)
         predictor.predict(df)
         self.assertTrue(isinstance(predictor.ensemble, StackedEnsemble))
+
+    def test_2_xgboost_mixer(self):
+        df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
+        target = 'concrete_strength'
+
+        pdef = ProblemDefinition.from_dict({'target': target, 'time_aim': 80})
+        jai = json_ai_from_problem(df, pdef)
+        jai.model['args']['submodels'] = [{"module": "XGBoostMixer", "args": {}}]
+
+        predictor = predictor_from_json_ai(jai)
+        predictor.learn(df)
+        predictor.predict(df)

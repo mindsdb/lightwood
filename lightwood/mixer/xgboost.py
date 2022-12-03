@@ -4,13 +4,14 @@ import inspect
 
 import torch
 import optuna
-import xgboost
+import xgboost as xgb
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 from type_infer.dtype import dtype
 
 from lightwood.helpers.log import log
+from lightwood.helpers.parallelism import get_nr_procs
 from lightwood.mixer.base import BaseMixer
 from lightwood.encoder.base import BaseEncoder
 from lightwood.api.types import PredictionArguments
@@ -25,16 +26,16 @@ def check_gpu_support():
         from sklearn.model_selection import train_test_split
         data = load_iris()
         x, _, y, _ = train_test_split(data['data'], data['target'], test_size=.2)
-        bst = xgboost.XGBClassifier(n_estimators=2, max_depth=2, learning_rate=1, objective='binary:logistic',
+        bst = xgb.XGBClassifier(n_estimators=2, max_depth=2, learning_rate=1, objective='binary:logistic',
                                     tree_method='gpu_hist', gpu_id=0)
         bst.fit(x, y)
         return True
-    except xgboost.core.XGBoostError:
+    except xgb.core.XGBoostError:
         return False
 
 
-class XGBoost(BaseMixer):
-    model: Union[xgboost.XGBClassifier, xgboost.XGBRegressor]
+class XGBoostMixer(BaseMixer):
+    model: Union[xgb.XGBClassifier, xgb.XGBRegressor]
     ordinal_encoder: OrdinalEncoder
     label_set: Set[str]
     max_bin: int
@@ -80,8 +81,8 @@ class XGBoost(BaseMixer):
         self.use_optuna = use_optuna
         self.params = {}
         self.fit_on_dev = fit_on_dev
-        self.cls_dtypes = [dtype.categorical, dtype.binary, dtype.cat_tsarray]
-        self.float_dtypes = [dtype.float, dtype.quantity, dtype.num_tsarray]
+        self.cls_dtypes = [dtype.categorical, dtype.binary]  # , dtype.cat_tsarray]
+        self.float_dtypes = [dtype.float, dtype.quantity]  # , dtype.num_tsarray]
         self.num_dtypes = [dtype.integer] + self.float_dtypes
         self.supports_proba = dtype_dict[target] in self.cls_dtypes
         self.stable = True
@@ -98,49 +99,43 @@ class XGBoost(BaseMixer):
 
         self.max_bin = 255
 
-    def _to_dataset(self, data: Dict[str, Dict], output_dtype: str):
+    def _to_dataset(self, ds: EncodedDs, output_dtype: str, mode='train'):
         """
-        Helper method to wrangle data into the format that the underlying model requires.
+        Helper method to wrangle a datasource into the format that the underlying model requires.
+        :param ds: EncodedDS that contains the dataframe to transform.
+        :param output_dtype:
+        :return: modified `data` object that conforms to XGBoost's expected format.
+        """  # noqa
+        data = None
+        for input_col in self.input_cols:
+            if data is None:
+                data = ds.get_encoded_column_data(input_col).to(self.device)
+            else:
+                enc_col = ds.get_encoded_column_data(input_col).to(self.device)
+                data = torch.cat((data, enc_col.to(self.device)), 1)
 
-        :param data: Includes train and dev data datasources.
-        :param output_dtype
-        :return: modified `data` object that conforms to LightGBM's expected format.
-        """
-        weight_map = getattr(self.target_encoder, 'target_weights', None)
+        data = data.cpu().numpy()
 
-        for subset_name in data.keys():
-            for input_col in self.input_cols:
-                if data[subset_name]['data'] is None:
-                    data[subset_name]['data'] = data[subset_name]['ds'].get_encoded_column_data(
-                        input_col).to(self.device)
-                else:
-                    enc_col = data[subset_name]['ds'].get_encoded_column_data(input_col)
-                    data[subset_name]['data'] = torch.cat((data[subset_name]['data'], enc_col.to(self.device)), 1)
-
-            data[subset_name]['data'] = data[subset_name]['data'].cpu().numpy()
-
-            label_data = data[subset_name]['ds'].get_column_original_data(self.target)
-
-            data[subset_name]['weights'] = None
+        if mode == 'train':
+            label_data = ds.get_column_original_data(self.target)
             if output_dtype in self.cls_dtypes:
-                if subset_name == 'train':
-                    self.ordinal_encoder = OrdinalEncoder()
-                    self.label_set = set(label_data)
-                    self.label_set.add('__mdb_unknown_cat')
-                    self.ordinal_encoder.fit(np.array(list(self.label_set)).reshape(-1, 1))
+                self.ordinal_encoder = OrdinalEncoder()
+                self.label_set = set(label_data)
+                self.label_set.add('__mdb_unknown_cat')
+                self.ordinal_encoder.fit(np.array(list(self.label_set)).reshape(-1, 1))
 
                 label_data = [x if x in self.label_set else '__mdb_unknown_cat' for x in label_data]
-                if weight_map is not None:
-                    data[subset_name]['weights'] = [weight_map[x] for x in label_data]
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
+                # TODO weight maps?
             elif output_dtype == dtype.integer:
                 label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
             elif output_dtype in self.float_dtypes:
                 label_data = label_data.astype(float)
 
-            data[subset_name]['label_data'] = label_data
+            return data, label_data
 
-        return data
+        else:
+            return data
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
@@ -152,131 +147,86 @@ class XGBoost(BaseMixer):
         started = time.time()
 
         log.info('Started fitting XGBoost model')
-        data = {
-            'train': {'ds': train_data, 'data': None, 'label_data': {}},
-            'dev': {'ds': dev_data, 'data': None, 'label_data': {}}
-        }
-        self.fit_data_len = len(data['train']['ds'])
+        self.fit_data_len = len(train_data)
         self.positive_domain = getattr(train_data.encoders.get(self.target, None), 'positive_domain', False)
-
         output_dtype = self.dtype_dict[self.target]
-        # data = self._to_dataset(data, output_dtype)
 
         if output_dtype not in self.cls_dtypes + self.num_dtypes:
             log.error(f'XGBoost mixer not supported for type: {output_dtype}')
             raise Exception(f'XGBoost mixer not supported for type: {output_dtype}')
         else:
-            objective = 'regression' if output_dtype in self.num_dtypes else 'multiclass'
-            metric = 'l2' if output_dtype in self.num_dtypes else 'multi_logloss'
+            objective = 'reg:squarederror' if output_dtype in self.num_dtypes else 'multi:softmax'
+            metric = 'rmse' if output_dtype in self.num_dtypes else 'mlogloss'
 
         self.params = {
             'objective': objective,
-            'metric': metric,
-            'verbose': -1,
-            'lambda_l1': 0.1,
-            'lambda_l2': 0.1,
-            'force_row_wise': True,
-            'device_type': self.device_str,
+            'eval_metric': metric,
+            'n_jobs': get_nr_procs(train_data.data_frame),
+            'process_type': 'default',  # normal training
+            'verbosity': 0,
+            'early_stopping_rounds': 5
+            # 'device_type': self.device_str,  # TODO
         }
 
-        if objective == 'multiclass':
+        # Prepare the data
+        train_dataset, train_labels = self._to_dataset(train_data, output_dtype, mode='train')
+        dev_dataset, dev_labels = self._to_dataset(dev_data, output_dtype, mode='train')
+
+        if objective == 'multi:softmax':
             self.all_classes = self.ordinal_encoder.categories_[0]
             self.params['num_class'] = self.all_classes.size
-        elif output_dtype == dtype.num_tsarray:
-            self.params['linear_tree'] = True
-        if self.device_str == 'gpu':
-            self.params['gpu_use_dp'] = True
+            model_class = xgb.XGBClassifier
+        else:
+            model_class = xgb.XGBRegressor
 
         # Determine time per iterations
         start = time.time()
-        self.params['num_iterations'] = 1
+        self.params['n_estimators'] = 1
 
-        # TODO: using the training dataset directly instead of building dataset object
+        with xgb.config_context(verbosity=0):
+            self.model = model_class(**self.params)
+            self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
 
-        kwargs = {}
-        if 'verbose_eval' in inspect.getfullargspec(lightgbm.train).args:
-            kwargs['verbose_eval'] = False
-        self.model = lightgbm.train(self.params, lightgbm.Dataset(data['train']['data'], label=data['train']
-        ['label_data'], weight=data['train']['weights']), **kwargs)
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
 
         self.stop_after = max(1, self.stop_after - (time.time() - started))
+
         # Determine nr of iterations
         log.info(f'A single GBM iteration takes {seconds_for_one_iteration} seconds')
         self.num_iterations = int(self.stop_after * 0.8 / seconds_for_one_iteration)
 
-        # Turn on grid search if training doesn't take too long using it
-        kwargs = {}
-        if self.use_optuna and self.num_iterations >= 200:
-            model_generator = optuna_lightgbm
-            kwargs['time_budget'] = self.stop_after * 0.4
-            self.num_iterations = int(self.num_iterations / 2)
-            kwargs['optuna_seed'] = 0
-        else:
-            model_generator = lightgbm
+        # TODO: Turn on grid search if training doesn't take too long using it
+        # kwargs = {}
+        # if self.use_optuna and self.num_iterations >= 200:
+        #     model_generator = optuna_lightgbm
+        #     kwargs['time_budget'] = self.stop_after * 0.4
+        #     self.num_iterations = int(self.num_iterations / 2)
+        #     kwargs['optuna_seed'] = 0
+        # else:
+        #     model_generator = lightgbm
 
         # Train the models
         log.info(
-            f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')  # noqa
+            f'Training XGBoost with {self.num_iterations} iterations given {self.stop_after} seconds constraint')  # noqa
         if self.num_iterations < 1:
             self.num_iterations = 1
-        self.params['num_iterations'] = int(self.num_iterations)
+        self.params['n_estimators'] = int(self.num_iterations)
 
-        self.params['early_stopping_rounds'] = 5
+        # TODO: reinstance these on each run! keep or use via eval_set in fit()?
+        # self.params['callbacks'] = [(train_dataset, 'train'), (dev_dataset, 'eval')]
 
-        # Prepare the data
-        train_dataset = lightgbm.Dataset(data['train']['data'], label=data['train']['label_data'],
-                                         weight=data['train']['weights'])
-
-        dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'],
-                                       weight=data['dev']['weights'])
-
-        if 'verbose_eval' in inspect.getfullargspec(lightgbm.train).args:
-            kwargs['verbose_eval'] = False
-        self.model = model_generator.train(
-            self.params, train_dataset, valid_sets=[dev_dataset, train_dataset],
-            valid_names=['dev', 'train'],
-            **kwargs)
-        self.num_iterations = self.model.best_iteration
-        log.info(f'Lightgbm model contains {self.model.num_trees()} weak estimators')
+        with xgb.config_context(verbosity=0):
+            self.model = model_class(**self.params)
+            self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
 
         if self.fit_on_dev:
             self.partial_fit(dev_data, train_data)
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
-        """
-        Updates the LightGBM model.
-
-        :param train_data: encoded features for (new) training dataset
-        :param dev_data: encoded features for (new) dev dataset
-        """
-        pct_of_original = len(train_data) / self.fit_data_len
-        iterations = max(1, int(self.num_iterations * pct_of_original) / 2)
-
-        data = {'retrain': {'ds': train_data, 'data': None, 'label_data': {}}, 'dev': {
-            'ds': dev_data, 'data': None, 'label_data': {}}}
-
-        output_dtype = self.dtype_dict[self.target]
-        # data = self._to_dataset(data, output_dtype)
-
-        train_dataset = lightgbm.Dataset(data['retrain']['data'], label=data['retrain']['label_data'],
-                                         weight=data['retrain']['weights'])
-        dev_dataset = lightgbm.Dataset(data['dev']['data'], label=data['dev']['label_data'],
-                                       weight=data['dev']['weights'])
-
-        log.info(f'Updating lightgbm model with {iterations} iterations')
-        self.params['num_iterations'] = int(iterations)
-
-        kwargs = {}
-        if 'verbose_eval' in inspect.getfullargspec(lightgbm.train).args:
-            kwargs['verbose_eval'] = False
-
-        self.model = lightgbm.train(
-            self.params, train_dataset, valid_sets=[dev_dataset, train_dataset],
-            valid_names=['dev', 'retrain'],
-            init_model=self.model, **kwargs)
-        log.info(f'Model now has a total of {self.model.num_trees()} weak estimators')
+        # TODO: https://xgboost.readthedocs.io/en/stable/python/python_api.html#module-xgboost.sklearn
+        # To resume training from a previous checkpoint, explicitly pass xgb_model argument.
+        log.info(f'XGBoost mixer does not have a `partial_fit` implementation')
 
     def __call__(self, ds: EncodedDs,
                  args: PredictionArguments = PredictionArguments()) -> pd.DataFrame:
@@ -287,16 +237,15 @@ class XGBoost(BaseMixer):
         :param args: inference-time arguments (e.g. whether to output predicted labels or probabilities).
 
         :return: dataframe with predictions.
-        """
-        data = None
-        for input_col in self.input_cols:
-            if data is None:
-                data = ds.get_encoded_column_data(input_col).to(self.device)
-            else:
-                data = torch.cat((data, ds.get_encoded_column_data(input_col).to(self.device)), 1)
+        """  # noqa
+        output_dtype = self.dtype_dict[self.target]
+        xgbdata = self._to_dataset(ds, self.dtype_dict[self.target], mode='predict')
 
-        data = data.cpu().numpy()
-        raw_predictions = self.model.predict(data)
+        with xgb.config_context(verbosity=0):
+            if output_dtype in self.num_dtypes:
+                raw_predictions = self.model.predict(xgbdata)
+            else:
+                raw_predictions = self.model.predict_proba(xgbdata)
 
         if self.ordinal_encoder is not None:
             decoded_predictions = self.ordinal_encoder.inverse_transform(
