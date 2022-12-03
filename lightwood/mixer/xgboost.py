@@ -37,7 +37,7 @@ def check_gpu_support():
 class XGBoostMixer(BaseMixer):
     model: Union[xgb.XGBClassifier, xgb.XGBRegressor]
     ordinal_encoder: OrdinalEncoder
-    label_set: Set[str]
+    label_set: List[str]
     max_bin: int
     device: torch.device
     device_str: str
@@ -74,7 +74,7 @@ class XGBoostMixer(BaseMixer):
         self.model = None
         self.ordinal_encoder = None
         self.positive_domain = False
-        self.label_set = set()
+        self.label_set = []
         self.target = target
         self.dtype_dict = dtype_dict
         self.input_cols = input_cols
@@ -116,17 +116,18 @@ class XGBoostMixer(BaseMixer):
 
         data = data.cpu().numpy()
 
-        if mode == 'train':
+        if mode in ('train', 'dev'):
             label_data = ds.get_column_original_data(self.target)
             if output_dtype in self.cls_dtypes:
-                self.ordinal_encoder = OrdinalEncoder()
-                self.label_set = set(label_data)
-                self.label_set.add('__mdb_unknown_cat')
-                self.ordinal_encoder.fit(np.array(list(self.label_set)).reshape(-1, 1))
+                if mode == 'train':  # TODO weight maps?
+                    self.ordinal_encoder = OrdinalEncoder()
+                    self.label_set = list(set(label_data))
+                    self.label_set.append('~UNK')
+                    self.ordinal_encoder.fit(np.array(list(self.label_set)).reshape(-1, 1))
 
                 label_data = [x if x in self.label_set else '__mdb_unknown_cat' for x in label_data]
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
-                # TODO weight maps?
+
             elif output_dtype == dtype.integer:
                 label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
             elif output_dtype in self.float_dtypes:
@@ -170,7 +171,7 @@ class XGBoostMixer(BaseMixer):
 
         # Prepare the data
         train_dataset, train_labels = self._to_dataset(train_data, output_dtype, mode='train')
-        dev_dataset, dev_labels = self._to_dataset(dev_data, output_dtype, mode='train')
+        dev_dataset, dev_labels = self._to_dataset(dev_data, output_dtype, mode='dev')
 
         if objective == 'multi:softmax':
             self.all_classes = self.ordinal_encoder.categories_[0]
