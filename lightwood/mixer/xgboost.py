@@ -161,7 +161,7 @@ class XGBoostMixer(BaseMixer):
             log.error(f'XGBoost mixer not supported for type: {output_dtype}')
             raise Exception(f'XGBoost mixer not supported for type: {output_dtype}')
         else:
-            objective = 'reg:squarederror' if output_dtype in self.num_dtypes else 'multi:softmax'
+            objective = 'reg:squarederror' if output_dtype in self.num_dtypes else 'multi:softprob'
             metric = 'rmse' if output_dtype in self.num_dtypes else 'mlogloss'
 
         self.params = {
@@ -178,7 +178,7 @@ class XGBoostMixer(BaseMixer):
         train_dataset, train_labels = self._to_dataset(train_data, output_dtype, mode='train')
         dev_dataset, dev_labels = self._to_dataset(dev_data, output_dtype, mode='dev')
 
-        if objective == 'multi:softmax':
+        if output_dtype not in self.num_dtypes:
             self.all_classes = self.ordinal_encoder.categories_[0]
             self.params['num_class'] = self.all_classes.size
             model_class = xgb.XGBClassifier
