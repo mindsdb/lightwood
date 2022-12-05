@@ -52,9 +52,12 @@ class XGBoostMixer(BaseMixer):
 
     We can basically think of this mixer as a wrapper to the XGBoost Python package. To do so, there are a few caveats the user may want to be aware about:
         * If you seek GPU utilization, XGBoost must be compiled from source instead of being installed through `pip`.
-        * Integer, float, and quantity `dtype`s are treated as regression tasks with `L2` loss. All other supported `dtype`s is casted as a multiclass task with `multi_logloss` loss.
-        * It has an automatic optuna-based hyperparameter search. This procedure triggers when a single iteration of XGBoost is deemed fast enough (given the time budget).
+        * Integer, float, and quantity `dtype`s are treated as regression tasks with `reg:squarederror` loss. All other supported `dtype`s is casted as a multiclass task with `multi:softmax` loss.
         * A partial fit can be performed with the `dev` data split as part of `fit`, if specified with the `fit_on_dev` argument.
+
+    There are a couple things in the backlog that will hopefully be added soon:
+        * An automatic optuna-based hyperparameter search. This procedure triggers when a single iteration of XGBoost is deemed fast enough (given the time budget).
+        * Support for "unknown class" as a possible answer for multiclass tasks.
     """  # noqa
 
     def __init__(
@@ -121,11 +124,14 @@ class XGBoostMixer(BaseMixer):
                 if mode == 'train':  # TODO weight maps?
                     self.ordinal_encoder = OrdinalEncoder()
                     self.label_set = list(set(label_data))
-                    self.label_set.append('~UNK')
                     self.ordinal_encoder.fit(np.array(list(self.label_set)).reshape(-1, 1))
 
-                label_data = [x if x in self.label_set else '__mdb_unknown_cat' for x in label_data]
-                label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
+                filtered_label_data = []
+                for x in label_data:
+                    if x in self.label_set:
+                        filtered_label_data.append(x)
+
+                label_data = self.ordinal_encoder.transform(np.array(filtered_label_data).reshape(-1, 1)).flatten()
 
             elif output_dtype == dtype.integer:
                 label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
