@@ -1208,7 +1208,7 @@ if self.pred_args.all_mixers:
 else:
     log.info(f'[Predict phase 4/{{n_phases}}] - Analyzing output')
     insights, global_insights = {call(json_ai.explainer)}
-    self.global_insights = {{**self.global_insights, global_insights}}
+    self.global_insights = {{**self.global_insights, **global_insights}}
     return insights
 """
 
