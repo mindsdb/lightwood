@@ -440,6 +440,7 @@ class PredictionArguments:
     :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly \
         detector.
     :param time_format: For time series predictors. If set to `infer`, predicted `order_by` timestamps will be formatted back to the original dataset's `order_by` format. Any other string value will be used as a formatting string, unless empty (''), which disables the feature (this is the default behavior).
+    :param force_ts_infer: For time series predictors. If set to `true`, an additional row will be produced per each group in the input DF, corresponding to an out-of-sample forecast w.r.t. to the input timestamps.
     """  # noqa
 
     predict_proba: bool = True
@@ -449,6 +450,7 @@ class PredictionArguments:
     forecast_offset: int = 0
     simple_ts_bounds: bool = False
     time_format: str = ''
+    force_ts_infer: bool = False
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -468,6 +470,7 @@ class PredictionArguments:
         forecast_offset = obj.get('forecast_offset', PredictionArguments.forecast_offset)
         simple_ts_bounds = obj.get('simple_ts_bounds', PredictionArguments.simple_ts_bounds)
         time_format = obj.get('time_format', PredictionArguments.time_format)
+        force_ts_infer = obj.get('force_ts_infer', PredictionArguments.force_ts_infer)
 
         pred_args = PredictionArguments(
             predict_proba=predict_proba,
@@ -477,6 +480,7 @@ class PredictionArguments:
             forecast_offset=forecast_offset,
             simple_ts_bounds=simple_ts_bounds,
             time_format=time_format,
+            force_ts_infer=force_ts_infer,
         )
 
         return pred_args

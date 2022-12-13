@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 from functools import partial
 import multiprocessing as mp
 
@@ -8,13 +8,15 @@ from lightwood.helpers.parallelism import get_nr_procs
 from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches
 
 from type_infer.dtype import dtype
-from lightwood.api.types import TimeseriesSettings
+from lightwood.api.types import TimeseriesSettings, PredictionArguments
 from lightwood.helpers.log import log
 
 
 def transform_timeseries(
         data: pd.DataFrame, dtype_dict: Dict[str, str], ts_analysis: dict,
-        timeseries_settings: TimeseriesSettings, target: str, mode: str) -> pd.DataFrame:
+        timeseries_settings: TimeseriesSettings, target: str, mode: str,
+        pred_args: Optional[PredictionArguments] = None
+) -> pd.DataFrame:
     """
     Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.
     
@@ -31,6 +33,7 @@ def transform_timeseries(
     :param timeseries_settings: A `TimeseriesSettings` object.
     :param target: The name of the target column to forecast.
     :param mode: Either "train" or "predict", depending on what phase is calling this procedure.
+    :param pred_args: Optional prediction arguments to control the transformation process.
     
     :return: A dataframe with all the transformations applied.
     """  # noqa
@@ -139,7 +142,8 @@ def transform_timeseries(
                 make_preds = [False for _ in range(max(0, len(new_index) - 1))] + [True]
                 df_arr[i] = df_arr[i].loc[new_index]
             else:
-                df_arr[i] = _ts_infer_next_row(subdf, oby)  # we still infer an "out-of-sample" forecast in default mode
+                if pred_args.force_ts_infer:
+                    df_arr[i] = _ts_infer_next_row(subdf, oby)  # force-infer out-of-sample forecast in default mode
                 make_preds = [True for _ in range(len(df_arr[i]))]
             df_arr[i]['__make_predictions'] = make_preds
 

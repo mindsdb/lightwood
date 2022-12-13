@@ -412,7 +412,8 @@ class TestTimeseries(unittest.TestCase):
         for idx in [1, None]:
             # Last row yields predictions starting one period after the most recent timestamp seen at training time
             train['__mdb_forecast_offset'] = idx
-            ps = predictor.predict(train)
+            args = {} if idx == 1 else {'force_ts_infer': True}
+            ps = predictor.predict(train, args=args)
             if idx == 1:
                 assert len(ps) == 1
             else:
@@ -422,6 +423,10 @@ class TestTimeseries(unittest.TestCase):
             start_predtime = datetime.utcfromtimestamp(ps.iloc[-1][f'order_{oby}'][0])
             start_test = datetime.utcfromtimestamp(pd.to_datetime(test.iloc[0][oby]).value // 1e9)
             assert start_test - start_predtime <= timedelta(days=2)
+
+            if idx is None:
+                ps = predictor.predict(train, args={})  # ensure without `force_ts_infer` flag it behaves normally
+                assert len(ps) == len(train)
 
     def test_7_irregular_series(self):
         """
