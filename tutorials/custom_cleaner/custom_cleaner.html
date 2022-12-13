@@ -490,8 +490,8 @@ from lightwood import ProblemDefinition, \
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2887:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2887:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2872:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2872:No torchvision/pillow detected, image encoder not supported</span>
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/json.py:101: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/gluonts/model/deepar/__init__.py:18: FutureWarning: The module gluonts.model.deepar has been moved to gluonts.mx.model.deepar. In GluonTS v0.12 it will be no longer possible to use the old path. Try to use &#39;from gluonts.mx import DeepAREstimator&#39;.
@@ -619,20 +619,20 @@ json_ai = json_ai_from_problem(data, problem_definition)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2887:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-<span class="ansi-green-fg">INFO:type_infer-2887:Analyzing a sample of 2478</span>
-<span class="ansi-green-fg">INFO:type_infer-2887:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2887:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2887:Doing text detection for column: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2887:Column id has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2887:Infering type for: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2887:Doing text detection for column: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2887:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:type_infer-2887:Column target has data type float</span>
-<span class="ansi-yellow-fg">WARNING:type_infer-2887:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2887:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2887:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2887:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2872:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:type_infer-2872:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:type_infer-2872:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2872:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2872:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2872:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2872:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2872:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2872:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:type_infer-2872:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:type_infer-2872:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2872:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2872:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2872:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -727,7 +727,7 @@ json_ai = json_ai_from_problem(data, problem_definition)
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 17107.2,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 16.9031503200531,
+        &#34;expected_additional_time&#34;: 17.241397857666016,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -964,7 +964,7 @@ with open(&#39;custom_cleaner_pipeline.py&#39;, &#39;w&#39;) as fp:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2887:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2872:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1042,7 +1042,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 17107.2,
                 &#34;seconds_per_encoder&#34;: 85536.0,
-                &#34;expected_additional_time&#34;: 16.9031503200531,
+                &#34;expected_additional_time&#34;: 17.241397857666016,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -1082,6 +1082,7 @@ class Predictor(PredictorInterface):
         self.statistical_analysis = None
         self.ts_analysis = None
         self.runtime_log = dict()
+        self.global_insights = dict()
 
     @timed
     def analyze_data(self, data: pd.DataFrame) -&gt; None:
@@ -1513,6 +1514,7 @@ class Predictor(PredictorInterface):
                 explainer_blocks=self.analysis_blocks,
                 pred_args=self.pred_args,
             )
+            self.global_insights = {**self.global_insights, **global_insights}
             return insights
 
 </pre></div></div>
@@ -1565,16 +1567,16 @@ cleaned_data.head()
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2887:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2887:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2887:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2887: `analyze_data` runtime: 0.05 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2887:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2887:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2887:Cleaning column =excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2887:Cleaning column =target</span>
-<span class="ansi-green-fg">INFO:lightwood-2887:Converted target into strictly non-negative</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2887: `preprocess` runtime: 0.09 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2872:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2872:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2872:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2872: `analyze_data` runtime: 0.06 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2872:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2872:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2872:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2872:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2872:Converted target into strictly non-negative</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2872: `preprocess` runtime: 0.1 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

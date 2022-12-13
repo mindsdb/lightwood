@@ -1381,6 +1381,7 @@
 <span class="s2">else:</span>
 <span class="s2">    log.info(f&#39;[Predict phase 4/</span><span class="se">{{</span><span class="s2">n_phases</span><span class="se">}}</span><span class="s2">] - Analyzing output&#39;)</span>
 <span class="s2">    insights, global_insights = </span><span class="si">{</span><span class="n">call</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">explainer</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">    self.global_insights = </span><span class="se">{{</span><span class="s2">**self.global_insights, **global_insights</span><span class="se">}}</span><span class="s2"></span>
 <span class="s2">    return insights</span>
 <span class="s2">&quot;&quot;&quot;</span>
 
@@ -1416,6 +1417,7 @@
 <span class="s2">        self.statistical_analysis = None</span>
 <span class="s2">        self.ts_analysis = None</span>
 <span class="s2">        self.runtime_log = dict()</span>
+<span class="s2">        self.global_insights = dict()</span>
 
 <span class="s2">    @timed</span>
 <span class="s2">    def analyze_data(self, data: pd.DataFrame) -&gt; None:</span>
