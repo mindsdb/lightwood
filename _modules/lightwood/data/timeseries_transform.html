@@ -211,6 +211,7 @@
 <span class="sd">    :return: A dataframe with all the transformations applied.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
+    <span class="n">pred_args</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">()</span> <span class="k">if</span> <span class="n">pred_args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">pred_args</span>
     <span class="n">tss</span> <span class="o">=</span> <span class="n">timeseries_settings</span>
     <span class="n">gb_arr</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
     <span class="n">oby</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span>
