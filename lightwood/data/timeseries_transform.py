@@ -38,6 +38,7 @@ def transform_timeseries(
     :return: A dataframe with all the transformations applied.
     """  # noqa
 
+    pred_args = PredictionArguments() if pred_args is None else pred_args
     tss = timeseries_settings
     gb_arr = tss.group_by if tss.group_by is not None else []
     oby = tss.order_by
