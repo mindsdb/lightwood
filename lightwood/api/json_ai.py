@@ -1208,6 +1208,7 @@ if self.pred_args.all_mixers:
 else:
     log.info(f'[Predict phase 4/{{n_phases}}] - Analyzing output')
     insights, global_insights = {call(json_ai.explainer)}
+    self.global_insights = {{**self.global_insights, **global_insights}}
     return insights
 """
 
@@ -1243,6 +1244,7 @@ class Predictor(PredictorInterface):
         self.statistical_analysis = None
         self.ts_analysis = None
         self.runtime_log = dict()
+        self.global_insights = dict()
 
     @timed
     def analyze_data(self, data: pd.DataFrame) -> None:
