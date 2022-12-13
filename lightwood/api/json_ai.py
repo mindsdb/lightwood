@@ -753,7 +753,8 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "dtype_dict": "$dtype_dict",
                 "target": "$target",
                 "mode": "$mode",
-                "ts_analysis": "$ts_analysis"
+                "ts_analysis": "$ts_analysis",
+                "pred_args": "$pred_args",
             },
         },
         "timeseries_analyzer": {
@@ -1050,7 +1051,6 @@ self.mixers = trained_mixers
 # --------------- #
 log.info('Ensembling the mixer')
 # Create an ensemble of mixers to identify best performing model
-self.pred_args = PredictionArguments()
 # Dirty hack
 self.ensemble = {call(json_ai.model)}
 self.supports_proba = self.ensemble.supports_proba
@@ -1183,6 +1183,8 @@ n_phases = 3 if self.pred_args.all_mixers else 4
 if len(data) == 0:
     raise Exception("Empty input, aborting prediction. Please try again with some input data.")
 
+self.pred_args = PredictionArguments.from_dict(args)
+
 log.info(f'[Predict phase 1/{{n_phases}}] - Data preprocessing')
 if self.problem_definition.ignore_features:
     log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
@@ -1200,7 +1202,6 @@ encoded_ds = self.featurize({{"predict_data": data}})["predict_data"]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
 log.info(f'[Predict phase 3/{{n_phases}}] - Calling ensemble')
-self.pred_args = PredictionArguments.from_dict(args)
 df = self.ensemble(encoded_ds, args=self.pred_args)
 
 if self.pred_args.all_mixers:
@@ -1234,6 +1235,7 @@ class Predictor(PredictorInterface):
         self.identifiers = {json_ai.identifiers}
         self.dtype_dict = {inline_dict(dtype_dict)}
         self.lightwood_version = '{lightwood_version}'
+        self.pred_args = PredictionArguments()
 
         # Any feature-column dependencies
         self.dependencies = {inline_dict(json_ai.dependency_dict)}
