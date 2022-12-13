@@ -926,7 +926,8 @@
                 <span class="s2">&quot;dtype_dict&quot;</span><span class="p">:</span> <span class="s2">&quot;$dtype_dict&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;$target&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;$mode&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;ts_analysis&quot;</span><span class="p">:</span> <span class="s2">&quot;$ts_analysis&quot;</span>
+                <span class="s2">&quot;ts_analysis&quot;</span><span class="p">:</span> <span class="s2">&quot;$ts_analysis&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;pred_args&quot;</span><span class="p">:</span> <span class="s2">&quot;$pred_args&quot;</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">},</span>
         <span class="s2">&quot;timeseries_analyzer&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1223,7 +1224,6 @@
 <span class="s2"># --------------- #</span>
 <span class="s2">log.info(&#39;Ensembling the mixer&#39;)</span>
 <span class="s2"># Create an ensemble of mixers to identify best performing model</span>
-<span class="s2">self.pred_args = PredictionArguments()</span>
 <span class="s2"># Dirty hack</span>
 <span class="s2">self.ensemble = </span><span class="si">{</span><span class="n">call</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">model</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">self.supports_proba = self.ensemble.supports_proba</span>
@@ -1356,6 +1356,8 @@
 <span class="s2">if len(data) == 0:</span>
 <span class="s2">    raise Exception(&quot;Empty input, aborting prediction. Please try again with some input data.&quot;)</span>
 
+<span class="s2">self.pred_args = PredictionArguments.from_dict(args)</span>
+
 <span class="s2">log.info(f&#39;[Predict phase 1/</span><span class="se">{{</span><span class="s2">n_phases</span><span class="se">}}</span><span class="s2">] - Data preprocessing&#39;)</span>
 <span class="s2">if self.problem_definition.ignore_features:</span>
 <span class="s2">    log.info(f&#39;Dropping features: </span><span class="se">{{</span><span class="s2">self.problem_definition.ignore_features</span><span class="se">}}</span><span class="s2">&#39;)</span>
@@ -1373,7 +1375,6 @@
 <span class="s2">encoded_data = encoded_ds.get_encoded_data(include_target=False)</span>
 
 <span class="s2">log.info(f&#39;[Predict phase 3/</span><span class="se">{{</span><span class="s2">n_phases</span><span class="se">}}</span><span class="s2">] - Calling ensemble&#39;)</span>
-<span class="s2">self.pred_args = PredictionArguments.from_dict(args)</span>
 <span class="s2">df = self.ensemble(encoded_ds, args=self.pred_args)</span>
 
 <span class="s2">if self.pred_args.all_mixers:</span>
@@ -1407,6 +1408,7 @@
 <span class="s2">        self.identifiers = </span><span class="si">{</span><span class="n">json_ai</span><span class="o">.</span><span class="n">identifiers</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">        self.dtype_dict = </span><span class="si">{</span><span class="n">inline_dict</span><span class="p">(</span><span class="n">dtype_dict</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
 <span class="s2">        self.lightwood_version = &#39;</span><span class="si">{</span><span class="n">lightwood_version</span><span class="si">}</span><span class="s2">&#39;</span>
+<span class="s2">        self.pred_args = PredictionArguments()</span>
 
 <span class="s2">        # Any feature-column dependencies</span>
 <span class="s2">        self.dependencies = </span><span class="si">{</span><span class="n">inline_dict</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">dependency_dict</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>

@@ -171,7 +171,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.data.timeseries_transform</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
 
@@ -181,13 +181,15 @@
 <span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">get_ts_groups</span><span class="p">,</span> <span class="n">get_delta</span><span class="p">,</span> <span class="n">get_group_matches</span>
 
 <span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span>
+<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">PredictionArguments</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 
 
 <div class="viewcode-block" id="transform_timeseries"><a class="viewcode-back" href="../../../data.html#data.transform_timeseries">[docs]</a><span class="k">def</span> <span class="nf">transform_timeseries</span><span class="p">(</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">ts_analysis</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-        <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">pred_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PredictionArguments</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.</span>
 <span class="sd">    </span>
@@ -204,6 +206,7 @@
 <span class="sd">    :param timeseries_settings: A `TimeseriesSettings` object.</span>
 <span class="sd">    :param target: The name of the target column to forecast.</span>
 <span class="sd">    :param mode: Either &quot;train&quot; or &quot;predict&quot;, depending on what phase is calling this procedure.</span>
+<span class="sd">    :param pred_args: Optional prediction arguments to control the transformation process.</span>
 <span class="sd">    </span>
 <span class="sd">    :return: A dataframe with all the transformations applied.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
@@ -266,16 +269,16 @@
             <span class="n">offset</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">original_df</span><span class="p">[</span><span class="s1">&#39;__mdb_forecast_offset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">infer_mode</span> <span class="o">=</span> <span class="n">offset_available</span> <span class="ow">and</span> <span class="n">offset</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">cutoff_mode</span> <span class="o">=</span> <span class="n">offset_available</span> <span class="ow">and</span> <span class="n">offset</span> <span class="o">==</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">offset_available</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">infer_mode</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">cutoff_mode</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="n">original_index_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">original_df</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">_make_pred</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="ow">or</span> <span class="n">infer_mode</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_make_pred</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cutoff_mode</span><span class="p">:</span>
             <span class="n">original_df</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span> <span class="s1">&#39;__make_predictions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">original_index_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
             <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -303,7 +306,7 @@
     <span class="n">n_groups</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_arr</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subdf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df_arr</span><span class="p">):</span>
         <span class="k">if</span> <span class="s1">&#39;__mdb_forecast_offset&#39;</span> <span class="ow">in</span> <span class="n">subdf</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;predict&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">infer_mode</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cutoff_mode</span><span class="p">:</span>
                 <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_infer_next_row</span><span class="p">(</span><span class="n">subdf</span><span class="p">,</span> <span class="n">oby</span><span class="p">)</span>
                 <span class="n">make_preds</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
             <span class="k">elif</span> <span class="n">offset_available</span><span class="p">:</span>
@@ -312,6 +315,8 @@
                 <span class="n">make_preds</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_index</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
                 <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">new_index</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">pred_args</span><span class="o">.</span><span class="n">force_ts_infer</span><span class="p">:</span>
+                    <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ts_infer_next_row</span><span class="p">(</span><span class="n">subdf</span><span class="p">,</span> <span class="n">oby</span><span class="p">)</span>  <span class="c1"># force-infer out-of-sample forecast in default mode</span>
                 <span class="n">make_preds</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]))]</span>
             <span class="n">df_arr</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;__make_predictions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">make_preds</span>
 
@@ -352,7 +357,7 @@
         <span class="n">combined_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">combined_df</span><span class="p">[</span><span class="n">combined_df</span><span class="p">[</span><span class="s1">&#39;__make_predictions&#39;</span><span class="p">]])</span>  <span class="c1"># filters by True only</span>
         <span class="k">del</span> <span class="n">combined_df</span><span class="p">[</span><span class="s1">&#39;__make_predictions&#39;</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">infer_mode</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">([</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">tss</span><span class="o">.</span><span class="n">window</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">group_lengths</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cutoff_mode</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">([</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">tss</span><span class="o">.</span><span class="n">window</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">group_lengths</span><span class="p">]):</span>
         <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">allow_incomplete_history</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Forecasting with incomplete historical context, predictions might be subpar&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -371,7 +376,7 @@
     <span class="k">if</span> <span class="n">df_gb_map</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">combined_df</span><span class="p">)):</span>
             <span class="n">row</span> <span class="o">=</span> <span class="n">combined_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">infer_mode</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cutoff_mode</span><span class="p">:</span>
                 <span class="n">timeseries_row_mapping</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
                     <span class="n">row</span><span class="p">[</span><span class="s1">&#39;original_index&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;original_index&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span>
                     <span class="n">row</span><span class="p">[</span><span class="s1">&#39;original_index&#39;</span><span class="p">])</span> <span class="k">else</span> <span class="kc">None</span>
@@ -382,7 +387,7 @@
         <span class="k">for</span> <span class="n">gb</span> <span class="ow">in</span> <span class="n">df_gb_map</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_gb_map</span><span class="p">[</span><span class="n">gb</span><span class="p">])):</span>
                 <span class="n">row</span> <span class="o">=</span> <span class="n">df_gb_map</span><span class="p">[</span><span class="n">gb</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">infer_mode</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">cutoff_mode</span><span class="p">:</span>
                     <span class="n">timeseries_row_mapping</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
                         <span class="n">row</span><span class="p">[</span><span class="s1">&#39;original_index&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;original_index&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span>
                         <span class="n">row</span><span class="p">[</span><span class="s1">&#39;original_index&#39;</span><span class="p">])</span> <span class="k">else</span> <span class="kc">None</span>
