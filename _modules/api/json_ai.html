@@ -453,13 +453,6 @@
             <span class="n">submodels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;LightGBM&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                            <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;fit_on_dev&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                        <span class="p">},</span>
-                    <span class="p">},</span>
-                    <span class="p">{</span>
                         <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;XGBoostMixer&quot;</span><span class="p">,</span>
                         <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
                             <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
@@ -481,47 +474,34 @@
                     <span class="p">},</span>
                 <span class="p">]</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">and</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span> <span class="ow">and</span> <span class="n">tss</span><span class="o">.</span><span class="n">horizon</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span> <span class="ow">and</span> \
+                <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">):</span>
+
             <span class="n">submodels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;LightGBMArray&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;SkTime&quot;</span><span class="p">,</span>
                         <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                            <span class="s2">&quot;fit_on_dev&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                             <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;ts_analysis&quot;</span><span class="p">:</span> <span class="s2">&quot;$ts_analysis&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;tss&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;horizon&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.horizon&quot;</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;ETSMixer&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;horizon&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.horizon&quot;</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;ARIMAMixer&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;horizon&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.horizon&quot;</span><span class="p">,</span>
                         <span class="p">},</span>
                     <span class="p">}</span>
                 <span class="p">]</span>
             <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span> <span class="ow">and</span> <span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">quantity</span><span class="p">):</span>
-                <span class="n">submodels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="p">{</span>
-                            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;SkTime&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;horizon&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.horizon&quot;</span><span class="p">,</span>
-                            <span class="p">},</span>
-                        <span class="p">},</span>
-                        <span class="p">{</span>
-                            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;ETSMixer&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;horizon&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.horizon&quot;</span><span class="p">,</span>
-                            <span class="p">},</span>
-                        <span class="p">},</span>
-                        <span class="p">{</span>
-                            <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;ARIMAMixer&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                <span class="s2">&quot;stop_after&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.seconds_per_mixer&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;horizon&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings.horizon&quot;</span><span class="p">,</span>
-                            <span class="p">},</span>
-                        <span class="p">}</span>
-                    <span class="p">]</span>
-                <span class="p">)</span>
 
     <span class="n">model</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;BestOf&quot;</span><span class="p">,</span>
