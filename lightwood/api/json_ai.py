@@ -280,13 +280,6 @@ def generate_json_ai(
             submodels.extend(
                 [
                     {
-                        "module": "LightGBM",
-                        "args": {
-                            "stop_after": "$problem_definition.seconds_per_mixer",
-                            "fit_on_dev": True,
-                        },
-                    },
-                    {
                         "module": "XGBoostMixer",
                         "args": {
                             "stop_after": "$problem_definition.seconds_per_mixer",
@@ -308,47 +301,34 @@ def generate_json_ai(
                     },
                 ]
             )
-        elif tss.is_timeseries and tss.horizon > 1:
+        elif tss.is_timeseries and tss.horizon > 1 and tss.use_previous_target and \
+                dtype_dict[target] in (dtype.integer, dtype.float, dtype.quantity):
+
             submodels.extend(
                 [
                     {
-                        "module": "LightGBMArray",
+                        "module": "SkTime",
                         "args": {
-                            "fit_on_dev": True,
                             "stop_after": "$problem_definition.seconds_per_mixer",
-                            "ts_analysis": "$ts_analysis",
-                            "tss": "$problem_definition.timeseries_settings",
+                            "horizon": "$problem_definition.timeseries_settings.horizon",
+                        },
+                    },
+                    {
+                        "module": "ETSMixer",
+                        "args": {
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "horizon": "$problem_definition.timeseries_settings.horizon",
+                        },
+                    },
+                    {
+                        "module": "ARIMAMixer",
+                        "args": {
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "horizon": "$problem_definition.timeseries_settings.horizon",
                         },
                     }
                 ]
             )
-
-            if tss.use_previous_target and dtype_dict[target] in (dtype.integer, dtype.float, dtype.quantity):
-                submodels.extend(
-                    [
-                        {
-                            "module": "SkTime",
-                            "args": {
-                                "stop_after": "$problem_definition.seconds_per_mixer",
-                                "horizon": "$problem_definition.timeseries_settings.horizon",
-                            },
-                        },
-                        {
-                            "module": "ETSMixer",
-                            "args": {
-                                "stop_after": "$problem_definition.seconds_per_mixer",
-                                "horizon": "$problem_definition.timeseries_settings.horizon",
-                            },
-                        },
-                        {
-                            "module": "ARIMAMixer",
-                            "args": {
-                                "stop_after": "$problem_definition.seconds_per_mixer",
-                                "horizon": "$problem_definition.timeseries_settings.horizon",
-                            },
-                        }
-                    ]
-                )
 
     model = {
         "module": "BestOf",
