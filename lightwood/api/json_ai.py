@@ -934,15 +934,14 @@ encoder_prepping_dict = {{}}
 # Prepare encoders that do not require learned strategies
 for col_name, encoder in self.encoders.items():
     if col_name != self.target and not encoder.is_trainable_encoder:
-        encoder_prepping_dict[col_name] = [encoder, concatenated_train_dev[col_name], 'prepare']
+        encoder.prepare(concatenated_train_dev[col_name])
+        encoder_prepping_dict[col_name] = encoder
 
-# Setup parallelization
-parallel_prepped_encoders = mut_method_call(encoder_prepping_dict)
-for col_name, encoder in parallel_prepped_encoders.items():
+for col_name, encoder in encoder_prepping_dict.items():
     self.encoders[col_name] = encoder
 
 # Prepare the target
-if self.target not in parallel_prepped_encoders:
+if self.target not in encoder_prepping_dict:
     if self.encoders[self.target].is_trainable_encoder:
         self.encoders[self.target].prepare(data['train'][self.target], data['dev'][self.target])
     else:
