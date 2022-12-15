@@ -280,7 +280,7 @@ def generate_json_ai(
             submodels.extend(
                 [
                     {
-                        "module": "LightGBM",
+                        "module": "XGBoostMixer",
                         "args": {
                             "stop_after": "$problem_definition.seconds_per_mixer",
                             "fit_on_dev": True,
@@ -301,47 +301,34 @@ def generate_json_ai(
                     },
                 ]
             )
-        elif tss.is_timeseries and tss.horizon > 1:
+        elif tss.is_timeseries and tss.horizon > 1 and tss.use_previous_target and \
+                dtype_dict[target] in (dtype.integer, dtype.float, dtype.quantity):
+
             submodels.extend(
                 [
                     {
-                        "module": "LightGBMArray",
+                        "module": "SkTime",
                         "args": {
-                            "fit_on_dev": True,
                             "stop_after": "$problem_definition.seconds_per_mixer",
-                            "ts_analysis": "$ts_analysis",
-                            "tss": "$problem_definition.timeseries_settings",
+                            "horizon": "$problem_definition.timeseries_settings.horizon",
+                        },
+                    },
+                    {
+                        "module": "ETSMixer",
+                        "args": {
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "horizon": "$problem_definition.timeseries_settings.horizon",
+                        },
+                    },
+                    {
+                        "module": "ARIMAMixer",
+                        "args": {
+                            "stop_after": "$problem_definition.seconds_per_mixer",
+                            "horizon": "$problem_definition.timeseries_settings.horizon",
                         },
                     }
                 ]
             )
-
-            if tss.use_previous_target and dtype_dict[target] in (dtype.integer, dtype.float, dtype.quantity):
-                submodels.extend(
-                    [
-                        {
-                            "module": "SkTime",
-                            "args": {
-                                "stop_after": "$problem_definition.seconds_per_mixer",
-                                "horizon": "$problem_definition.timeseries_settings.horizon",
-                            },
-                        },
-                        {
-                            "module": "ETSMixer",
-                            "args": {
-                                "stop_after": "$problem_definition.seconds_per_mixer",
-                                "horizon": "$problem_definition.timeseries_settings.horizon",
-                            },
-                        },
-                        {
-                            "module": "ARIMAMixer",
-                            "args": {
-                                "stop_after": "$problem_definition.seconds_per_mixer",
-                                "horizon": "$problem_definition.timeseries_settings.horizon",
-                            },
-                        }
-                    ]
-                )
 
     model = {
         "module": "BestOf",
@@ -600,12 +587,15 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 )
                 mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get("ts_analysis", "$ts_analysis")
 
-        elif mixers[i]["module"] == "LightGBM":
+        elif mixers[i]["module"] in ("LightGBM", "XGBoostMixer"):
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
                 "input_cols", "$input_cols"
             )
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
+            )
+            mixers[i]["args"]["fit_on_dev"] = mixers[i]["args"].get(
+                "fit_on_dev", True
             )
             mixers[i]["args"]["use_optuna"] = True
 
@@ -743,7 +733,8 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "dtype_dict": "$dtype_dict",
                 "target": "$target",
                 "mode": "$mode",
-                "ts_analysis": "$ts_analysis"
+                "ts_analysis": "$ts_analysis",
+                "pred_args": "$pred_args",
             },
         },
         "timeseries_analyzer": {
@@ -1040,7 +1031,6 @@ self.mixers = trained_mixers
 # --------------- #
 log.info('Ensembling the mixer')
 # Create an ensemble of mixers to identify best performing model
-self.pred_args = PredictionArguments()
 # Dirty hack
 self.ensemble = {call(json_ai.model)}
 self.supports_proba = self.ensemble.supports_proba
@@ -1173,6 +1163,8 @@ n_phases = 3 if self.pred_args.all_mixers else 4
 if len(data) == 0:
     raise Exception("Empty input, aborting prediction. Please try again with some input data.")
 
+self.pred_args = PredictionArguments.from_dict(args)
+
 log.info(f'[Predict phase 1/{{n_phases}}] - Data preprocessing')
 if self.problem_definition.ignore_features:
     log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
@@ -1190,7 +1182,6 @@ encoded_ds = self.featurize({{"predict_data": data}})["predict_data"]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
 log.info(f'[Predict phase 3/{{n_phases}}] - Calling ensemble')
-self.pred_args = PredictionArguments.from_dict(args)
 df = self.ensemble(encoded_ds, args=self.pred_args)
 
 if self.pred_args.all_mixers:
@@ -1198,6 +1189,7 @@ if self.pred_args.all_mixers:
 else:
     log.info(f'[Predict phase 4/{{n_phases}}] - Analyzing output')
     insights, global_insights = {call(json_ai.explainer)}
+    self.global_insights = {{**self.global_insights, **global_insights}}
     return insights
 """
 
@@ -1223,6 +1215,7 @@ class Predictor(PredictorInterface):
         self.identifiers = {json_ai.identifiers}
         self.dtype_dict = {inline_dict(dtype_dict)}
         self.lightwood_version = '{lightwood_version}'
+        self.pred_args = PredictionArguments()
 
         # Any feature-column dependencies
         self.dependencies = {inline_dict(json_ai.dependency_dict)}
@@ -1233,6 +1226,7 @@ class Predictor(PredictorInterface):
         self.statistical_analysis = None
         self.ts_analysis = None
         self.runtime_log = dict()
+        self.global_insights = dict()
 
     @timed
     def analyze_data(self, data: pd.DataFrame) -> None:

@@ -409,15 +409,24 @@ class TestTimeseries(unittest.TestCase):
             assert len(ps) == 1
             assert ps.iloc[0]['original_index'] == (len(train) - 1 + idx)
 
-        for idx in [1]:
-            # Should yield predictions starting one period after the most recent timestamp seen at training time.
+        for idx in [1, None]:
+            # Last row yields predictions starting one period after the most recent timestamp seen at training time
             train['__mdb_forecast_offset'] = idx
-            ps = predictor.predict(train)
-            assert len(ps) == 1
-            assert ps.iloc[0]['original_index'] == (len(train) - 1)  # fixed at the last seen training point
-            start_predtime = datetime.utcfromtimestamp(ps.iloc[0][f'order_{oby}'][0])
+            args = {} if idx == 1 else {'force_ts_infer': True}
+            ps = predictor.predict(train, args=args)
+            if idx == 1:
+                assert len(ps) == 1
+            else:
+                assert len(ps) == len(train) + 1  # `None` triggers bulk prediction with inferred row at the end
+
+            assert ps.iloc[-1]['original_index'] == (len(train) - 1)  # fixed at the last seen training point
+            start_predtime = datetime.utcfromtimestamp(ps.iloc[-1][f'order_{oby}'][0])
             start_test = datetime.utcfromtimestamp(pd.to_datetime(test.iloc[0][oby]).value // 1e9)
             assert start_test - start_predtime <= timedelta(days=2)
+
+            if idx is None:
+                ps = predictor.predict(train, args={})  # ensure without `force_ts_infer` flag it behaves normally
+                assert len(ps) == len(train)
 
     def test_7_irregular_series(self):
         """

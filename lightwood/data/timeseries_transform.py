@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 from functools import partial
 import multiprocessing as mp
 
@@ -8,13 +8,15 @@ from lightwood.helpers.parallelism import get_nr_procs
 from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches
 
 from type_infer.dtype import dtype
-from lightwood.api.types import TimeseriesSettings
+from lightwood.api.types import TimeseriesSettings, PredictionArguments
 from lightwood.helpers.log import log
 
 
 def transform_timeseries(
         data: pd.DataFrame, dtype_dict: Dict[str, str], ts_analysis: dict,
-        timeseries_settings: TimeseriesSettings, target: str, mode: str) -> pd.DataFrame:
+        timeseries_settings: TimeseriesSettings, target: str, mode: str,
+        pred_args: Optional[PredictionArguments] = None
+) -> pd.DataFrame:
     """
     Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.
     
@@ -31,10 +33,12 @@ def transform_timeseries(
     :param timeseries_settings: A `TimeseriesSettings` object.
     :param target: The name of the target column to forecast.
     :param mode: Either "train" or "predict", depending on what phase is calling this procedure.
+    :param pred_args: Optional prediction arguments to control the transformation process.
     
     :return: A dataframe with all the transformations applied.
     """  # noqa
 
+    pred_args = PredictionArguments() if pred_args is None else pred_args
     tss = timeseries_settings
     gb_arr = tss.group_by if tss.group_by is not None else []
     oby = tss.order_by
@@ -93,16 +97,16 @@ def transform_timeseries(
             offset = min(int(original_df['__mdb_forecast_offset'].unique()[0]), 1)
         else:
             offset = 0
-        infer_mode = offset_available and offset == 1
+        cutoff_mode = offset_available and offset == 1
     else:
         offset_available = False
         offset = 0
-        infer_mode = False
+        cutoff_mode = False
 
     original_index_list = []
     idx = 0
     for row in original_df.itertuples():
-        if _make_pred(row) or infer_mode:
+        if _make_pred(row) or cutoff_mode:
             original_df.at[row.Index, '__make_predictions'] = True
             original_index_list.append(idx)
             idx += 1
@@ -130,7 +134,7 @@ def transform_timeseries(
     n_groups = len(df_arr)
     for i, subdf in enumerate(df_arr):
         if '__mdb_forecast_offset' in subdf.columns and mode == 'predict':
-            if infer_mode:
+            if cutoff_mode:
                 df_arr[i] = _ts_infer_next_row(subdf, oby)
                 make_preds = [False for _ in range(max(0, len(df_arr[i]) - 1))] + [True]
             elif offset_available:
@@ -139,6 +143,8 @@ def transform_timeseries(
                 make_preds = [False for _ in range(max(0, len(new_index) - 1))] + [True]
                 df_arr[i] = df_arr[i].loc[new_index]
             else:
+                if pred_args.force_ts_infer:
+                    df_arr[i] = _ts_infer_next_row(subdf, oby)  # force-infer out-of-sample forecast in default mode
                 make_preds = [True for _ in range(len(df_arr[i]))]
             df_arr[i]['__make_predictions'] = make_preds
 
@@ -179,7 +185,7 @@ def transform_timeseries(
         combined_df = pd.DataFrame(combined_df[combined_df['__make_predictions']])  # filters by True only
         del combined_df['__make_predictions']
 
-    if not infer_mode and any([i < tss.window for i in group_lengths]):
+    if not cutoff_mode and any([i < tss.window for i in group_lengths]):
         if tss.allow_incomplete_history:
             log.warning("Forecasting with incomplete historical context, predictions might be subpar")
         else:
@@ -198,7 +204,7 @@ def transform_timeseries(
     if df_gb_map is None:
         for i in range(len(combined_df)):
             row = combined_df.iloc[i]
-            if not infer_mode:
+            if not cutoff_mode:
                 timeseries_row_mapping[idx] = int(
                     row['original_index']) if row['original_index'] is not None and not np.isnan(
                     row['original_index']) else None
@@ -209,7 +215,7 @@ def transform_timeseries(
         for gb in df_gb_map:
             for i in range(len(df_gb_map[gb])):
                 row = df_gb_map[gb].iloc[i]
-                if not infer_mode:
+                if not cutoff_mode:
                     timeseries_row_mapping[idx] = int(
                         row['original_index']) if row['original_index'] is not None and not np.isnan(
                         row['original_index']) else None
