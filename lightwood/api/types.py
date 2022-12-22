@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Union
 import sys
 
 from type_infer.dtype import dtype
+from dataprep_ml.base import StatisticalAnalysis
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict
