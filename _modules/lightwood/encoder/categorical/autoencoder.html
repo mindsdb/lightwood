@@ -187,7 +187,7 @@
 
 
 <div class="viewcode-block" id="CategoricalAutoEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder">[docs]</a><span class="k">class</span> <span class="nc">CategoricalAutoEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Trains an autoencoder (AE) to represent categorical information with over 100 categories. This is used to ensure that feature vectors for categorical data with many categories are not excessively large.</span>
 
 <span class="sd">    The AE defaults to a vector sized 100 but can be adjusted to user preference. It is highly advised NOT to use this encoder to feature engineer your target, as reconstruction accuracy will determine your AE&#39;s ability to decode properly.</span>
@@ -205,7 +205,7 @@
         <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
         <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param stop_after: Stops training with provided time limit (sec)</span>
 <span class="sd">        :param is_target: Encoder represents target class (NOT recommended)</span>
 <span class="sd">        :param max_encoded_length: Maximum length of vector represented</span>
@@ -231,7 +231,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span> <span class="o">=</span> <span class="n">stop_after</span>
 
 <div class="viewcode-block" id="CategoricalAutoEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates inputs and prepares a categorical autoencoder (CatAE) for input data. Currently, does not support a dev set; inputs for train and dev are concatenated together to train an autoencoder.</span>
 
 <span class="sd">        :param train_priming_data: Input training data</span>
@@ -272,7 +272,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="CategoricalAutoEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Encodes categorical information in column as the compressed vector from the CatAE.</span>
 
 <span class="sd">        :param column_data: An iterable of category samples from a column</span>
@@ -287,7 +287,7 @@
             <span class="k">return</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CategoricalAutoEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Decodes from the embedding space, the original categories.</span>
 
 <span class="sd">        ..warning If your reconstruction accuracy is not 100%, the CatAE may not return the correct category.</span>
@@ -305,7 +305,7 @@
     <span class="k">def</span> <span class="nf">_prepare_AE_input</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">train_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">DataLoader</span><span class="p">,</span> <span class="n">DataLoader</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the data loaders for the CatAE model inputs. Expected inputs are generally of form `pd.Series`</span>
 
 <span class="sd">        Currently does not use &#39;dev&#39;; concatenates both inputs together.</span>
@@ -338,7 +338,7 @@
         <span class="k">return</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">dev_loader</span>
 
     <span class="k">def</span> <span class="nf">_prepare_catae</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">dev_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trains the CatAE using Lightwood&#39;s `Gym` class.</span>
 
 <span class="sd">        :param train_loader: Training dataset Loader</span>
@@ -374,7 +374,7 @@
         <span class="k">return</span> <span class="n">best_model</span>
 
     <span class="k">def</span> <span class="nf">_encoder_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
         <span class="n">oh_encoded_categories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">target</span> <span class="o">=</span> <span class="n">oh_encoded_categories</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="n">target_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">target</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
@@ -392,7 +392,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

@@ -178,7 +178,7 @@
 
 
 <div class="viewcode-block" id="BaseAnalysisBlock"><a class="viewcode-back" href="../../../analysis.html#analysis.BaseAnalysisBlock">[docs]</a><span class="k">class</span> <span class="nc">BaseAnalysisBlock</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class to be inherited by any analysis/explainer block.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to be inherited by any analysis/explainer block.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">deps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
                  <span class="p">):</span>
@@ -186,7 +186,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">=</span> <span class="n">deps</span>  <span class="c1"># can be parallelized when there are no dependencies @TODO enforce</span>
 
 <div class="viewcode-block" id="BaseAnalysisBlock.analyze"><a class="viewcode-back" href="../../../analysis.html#analysis.BaseAnalysisBlock.analyze">[docs]</a>    <span class="k">def</span> <span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method should be called once during the analysis phase, or not called at all.</span>
 <span class="sd">        It computes any information that the block may either output to the model analysis object,</span>
 <span class="sd">        or use at inference time when `.explain()` is called (in this case, make sure all needed</span>
@@ -203,7 +203,7 @@
 <div class="viewcode-block" id="BaseAnalysisBlock.explain"><a class="viewcode-back" href="../../../analysis.html#analysis.BaseAnalysisBlock.explain">[docs]</a>    <span class="k">def</span> <span class="nf">explain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">row_insights</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                 <span class="n">global_insights</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method should be called once during the explaining phase at inference time, or not called at all.</span>
 <span class="sd">        Additional explanations can be at an instance level (row-wise) or global.</span>
 <span class="sd">        For the former, return a data frame with any new insights. For the latter, a dictionary is required.</span>
@@ -228,7 +228,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

@@ -180,7 +180,7 @@
 
 
 <div class="viewcode-block" id="DatetimeEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.DatetimeEncoder">[docs]</a><span class="k">class</span> <span class="nc">DatetimeEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This encoder produces an encoded representation for timestamps.</span>
 
 <span class="sd">    The approach consists on decomposing the timestamp objects into its constituent units (e.g. day-of-week, month, year, etc), and describing each of those with a single value that represents the magnitude in a sensible cycle length.</span>
@@ -199,7 +199,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="DatetimeEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.DatetimeEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param data: # @TODO: receive a consistent data type here; currently either list of lists or pd.Series w/lists</span>
 <span class="sd">        :return: encoded data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -211,7 +211,7 @@
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DatetimeEncoder.encode_one"><a class="viewcode-back" href="../../../../encoder.html#encoder.DatetimeEncoder.encode_one">[docs]</a>    <span class="k">def</span> <span class="nf">encode_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unix_timestamp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Encodes a list of unix_timestamps, or a list of tensors with unix_timestamps</span>
 <span class="sd">        :param data: list of unix_timestamps (unix_timestamp resolution is seconds)</span>
 <span class="sd">        :return: a list of vectors</span>
@@ -272,7 +272,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

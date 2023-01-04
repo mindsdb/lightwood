@@ -206,7 +206,7 @@
 
 
 <div class="viewcode-block" id="predictor_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.predictor_from_problem">[docs]</a><span class="k">def</span> <span class="nf">predictor_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PredictorInterface</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a ready-to-train ``Predictor`` object from some raw data and a ``ProblemDefinition``. Do not use this if you want to edit the JsonAI first. Usually you&#39;d want to next train this predictor by calling the ``learn`` method on the same dataframe used to create it.</span>
 
 <span class="sd">    :param df: The raw data</span>
@@ -226,7 +226,7 @@
 
 
 <div class="viewcode-block" id="json_ai_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.json_ai_from_problem">[docs]</a><span class="k">def</span> <span class="nf">json_ai_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">JsonAI</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a JsonAI from your raw data and problem definition. Usually you would use this when you want to subsequently edit the JsonAI, the easiest way to do this is to unload it to a dictionary via `to_dict`, modify it, and then create a new object from it using `lightwood.JsonAI.from_dict`. It&#39;s usually better to generate the JsonAI using this function rather than writing it from scratch.</span>
 
 <span class="sd">    :param df: The raw data</span>
@@ -264,7 +264,7 @@
 
 
 <div class="viewcode-block" id="code_from_json_ai"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.code_from_json_ai">[docs]</a><span class="k">def</span> <span class="nf">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">:</span> <span class="n">JsonAI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Autogenerates custom code based on the details you specified inside your JsonAI.</span>
 
 <span class="sd">    :param json_ai: A ``JsonAI`` object</span>
@@ -275,7 +275,7 @@
 
 
 <div class="viewcode-block" id="predictor_from_code"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.predictor_from_code">[docs]</a><span class="k">def</span> <span class="nf">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PredictorInterface</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param code: The ``Predictor``&#39;s code in text form</span>
 
 <span class="sd">    :returns: A lightwood ``Predictor`` object</span>
@@ -287,7 +287,7 @@
 
 
 <div class="viewcode-block" id="code_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.code_from_problem">[docs]</a><span class="k">def</span> <span class="nf">code_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param df: The raw data</span>
 <span class="sd">    :param problem_definition: The manual specifications for your predictive problem</span>
 
@@ -306,7 +306,7 @@
 
 
 <div class="viewcode-block" id="predictor_from_state"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.predictor_from_state">[docs]</a><span class="k">def</span> <span class="nf">predictor_from_state</span><span class="p">(</span><span class="n">state_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PredictorInterface</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param state_file: The file containing the pickle resulting from calling ``save`` on a ``Predictor`` object</span>
 <span class="sd">    :param code: The ``Predictor``&#39;s code in text form</span>
 
@@ -336,7 +336,7 @@
 
 
 <span class="k">def</span> <span class="nf">_module_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModuleType</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a python module (containing the generated ``Predictor`` class) from the code. This is both a python object and an associated temporary file on your filesystem</span>
 
 <span class="sd">    :param code: The ``Predictor``&#39;s code in text form</span>
@@ -361,7 +361,7 @@
 
 
 <div class="viewcode-block" id="predictor_from_json_ai"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.predictor_from_json_ai">[docs]</a><span class="k">def</span> <span class="nf">predictor_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">:</span> <span class="n">JsonAI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PredictorInterface</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a ready-to-train ``Predictor`` object based on the details you specified inside your JsonAI.</span>
 
 <span class="sd">    :param json_ai: A ``JsonAI`` object</span>
@@ -382,7 +382,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

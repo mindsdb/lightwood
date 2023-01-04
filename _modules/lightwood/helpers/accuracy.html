@@ -209,7 +209,7 @@
 
 
 <div class="viewcode-block" id="r2_score"><a class="viewcode-back" href="../../../helpers.html#helpers.r2_score">[docs]</a><span class="k">def</span> <span class="nf">r2_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Wrapper for sklearn R2 score, lower capped between 0 and 1&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Wrapper for sklearn R2 score, lower capped between 0 and 1&quot;&quot;&quot;</span>
     <span class="n">acc</span> <span class="o">=</span> <span class="n">sk_r2_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
     <span class="c1"># Cap at 0</span>
     <span class="k">if</span> <span class="n">acc</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -230,7 +230,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

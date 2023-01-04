@@ -180,7 +180,7 @@
 
 
 <div class="viewcode-block" id="TsNumericEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsNumericEncoder">[docs]</a><span class="k">class</span> <span class="nc">TsNumericEncoder</span><span class="p">(</span><span class="n">NumericEncoder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Variant of vanilla numerical encoder, supports dynamic mean re-scaling</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">is_timeseries_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
@@ -194,7 +194,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="mi">1</span>
 
 <div class="viewcode-block" id="TsNumericEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsNumericEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="p">{}):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param dependency_data: dict with grouped_by column info, to retrieve the correct normalizer for each datum</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
@@ -302,7 +302,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

@@ -190,7 +190,7 @@
         <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">pred_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PredictionArguments</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.</span>
 <span class="sd">    </span>
 <span class="sd">    The main transformations performed by this block are:</span>
@@ -257,7 +257,7 @@
     <span class="n">original_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">subsets</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;__mdb_original_index&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;__mdb_forecast_offset&#39;</span> <span class="ow">in</span> <span class="n">original_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; This special column can be either None or an integer. If this column is passed, then the TS transformation will react to the values within:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; This special column can be either None or an integer. If this column is passed, then the TS transformation will react to the values within:</span>
 
 <span class="sd">        * If all rows = `None`, proceed as usual. This ends up generating one HORIZON-length forecast for each row in the DF.</span>
 <span class="sd">        * If all rows have the same value `N &lt;= 0`, then cutoff the dataframe latest `-N` rows after TS shaping and prime the DF (with `__make_predictions` column) so that a forecast is generated only for the last row (thus more efficient). This enables `WHERE T = LATEST - K` with `0 &lt;= K &lt; WINDOW` syntax upstream in MindsDB.</span>
@@ -403,7 +403,7 @@
 
 
 <span class="k">def</span> <span class="nf">_ts_infer_next_row</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ob</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds an inferred next row for streaming mode purposes.</span>
 
 <span class="sd">    :param df: dataframe from which next row is inferred.</span>
@@ -430,14 +430,14 @@
 
 
 <span class="k">def</span> <span class="nf">_make_pred</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Indicates whether a prediction should be made for `row` or not.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s1">&#39;__mdb_forecast_offset&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">make_predictions</span>
 
 
 <span class="k">def</span> <span class="nf">_ts_to_obj</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">historical_columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Casts all historical columns in a dataframe to `object` type.</span>
 
 <span class="sd">    :param df: Input dataframe</span>
@@ -451,7 +451,7 @@
 
 
 <span class="k">def</span> <span class="nf">_ts_add_previous_rows</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">order_cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of the `order_by` column.</span>
 
 <span class="sd">    :param df: Input dataframe.</span>
@@ -473,7 +473,7 @@
 
 
 <span class="k">def</span> <span class="nf">_ts_add_previous_target</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of the target column.</span>
 
 <span class="sd">    :param df: Input dataframe.</span>
@@ -500,7 +500,7 @@
 
 
 <span class="k">def</span> <span class="nf">_ts_add_future_target</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds as many columns to the input dataframe as the forecasting horizon asks for (as determined by `TimeseriesSettings.horizon`).</span>
 
 <span class="sd">    :param df: Input dataframe.</span>
@@ -537,7 +537,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

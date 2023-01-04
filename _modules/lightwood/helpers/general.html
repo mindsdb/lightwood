@@ -191,7 +191,7 @@
                       <span class="n">accuracy_functions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                       <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
                       <span class="n">n_decimals</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dispatcher for accuracy evaluation.</span>
 <span class="sd">    </span>
 <span class="sd">    :param data: original dataframe.</span>
@@ -254,7 +254,7 @@
         <span class="n">predictions</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluates accuracy for regression tasks.</span>
 <span class="sd">    If predictions have a lower and upper bound, then `within-bound` accuracy is computed: whether the ground truth value falls within the predicted region.</span>
 <span class="sd">    If not, then a (positive bounded) R2 score is returned instead.</span>
@@ -271,7 +271,7 @@
 
 
 <div class="viewcode-block" id="evaluate_multilabel_accuracy"><a class="viewcode-back" href="../../../helpers.html#helpers.evaluate_multilabel_accuracy">[docs]</a><span class="k">def</span> <span class="nf">evaluate_multilabel_accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluates accuracy for multilabel/tag prediction.</span>
 
 <span class="sd">    :return: weighted f1 score of predictions and ground truths.</span>
@@ -285,7 +285,7 @@
         <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate accuracy in numerical time series forecasting tasks.</span>
 <span class="sd">    Defaults to mean absolute scaled error (MASE) if in-sample residuals are available.</span>
 <span class="sd">    If this is not the case, R2 score is computed instead.</span>
@@ -343,7 +343,7 @@
         <span class="n">predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Default time series forecasting accuracy method.</span>
 <span class="sd">    Returns mean score over all timesteps in the forecasting horizon, as determined by the `base_acc_fn` (R2 score by default).</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
@@ -363,7 +363,7 @@
         <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evaluate accuracy in categorical time series forecasting tasks.</span>
 
 <span class="sd">    Balanced accuracy is computed for each timestep (as determined by `timeseries_settings.horizon`),</span>
@@ -388,7 +388,7 @@
         <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The normal MASE accuracy inside ``evaluate_array_accuracy`` has a break point of 1.0: smaller values mean a naive forecast is better, and bigger values imply the forecast is better than a naive one. It is upper-bounded by 1e4.</span>
 
 <span class="sd">    This 0-1 bounded MASE variant scores the 1.0 breakpoint to be equal to 0.5.</span>
@@ -416,7 +416,7 @@
         <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This metric is used in forecasting tasks. It returns ``1 - (sMAPE/2)``, where ``sMAPE`` is the symmetrical mean absolute percentage error of the forecast versus actual measurements in the time series.</span>
 
 <span class="sd">    As such, its domain is 0-1 bounded.</span>
@@ -444,7 +444,7 @@
 <span class="c1"># Helpers</span>
 <span class="c1"># ------------------------- #</span>
 <div class="viewcode-block" id="mase"><a class="viewcode-back" href="../../../helpers.html#helpers.mase">[docs]</a><span class="k">def</span> <span class="nf">mase</span><span class="p">(</span><span class="n">trues</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">scale_error</span><span class="p">,</span> <span class="n">fh</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes mean absolute scaled error.</span>
 <span class="sd">    The scale corrective factor is the mean in-sample residual from the naive forecasting method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -465,7 +465,7 @@
 
 
 <div class="viewcode-block" id="is_none"><a class="viewcode-back" href="../../../helpers.html#helpers.is_none">[docs]</a><span class="k">def</span> <span class="nf">is_none</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    We use pandas :(</span>
 <span class="sd">    Pandas has no way to guarantee &quot;stability&quot; for the type of a column, it choses to arbitrarily change it based on the values.</span>
 <span class="sd">    Pandas also change the values in the columns based on the types.</span>
@@ -500,7 +500,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

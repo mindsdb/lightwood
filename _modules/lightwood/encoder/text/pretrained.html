@@ -198,7 +198,7 @@
 <div class="viewcode-block" id="PretrainedLangEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.PretrainedLangEncoder">[docs]</a><span class="k">class</span> <span class="nc">PretrainedLangEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
     <span class="n">is_trainable_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a contextualized embedding to represent input text via the [CLS] token vector from DistilBERT (transformers). (Sanh et al. 2019 - https://arxiv.org/abs/1910.01108).</span>
 
 <span class="sd">    In certain text tasks, this model can use a transformer to automatically fine-tune on a class of interest (providing there is a 2 column dataset, where the input column is text).</span>
@@ -217,7 +217,7 @@
         <span class="n">embed_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param is_target: Whether this encoder represents the target. NOT functional for text generation yet.</span>
 <span class="sd">        :param batch_size: size of batch while fine-tuning</span>
 <span class="sd">        :param max_position_embeddings: max sequence length of input text</span>
@@ -267,7 +267,7 @@
         <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">encoded_target_values</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fine-tunes a transformer on the priming data.</span>
 
 <span class="sd">        CURRENTLY WIP; train + dev are placeholders for a validation-based approach. </span>
@@ -320,7 +320,7 @@
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frozen</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Frozen Model + Training Classifier Layers&quot;</span><span class="p">)</span>
-                <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">                Freeze the base transformer model and train</span>
 <span class="sd">                a linear layer on top</span>
 <span class="sd">                &quot;&quot;&quot;</span>
@@ -332,7 +332,7 @@
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Fine-tuning model&quot;</span><span class="p">)</span>
-                <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">                Fine-tuning parameters with weight decay</span>
 <span class="sd">                &quot;&quot;&quot;</span>
                 <span class="n">no_decay</span> <span class="o">=</span> <span class="p">[</span>
@@ -390,7 +390,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">encoded</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
     <span class="k">def</span> <span class="nf">_tune_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">optim</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given a model, train for n_epochs.</span>
 <span class="sd">        Specifically intended for tuning; it does NOT use loss/</span>
 <span class="sd">        stopping criterion.</span>
@@ -448,7 +448,7 @@
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> at epoch </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> and loss </span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PretrainedLangEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.PretrainedLangEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts each text example in a column into encoded state. This can be either a vector embedding of the [CLS] token (represents the full text input) OR the logits prediction of the output.</span>
 
 <span class="sd">        The transformer model is of form:</span>
@@ -497,13 +497,13 @@
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">encoded_representation</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PretrainedLangEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.PretrainedLangEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_values_tensor</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Text generation via decoding is not supported.</span>
 <span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Decoder not implemented.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PretrainedLangEncoder.to"><a class="viewcode-back" href="../../../../encoder.html#encoder.PretrainedLangEncoder.to">[docs]</a>    <span class="k">def</span> <span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">available_devices</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts encoder models to device specified (CPU/GPU)</span>
 
 <span class="sd">        Transformers are LARGE models, please run on GPU for fastest implementation.</span>
@@ -524,7 +524,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

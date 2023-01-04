@@ -217,7 +217,7 @@
     <span class="n">use_optuna</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">supports_proba</span><span class="p">:</span> <span class="nb">bool</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gradient boosting mixer with an XGBoost backbone.</span>
 
 <span class="sd">    This mixer is a good all-rounder, due to the generally great performance of tree-based ML algorithms for supervised learning tasks with tabular data.</span>
@@ -237,7 +237,7 @@
             <span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
             <span class="n">input_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
             <span class="n">fit_on_dev</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">use_optuna</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param stop_after: time budget in seconds.</span>
 <span class="sd">        :param target: name of the target column that the mixer will learn to predict.</span>
 <span class="sd">        :param dtype_dict: dictionary with dtypes of all columns in the data.</span>
@@ -275,7 +275,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">max_bin</span> <span class="o">=</span> <span class="mi">255</span>
 
     <span class="k">def</span> <span class="nf">_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">output_dtype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;train&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Helper method to wrangle a datasource into the format that the underlying model requires.</span>
 <span class="sd">        :param ds: EncodedDS that contains the dataframe to transform.</span>
 <span class="sd">        :param output_dtype:</span>
@@ -317,7 +317,7 @@
             <span class="k">return</span> <span class="n">data</span>
 
 <div class="viewcode-block" id="XGBoostMixer.fit"><a class="viewcode-back" href="../../../mixer.html#mixer.XGBoostMixer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fits the XGBoost model.</span>
 
 <span class="sd">        :param train_data: encoded features for training dataset</span>
@@ -409,7 +409,7 @@
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span>
                  <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Call a trained XGBoost mixer to output predictions for the target column.</span>
 
 <span class="sd">        :param ds: input data with values for all non-target columns.</span>
@@ -453,7 +453,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

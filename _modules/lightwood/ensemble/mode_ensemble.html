@@ -187,7 +187,7 @@
 
 
 <div class="viewcode-block" id="ModeEnsemble"><a class="viewcode-back" href="../../../ensemble.html#ensemble.ModeEnsemble">[docs]</a><span class="k">class</span> <span class="nc">ModeEnsemble</span><span class="p">(</span><span class="n">BaseEnsemble</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    When called, this ensemble will return the mode prediction from the entire list of underlying mixers.</span>
 
 <span class="sd">    If there are multiple modes, the mode whose voting mixers have the highest score will be returned.</span>
@@ -227,7 +227,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">prepared</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">_pick_mode_highest_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;If the predictions are unimodal, return the mode. If there are multiple modes, return the mode whose voting</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;If the predictions are unimodal, return the mode. If there are multiple modes, return the mode whose voting</span>
 <span class="sd">        mixers have the highest score.&quot;&quot;&quot;</span>
         <span class="n">prediction_counts</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 
@@ -273,7 +273,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

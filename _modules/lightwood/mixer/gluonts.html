@@ -210,7 +210,7 @@
             <span class="n">distribution_output</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
             <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Wrapper around GluonTS probabilistic deep learning models. For now, only DeepAR is supported.</span>
 
 <span class="sd">        :param stop_after: time budget in seconds.</span>
@@ -253,7 +253,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;This mixer can only be used with 0 or 1 partition columns.&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GluonTSMixer.fit"><a class="viewcode-back" href="../../../mixer.html#mixer.GluonTSMixer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Fits the model. &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Fits the model. &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Started fitting GluonTS forecasting model&#39;</span><span class="p">)</span>
 
         <span class="c1"># prepare data</span>
@@ -273,7 +273,7 @@
 
 <div class="viewcode-block" id="GluonTSMixer.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.GluonTSMixer.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span>
                     <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Due to how lightwood implements the `update` procedure, expected inputs for this method are:</span>
 
 <span class="sd">        :param dev_data: original `test` split (used to validate and select model if ensemble is `BestOf`).</span>
@@ -298,7 +298,7 @@
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span><span class="p">],</span>
                  <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Calls the mixer to emit forecasts.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="n">length</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">encoded_ds_lenghts</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
@@ -417,7 +417,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>

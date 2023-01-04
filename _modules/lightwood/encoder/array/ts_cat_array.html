@@ -182,7 +182,7 @@
 
 <div class="viewcode-block" id="TsCatArrayEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsCatArrayEncoder">[docs]</a><span class="k">class</span> <span class="nc">TsCatArrayEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">grouped_by</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This encoder handles arrays of categorical time series data by wrapping the OHE encoder with behavior specific to time series tasks.</span>
 
 <span class="sd">        :param timesteps: length of forecasting horizon, as defined by TimeseriesSettings.window.</span>
@@ -196,7 +196,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">is_target</span><span class="o">=</span><span class="n">is_target</span><span class="p">,</span> <span class="n">use_unknown</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TsCatArrayEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsCatArrayEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method prepares the underlying time series numerical encoder.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
@@ -208,7 +208,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="TsCatArrayEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsCatArrayEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">],</span> <span class="n">dependency_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Encodes a list of time series arrays using the underlying time series numerical encoder.</span>
 
 <span class="sd">        :param data: list of numerical values to encode. Its length is determined by the tss.window parameter, and all data points belong to the same time series.</span>
@@ -226,7 +226,7 @@
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TsCatArrayEncoder.encode_one"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsCatArrayEncoder.encode_one">[docs]</a>    <span class="k">def</span> <span class="nf">encode_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Encodes a single windowed slice of any given time series.</span>
 
 <span class="sd">        :param data: windowed slice of a numerical time series.</span>
@@ -248,7 +248,7 @@
         <span class="k">return</span> <span class="n">ret</span></div>
 
 <div class="viewcode-block" id="TsCatArrayEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsCatArrayEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_values</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Decodes a list of encoded arrays into values in their original domains.</span>
 
 <span class="sd">        :param encoded_values: encoded slices of numerical time series.</span>
@@ -270,7 +270,7 @@
         <span class="k">return</span> <span class="n">ret</span></div>
 
 <div class="viewcode-block" id="TsCatArrayEncoder.decode_one"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsCatArrayEncoder.decode_one">[docs]</a>    <span class="k">def</span> <span class="nf">decode_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Decodes a single window of a time series into its original domain.</span>
 
 <span class="sd">        :param encoded_value: encoded slice of a numerical time series.</span>
@@ -293,7 +293,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2017-2022, MindsDB.
+        &#169; Copyright 2017-2023, MindsDB.
 
     </p>
   </div>
