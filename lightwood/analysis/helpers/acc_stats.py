@@ -8,7 +8,6 @@ from sklearn.metrics import confusion_matrix
 from type_infer.dtype import dtype
 from lightwood.analysis.base import BaseAnalysisBlock
 from mindsdb_evaluator import evaluate_accuracy
-from lightwood.helpers.log import log
 
 
 class AccStats(BaseAnalysisBlock):
