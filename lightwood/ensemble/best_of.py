@@ -9,7 +9,7 @@ from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
 from lightwood.api.types import PredictionArguments, SubmodelData
 from lightwood.data.encoded_ds import EncodedDs
-from lightwood.helpers.general import evaluate_accuracy
+from mindsdb_evaluator import evaluate_accuracy
 
 
 class BestOf(BaseEnsemble):
