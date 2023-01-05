@@ -21,11 +21,7 @@ class AccStats(BaseAnalysisBlock):
     def analyze(self, info: Dict[str, object], **kwargs) -> Dict[str, object]:
         ns = SimpleNamespace(**kwargs)
 
-        if ns.accuracy_functions == ['evaluate_array_accuracy'] and ns.ts_analysis.get('ts_naive_mae', {}):
-            accuracy_functions = ['bounded_ts_accuracy']
-            log.info("AccStats will bound the array accuracy for reporting purposes. Check `bounded_ts_accuracy` for a description of the bounding procedure.")  # noqa
-        else:
-            accuracy_functions = ns.accuracy_functions
+        accuracy_functions = ns.accuracy_functions
 
         info['score_dict'] = evaluate_accuracy(ns.data, ns.normal_predictions['prediction'],
                                                ns.target, accuracy_functions, ts_analysis=ns.ts_analysis)
