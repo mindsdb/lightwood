@@ -7,7 +7,7 @@ from sklearn.metrics import confusion_matrix
 
 from type_infer.dtype import dtype
 from lightwood.analysis.base import BaseAnalysisBlock
-from mindsdb_evaluator import evaluate_accuracy
+from mindsdb_evaluator import evaluate_accuracies
 
 
 class AccStats(BaseAnalysisBlock):
@@ -22,8 +22,8 @@ class AccStats(BaseAnalysisBlock):
 
         accuracy_functions = ns.accuracy_functions
 
-        info['score_dict'] = evaluate_accuracy(ns.data, ns.normal_predictions['prediction'],
-                                               ns.target, accuracy_functions, ts_analysis=ns.ts_analysis)
+        info['score_dict'] = evaluate_accuracies(ns.data, ns.normal_predictions['prediction'],
+                                                 ns.target, accuracy_functions, ts_analysis=ns.ts_analysis)
 
         info['normal_accuracy'] = round(np.mean(list(info['score_dict'].values())), self.n_decimals)
         self.fit(ns, info['result_df'])

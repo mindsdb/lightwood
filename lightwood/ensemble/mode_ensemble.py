@@ -8,7 +8,7 @@ from lightwood.ensemble.base import BaseEnsemble
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs
 from type_infer.dtype import dtype
-from mindsdb_evaluator import evaluate_accuracy
+from mindsdb_evaluator import evaluate_accuracies
 from type_infer.helpers import is_nan_numeric
 from lightwood.helpers.log import log
 
@@ -36,7 +36,7 @@ class ModeEnsemble(BaseEnsemble):
                     f'Got target dtype {dtype_dict[target]} instead!')
 
             for _, mixer in enumerate(mixers):
-                score_dict = evaluate_accuracy(
+                score_dict = evaluate_accuracies(
                     data.data_frame,
                     mixer(data, args)['prediction'],
                     target,

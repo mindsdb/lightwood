@@ -9,7 +9,7 @@ from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
 from lightwood.api.types import PredictionArguments, SubmodelData
 from lightwood.data.encoded_ds import EncodedDs
-from mindsdb_evaluator import evaluate_accuracy
+from mindsdb_evaluator import evaluate_accuracies
 
 
 class BestOf(BaseEnsemble):
@@ -26,7 +26,7 @@ class BestOf(BaseEnsemble):
         if fit:
             score_list = []
             for _, mixer in enumerate(self.mixers):
-                score_dict = evaluate_accuracy(
+                score_dict = evaluate_accuracies(
                     data.data_frame,
                     mixer(data, args)['prediction'],
                     target,

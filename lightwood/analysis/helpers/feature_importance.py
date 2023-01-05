@@ -8,7 +8,7 @@ from sklearn.utils import shuffle
 from lightwood.helpers.log import log
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.analysis.base import BaseAnalysisBlock
-from mindsdb_evaluator import evaluate_accuracy
+from mindsdb_evaluator import evaluate_accuracies
 from lightwood.api.types import PredictionArguments
 
 
@@ -59,11 +59,11 @@ class PermutationFeatureImportance(BaseAnalysisBlock):
 
             args = {'predict_proba': True} if ns.is_classification else {}
             ref_preds = ns.predictor(ref_data, args=PredictionArguments.from_dict(args))
-            ref_score = np.mean(list(evaluate_accuracy(ref_data.data_frame,
-                                                       ref_preds['prediction'],
-                                                       ns.target,
-                                                       ns.accuracy_functions
-                                                       ).values()))
+            ref_score = np.mean(list(evaluate_accuracies(ref_data.data_frame,
+                                                         ref_preds['prediction'],
+                                                         ns.target,
+                                                         ns.accuracy_functions
+                                                         ).values()))
             shuffled_col_accuracy = {}
             shuffled_cols = []
             for x in ns.input_cols:
@@ -83,7 +83,7 @@ class PermutationFeatureImportance(BaseAnalysisBlock):
                 shuffle_data.data_frame[col] = shuffle(shuffle_data.data_frame[col].values)
 
                 shuffled_preds = ns.predictor(shuffle_data, args=PredictionArguments.from_dict(args))
-                shuffled_col_accuracy[col] = np.mean(list(evaluate_accuracy(
+                shuffled_col_accuracy[col] = np.mean(list(evaluate_accuracies(
                     shuffle_data.data_frame,
                     shuffled_preds['prediction'],
                     ns.target,
