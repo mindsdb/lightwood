@@ -56,7 +56,7 @@ from dataprep_ml.splitters import splitter
 from dataprep_ml.imputers import *
 
 import pandas as pd
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 import os
 from types import ModuleType
 import importlib.machinery
