@@ -181,7 +181,7 @@
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span>
 <span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.general</span> <span class="kn">import</span> <span class="n">evaluate_accuracy</span>
+<span class="kn">from</span> <span class="nn">mindsdb_evaluator</span> <span class="kn">import</span> <span class="n">evaluate_accuracies</span>
 <span class="kn">from</span> <span class="nn">type_infer.helpers</span> <span class="kn">import</span> <span class="n">is_nan_numeric</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 
@@ -209,7 +209,7 @@
                     <span class="sa">f</span><span class="s1">&#39;Got target dtype </span><span class="si">{</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="si">}</span><span class="s1"> instead!&#39;</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">mixer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mixers</span><span class="p">):</span>
-                <span class="n">score_dict</span> <span class="o">=</span> <span class="n">evaluate_accuracy</span><span class="p">(</span>
+                <span class="n">score_dict</span> <span class="o">=</span> <span class="n">evaluate_accuracies</span><span class="p">(</span>
                     <span class="n">data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">,</span>
                     <span class="n">mixer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">)[</span><span class="s1">&#39;prediction&#39;</span><span class="p">],</span>
                     <span class="n">target</span><span class="p">,</span>

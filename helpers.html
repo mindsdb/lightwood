@@ -108,19 +108,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.LightwoodAutocast">LightwoodAutocast</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.add_tn_num_conf_bounds">add_tn_num_conf_bounds</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.bounded_ts_accuracy">bounded_ts_accuracy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.evaluate_accuracy">evaluate_accuracy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.evaluate_array_accuracy">evaluate_array_accuracy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.evaluate_cat_array_accuracy">evaluate_cat_array_accuracy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.evaluate_multilabel_accuracy">evaluate_multilabel_accuracy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.evaluate_num_array_accuracy">evaluate_num_array_accuracy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.evaluate_regression_accuracy">evaluate_regression_accuracy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.gen_chars">gen_chars</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.get_group_matches">get_group_matches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.is_none">is_none</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.isascii">isascii</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.mase">mase</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.r2_score">r2_score</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
@@ -235,117 +224,6 @@ For now, (conservatively) increases width by the confidence times the log of the
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="helpers.bounded_ts_accuracy">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">bounded_ts_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#bounded_ts_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.bounded_ts_accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>The normal MASE accuracy inside <code class="docutils literal notranslate"><span class="pre">evaluate_array_accuracy</span></code> has a break point of 1.0: smaller values mean a naive forecast is better, and bigger values imply the forecast is better than a naive one. It is upper-bounded by 1e4.</p>
-<p>This 0-1 bounded MASE variant scores the 1.0 breakpoint to be equal to 0.5.
-For worse-than-naive, it scales linearly (with a factor).
-For better-than-naive, we fix 10 as 0.99, and scaled-logarithms (with 10 and 1e4 cutoffs as respective bases) are used to squash all remaining preimages to values between 0.5 and 1.0.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="helpers.evaluate_accuracy">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">evaluate_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#evaluate_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.evaluate_accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dispatcher for accuracy evaluation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – original dataframe.</p></li>
-<li><p><strong>predictions</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code>) – output of a lightwood predictor for the input <cite>data</cite>.</p></li>
-<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – target column name.</p></li>
-<li><p><strong>accuracy_functions</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – list of accuracy function names. Support currently exists for <cite>scikit-learn</cite>’s <cite>metrics</cite> module, plus any custom methods that Lightwood exposes.</p></li>
-<li><p><strong>ts_analysis</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – <cite>lightwood.data.timeseries_analyzer</cite> output, used to compute time series task accuracy.</p></li>
-<li><p><strong>n_decimals</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – used to round accuracies.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>accuracy metric for a dataset and predictions.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="helpers.evaluate_array_accuracy">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">evaluate_array_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#evaluate_array_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.evaluate_array_accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default time series forecasting accuracy method.
-Returns mean score over all timesteps in the forecasting horizon, as determined by the <cite>base_acc_fn</cite> (R2 score by default).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="helpers.evaluate_cat_array_accuracy">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">evaluate_cat_array_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#evaluate_cat_array_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.evaluate_cat_array_accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate accuracy in categorical time series forecasting tasks.</p>
-<p>Balanced accuracy is computed for each timestep (as determined by <cite>timeseries_settings.horizon</cite>),
-and the final accuracy is the reciprocal of the average score through all timesteps.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="helpers.evaluate_multilabel_accuracy">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">evaluate_multilabel_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#evaluate_multilabel_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.evaluate_multilabel_accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates accuracy for multilabel/tag prediction.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>weighted f1 score of predictions and ground truths.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="helpers.evaluate_num_array_accuracy">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">evaluate_num_array_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#evaluate_num_array_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.evaluate_num_array_accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate accuracy in numerical time series forecasting tasks.
-Defaults to mean absolute scaled error (MASE) if in-sample residuals are available.
-If this is not the case, R2 score is computed instead.</p>
-<p>Scores are computed for each timestep (as determined by <cite>timeseries_settings.horizon</cite>),
-and the final accuracy is the reciprocal of the average score through all timesteps.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="helpers.evaluate_regression_accuracy">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">evaluate_regression_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#evaluate_regression_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.evaluate_regression_accuracy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates accuracy for regression tasks.
-If predictions have a lower and upper bound, then <cite>within-bound</cite> accuracy is computed: whether the ground truth value falls within the predicted region.
-If not, then a (positive bounded) R2 score is returned instead.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>accuracy score as defined above.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="helpers.gen_chars">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">gen_chars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/text.html#gen_chars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.gen_chars" title="Permalink to this definition">¶</a></dt>
-<dd><p># lambda to Generates a string consisting of <cite>length</cite> consiting of repeating <cite>character</cite>
-:param length:
-:param character:
-:return:</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="helpers.get_group_matches">
 <span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">get_group_matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_columns</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/ts.html#get_group_matches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.get_group_matches" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a particular group combination, return the data subset that belongs to it.</p>
@@ -359,36 +237,11 @@ If not, then a (positive bounded) R2 score is returned instead.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="helpers.is_none">
 <span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">is_none</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#is_none"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.is_none" title="Permalink to this definition">¶</a></dt>
-<dd><p>We use pandas :(
-Pandas has no way to guarantee “stability” for the type of a column, it choses to arbitrarily change it based on the values.
+<dd><p>Pandas has no way to guarantee “stability” for the type of a column, it choses to arbitrarily change it based on the values.
 Pandas also change the values in the columns based on the types.
 Lightwood relies on having <code class="docutils literal notranslate"><span class="pre">None</span></code> values for a cells that represent “missing” or “corrupt”.</p>
 <p>When we assign <code class="docutils literal notranslate"><span class="pre">None</span></code> to a cell in a dataframe this might get turned to <cite>nan</cite> or other values, this function checks if a cell is <code class="docutils literal notranslate"><span class="pre">None</span></code> or any other values a pd.DataFrame might convert <code class="docutils literal notranslate"><span class="pre">None</span></code> to.</p>
-<p>It also check some extra values (like <code class="docutils literal notranslate"><span class="pre">''</span></code>) that pandas never converts <code class="docutils literal notranslate"><span class="pre">None</span></code> to (hopefully). But lightwood would still consider those values “None values”, and this will allow for more generic use later.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="helpers.isascii">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">isascii</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/text.html#isascii"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.isascii" title="Permalink to this definition">¶</a></dt>
-<dd><p>Used instead of str.isascii because python 3.6 doesn’t have that</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="helpers.mase">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">mase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_error</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/general.html#mase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.mase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes mean absolute scaled error.
-The scale corrective factor is the mean in-sample residual from the naive forecasting method.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="helpers.r2_score">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">r2_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/accuracy.html#r2_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.r2_score" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper for sklearn R2 score, lower capped between 0 and 1</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-</dl>
+<p>It also checks some extra values (like <code class="docutils literal notranslate"><span class="pre">''</span></code>) that pandas never converts <code class="docutils literal notranslate"><span class="pre">None</span></code> to (hopefully). But lightwood would still consider those values “None values”, and this will allow for more generic use later.</p>
 </dd></dl>
 
 </div>
