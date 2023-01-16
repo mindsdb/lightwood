@@ -1,5 +1,6 @@
 type_infer >= 0.0.6
 dataprep_ml >= 0.0.6
+mindsdb-evaluator >= 0.0.3
 numpy >=1.18.0,<=1.22.0
 nltk >=3,<3.6
 python-dateutil <2.8.1,>=2.1
@@ -15,7 +16,6 @@ setuptools >=21.2.1
 wheel >=0.32.2
 scikit-learn >=1.0.0, <=1.0.2
 dataclasses_json >=0.5.4
-autopep8 >=1.5.7
 dill ==0.3.4
 sktime >=0.14.0,<0.15.0
 statsforecast ==0.7.0
