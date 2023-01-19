@@ -573,7 +573,7 @@ class TestTimeseries(unittest.TestCase):
     def test_12_gluonts(self):
         """ Tests GluonTS mixer """
         from lightwood.mixer import GluonTSMixer
-        
+
         if GluonTSMixer is not None:
             data = pd.read_csv('tests/data/arrivals.csv')
             for i, subdata in enumerate([data, data[data['Country'] == 'US']]):
