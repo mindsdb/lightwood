@@ -28,7 +28,6 @@ langid==1.1.6
 pydateinfer==0.3.0
 protobuf<3.21.0
 xgboost>=1.6.0, <=1.8.0
-dataclasses-json
 typing-inspect
 six
 regex
