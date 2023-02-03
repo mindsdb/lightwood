@@ -1197,6 +1197,8 @@
 <span class="s2">            raise e</span>
 
 <span class="s2"># Update mixers to trained versions</span>
+<span class="s2">if not trained_mixers:</span>
+<span class="s2">    raise Exception(&#39;No mixers could be trained! Please verify your problem definition or JsonAI model representation.&#39;)</span>
 <span class="s2">self.mixers = trained_mixers</span>
 
 <span class="s2"># --------------- #</span>
