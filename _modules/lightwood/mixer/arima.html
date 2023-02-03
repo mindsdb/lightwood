@@ -171,32 +171,136 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.mixer.arima</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.mixer.sktime</span> <span class="kn">import</span> <span class="n">SkTime</span>
 
 
 <div class="viewcode-block" id="ARIMAMixer"><a class="viewcode-back" href="../../../mixer.html#mixer.ARIMAMixer">[docs]</a><span class="k">class</span> <span class="nc">ARIMAMixer</span><span class="p">(</span><span class="n">SkTime</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
-                 <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;statsforecast.StatsForecastAutoARIMA&#39;</span><span class="p">,</span>
-                 <span class="n">auto_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                 <span class="n">sp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">hyperparam_search</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">use_stl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-                 <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+            <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+            <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;statsforecast.StatsForecastAutoARIMA&#39;</span><span class="p">,</span>
+            <span class="n">auto_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">sp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">use_stl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">start_p</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">d</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">start_q</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">max_p</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="n">max_d</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">max_q</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="n">start_P</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">D</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">start_Q</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">max_P</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">max_D</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">max_Q</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">max_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="n">seasonal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">stationary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">information_criterion</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">test</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;kpss&#39;</span><span class="p">,</span>
+            <span class="n">seasonal_test</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">stepwise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">start_params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">trend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">maxiter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+            <span class="n">offset_test_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">seasonal_test_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">suppress_warnings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">error_action</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;warn&#39;</span><span class="p">,</span>
+            <span class="n">trace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">random</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">n_fits</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">out_of_sample_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">scoring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;mse&#39;</span><span class="p">,</span>
+            <span class="n">scoring_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">with_intercept</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">update_pdq</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">time_varying_regression</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">enforce_stationarity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">enforce_invertibility</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">simple_differencing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">measurement_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">mle_regression</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">hamilton_representation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">concentrate_scale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper for SkTime&#39;s AutoARIMA interface.</span>
+
+<span class="sd">        :param stop_after: time budget in seconds</span>
+<span class="sd">        :param target: column containing target time series</span>
+<span class="sd">        :param dtype_dict: data types for each dataset column</span>
+<span class="sd">        :param horizon: forecast length</span>
+<span class="sd">        :param ts_analysis: lightwood-produced stats about input time series</span>
+<span class="sd">        :param auto_size: whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.</span>
+<span class="sd">        :param use_stl: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.</span>
+
+<span class="sd">        For the rest of the parameters, please refer to SkTime&#39;s documentation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="n">hyperparam_search</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">model_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;start_p&#39;</span><span class="p">:</span> <span class="n">start_p</span><span class="p">,</span>
+            <span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span>
+            <span class="s1">&#39;start_q&#39;</span><span class="p">:</span> <span class="n">start_q</span><span class="p">,</span>
+            <span class="s1">&#39;max_p&#39;</span><span class="p">:</span> <span class="n">max_p</span><span class="p">,</span>
+            <span class="s1">&#39;max_d&#39;</span><span class="p">:</span> <span class="n">max_d</span><span class="p">,</span>
+            <span class="s1">&#39;max_q&#39;</span><span class="p">:</span> <span class="n">max_q</span><span class="p">,</span>
+            <span class="s1">&#39;start_P&#39;</span><span class="p">:</span> <span class="n">start_P</span><span class="p">,</span>
+            <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="n">D</span><span class="p">,</span>
+            <span class="s1">&#39;start_Q&#39;</span><span class="p">:</span> <span class="n">start_Q</span><span class="p">,</span>
+            <span class="s1">&#39;max_P&#39;</span><span class="p">:</span> <span class="n">max_P</span><span class="p">,</span>
+            <span class="s1">&#39;max_D&#39;</span><span class="p">:</span> <span class="n">max_D</span><span class="p">,</span>
+            <span class="s1">&#39;max_Q&#39;</span><span class="p">:</span> <span class="n">max_Q</span><span class="p">,</span>
+            <span class="s1">&#39;max_order&#39;</span><span class="p">:</span> <span class="n">max_order</span><span class="p">,</span>
+            <span class="s1">&#39;seasonal&#39;</span><span class="p">:</span> <span class="n">seasonal</span><span class="p">,</span>
+            <span class="s1">&#39;stationary&#39;</span><span class="p">:</span> <span class="n">stationary</span><span class="p">,</span>
+            <span class="s1">&#39;information_criterion&#39;</span><span class="p">:</span> <span class="n">information_criterion</span><span class="p">,</span>
+            <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="n">alpha</span><span class="p">,</span>
+            <span class="s1">&#39;test&#39;</span><span class="p">:</span> <span class="n">test</span><span class="p">,</span>
+            <span class="s1">&#39;seasonal_test&#39;</span><span class="p">:</span> <span class="n">seasonal_test</span><span class="p">,</span>
+            <span class="s1">&#39;stepwise&#39;</span><span class="p">:</span> <span class="n">stepwise</span><span class="p">,</span>
+            <span class="s1">&#39;n_jobs&#39;</span><span class="p">:</span> <span class="n">n_jobs</span><span class="p">,</span>
+            <span class="s1">&#39;start_params&#39;</span><span class="p">:</span> <span class="n">start_params</span><span class="p">,</span>
+            <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">trend</span><span class="p">,</span>
+            <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="n">method</span><span class="p">,</span>
+            <span class="s1">&#39;maxiter&#39;</span><span class="p">:</span> <span class="n">maxiter</span><span class="p">,</span>
+            <span class="s1">&#39;offset_test_args&#39;</span><span class="p">:</span> <span class="n">offset_test_args</span><span class="p">,</span>
+            <span class="s1">&#39;seasonal_test_args&#39;</span><span class="p">:</span> <span class="n">seasonal_test_args</span><span class="p">,</span>
+            <span class="s1">&#39;suppress_warnings&#39;</span><span class="p">:</span> <span class="n">suppress_warnings</span><span class="p">,</span>
+            <span class="s1">&#39;error_action&#39;</span><span class="p">:</span> <span class="n">error_action</span><span class="p">,</span>
+            <span class="s1">&#39;trace&#39;</span><span class="p">:</span> <span class="n">trace</span><span class="p">,</span>
+            <span class="s1">&#39;random&#39;</span><span class="p">:</span> <span class="n">random</span><span class="p">,</span>
+            <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="n">random_state</span><span class="p">,</span>
+            <span class="s1">&#39;n_fits&#39;</span><span class="p">:</span> <span class="n">n_fits</span><span class="p">,</span>
+            <span class="s1">&#39;out_of_sample_size&#39;</span><span class="p">:</span> <span class="n">out_of_sample_size</span><span class="p">,</span>
+            <span class="s1">&#39;scoring&#39;</span><span class="p">:</span> <span class="n">scoring</span><span class="p">,</span>
+            <span class="s1">&#39;scoring_args&#39;</span><span class="p">:</span> <span class="n">scoring_args</span><span class="p">,</span>
+            <span class="s1">&#39;with_intercept&#39;</span><span class="p">:</span> <span class="n">with_intercept</span><span class="p">,</span>
+            <span class="s1">&#39;update_pdq&#39;</span><span class="p">:</span> <span class="n">update_pdq</span><span class="p">,</span>
+            <span class="s1">&#39;time_varying_regression&#39;</span><span class="p">:</span> <span class="n">time_varying_regression</span><span class="p">,</span>
+            <span class="s1">&#39;enforce_stationarity&#39;</span><span class="p">:</span> <span class="n">enforce_stationarity</span><span class="p">,</span>
+            <span class="s1">&#39;enforce_invertibility&#39;</span><span class="p">:</span> <span class="n">enforce_invertibility</span><span class="p">,</span>
+            <span class="s1">&#39;simple_differencing&#39;</span><span class="p">:</span> <span class="n">simple_differencing</span><span class="p">,</span>
+            <span class="s1">&#39;measurement_error&#39;</span><span class="p">:</span> <span class="n">measurement_error</span><span class="p">,</span>
+            <span class="s1">&#39;mle_regression&#39;</span><span class="p">:</span> <span class="n">mle_regression</span><span class="p">,</span>
+            <span class="s1">&#39;hamilton_representation&#39;</span><span class="p">:</span> <span class="n">hamilton_representation</span><span class="p">,</span>
+            <span class="s1">&#39;concentrate_scale&#39;</span><span class="p">:</span> <span class="n">concentrate_scale</span><span class="p">,</span>
+        <span class="p">}</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">,</span>
-                         <span class="n">model_path</span><span class="p">,</span> <span class="n">auto_size</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">hyperparam_search</span><span class="p">,</span> <span class="n">use_stl</span><span class="p">)</span>
+                         <span class="n">model_path</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">,</span> <span class="n">auto_size</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">hyperparam_search</span><span class="p">,</span> <span class="n">use_stl</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;AutoARIMA&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">=</span> <span class="n">model_path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">False</span></div>
 </pre></div>
 
            </div>

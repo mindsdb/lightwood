@@ -171,32 +171,83 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.mixer.ets</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.mixer.sktime</span> <span class="kn">import</span> <span class="n">SkTime</span>
 
 
 <div class="viewcode-block" id="ETSMixer"><a class="viewcode-back" href="../../../mixer.html#mixer.ETSMixer">[docs]</a><span class="k">class</span> <span class="nc">ETSMixer</span><span class="p">(</span><span class="n">SkTime</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
-                 <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;ets.AutoETS&#39;</span><span class="p">,</span>
-                 <span class="n">auto_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                 <span class="n">sp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">hyperparam_search</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">use_stl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-                 <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+            <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+            <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;ets.AutoETS&#39;</span><span class="p">,</span>
+            <span class="n">auto_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">sp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">use_stl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">error</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;add&#39;</span><span class="p">,</span>
+            <span class="n">trend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">damped_trend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">seasonal</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">initialization_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;estimated&#39;</span><span class="p">,</span>
+            <span class="n">initial_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">initial_trend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">initial_seasonal</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">bounds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">start_params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">maxiter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="n">auto</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">information_criterion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;aic&#39;</span><span class="p">,</span>
+            <span class="n">allow_multiplicative_trend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">restrict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">additive_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">ignore_inf_ic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper for SkTime&#39;s AutoETS interface.</span>
+
+<span class="sd">        :param stop_after: time budget in seconds</span>
+<span class="sd">        :param target: column containing target time series</span>
+<span class="sd">        :param dtype_dict: data types for each dataset column</span>
+<span class="sd">        :param horizon: forecast length</span>
+<span class="sd">        :param ts_analysis: lightwood-produced stats about input time series</span>
+<span class="sd">        :param auto_size: whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.</span>
+<span class="sd">        :param use_stl: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.</span>
+
+<span class="sd">        For the rest of the parameters, please refer to SkTime&#39;s documentation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
         <span class="n">hyperparam_search</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">model_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="n">error</span><span class="p">,</span>
+            <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">trend</span><span class="p">,</span>
+            <span class="s1">&#39;damped_trend&#39;</span><span class="p">:</span> <span class="n">damped_trend</span><span class="p">,</span>
+            <span class="s1">&#39;seasonal&#39;</span><span class="p">:</span> <span class="n">seasonal</span><span class="p">,</span>
+            <span class="s1">&#39;initialization_method&#39;</span><span class="p">:</span> <span class="n">initialization_method</span><span class="p">,</span>
+            <span class="s1">&#39;initial_level&#39;</span><span class="p">:</span> <span class="n">initial_level</span><span class="p">,</span>
+            <span class="s1">&#39;initial_trend&#39;</span><span class="p">:</span> <span class="n">initial_trend</span><span class="p">,</span>
+            <span class="s1">&#39;initial_seasonal&#39;</span><span class="p">:</span> <span class="n">initial_seasonal</span><span class="p">,</span>
+            <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">,</span>
+            <span class="s1">&#39;start_params&#39;</span><span class="p">:</span> <span class="n">start_params</span><span class="p">,</span>
+            <span class="s1">&#39;maxiter&#39;</span><span class="p">:</span> <span class="n">maxiter</span><span class="p">,</span>
+            <span class="s1">&#39;auto&#39;</span><span class="p">:</span> <span class="n">auto</span><span class="p">,</span>
+            <span class="s1">&#39;information_criterion&#39;</span><span class="p">:</span> <span class="n">information_criterion</span><span class="p">,</span>
+            <span class="s1">&#39;allow_multiplicative_trend&#39;</span><span class="p">:</span> <span class="n">allow_multiplicative_trend</span><span class="p">,</span>
+            <span class="s1">&#39;restrict&#39;</span><span class="p">:</span> <span class="n">restrict</span><span class="p">,</span>
+            <span class="s1">&#39;additive_only&#39;</span><span class="p">:</span> <span class="n">additive_only</span><span class="p">,</span>
+            <span class="s1">&#39;ignore_inf_ic&#39;</span><span class="p">:</span> <span class="n">ignore_inf_ic</span><span class="p">,</span>
+            <span class="s1">&#39;n_jobs&#39;</span><span class="p">:</span> <span class="n">n_jobs</span><span class="p">,</span>
+            <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="n">random_state</span>
+        <span class="p">}</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">,</span>
-                         <span class="n">model_path</span><span class="p">,</span> <span class="n">auto_size</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">hyperparam_search</span><span class="p">,</span> <span class="n">use_stl</span><span class="p">)</span>
+                         <span class="n">model_path</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">,</span> <span class="n">auto_size</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">hyperparam_search</span><span class="p">,</span> <span class="n">use_stl</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;AutoETS&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">=</span> <span class="n">model_path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">False</span></div>
 </pre></div>
 
            </div>

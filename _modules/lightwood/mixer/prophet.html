@@ -171,30 +171,88 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.mixer.prophet</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.mixer.sktime</span> <span class="kn">import</span> <span class="n">SkTime</span>
 
 
 <div class="viewcode-block" id="ProphetMixer"><a class="viewcode-back" href="../../../mixer.html#mixer.ProphetMixer">[docs]</a><span class="k">class</span> <span class="nc">ProphetMixer</span><span class="p">(</span><span class="n">SkTime</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
-                 <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;fbprophet.Prophet&#39;</span><span class="p">,</span>
-                 <span class="n">auto_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                 <span class="n">sp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">hyperparam_search</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">use_decomposers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-                 <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+            <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+            <span class="n">auto_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">use_stl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">add_seasonality</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">add_country_holidays</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">growth</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span>
+            <span class="n">growth_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">growth_cap</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">changepoints</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">n_changepoints</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
+            <span class="n">changepoint_range</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+            <span class="n">yearly_seasonality</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+            <span class="n">weekly_seasonality</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+            <span class="n">daily_seasonality</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+            <span class="n">holidays</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">seasonality_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;additive&#39;</span><span class="p">,</span>
+            <span class="n">seasonality_prior_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
+            <span class="n">holidays_prior_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
+            <span class="n">changepoint_prior_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">mcmc_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">uncertainty_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper for SkTime&#39;s Prophet interface.</span>
+<span class="sd">         </span>
+<span class="sd">        :param stop_after: time budget in seconds</span>
+<span class="sd">        :param target: column containing target time series</span>
+<span class="sd">        :param dtype_dict: data types for each dataset column</span>
+<span class="sd">        :param horizon: forecast length</span>
+<span class="sd">        :param ts_analysis: lightwood-produced stats about input time series</span>
+<span class="sd">        :param auto_size: whether to filter out old data points if training split is bigger than a certain threshold (defined by the dataset sampling frequency). Enabled by default to avoid long training times in big datasets.</span>
+<span class="sd">        :param use_stl: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.</span>
+<span class="sd">        </span>
+<span class="sd">        For the rest of the parameters, please refer to SkTime&#39;s documentation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+        <span class="c1"># overrides</span>
+        <span class="n">sp</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">hyperparam_search</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">model_path</span> <span class="o">=</span> <span class="s1">&#39;fbprophet.Prophet&#39;</span>
+        <span class="n">model_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;add_seasonality&#39;</span><span class="p">:</span> <span class="n">add_seasonality</span><span class="p">,</span>
+            <span class="s1">&#39;add_country_holidays&#39;</span><span class="p">:</span> <span class="n">add_country_holidays</span><span class="p">,</span>
+            <span class="s1">&#39;growth&#39;</span><span class="p">:</span> <span class="n">growth</span><span class="p">,</span>
+            <span class="s1">&#39;growth_floor&#39;</span><span class="p">:</span> <span class="n">growth_floor</span><span class="p">,</span>
+            <span class="s1">&#39;growth_cap&#39;</span><span class="p">:</span> <span class="n">growth_cap</span><span class="p">,</span>
+            <span class="s1">&#39;changepoints&#39;</span><span class="p">:</span> <span class="n">changepoints</span><span class="p">,</span>
+            <span class="s1">&#39;n_changepoints&#39;</span><span class="p">:</span> <span class="n">n_changepoints</span><span class="p">,</span>
+            <span class="s1">&#39;changepoint_range&#39;</span><span class="p">:</span> <span class="n">changepoint_range</span><span class="p">,</span>
+            <span class="s1">&#39;yearly_seasonality&#39;</span><span class="p">:</span> <span class="n">yearly_seasonality</span><span class="p">,</span>
+            <span class="s1">&#39;weekly_seasonality&#39;</span><span class="p">:</span> <span class="n">weekly_seasonality</span><span class="p">,</span>
+            <span class="s1">&#39;daily_seasonality&#39;</span><span class="p">:</span> <span class="n">daily_seasonality</span><span class="p">,</span>
+            <span class="s1">&#39;holidays&#39;</span><span class="p">:</span> <span class="n">holidays</span><span class="p">,</span>
+            <span class="s1">&#39;seasonality_mode&#39;</span><span class="p">:</span> <span class="n">seasonality_mode</span><span class="p">,</span>
+            <span class="s1">&#39;seasonality_prior_scale&#39;</span><span class="p">:</span> <span class="n">seasonality_prior_scale</span><span class="p">,</span>
+            <span class="s1">&#39;holidays_prior_scale&#39;</span><span class="p">:</span> <span class="n">holidays_prior_scale</span><span class="p">,</span>
+            <span class="s1">&#39;changepoint_prior_scale&#39;</span><span class="p">:</span> <span class="n">changepoint_prior_scale</span><span class="p">,</span>
+            <span class="s1">&#39;mcmc_samples&#39;</span><span class="p">:</span> <span class="n">mcmc_samples</span><span class="p">,</span>
+            <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="n">alpha</span><span class="p">,</span>
+            <span class="s1">&#39;uncertainty_samples&#39;</span><span class="p">:</span> <span class="n">uncertainty_samples</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># setup sktime base mixer</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">,</span>
-                         <span class="n">model_path</span><span class="p">,</span> <span class="n">auto_size</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">hyperparam_search</span><span class="p">,</span> <span class="n">use_decomposers</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">=</span> <span class="n">model_path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">possible_models</span><span class="p">)</span></div>
+                         <span class="n">model_path</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">,</span> <span class="n">auto_size</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">hyperparam_search</span><span class="p">,</span> <span class="n">use_stl</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Prophet&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">False</span></div>
 </pre></div>
 
            </div>
