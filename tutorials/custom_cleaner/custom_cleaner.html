@@ -490,8 +490,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2925:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2925:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2787:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2787:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <div class="section" id="1)-Load-your-data">
@@ -615,20 +615,20 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2925:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-<span class="ansi-green-fg">INFO:type_infer-2925:Analyzing a sample of 2478</span>
-<span class="ansi-green-fg">INFO:type_infer-2925:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2925:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2925:Doing text detection for column: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2925:Column id has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2925:Infering type for: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2925:Doing text detection for column: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2925:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:type_infer-2925:Column target has data type float</span>
-<span class="ansi-yellow-fg">WARNING:type_infer-2925:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2925:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2925:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2925:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2787:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:type_infer-2787:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:type_infer-2787:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2787:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2787:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2787:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2787:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2787:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2787:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:type_infer-2787:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:type_infer-2787:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2787:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2787:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2787:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -716,7 +716,7 @@ div.rendered_html tbody tr:hover {
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 19.493083477020264,
+        &#34;expected_additional_time&#34;: 22.54438877105713,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -953,7 +953,7 @@ Writing MyCustomCleaner.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2925:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2787:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1031,7 +1031,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 21384.0,
                 &#34;seconds_per_encoder&#34;: 85536.0,
-                &#34;expected_additional_time&#34;: 19.493083477020264,
+                &#34;expected_additional_time&#34;: 22.54438877105713,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -1155,24 +1155,33 @@ class Predictor(PredictorInterface):
         # Prepare the training + dev data
         concatenated_train_dev = pd.concat([data[&#34;train&#34;], data[&#34;dev&#34;]])
 
-        encoder_prepping_dict = {}
+        prepped_encoders = {}
 
-        # Prepare encoders that do not require learned strategies
-        for col_name, encoder in self.encoders.items():
-            if col_name != self.target and not encoder.is_trainable_encoder:
-                encoder_prepping_dict[col_name] = [
-                    encoder,
-                    concatenated_train_dev[col_name],
-                    &#34;prepare&#34;,
-                ]
+        # Prepare input encoders
+        parallel_encoding = parallel_encoding_check(data[&#34;train&#34;], self.encoders)
 
-        # Setup parallelization
-        parallel_prepped_encoders = mut_method_call(encoder_prepping_dict)
-        for col_name, encoder in parallel_prepped_encoders.items():
+        if parallel_encoding:
+            for col_name, encoder in self.encoders.items():
+                if col_name != self.target and not encoder.is_trainable_encoder:
+                    prepped_encoders[col_name] = (
+                        encoder,
+                        concatenated_train_dev[col_name],
+                        &#34;prepare&#34;,
+                    )
+            prepped_encoders = mut_method_call(prepped_encoders)
+
+        else:
+            for col_name, encoder in self.encoders.items():
+                if col_name != self.target and not encoder.is_trainable_encoder:
+                    encoder.prepare(concatenated_train_dev[col_name])
+                    prepped_encoders[col_name] = encoder
+
+        # Store encoders
+        for col_name, encoder in prepped_encoders.items():
             self.encoders[col_name] = encoder
 
         # Prepare the target
-        if self.target not in parallel_prepped_encoders:
+        if self.target not in prepped_encoders:
             if self.encoders[self.target].is_trainable_encoder:
                 self.encoders[self.target].prepare(
                     data[&#34;train&#34;][self.target], data[&#34;dev&#34;][self.target]
@@ -1550,16 +1559,16 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2925:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2925:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2925:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2925: `analyze_data` runtime: 0.07 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2925:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2925:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2925:Cleaning column =excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2925:Cleaning column =target</span>
-<span class="ansi-green-fg">INFO:lightwood-2925:Converted target into strictly non-negative</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2925: `preprocess` runtime: 0.11 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2787:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2787:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2787:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2787: `analyze_data` runtime: 0.07 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2787:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2787:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2787:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2787:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2787:Converted target into strictly non-negative</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2787: `preprocess` runtime: 0.11 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

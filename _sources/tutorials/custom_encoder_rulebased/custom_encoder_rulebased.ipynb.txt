@@ -43,10 +43,10 @@
    "id": "raising-adventure",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-03T22:30:47.019930Z",
-     "iopub.status.busy": "2023-02-03T22:30:47.019649Z",
-     "iopub.status.idle": "2023-02-03T22:30:53.695500Z",
-     "shell.execute_reply": "2023-02-03T22:30:53.694132Z"
+     "iopub.execute_input": "2023-02-03T23:01:13.520320Z",
+     "iopub.status.busy": "2023-02-03T23:01:13.519753Z",
+     "iopub.status.idle": "2023-02-03T23:01:20.259769Z",
+     "shell.execute_reply": "2023-02-03T23:01:20.258723Z"
     }
    },
    "outputs": [
@@ -89,10 +89,10 @@
    "id": "technical-government",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-03T22:30:53.699949Z",
-     "iopub.status.busy": "2023-02-03T22:30:53.699362Z",
-     "iopub.status.idle": "2023-02-03T22:30:53.820547Z",
-     "shell.execute_reply": "2023-02-03T22:30:53.819568Z"
+     "iopub.execute_input": "2023-02-03T23:01:20.264723Z",
+     "iopub.status.busy": "2023-02-03T23:01:20.264153Z",
+     "iopub.status.idle": "2023-02-03T23:01:20.637890Z",
+     "shell.execute_reply": "2023-02-03T23:01:20.636710Z"
     }
    },
    "outputs": [
@@ -239,10 +239,10 @@
    "id": "absent-maker",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-03T22:30:53.825355Z",
-     "iopub.status.busy": "2023-02-03T22:30:53.824834Z",
-     "iopub.status.idle": "2023-02-03T22:30:55.743901Z",
-     "shell.execute_reply": "2023-02-03T22:30:55.742917Z"
+     "iopub.execute_input": "2023-02-03T23:01:20.641642Z",
+     "iopub.status.busy": "2023-02-03T23:01:20.641372Z",
+     "iopub.status.idle": "2023-02-03T23:01:23.064535Z",
+     "shell.execute_reply": "2023-02-03T23:01:23.063468Z"
     }
    },
    "outputs": [
@@ -300,10 +300,10 @@
    "id": "coastal-paragraph",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-03T22:30:55.748823Z",
-     "iopub.status.busy": "2023-02-03T22:30:55.748321Z",
-     "iopub.status.idle": "2023-02-03T22:30:55.754237Z",
-     "shell.execute_reply": "2023-02-03T22:30:55.753416Z"
+     "iopub.execute_input": "2023-02-03T23:01:23.068486Z",
+     "iopub.status.busy": "2023-02-03T23:01:23.068165Z",
+     "iopub.status.idle": "2023-02-03T23:01:23.074970Z",
+     "shell.execute_reply": "2023-02-03T23:01:23.073988Z"
     }
    },
    "outputs": [
@@ -406,7 +406,7 @@
       "        \"unbias_target\": true,\n",
       "        \"seconds_per_mixer\": 42768.0,\n",
       "        \"seconds_per_encoder\": null,\n",
-      "        \"expected_additional_time\": 1.8656866550445557,\n",
+      "        \"expected_additional_time\": 2.367706298828125,\n",
       "        \"time_aim\": 259200,\n",
       "        \"target_weights\": null,\n",
       "        \"positive_domain\": false,\n",
@@ -503,10 +503,10 @@
    "id": "e03db1b0",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-03T22:30:55.758638Z",
-     "iopub.status.busy": "2023-02-03T22:30:55.758333Z",
-     "iopub.status.idle": "2023-02-03T22:30:55.764716Z",
-     "shell.execute_reply": "2023-02-03T22:30:55.763930Z"
+     "iopub.execute_input": "2023-02-03T23:01:23.079325Z",
+     "iopub.status.busy": "2023-02-03T23:01:23.079006Z",
+     "iopub.status.idle": "2023-02-03T23:01:23.087232Z",
+     "shell.execute_reply": "2023-02-03T23:01:23.086244Z"
     }
    },
    "outputs": [
@@ -627,10 +627,10 @@
    "id": "e30866c1",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-03T22:30:55.768248Z",
-     "iopub.status.busy": "2023-02-03T22:30:55.767789Z",
-     "iopub.status.idle": "2023-02-03T22:30:55.771840Z",
-     "shell.execute_reply": "2023-02-03T22:30:55.771103Z"
+     "iopub.execute_input": "2023-02-03T23:01:23.090894Z",
+     "iopub.status.busy": "2023-02-03T23:01:23.090606Z",
+     "iopub.status.idle": "2023-02-03T23:01:23.096772Z",
+     "shell.execute_reply": "2023-02-03T23:01:23.095740Z"
     }
    },
    "outputs": [],
@@ -689,10 +689,10 @@
    "id": "elementary-fusion",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-03T22:30:55.775087Z",
-     "iopub.status.busy": "2023-02-03T22:30:55.774671Z",
-     "iopub.status.idle": "2023-02-03T22:30:55.778636Z",
-     "shell.execute_reply": "2023-02-03T22:30:55.777860Z"
+     "iopub.execute_input": "2023-02-03T23:01:23.100869Z",
+     "iopub.status.busy": "2023-02-03T23:01:23.100499Z",
+     "iopub.status.idle": "2023-02-03T23:01:23.105170Z",
+     "shell.execute_reply": "2023-02-03T23:01:23.104276Z"
     }
    },
    "outputs": [],
@@ -718,10 +718,10 @@
    "id": "inappropriate-james",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-03T22:30:55.781980Z",
-     "iopub.status.busy": "2023-02-03T22:30:55.781592Z",
-     "iopub.status.idle": "2023-02-03T22:30:56.227454Z",
-     "shell.execute_reply": "2023-02-03T22:30:56.226399Z"
+     "iopub.execute_input": "2023-02-03T23:01:23.108725Z",
+     "iopub.status.busy": "2023-02-03T23:01:23.108424Z",
+     "iopub.status.idle": "2023-02-03T23:01:23.642331Z",
+     "shell.execute_reply": "2023-02-03T23:01:23.641145Z"
     }
    },
    "outputs": [
@@ -760,10 +760,10 @@
    "id": "palestinian-harvey",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-03T22:30:56.231446Z",
-     "iopub.status.busy": "2023-02-03T22:30:56.230871Z",
-     "iopub.status.idle": "2023-02-03T22:30:56.980674Z",
-     "shell.execute_reply": "2023-02-03T22:30:56.979766Z"
+     "iopub.execute_input": "2023-02-03T23:01:23.646955Z",
+     "iopub.status.busy": "2023-02-03T23:01:23.646492Z",
+     "iopub.status.idle": "2023-02-03T23:01:24.393964Z",
+     "shell.execute_reply": "2023-02-03T23:01:24.392892Z"
     }
    },
    "outputs": [
@@ -773,23 +773,15 @@
      "text": [
       "\u001b[32mINFO:dataprep_ml-2086:Starting statistical analysis\u001b[0m\n",
       "\u001b[32mINFO:dataprep_ml-2086:Finished statistical analysis\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2086: `analyze_data` runtime: 0.31 seconds\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2086: `analyze_data` runtime: 0.37 seconds\u001b[0m\n",
       "\u001b[32mINFO:dataprep_ml-2086:Cleaning the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2086: `preprocess` runtime: 0.11 seconds\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2086: `preprocess` runtime: 0.12 seconds\u001b[0m\n",
       "\u001b[32mINFO:dataprep_ml-2086:Splitting the data into train/test\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2086: `split` runtime: 0.0 seconds\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2086: `split` runtime: 0.01 seconds\u001b[0m\n",
       "\u001b[32mINFO:lightwood-2086:Categories Detected = 1\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2086:Done running for: model\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2086:Done running for: year\u001b[0m\n",
       "\u001b[32mINFO:lightwood-2086:Categories Detected = 1\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2086:Done running for: transmission\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2086:Done running for: mileage\u001b[0m\n",
       "\u001b[32mINFO:lightwood-2086:Categories Detected = 1\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2086:Done running for: fuelType\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2086:Done running for: tax\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2086:Done running for: mpg\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2086:Done running for: engineSize\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2086: `prepare` runtime: 0.31 seconds\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2086: `prepare` runtime: 0.24 seconds\u001b[0m\n",
       "\u001b[32mINFO:dataprep_ml-2086:Featurizing the data\u001b[0m\n",
       "\u001b[37mDEBUG:lightwood-2086: `featurize` runtime: 0.0 seconds\u001b[0m\n"
      ]
@@ -826,10 +818,10 @@
    "id": "silent-dealing",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-03T22:30:56.985323Z",
-     "iopub.status.busy": "2023-02-03T22:30:56.983894Z",
-     "iopub.status.idle": "2023-02-03T22:30:57.006326Z",
-     "shell.execute_reply": "2023-02-03T22:30:57.005514Z"
+     "iopub.execute_input": "2023-02-03T23:01:24.397836Z",
+     "iopub.status.busy": "2023-02-03T23:01:24.397501Z",
+     "iopub.status.idle": "2023-02-03T23:01:24.418774Z",
+     "shell.execute_reply": "2023-02-03T23:01:24.417847Z"
     }
    },
    "outputs": [
@@ -931,10 +923,10 @@
    "id": "superior-mobility",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-03T22:30:57.010140Z",
-     "iopub.status.busy": "2023-02-03T22:30:57.009623Z",
-     "iopub.status.idle": "2023-02-03T22:30:57.015796Z",
-     "shell.execute_reply": "2023-02-03T22:30:57.015068Z"
+     "iopub.execute_input": "2023-02-03T23:01:24.422496Z",
+     "iopub.status.busy": "2023-02-03T23:01:24.421996Z",
+     "iopub.status.idle": "2023-02-03T23:01:24.429081Z",
+     "shell.execute_reply": "2023-02-03T23:01:24.427646Z"
     }
    },
    "outputs": [

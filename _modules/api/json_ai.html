@@ -1102,20 +1102,29 @@
 <span class="s2"># Prepare the training + dev data</span>
 <span class="s2">concatenated_train_dev = pd.concat([data[&#39;train&#39;], data[&#39;dev&#39;]])</span>
 
-<span class="s2">encoder_prepping_dict = </span><span class="se">{{}}</span>
+<span class="s2">prepped_encoders = </span><span class="se">{{}}</span>
 
-<span class="s2"># Prepare encoders that do not require learned strategies</span>
-<span class="s2">for col_name, encoder in self.encoders.items():</span>
-<span class="s2">    if col_name != self.target and not encoder.is_trainable_encoder:</span>
-<span class="s2">        encoder_prepping_dict[col_name] = [encoder, concatenated_train_dev[col_name], &#39;prepare&#39;]</span>
+<span class="s2"># Prepare input encoders</span>
+<span class="s2">parallel_encoding = parallel_encoding_check(data[&#39;train&#39;], self.encoders)</span>
 
-<span class="s2"># Setup parallelization</span>
-<span class="s2">parallel_prepped_encoders = mut_method_call(encoder_prepping_dict)</span>
-<span class="s2">for col_name, encoder in parallel_prepped_encoders.items():</span>
+<span class="s2">if parallel_encoding:</span>
+<span class="s2">    for col_name, encoder in self.encoders.items():</span>
+<span class="s2">        if col_name != self.target and not encoder.is_trainable_encoder:</span>
+<span class="s2">            prepped_encoders[col_name] = (encoder, concatenated_train_dev[col_name], &#39;prepare&#39;)</span>
+<span class="s2">    prepped_encoders = mut_method_call(prepped_encoders)</span>
+
+<span class="s2">else:</span>
+<span class="s2">    for col_name, encoder in self.encoders.items():</span>
+<span class="s2">        if col_name != self.target and not encoder.is_trainable_encoder:</span>
+<span class="s2">            encoder.prepare(concatenated_train_dev[col_name])</span>
+<span class="s2">            prepped_encoders[col_name] = encoder</span>
+
+<span class="s2"># Store encoders</span>
+<span class="s2">for col_name, encoder in prepped_encoders.items():</span>
 <span class="s2">    self.encoders[col_name] = encoder</span>
 
 <span class="s2"># Prepare the target</span>
-<span class="s2">if self.target not in parallel_prepped_encoders:</span>
+<span class="s2">if self.target not in prepped_encoders:</span>
 <span class="s2">    if self.encoders[self.target].is_trainable_encoder:</span>
 <span class="s2">        self.encoders[self.target].prepare(data[&#39;train&#39;][self.target], data[&#39;dev&#39;][self.target])</span>
 <span class="s2">    else:</span>
