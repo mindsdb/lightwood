@@ -433,7 +433,8 @@ class PredictionArguments:
     :param predict_proba: triggers (where supported) predictions in raw probability output form. I.e. for classifiers,
     instead of returning only the predicted class, the output additionally includes the assigned probability for
     each class.   
-    :param all_mixers: forces an ensemble to return predictions emitted by all its internal mixers. 
+    :param all_mixers: forces an ensemble to return predictions emitted by all its internal mixers.
+    :param mixer_weights: a list with coefficients that are normalized into 0-1 bounded scores to mix the output of all mixers available to a compatible ensemble (e.g. [0.5, 0.5] for an ensemble with two mixers would yield the mean prediction). Can be used with WeightedMeanEnsemble, StackedEnsemble or TsStackedEnsemble.
     :param fixed_confidence: Used in the ICP analyzer module, specifies an `alpha` fixed confidence so that predictions, in average, are correct `alpha` percent of the time. For unsupervised anomaly detection, this also translates into the expected error rate. Bounded between 0.01 and 0.99 (respectively implies wider and tighter bounds, all other parameters being equal).
     :param anomaly_cooldown: Sets the minimum amount of timesteps between consecutive firings of the the anomaly detector.
     :param simple_ts_bounds: in forecasting contexts, enabling this parameter disables the usual conformal-based bounds (with Bonferroni correction) and resorts to a simpler way of scaling bounds through the horizon based on the uncertainty estimation for the first value in the forecast (see helpers.ts.add_tn_num_conf_bounds for the implementation).
@@ -445,6 +446,7 @@ class PredictionArguments:
 
     predict_proba: bool = True
     all_mixers: bool = False
+    mixer_weights: list = None
     fixed_confidence: Union[int, float, None] = None
     anomaly_cooldown: int = 1
     forecast_offset: int = 0
@@ -465,6 +467,7 @@ class PredictionArguments:
         # maybe this should be stateful instead, and save the latest used value for each field?
         predict_proba = obj.get('predict_proba', PredictionArguments.predict_proba)
         all_mixers = obj.get('all_mixers', PredictionArguments.all_mixers)
+        mixer_weights = obj.get('mixer_weights', PredictionArguments.mixer_weights)
         fixed_confidence = obj.get('fixed_confidence', PredictionArguments.fixed_confidence)
         anomaly_cooldown = obj.get('anomaly_cooldown', PredictionArguments.anomaly_cooldown)
         forecast_offset = obj.get('forecast_offset', PredictionArguments.forecast_offset)
@@ -475,6 +478,7 @@ class PredictionArguments:
         pred_args = PredictionArguments(
             predict_proba=predict_proba,
             all_mixers=all_mixers,
+            mixer_weights=mixer_weights,
             fixed_confidence=fixed_confidence,
             anomaly_cooldown=anomaly_cooldown,
             forecast_offset=forecast_offset,
