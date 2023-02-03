@@ -66,7 +66,7 @@ def _consolidate_analysis_blocks(jsonai, key):
         2. Execution order is such that all dependencies are met.
             - For this we use a topological sort over the DAG.
     """
-    analysis_defaults = {  # non-optional plus dependencies
+    analysis_defaults = {  # non-optional plus dependencies  # TODO: move to config file
         'ICP': {
             "deps": [],
         },

@@ -56,7 +56,7 @@ from dataprep_ml.splitters import splitter
 from dataprep_ml.imputers import *
 
 import pandas as pd
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 import os
 from types import ModuleType
 import importlib.machinery
@@ -1033,6 +1033,8 @@ for mixer in self.mixers:
             raise e
 
 # Update mixers to trained versions
+if not trained_mixers:
+    raise Exception('No mixers could be trained! Please verify your problem definition or JsonAI model representation.')
 self.mixers = trained_mixers
 
 # --------------- #

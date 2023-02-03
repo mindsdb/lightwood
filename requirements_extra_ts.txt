@@ -2,3 +2,5 @@ pystan==2.19.1.1
 prophet==1.1
 neuralforecast ==0.1.0
 pytorch-lightning>=1.6.0, <1.7.0
+mxnet >=1.6.0, <2.0.0
+gluonts >= 0.11.0, <0.12.0

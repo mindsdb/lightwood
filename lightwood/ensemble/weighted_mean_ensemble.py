@@ -9,7 +9,7 @@ from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs
-from lightwood.helpers.general import evaluate_accuracy
+from mindsdb_evaluator import evaluate_accuracies
 from type_infer.dtype import dtype
 
 
@@ -34,7 +34,7 @@ class WeightedMeanEnsemble(BaseEnsemble):
         if fit:
             score_list = []
             for _, mixer in enumerate(mixers):
-                score_dict = evaluate_accuracy(
+                score_dict = evaluate_accuracies(
                     data.data_frame,
                     mixer(data, args)['prediction'],
                     target,
@@ -61,7 +61,8 @@ class WeightedMeanEnsemble(BaseEnsemble):
         for mixer in self.mixers:
             df[f'__mdb_mixer_{type(mixer).__name__}'] = mixer(ds, args=args)['prediction']
 
-        avg_predictions_df = df.apply(lambda x: np.average(x, weights=self.weights), axis='columns')
+        mixer_weights = args.mixer_weights if args.mixer_weights else self.weights
+        avg_predictions_df = df.apply(lambda x: np.average(x, weights=mixer_weights), axis='columns')
         return pd.DataFrame(avg_predictions_df, columns=['prediction'])
 
     @staticmethod
