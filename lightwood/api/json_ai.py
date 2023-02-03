@@ -929,19 +929,29 @@ self.encoders = {inline_dict(encoder_dict)}
 # Prepare the training + dev data
 concatenated_train_dev = pd.concat([data['train'], data['dev']])
 
-encoder_prepping_dict = {{}}
+prepped_encoders = {{}}
 
-# Prepare encoders that do not require learned strategies
-for col_name, encoder in self.encoders.items():
-    if col_name != self.target and not encoder.is_trainable_encoder:
-        encoder.prepare(concatenated_train_dev[col_name])
-        encoder_prepping_dict[col_name] = encoder
+# Prepare input encoders
+parallel_encoding = parallel_encoding_check(data['train'], self.encoders)
 
-for col_name, encoder in encoder_prepping_dict.items():
+if parallel_encoding:
+    for col_name, encoder in self.encoders.items():
+        if col_name != self.target and not encoder.is_trainable_encoder:
+            prepped_encoders[col_name] = (encoder, concatenated_train_dev[col_name], 'prepare')
+    prepped_encoders = mut_method_call(prepped_encoders)
+
+else:
+    for col_name, encoder in self.encoders.items():
+        if col_name != self.target and not encoder.is_trainable_encoder:
+            encoder.prepare(concatenated_train_dev[col_name])
+            prepped_encoders[col_name] = encoder
+
+# Store encoders
+for col_name, encoder in prepped_encoders.items():
     self.encoders[col_name] = encoder
 
 # Prepare the target
-if self.target not in encoder_prepping_dict:
+if self.target not in prepped_encoders:
     if self.encoders[self.target].is_trainable_encoder:
         self.encoders[self.target].prepare(data['train'][self.target], data['dev'][self.target])
     else:
