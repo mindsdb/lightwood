@@ -8,16 +8,29 @@
  * permission of MindsDB Inc
  *******************************************************
 """
+import os
+
 import nltk
+from contextlib import redirect_stdout
+
+from lightwood.helpers.log import log
 
 
 try:
-    nltk.data.find('tokenizers/punkt')
+    with redirect_stdout(open(os.devnull, "w")):
+        nltk.data.find('tokenizers/punkt')
 except LookupError:
-    nltk.download('punkt')
+    try:
+        nltk.download('punkt', quiet=True)
+    except Exception:
+        log.error("NLTK was unable to download the 'punkt' package. Please check your connection and try again!")
 
 try:
-    from nltk.corpus import stopwords
-    stopwords.words('english')
+    with redirect_stdout(open(os.devnull, "w")):
+        from nltk.corpus import stopwords
+        stopwords.words('english')
 except LookupError:
-    nltk.download('stopwords', quiet=True)
+    try:
+        nltk.download('stopwords', quiet=True)
+    except Exception:
+        log.error("NLTK was unable to download the 'stopwords' package. Please check your connection and try again!")

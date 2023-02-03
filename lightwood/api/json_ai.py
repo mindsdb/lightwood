@@ -1024,6 +1024,8 @@ for mixer in self.mixers:
             raise e
 
 # Update mixers to trained versions
+if not trained_mixers:
+    raise Exception('No mixers could be trained! Please verify your problem definition or JsonAI model representation.')
 self.mixers = trained_mixers
 
 # --------------- #
