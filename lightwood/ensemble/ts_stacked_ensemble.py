@@ -58,8 +58,9 @@ class TsStackedEnsemble(StackedEnsemble):
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         assert self.prepared
+        mixer_weights = torch.tensor(args.mixer_weights) if args.mixer_weights else self.mixer_weights
         output = pd.DataFrame()
         predictions = torch.tensor(np.concatenate(self.predict(ds, args), axis=2))
-        predictions = (predictions * self.mixer_weights).sum(axis=self.agg_dim)
+        predictions = (predictions * mixer_weights).sum(axis=self.agg_dim)
         output['prediction'] = predictions.detach().numpy().tolist()
         return output

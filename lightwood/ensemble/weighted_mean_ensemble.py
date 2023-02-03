@@ -61,7 +61,8 @@ class WeightedMeanEnsemble(BaseEnsemble):
         for mixer in self.mixers:
             df[f'__mdb_mixer_{type(mixer).__name__}'] = mixer(ds, args=args)['prediction']
 
-        avg_predictions_df = df.apply(lambda x: np.average(x, weights=self.weights), axis='columns')
+        mixer_weights = args.mixer_weights if args.mixer_weights else self.weights
+        avg_predictions_df = df.apply(lambda x: np.average(x, weights=mixer_weights), axis='columns')
         return pd.DataFrame(avg_predictions_df, columns=['prediction'])
 
     @staticmethod
