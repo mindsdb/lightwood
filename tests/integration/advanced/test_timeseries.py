@@ -373,11 +373,10 @@ class TestTimeseries(unittest.TestCase):
                                             }})
         json_ai = json_ai_from_problem(df, problem_definition=pdef)
         json_ai.model['args']['submodels'] = [{
-            "module": "ProphetMixer",
+            "module": "SkTime",
             "args": {
                 "stop_after": "$problem_definition.seconds_per_mixer",
                 "horizon": "$problem_definition.timeseries_settings.horizon",
-                'seasonality_mode': '"multiplicative"',
             }}]
         predictor = predictor_from_code(code_from_json_ai(json_ai))
         train_and_check_time_aim(predictor, train)
