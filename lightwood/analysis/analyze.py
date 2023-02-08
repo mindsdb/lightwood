@@ -56,10 +56,14 @@ def model_analyzer(
 
     # raw predictions for validation dataset
     args = {} if not is_classification else {"predict_proba": True}
-    filtered_df = filter_ds(encoded_val_data, tss)
-    encoded_val_data = EncodedDs(encoded_val_data.encoders, filtered_df, encoded_val_data.target)
-    normal_predictions = predictor(encoded_val_data, args=PredictionArguments.from_dict(args))
-    normal_predictions = normal_predictions.set_index(encoded_val_data.data_frame.index)
+    filtered_df = encoded_val_data.data_frame
+    normal_predictions = None
+
+    if len(analysis_blocks) > 0:
+        filtered_df = filter_ds(encoded_val_data, tss)
+        encoded_val_data = EncodedDs(encoded_val_data.encoders, filtered_df, encoded_val_data.target)
+        normal_predictions = predictor(encoded_val_data, args=PredictionArguments.from_dict(args))
+        normal_predictions = normal_predictions.set_index(encoded_val_data.data_frame.index)
 
     # ------------------------- #
     # Run analysis blocks, both core and user-defined
