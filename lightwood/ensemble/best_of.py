@@ -12,7 +12,7 @@ from lightwood.api.types import PredictionArguments, SubmodelData
 from lightwood.data.encoded_ds import EncodedDs
 
 # special dispatches
-from lightwood.mixer.gluonts import GluonTSMixer
+from lightwood.mixer import GluonTSMixer  # imported from base mixer folder as it needs optional dependencies
 
 
 class BestOf(BaseEnsemble):
