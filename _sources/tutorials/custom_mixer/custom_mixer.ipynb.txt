@@ -46,10 +46,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-08T03:59:11.460364Z",
-     "iopub.status.busy": "2023-02-08T03:59:11.460103Z",
-     "iopub.status.idle": "2023-02-08T03:59:11.470470Z",
-     "shell.execute_reply": "2023-02-08T03:59:11.469492Z"
+     "iopub.execute_input": "2023-02-08T04:22:31.801734Z",
+     "iopub.status.busy": "2023-02-08T04:22:31.801196Z",
+     "iopub.status.idle": "2023-02-08T04:22:31.811503Z",
+     "shell.execute_reply": "2023-02-08T04:22:31.810799Z"
     }
    },
    "outputs": [
@@ -133,10 +133,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-08T03:59:11.513525Z",
-     "iopub.status.busy": "2023-02-08T03:59:11.512806Z",
-     "iopub.status.idle": "2023-02-08T03:59:14.627495Z",
-     "shell.execute_reply": "2023-02-08T03:59:14.626828Z"
+     "iopub.execute_input": "2023-02-08T04:22:31.855972Z",
+     "iopub.status.busy": "2023-02-08T04:22:31.855357Z",
+     "iopub.status.idle": "2023-02-08T04:22:34.954726Z",
+     "shell.execute_reply": "2023-02-08T04:22:34.953887Z"
     }
    },
    "outputs": [
@@ -144,40 +144,40 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2206:No torchvision detected, image helpers not supported.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:No torchvision/pillow detected, image encoder not supported\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Analyzing a sample of 298\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:from a total population of 303, this is equivalent to 98.3% of your data.\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: age\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column age has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: sex\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column sex has data type binary\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: cp\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column cp has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: trestbps\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column trestbps has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: chol\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column chol has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: fbs\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column fbs has data type binary\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: restecg\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column restecg has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: thalach\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column thalach has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: exang\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column exang has data type binary\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: oldpeak\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column oldpeak has data type float\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: slope\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column slope has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: ca\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column ca has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: thal\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column thal has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Infering type for: target\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2206:Column target has data type binary\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2218:No torchvision detected, image helpers not supported.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:No torchvision/pillow detected, image encoder not supported\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Analyzing a sample of 298\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:from a total population of 303, this is equivalent to 98.3% of your data.\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: age\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column age has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: sex\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column sex has data type binary\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: cp\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column cp has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: trestbps\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column trestbps has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: chol\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column chol has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: fbs\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column fbs has data type binary\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: restecg\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column restecg has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: thalach\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column thalach has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: exang\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column exang has data type binary\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: oldpeak\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column oldpeak has data type float\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: slope\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column slope has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: ca\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column ca has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: thal\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column thal has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Infering type for: target\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2218:Column target has data type binary\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Finished statistical analysis\u001b[0m\n"
      ]
     },
     {
@@ -304,7 +304,7 @@
       "        \"unbias_target\": true,\n",
       "        \"seconds_per_mixer\": 42768.0,\n",
       "        \"seconds_per_encoder\": null,\n",
-      "        \"expected_additional_time\": 0.0699005126953125,\n",
+      "        \"expected_additional_time\": 0.07171988487243652,\n",
       "        \"time_aim\": 259200,\n",
       "        \"target_weights\": null,\n",
       "        \"positive_domain\": false,\n",
@@ -372,10 +372,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-08T03:59:14.631104Z",
-     "iopub.status.busy": "2023-02-08T03:59:14.630438Z",
-     "iopub.status.idle": "2023-02-08T03:59:14.638253Z",
-     "shell.execute_reply": "2023-02-08T03:59:14.637442Z"
+     "iopub.execute_input": "2023-02-08T04:22:34.958480Z",
+     "iopub.status.busy": "2023-02-08T04:22:34.957654Z",
+     "iopub.status.idle": "2023-02-08T04:22:34.965439Z",
+     "shell.execute_reply": "2023-02-08T04:22:34.964843Z"
     }
    },
    "outputs": [],
@@ -404,10 +404,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-08T03:59:14.641286Z",
-     "iopub.status.busy": "2023-02-08T03:59:14.640725Z",
-     "iopub.status.idle": "2023-02-08T03:59:14.993372Z",
-     "shell.execute_reply": "2023-02-08T03:59:14.992640Z"
+     "iopub.execute_input": "2023-02-08T04:22:34.968526Z",
+     "iopub.status.busy": "2023-02-08T04:22:34.968004Z",
+     "iopub.status.idle": "2023-02-08T04:22:35.328429Z",
+     "shell.execute_reply": "2023-02-08T04:22:35.327680Z"
     }
    },
    "outputs": [
@@ -415,7 +415,7 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2206:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2218:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
      ]
     }
    ],
@@ -431,10 +431,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-08T03:59:14.996868Z",
-     "iopub.status.busy": "2023-02-08T03:59:14.996386Z",
-     "iopub.status.idle": "2023-02-08T03:59:21.775416Z",
-     "shell.execute_reply": "2023-02-08T03:59:21.774788Z"
+     "iopub.execute_input": "2023-02-08T04:22:35.332212Z",
+     "iopub.status.busy": "2023-02-08T04:22:35.331728Z",
+     "iopub.status.idle": "2023-02-08T04:22:42.318790Z",
+     "shell.execute_reply": "2023-02-08T04:22:42.318162Z"
     }
    },
    "outputs": [
@@ -442,15 +442,15 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2206:[Learn phase 1/8] - Statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Finished statistical analysis\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2206: `analyze_data` runtime: 0.02 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:[Learn phase 2/8] - Data preprocessing\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Cleaning the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2206: `preprocess` runtime: 0.01 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:[Learn phase 3/8] - Data splitting\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Splitting the data into train/test\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:[Learn phase 1/8] - Statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Finished statistical analysis\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `analyze_data` runtime: 0.03 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:[Learn phase 2/8] - Data preprocessing\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Cleaning the data\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `preprocess` runtime: 0.01 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:[Learn phase 3/8] - Data splitting\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Splitting the data into train/test\u001b[0m\n",
       "/opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/dataprep_ml/splitters.py:131: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
       "  train_st = train_st.append(df[:train_cutoff])\n",
       "/opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/dataprep_ml/splitters.py:132: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
@@ -463,32 +463,32 @@
       "  dev_st = dev_st.append(df[train_cutoff:dev_cutoff])\n",
       "/opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/dataprep_ml/splitters.py:133: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
       "  test_st = test_st.append(df[dev_cutoff:test_cutoff])\n",
-      "\u001b[37mDEBUG:lightwood-2206: `split` runtime: 0.02 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:[Learn phase 4/8] - Preparing encoders\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:Encoding UNKNOWN categories as index 0\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:Encoding UNKNOWN categories as index 0\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:Encoding UNKNOWN categories as index 0\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:Encoding UNKNOWN categories as index 0\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:Encoding UNKNOWN categories as index 0\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2206: `prepare` runtime: 0.01 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:[Learn phase 5/8] - Feature generation\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Featurizing the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2206: `featurize` runtime: 0.0 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:[Learn phase 6/8] - Mixer training\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Training the mixers\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2206: `fit_mixer` runtime: 2.75 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Ensembling the mixer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:Mixer: RandomForestMixer got accuracy: 0.835\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:Picked best mixer: RandomForestMixer\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2206: `fit` runtime: 3.06 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:[Learn phase 7/8] - Ensemble analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Analyzing the ensemble of mixers\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:The block ICP is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:The block ConfStats is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:The block AccStats is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:The block PermutationFeatureImportance is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:[PFI] Using a random sample (1000 rows out of 30).\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:[PFI] Set to consider first 10 columns out of 10: ['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 'restecg', 'thalach', 'exang', 'oldpeak'].\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `split` runtime: 0.02 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:[Learn phase 4/8] - Preparing encoders\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:Encoding UNKNOWN categories as index 0\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:Encoding UNKNOWN categories as index 0\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:Encoding UNKNOWN categories as index 0\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:Encoding UNKNOWN categories as index 0\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:Encoding UNKNOWN categories as index 0\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `prepare` runtime: 0.01 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:[Learn phase 5/8] - Feature generation\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Featurizing the data\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `featurize` runtime: 0.0 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:[Learn phase 6/8] - Mixer training\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Training the mixers\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `fit_mixer` runtime: 2.82 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Ensembling the mixer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:Mixer: RandomForestMixer got accuracy: 0.835\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:Picked best mixer: RandomForestMixer\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `fit` runtime: 3.14 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:[Learn phase 7/8] - Ensemble analysis\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Analyzing the ensemble of mixers\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:The block ICP is now running its analyze() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:The block ConfStats is now running its analyze() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:The block AccStats is now running its analyze() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:The block PermutationFeatureImportance is now running its analyze() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:[PFI] Using a random sample (1000 rows out of 30).\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:[PFI] Set to consider first 10 columns out of 10: ['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 'restecg', 'thalach', 'exang', 'oldpeak'].\u001b[0m\n",
       "/opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/sklearn/metrics/_classification.py:1987: UserWarning: y_pred contains classes not in y_true\n",
       "  warnings.warn(\"y_pred contains classes not in y_true\")\n",
       "/opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/sklearn/metrics/_classification.py:1987: UserWarning: y_pred contains classes not in y_true\n",
@@ -499,11 +499,11 @@
       "  warnings.warn(\"y_pred contains classes not in y_true\")\n",
       "/opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/sklearn/metrics/_classification.py:1987: UserWarning: y_pred contains classes not in y_true\n",
       "  warnings.warn(\"y_pred contains classes not in y_true\")\n",
-      "\u001b[37mDEBUG:lightwood-2206: `analyze_ensemble` runtime: 3.63 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:[Learn phase 8/8] - Adjustment on validation requested\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Updating the mixers\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2206: `adjust` runtime: 0.0 seconds\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2206: `learn` runtime: 6.77 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2218: `analyze_ensemble` runtime: 3.75 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:[Learn phase 8/8] - Adjustment on validation requested\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Updating the mixers\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `adjust` runtime: 0.0 seconds\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `learn` runtime: 6.98 seconds\u001b[0m\n"
      ]
     }
    ],
@@ -523,10 +523,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-02-08T03:59:21.778769Z",
-     "iopub.status.busy": "2023-02-08T03:59:21.778207Z",
-     "iopub.status.idle": "2023-02-08T03:59:21.912810Z",
-     "shell.execute_reply": "2023-02-08T03:59:21.911948Z"
+     "iopub.execute_input": "2023-02-08T04:22:42.321969Z",
+     "iopub.status.busy": "2023-02-08T04:22:42.321552Z",
+     "iopub.status.idle": "2023-02-08T04:22:42.465610Z",
+     "shell.execute_reply": "2023-02-08T04:22:42.464741Z"
     }
    },
    "outputs": [
@@ -534,22 +534,22 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2206:[Predict phase 1/4] - Data preprocessing\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Cleaning the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2206: `preprocess` runtime: 0.01 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:[Predict phase 2/4] - Feature generation\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:Featurizing the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2206: `featurize` runtime: 0.0 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:[Predict phase 3/4] - Calling ensemble\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2206:[Predict phase 4/4] - Analyzing output\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:The block ICP is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:The block ConfStats is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:The block AccStats is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2206:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2206: `predict` runtime: 0.07 seconds\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2218:[Predict phase 1/4] - Data preprocessing\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Cleaning the data\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `preprocess` runtime: 0.01 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:[Predict phase 2/4] - Feature generation\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:Featurizing the data\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `featurize` runtime: 0.0 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:[Predict phase 3/4] - Calling ensemble\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2218:[Predict phase 4/4] - Analyzing output\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:The block ICP is now running its explain() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:The block ConfStats is now running its explain() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:The block AccStats is now running its explain() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2218:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2218: `predict` runtime: 0.07 seconds\u001b[0m\n"
      ]
     },
     {
