@@ -175,6 +175,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">mindsdb_evaluator</span> <span class="kn">import</span> <span class="n">evaluate_accuracies</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">type_infer.helpers</span> <span class="kn">import</span> <span class="n">is_nan_numeric</span>
@@ -182,7 +183,9 @@
 <span class="kn">from</span> <span class="nn">lightwood.ensemble.base</span> <span class="kn">import</span> <span class="n">BaseEnsemble</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span><span class="p">,</span> <span class="n">SubmodelData</span>
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span>
-<span class="kn">from</span> <span class="nn">mindsdb_evaluator</span> <span class="kn">import</span> <span class="n">evaluate_accuracies</span>
+
+<span class="c1"># special dispatches</span>
+<span class="kn">from</span> <span class="nn">lightwood.mixer</span> <span class="kn">import</span> <span class="n">GluonTSMixer</span>  <span class="c1"># imported from base mixer folder as it needs optional dependencies</span>
 
 
 <div class="viewcode-block" id="BestOf"><a class="viewcode-back" href="../../../ensemble.html#ensemble.BestOf">[docs]</a><span class="k">class</span> <span class="nc">BestOf</span><span class="p">(</span><span class="n">BaseEnsemble</span><span class="p">):</span>
@@ -195,19 +198,24 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseMixer</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">accuracy_functions</span><span class="p">,</span>
                  <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">special_dispatch_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">GluonTSMixer</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">fit</span><span class="p">:</span>
             <span class="n">score_list</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">mixer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mixers</span><span class="p">):</span>
-                <span class="n">score_dict</span> <span class="o">=</span> <span class="n">evaluate_accuracies</span><span class="p">(</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">,</span>
-                    <span class="n">mixer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">)[</span><span class="s1">&#39;prediction&#39;</span><span class="p">],</span>
-                    <span class="n">target</span><span class="p">,</span>
-                    <span class="n">accuracy_functions</span><span class="p">,</span>
-                    <span class="n">ts_analysis</span><span class="o">=</span><span class="n">ts_analysis</span>
-                <span class="p">)</span>
 
-                <span class="n">avg_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">score_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">special_dispatch_list</span><span class="p">:</span>
+                    <span class="n">avg_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">special_dispatch</span><span class="p">(</span><span class="n">mixer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">score_dict</span> <span class="o">=</span> <span class="n">evaluate_accuracies</span><span class="p">(</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">,</span>
+                        <span class="n">mixer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">)[</span><span class="s1">&#39;prediction&#39;</span><span class="p">],</span>
+                        <span class="n">target</span><span class="p">,</span>
+                        <span class="n">accuracy_functions</span><span class="p">,</span>
+                        <span class="n">ts_analysis</span><span class="o">=</span><span class="n">ts_analysis</span>
+                    <span class="p">)</span>
+
+                    <span class="n">avg_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">score_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mixer: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> got accuracy: </span><span class="si">{</span><span class="n">avg_score</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">is_nan_numeric</span><span class="p">(</span><span class="n">avg_score</span><span class="p">):</span>
@@ -245,7 +253,11 @@
                         <span class="k">raise</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unstable mixer </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> failed with exception: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">.</span><span class="se">\</span>
-<span class="s1">                        Trying next best&#39;</span><span class="p">)</span></div>
+<span class="s1">                        Trying next best&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">special_dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mixer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mixer</span><span class="p">,</span> <span class="n">GluonTSMixer</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">mixer</span><span class="o">.</span><span class="n">model_train_stats</span><span class="o">.</span><span class="n">loss_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 </pre></div>
 
            </div>
