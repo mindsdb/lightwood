@@ -33,7 +33,7 @@ class TsStackedEnsemble(StackedEnsemble):
         self.agg_dim = 2
         self.opt_max_iter = 1000
 
-        if fit:
+        if fit and len(mixers) > 1:
             all_preds = torch.tensor(self.predict(data, args)).squeeze().reshape(-1, self.horizon, len(mixers))
             actual = torch.tensor(data.data_frame[self.target_cols].values)
             nan_mask = actual != actual
