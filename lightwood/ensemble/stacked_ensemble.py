@@ -38,7 +38,7 @@ class StackedEnsemble(MeanEnsemble):
         self.optimizer = SGD([self.mixer_weights], lr=0.01)
         self.agg_dim = 1
 
-        if fit:
+        if fit and len(mixers) > 1:
             all_preds = torch.tensor(self.predict(data, args)).squeeze().reshape(-1, len(mixers))
             actual = torch.tensor(data.data_frame[self.target_cols].values)
 
