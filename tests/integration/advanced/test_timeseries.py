@@ -580,6 +580,7 @@ class TestTimeseries(unittest.TestCase):
                 order_by = 'T'
                 train_df, test_df = self.split_arrivals(subdata, grouped=False)
                 pdef = {'target': 'Traffic',
+                        'use_default_analysis': False,
                         'timeseries_settings': {
                             'order_by': order_by,
                             'window': 4 * 5,

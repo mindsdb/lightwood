@@ -37,11 +37,30 @@ def explain(data: pd.DataFrame,
     # ------------------------- #
     # Setup base insights
     # ------------------------- #
-    data = data.reset_index(drop=True)
     predictions = predictions.reset_index(drop=True)
-
+    data = data.reset_index(drop=True)
+    tss = problem_definition.timeseries_settings
     row_insights = pd.DataFrame()
     global_insights = {}
+
+    def _reformat_ts_columns(tss, out_df, in_df):
+        if tss.is_timeseries:
+            if tss.group_by:
+                for col in tss.group_by:
+                    out_df[f'group_{col}'] = in_df[col]
+
+            out_df[f'order_{tss.order_by}'] = in_df[tss.order_by]
+            out_df[f'order_{tss.order_by}'] = get_inferred_timestamps(
+                out_df, tss.order_by, ts_analysis['deltas'], tss, stat_analysis,
+                time_format=pred_args.time_format
+            )
+        return out_df
+
+    if not explainer_blocks:
+        predictions.rename(columns={'__mdb_original_index': 'original_index'}, inplace=True)
+        predictions = _reformat_ts_columns(tss, predictions, data)
+        return predictions, global_insights
+
     row_insights['original_index'] = data['__mdb_original_index']
     row_insights['prediction'] = predictions['prediction']
 
@@ -50,17 +69,7 @@ def explain(data: pd.DataFrame,
             if '__mdb_proba' in col:
                 row_insights[col] = predictions[col]
 
-    tss = problem_definition.timeseries_settings
-    if tss.is_timeseries:
-        if tss.group_by:
-            for col in tss.group_by:
-                row_insights[f'group_{col}'] = data[col]
-
-        row_insights[f'order_{tss.order_by}'] = data[tss.order_by]
-        row_insights[f'order_{tss.order_by}'] = get_inferred_timestamps(
-            row_insights, tss.order_by, ts_analysis['deltas'], tss, stat_analysis,
-            time_format=pred_args.time_format
-        )
+    row_insights = _reformat_ts_columns(tss, row_insights, data)
 
     kwargs = {
         'data': data,
