@@ -52,7 +52,7 @@ class StackedEnsemble(MeanEnsemble):
             self.optimizer.step(_eval_loss)
             self.mixer_weights = self.softmax(self.mixer_weights)
             log.info(f'Optimal stacking weights: {self.mixer_weights.detach().tolist()}')
-            self.prepared = True
+        self.prepared = True
 
     def predict(self, ds: EncodedDs, args: PredictionArguments) -> List:
         outputs = []
