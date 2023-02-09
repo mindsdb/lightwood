@@ -4,6 +4,9 @@ import psutil
 import multiprocessing as mp
 from lightwood.helpers.log import log
 
+MAX_SEQ_ENCODERS = 20
+MAX_SEQ_LEN = 100_000
+
 
 def get_nr_procs(df=None):
     if 'LIGHTWOOD_N_WORKERS' in os.environ:
@@ -54,3 +57,19 @@ def mut_method_call(object_dict: Dict[str, tuple]) -> Dict[str, object]:
     pool.join()
 
     return dict(return_dict)
+
+
+def parallel_encoding_check(df, encoders):
+    """
+      Given a dataframe and some encoders, this rule-based method determines whether to train these encoders in parallel.
+      This has runtime implications, as instancing a new Lightwood process has noticeable overhead.
+    """  # noqa
+    trainable_encoders = [enc for col, enc in encoders.items() if enc.is_trainable_encoder]
+
+    if len(trainable_encoders) > MAX_SEQ_ENCODERS:
+        return True
+
+    if len(df) > MAX_SEQ_LEN:
+        return True
+
+    return False

@@ -33,7 +33,7 @@ class TsStackedEnsemble(StackedEnsemble):
         self.agg_dim = 2
         self.opt_max_iter = 1000
 
-        if fit:
+        if fit and len(mixers) > 1:
             all_preds = torch.tensor(self.predict(data, args)).squeeze().reshape(-1, self.horizon, len(mixers))
             actual = torch.tensor(data.data_frame[self.target_cols].values)
             nan_mask = actual != actual
@@ -54,12 +54,13 @@ class TsStackedEnsemble(StackedEnsemble):
                 optimizer.step(_eval_loss)
             self.mixer_weights = self.softmax(self.mixer_weights)
             log.info(f'Optimal stacking weights: {self.mixer_weights.detach().tolist()}')
-            self.prepared = True
+        self.prepared = True
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         assert self.prepared
+        mixer_weights = torch.tensor(args.mixer_weights) if args.mixer_weights else self.mixer_weights
         output = pd.DataFrame()
         predictions = torch.tensor(np.concatenate(self.predict(ds, args), axis=2))
-        predictions = (predictions * self.mixer_weights).sum(axis=self.agg_dim)
+        predictions = (predictions * mixer_weights).sum(axis=self.agg_dim)
         output['prediction'] = predictions.detach().numpy().tolist()
         return output

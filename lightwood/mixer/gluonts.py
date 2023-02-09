@@ -87,12 +87,13 @@ class GluonTSMixer(BaseMixer):
         cat_ds = ConcatedEncodedDs([train_data, dev_data])
         fit_groups = list(cat_ds.data_frame[self.grouped_by[0]].unique()) if self.grouped_by != ['__default'] else None
         train_ds = self._make_initial_ds(cat_ds.data_frame, phase='train', groups=fit_groups)
+        self.model_train_stats = TrainingHistory()
 
         self.estimator = DeepAREstimator(
             freq=train_ds.freq,
             prediction_length=self.horizon,
             distr_output=self.distribution,
-            trainer=Trainer(epochs=self.n_epochs, callbacks=[EarlyStop(patience=self.patience)])
+            trainer=Trainer(epochs=self.n_epochs, callbacks=[EarlyStop(patience=self.patience), self.model_train_stats])
         )
         self.model = self.estimator.train(train_ds)
         self.prepared = True

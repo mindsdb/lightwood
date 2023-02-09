@@ -38,7 +38,7 @@ class StackedEnsemble(MeanEnsemble):
         self.optimizer = SGD([self.mixer_weights], lr=0.01)
         self.agg_dim = 1
 
-        if fit:
+        if fit and len(mixers) > 1:
             all_preds = torch.tensor(self.predict(data, args)).squeeze().reshape(-1, len(mixers))
             actual = torch.tensor(data.data_frame[self.target_cols].values)
 
@@ -52,7 +52,7 @@ class StackedEnsemble(MeanEnsemble):
             self.optimizer.step(_eval_loss)
             self.mixer_weights = self.softmax(self.mixer_weights)
             log.info(f'Optimal stacking weights: {self.mixer_weights.detach().tolist()}')
-            self.prepared = True
+        self.prepared = True
 
     def predict(self, ds: EncodedDs, args: PredictionArguments) -> List:
         outputs = []
@@ -64,9 +64,10 @@ class StackedEnsemble(MeanEnsemble):
 
     def __call__(self, ds: EncodedDs, args: PredictionArguments) -> pd.DataFrame:
         assert self.prepared
+        mixer_weights = torch.tensor(args.mixer_weights) if args.mixer_weights else self.mixer_weights
         output = pd.DataFrame()
         predictions = torch.tensor(self.predict(ds, args)).squeeze().reshape(-1, len(self.mixers))
-        predictions = (predictions * self.mixer_weights).sum(axis=1)
+        predictions = (predictions * mixer_weights).sum(axis=1)
         output['prediction'] = predictions.detach().numpy().tolist()
         return output
 

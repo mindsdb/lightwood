@@ -7,7 +7,6 @@ from lightwood.mixer.random_forest import RandomForest
 from lightwood.mixer.sktime import SkTime
 from lightwood.mixer.arima import ARIMAMixer
 from lightwood.mixer.ets import ETSMixer
-from lightwood.mixer.gluonts import GluonTSMixer
 from lightwood.mixer.regression import Regression
 
 try:
@@ -24,6 +23,11 @@ try:
     from lightwood.mixer.prophet import ProphetMixer
 except Exception:
     ProphetMixer = None
+
+try:
+    from lightwood.mixer.gluonts import GluonTSMixer
+except Exception:
+    GluonTSMixer = None
 
 try:
     from lightwood.mixer.lightgbm import LightGBM
