@@ -240,7 +240,7 @@ class SkTime(BaseMixer):
         df = deepcopy(ds.data_frame)
         df = df.rename_axis('__sktime_index').reset_index()
 
-        length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
+        length = sum(ds.encoded_ds_lengths) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=df.index,
                            columns=['prediction'],
