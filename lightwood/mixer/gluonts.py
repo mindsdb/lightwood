@@ -8,8 +8,7 @@ import mxnet as mx
 
 from gluonts.dataset.pandas import PandasDataset
 
-from gluonts.model.deepar import DeepAREstimator  # @TODO: support for other estimators
-from gluonts.mx import Trainer
+from gluonts.mx import DeepAREstimator, Trainer  # @TODO: support for other estimators
 from gluonts.mx.trainer.callback import TrainingHistory
 from gluonts.mx.distribution.student_t import StudentTOutput
 
