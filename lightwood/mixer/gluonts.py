@@ -70,6 +70,7 @@ class GluonTSMixer(BaseMixer):
         self.train_cache = None
         self.patience = early_stop_patience
         self.seed = seed
+        self.trains_once = True
 
         dist_module = importlib.import_module('.'.join(['gluonts.mx.distribution',
                                                         *distribution_output.split(".")[:-1]]))
