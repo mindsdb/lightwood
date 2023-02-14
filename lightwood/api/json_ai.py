@@ -622,7 +622,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["fit_on_dev"] = mixers[i]["args"].get("fit_on_dev", "True")
             mixers[i]["args"]["use_stl"] = mixers[i]["args"].get("use_stl", "False")
 
-        elif mixers[i]["module"] in ("NHitsMixer", ):
+        elif mixers[i]["module"] in ("NHitsMixer", "GluonTSMixer"):
             mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
             mixers[i]["args"]["window"] = "$problem_definition.timeseries_settings.window"
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
@@ -630,12 +630,12 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             )
             problem_definition.fit_on_all = False  # takes too long otherwise
 
-        elif mixers[i]["module"] in ("SkTime", "ProphetMixer", "ETSMixer", "ARIMAMixer", "GluonTSMixer"):
+        elif mixers[i]["module"] in ("SkTime", "ProphetMixer", "ETSMixer", "ARIMAMixer"):
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
                 "ts_analysis", "$ts_analysis"
             )
-            mixers[i]["args"]["window"] = "$problem_definition.timeseries_settings.window"
-            mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
+            if "horizon" not in mixers[i]["args"]:
+                mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
 
             # enforce fit_on_all if this mixer is specified
             problem_definition.fit_on_all = True
