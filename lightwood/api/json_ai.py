@@ -1025,7 +1025,12 @@ self.mixers = [{', '.join([call(x) for x in json_ai.model["args"]["submodels"]])
 trained_mixers = []
 for mixer in self.mixers:
     try:
-        self.fit_mixer(mixer, encoded_train_data, encoded_dev_data)
+        if mixer.trains_once:
+            self.fit_mixer(mixer,
+                           ConcatedEncodedDs([encoded_train_data, encoded_dev_data]),
+                           encoded_test_data)
+        else:
+            self.fit_mixer(mixer, encoded_train_data, encoded_dev_data)
         trained_mixers.append(mixer)
     except Exception as e:
         log.warning(f'Exception: {{e}} when training mixer: {{mixer}}')
@@ -1107,7 +1112,7 @@ train_data = EncodedDs(self.encoders, train_data, self.target)
 log.info('Updating the mixers')
 
 for mixer in self.mixers:
-    mixer.partial_fit(train_data, dev_data, adjust_args)
+        mixer.partial_fit(train_data, dev_data, adjust_args)
 """  # noqa
 
     adjust_body = align(adjust_body, 2)
@@ -1154,8 +1159,7 @@ self.analyze_ensemble(enc_train_test)
 # SET `json_ai.problem_definition.fit_on_all=False` TO TURN THIS BLOCK OFF.
 
 # Update the mixers with partial fit
-if self.problem_definition.fit_on_all:
-
+if self.problem_definition.fit_on_all and all([not m.trains_once for m in self.mixers]):
     log.info(f'[Learn phase 8/{n_phases}] - Adjustment on validation requested')
     self.adjust(enc_train_test["test"].data_frame, ConcatedEncodedDs([enc_train_test["train"],
                                                                       enc_train_test["dev"]]).data_frame,

@@ -8,12 +8,12 @@ import mxnet as mx
 
 from gluonts.dataset.pandas import PandasDataset
 
-from gluonts.model.deepar import DeepAREstimator  # @TODO: support for other estimators
-from gluonts.mx import Trainer
+from gluonts.mx import DeepAREstimator, Trainer  # @TODO: support for other estimators
 from gluonts.mx.trainer.callback import TrainingHistory
 from gluonts.mx.distribution.student_t import StudentTOutput
 
 from lightwood.helpers.log import log
+from lightwood.helpers.ts import get_group_matches
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
@@ -39,6 +39,8 @@ class GluonTSMixer(BaseMixer):
     ):
         """
         Wrapper around GluonTS probabilistic deep learning models. For now, only DeepAR is supported.
+
+        Due to inference speed, predictions are only generated for the last data point (as opposed to other mixers).  
 
         :param stop_after: time budget in seconds.
         :param target: column to forecast.
@@ -68,6 +70,7 @@ class GluonTSMixer(BaseMixer):
         self.train_cache = None
         self.patience = early_stop_patience
         self.seed = seed
+        self.trains_once = True
 
         dist_module = importlib.import_module('.'.join(['gluonts.mx.distribution',
                                                         *distribution_output.split(".")[:-1]]))
@@ -129,11 +132,15 @@ class GluonTSMixer(BaseMixer):
         """ 
         Calls the mixer to emit forecasts.
         """  # noqa
-        length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
-        ydf = pd.DataFrame(0,  # zero-filled
-                           index=np.arange(length),
-                           columns=['prediction', 'lower', 'upper'],
-                           dtype=object)
+        mx.random.seed(self.seed)
+        np.random.seed(self.seed)
+        length = sum(ds.encoded_ds_lengths) if isinstance(ds, ConcatedEncodedDs) else len(ds)
+
+        ydf = pd.DataFrame(index=np.arange(length), dtype=object)
+        init_arr = [0 for _ in range(self.ts_analysis['tss'].horizon)]
+        for col in ['prediction', 'lower', 'upper']:
+            ydf.at[:, col] = [init_arr for _ in range(len(ydf))]
+
         ydf['index'] = ds.data_frame.index
         conf = args.fixed_confidence if args.fixed_confidence else 0.9
         ydf['confidence'] = conf
@@ -141,20 +148,16 @@ class GluonTSMixer(BaseMixer):
         gby = self.ts_analysis["tss"].group_by if self.ts_analysis["tss"].group_by else []
         groups = ds.data_frame[gby[0]].unique().tolist() if gby else None
 
-        for idx in range(length):
-            df = ds.data_frame.iloc[:idx] if idx != 0 else None
-            input_ds = self._make_initial_ds(df, groups=groups)
-            if not input_ds:
-                # edge case: new group
-                for col in ['prediction', 'lower', 'upper']:
-                    ydf.at[idx, col] = [0 for _ in range(self.ts_analysis["tss"].horizon)]
-            else:
-                mx.random.seed(self.seed)
-                np.random.seed(self.seed)
-                forecasts = list(self.model.predict(input_ds))[0]
-                ydf.at[idx, 'prediction'] = [entry for entry in forecasts.quantile(0.5)]
-                ydf.at[idx, 'lower'] = [entry for entry in forecasts.quantile(1 - conf)]
-                ydf.at[idx, 'upper'] = [entry for entry in forecasts.quantile(conf)]
+        df = ds.data_frame
+        ydf['__original_index'] = df['__mdb_original_index'].values
+        input_ds = self._make_initial_ds(df, groups=groups)  # TODO test with novel group
+        forecasts = list(self.model.predict(input_ds))
+        for group, group_forecast in zip(groups, forecasts):
+            _, subdf = get_group_matches(df, (group, ), gby)
+            idx = ydf[ydf['__original_index'] == max(subdf['__mdb_original_index'])].index.values[0]
+            ydf.at[idx, 'prediction'] = [entry for entry in group_forecast.quantile(0.5)]
+            ydf.at[idx, 'lower'] = [entry for entry in group_forecast.quantile(1 - conf)]
+            ydf.at[idx, 'upper'] = [entry for entry in group_forecast.quantile(conf)]
 
         return ydf
 
