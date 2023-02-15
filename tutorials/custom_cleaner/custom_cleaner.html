@@ -490,8 +490,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2775:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2775:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2731:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2731:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <div class="section" id="1)-Load-your-data">
@@ -615,20 +615,20 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2775:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-<span class="ansi-green-fg">INFO:type_infer-2775:Analyzing a sample of 2478</span>
-<span class="ansi-green-fg">INFO:type_infer-2775:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2775:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2775:Doing text detection for column: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2775:Column id has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2775:Infering type for: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2775:Doing text detection for column: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2775:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:type_infer-2775:Column target has data type float</span>
-<span class="ansi-yellow-fg">WARNING:type_infer-2775:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2775:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2775:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2775:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2731:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:type_infer-2731:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:type_infer-2731:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2731:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2731:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2731:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2731:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2731:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2731:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:type_infer-2731:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:type_infer-2731:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2731:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2731:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2731:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -716,7 +716,7 @@ div.rendered_html tbody tr:hover {
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 22.616636991500854,
+        &#34;expected_additional_time&#34;: 20.07448983192444,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -953,7 +953,7 @@ Writing MyCustomCleaner.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2775:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2731:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1031,7 +1031,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 21384.0,
                 &#34;seconds_per_encoder&#34;: 85536.0,
-                &#34;expected_additional_time&#34;: 22.616636991500854,
+                &#34;expected_additional_time&#34;: 20.07448983192444,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -1293,7 +1293,14 @@ class Predictor(PredictorInterface):
         trained_mixers = []
         for mixer in self.mixers:
             try:
-                self.fit_mixer(mixer, encoded_train_data, encoded_dev_data)
+                if mixer.trains_once:
+                    self.fit_mixer(
+                        mixer,
+                        ConcatedEncodedDs([encoded_train_data, encoded_dev_data]),
+                        encoded_test_data,
+                    )
+                else:
+                    self.fit_mixer(mixer, encoded_train_data, encoded_dev_data)
                 trained_mixers.append(mixer)
             except Exception as e:
                 log.warning(f&#34;Exception: {e} when training mixer: {mixer}&#34;)
@@ -1402,7 +1409,9 @@ class Predictor(PredictorInterface):
         # SET `json_ai.problem_definition.fit_on_all=False` TO TURN THIS BLOCK OFF.
 
         # Update the mixers with partial fit
-        if self.problem_definition.fit_on_all:
+        if self.problem_definition.fit_on_all and all(
+            [not m.trains_once for m in self.mixers]
+        ):
             log.info(f&#34;[Learn phase 8/{n_phases}] - Adjustment on validation requested&#34;)
             self.adjust(
                 enc_train_test[&#34;test&#34;].data_frame,
@@ -1559,16 +1568,16 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2775:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2775:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2775:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2775: `analyze_data` runtime: 0.07 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2775:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2775:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2775:Cleaning column =excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2775:Cleaning column =target</span>
-<span class="ansi-green-fg">INFO:lightwood-2775:Converted target into strictly non-negative</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2775: `preprocess` runtime: 0.12 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2731:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2731:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2731:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2731: `analyze_data` runtime: 0.06 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2731:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2731:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2731:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2731:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2731:Converted target into strictly non-negative</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2731: `preprocess` runtime: 0.1 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

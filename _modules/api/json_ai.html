@@ -1198,7 +1198,12 @@
 <span class="s2">trained_mixers = []</span>
 <span class="s2">for mixer in self.mixers:</span>
 <span class="s2">    try:</span>
-<span class="s2">        self.fit_mixer(mixer, encoded_train_data, encoded_dev_data)</span>
+<span class="s2">        if mixer.trains_once:</span>
+<span class="s2">            self.fit_mixer(mixer,</span>
+<span class="s2">                           ConcatedEncodedDs([encoded_train_data, encoded_dev_data]),</span>
+<span class="s2">                           encoded_test_data)</span>
+<span class="s2">        else:</span>
+<span class="s2">            self.fit_mixer(mixer, encoded_train_data, encoded_dev_data)</span>
 <span class="s2">        trained_mixers.append(mixer)</span>
 <span class="s2">    except Exception as e:</span>
 <span class="s2">        log.warning(f&#39;Exception: </span><span class="se">{{</span><span class="s2">e</span><span class="se">}}</span><span class="s2"> when training mixer: </span><span class="se">{{</span><span class="s2">mixer</span><span class="se">}}</span><span class="s2">&#39;)</span>
@@ -1280,7 +1285,7 @@
 <span class="s2">log.info(&#39;Updating the mixers&#39;)</span>
 
 <span class="s2">for mixer in self.mixers:</span>
-<span class="s2">    mixer.partial_fit(train_data, dev_data, adjust_args)</span>
+<span class="s2">        mixer.partial_fit(train_data, dev_data, adjust_args)</span>
 <span class="s2">&quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="n">adjust_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">adjust_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -1327,8 +1332,7 @@
 <span class="s2"># SET `json_ai.problem_definition.fit_on_all=False` TO TURN THIS BLOCK OFF.</span>
 
 <span class="s2"># Update the mixers with partial fit</span>
-<span class="s2">if self.problem_definition.fit_on_all:</span>
-
+<span class="s2">if self.problem_definition.fit_on_all and all([not m.trains_once for m in self.mixers]):</span>
 <span class="s2">    log.info(f&#39;[Learn phase 8/</span><span class="si">{n_phases}</span><span class="s2">] - Adjustment on validation requested&#39;)</span>
 <span class="s2">    self.adjust(enc_train_test[&quot;test&quot;].data_frame, ConcatedEncodedDs([enc_train_test[&quot;train&quot;],</span>
 <span class="s2">                                                                      enc_train_test[&quot;dev&quot;]]).data_frame,</span>

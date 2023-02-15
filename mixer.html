@@ -282,7 +282,8 @@
 <p>Class Attributes:
 - stable: If set to <cite>True</cite>, this mixer should always work. Any mixer with <cite>stable=False</cite> can be expected to fail under some circumstances.
 - fit_data_len: Length of the training data.
-- supports_proba: For classification tasks, whether the mixer supports yielding per-class scores rather than only returning the predicted label.</p>
+- supports_proba: For classification tasks, whether the mixer supports yielding per-class scores rather than only returning the predicted label.
+- trains_once: If True, the mixer is trained once during learn, using all available input data (<cite>train</cite> and <cite>dev</cite> splits for training, <cite>test</cite> for validation). Otherwise, it trains once with the <cite>train`</cite> split &amp; <cite>dev</cite> for validation, and optionally (depending on the problem definition <cite>fit_on_all</cite> and mixer-wise <cite>fit_on_dev</cite> arguments) a second time after post-training analysis via partial_fit, with <cite>train</cite> and <cite>dev</cite> splits as training subset, and <cite>test</cite> split as validation. Should only be set to True for mixers that don’t require post-training analysis, as otherwise actual validation data would be treated as a held-out portion, which is a mistake.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
