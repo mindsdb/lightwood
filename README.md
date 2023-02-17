@@ -65,40 +65,44 @@ from lightwood.api.high_level import (
     predictor_from_code,
 )
 
-# Load a pandas dataset
-df = pd.read_csv(
-    "https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/hdi/data.csv"
-)
 
-# Define the prediction task by naming the target column
-pdef = ProblemDefinition.from_dict(
-    {
-        "target": "Development Index",  # column you want to predict
-    }
-)
+def main():
+    # Load a pandas dataset
+    df = pd.read_csv("https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/hdi/data.csv")
 
-# Generate JSON-AI code to model the problem
-json_ai = json_ai_from_problem(df, problem_definition=pdef)
+    # Define the prediction task by naming the target column
+    pdef = ProblemDefinition.from_dict(
+        {
+            "target": "Development Index",  # column you want to predict
+        }
+    )
 
-# OPTIONAL - see the JSON-AI syntax
-#print(json_ai.to_json())
+    # Generate JSON-AI code to model the problem
+    json_ai = json_ai_from_problem(df, problem_definition=pdef)
 
-# Generate python code
-code = code_from_json_ai(json_ai)
+    # OPTIONAL - see the JSON-AI syntax
+    # print(json_ai.to_json())
 
-# OPTIONAL - see generated code
-#print(code)
+    # Generate python code
+    code = code_from_json_ai(json_ai)
 
-# Create a predictor from python code
-predictor = predictor_from_code(code)
+    # OPTIONAL - see generated code
+    # print(code)
 
-# Train a model end-to-end from raw data to a finalized predictor
-predictor.learn(df)
+    # Create a predictor from python code
+    predictor = predictor_from_code(code)
 
-# Make the train/test splits and show predictions for a few examples
-test_df = predictor.split(predictor.preprocess(df))["test"]
-preds = predictor.predict(test_df).iloc[:10]
-print(preds)
+    # Train a model end-to-end from raw data to a finalized predictor
+    predictor.learn(df)
+
+    # Make the train/test splits and show predictions for a few examples
+    test_df = predictor.split(predictor.preprocess(df))["test"]
+    preds = predictor.predict(test_df).iloc[:10]
+    print(preds)
+
+
+if __name__ == '__main__':
+    main()
 ```
 
 ### BYOM: Bring your own models
