@@ -65,10 +65,10 @@ from lightwood.api.high_level import (
     predictor_from_code,
 )
 
-
-def main():
+if __name__ == '__main__':
     # Load a pandas dataset
-    df = pd.read_csv("https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/hdi/data.csv")
+    df = pd.read_csv("https://raw.githubusercontent.com/mindsdb/benchmarks/main/benchmarks/datasets/hdi/data.csv"
+    )
 
     # Define the prediction task by naming the target column
     pdef = ProblemDefinition.from_dict(
@@ -99,11 +99,6 @@ def main():
     test_df = predictor.split(predictor.preprocess(df))["test"]
     preds = predictor.predict(test_df).iloc[:10]
     print(preds)
-
-# "main module" is to guard your code through the multiprocessing for windows users
-if __name__ == '__main__':
-    # Load a pandas dataset and start define, create and train predictors
-    main()
 ```
 
 ### BYOM: Bring your own models
