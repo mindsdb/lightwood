@@ -100,8 +100,9 @@ def main():
     preds = predictor.predict(test_df).iloc[:10]
     print(preds)
 
-
+# "main module" is to guard your code through the multiprocessing for windows users
 if __name__ == '__main__':
+    # Load a pandas dataset and start define, create and train predictors
     main()
 ```
 
