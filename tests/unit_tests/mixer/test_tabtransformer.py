@@ -1,7 +1,6 @@
 import unittest
 import numpy as np
 import pandas as pd
-from sklearn.metrics import balanced_accuracy_score
 from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import json_ai_from_problem, predictor_from_json_ai, JsonAI, code_from_json_ai, predictor_from_code  # noqa
 
@@ -48,5 +47,4 @@ class TestBasic(unittest.TestCase):
         predictor.learn(df)
         predictions = predictor.predict(df)
 
-        acc = balanced_accuracy_score(df[target], predictions['prediction'])
         self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
