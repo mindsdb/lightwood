@@ -1,2 +1,2 @@
 lightgbm >=3.3.0,<=3.3.3
-tab-transformer-pytorch
+tab-transformer-pytorch >= 0.2.1
