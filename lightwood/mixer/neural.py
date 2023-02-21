@@ -80,7 +80,7 @@ class Neural(BaseMixer):
                     for X, Y in data:
                         X = X.to(self.model.device)
                         Y = Y.to(self.model.device)
-                        Yh = self.model(X)
+                        Yh = self._net_call(X)
 
                         Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
                         Y = torch.unsqueeze(Y, 0) if len(Y.shape) < 2 else Y
@@ -134,7 +134,7 @@ class Neural(BaseMixer):
                 Y = Y.to(self.model.device)
                 with LightwoodAutocast():
                     optimizer.zero_grad()
-                    Yh = self.model(X)
+                    Yh = self._net_call(X)
                     loss = criterion(Yh, Y)
                     if LightwoodAutocast.active:
                         scaler.scale(loss).backward()
@@ -179,7 +179,7 @@ class Neural(BaseMixer):
                 Y = Y.to(self.model.device)
                 with LightwoodAutocast():
                     optimizer.zero_grad()
-                    Yh = self.model(X)
+                    Yh = self._net_call(X)
                     loss = criterion(Yh, Y)
                     if LightwoodAutocast.active:
                         scaler.scale(loss).backward()
@@ -236,7 +236,7 @@ class Neural(BaseMixer):
             for X, Y in dev_dl:
                 X = X.to(self.model.device)
                 Y = Y.to(self.model.device)
-                Yh = self.model(X)
+                Yh = self._net_call(X)
                 running_losses.append(criterion(Yh, Y).item())
             return np.mean(running_losses)
 
@@ -253,6 +253,9 @@ class Neural(BaseMixer):
             net_kwargs['target_name'] = self.target
 
         self.model = self.net_class(**net_kwargs)
+
+    def _net_call(self, x: torch.Tensor) -> torch.Tensor:
+        return self.model(x)
 
     # @TODO: Compare partial fitting fully on and fully off on the benchmarks!
     # @TODO: Writeup on the methodology for partial fitting
@@ -336,7 +339,7 @@ class Neural(BaseMixer):
         with torch.no_grad():
             for idx, (X, Y) in enumerate(ds):
                 X = X.to(self.model.device)
-                Yh = self.model(X)
+                Yh = self._net_call(X)
                 Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
 
                 kwargs = {}

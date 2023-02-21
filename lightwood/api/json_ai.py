@@ -571,21 +571,30 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
         mixers[i]["args"]["stop_after"] = mixers[i]["args"].get("stop_after", "$problem_definition.seconds_per_mixer")
 
         # specific
-        if mixers[i]["module"] in ("Neural", "NeuralTs"):
+        if mixers[i]["module"] in ("Neural", "NeuralTs", "TabTransformerMixer"):
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
-            mixers[i]["args"]["net"] = mixers[i]["args"].get(
-                "net",
-                '"DefaultNet"'
-                if not tss.is_timeseries or not tss.use_previous_target
-                else '"ArNet"',
-            )
+
+            if mixers[i]["module"] in ("Neural", "NeuralTs"):
+                mixers[i]["args"]["net"] = mixers[i]["args"].get(
+                    "net",
+                    '"DefaultNet"'
+                    if not tss.is_timeseries or not tss.use_previous_target
+                    else '"ArNet"',
+                )
+                mixers[i]["args"]["search_hyperparameters"] = mixers[i]["args"].get("search_hyperparameters", True)
+                mixers[i]["args"]["fit_on_dev"] = mixers[i]["args"].get("fit_on_dev", True)
+
             if mixers[i]["module"] == "NeuralTs":
                 mixers[i]["args"]["timeseries_settings"] = mixers[i]["args"].get(
                     "timeseries_settings", "$problem_definition.timeseries_settings"
                 )
                 mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get("ts_analysis", "$ts_analysis")
+
+            if mixers[i]["module"] == "TabTransformerMixer":
+                mixers[i]["args"]["search_hyperparameters"] = mixers[i]["args"].get("search_hyperparameters", False)
+                mixers[i]["args"]["fit_on_dev"] = mixers[i]["args"].get("fit_on_dev", False)
 
         elif mixers[i]["module"] in ("LightGBM", "XGBoostMixer"):
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
