@@ -135,6 +135,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#mixer.SkTime.partial_fit">partial_fit</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.TabTransformerMixer">TabTransformerMixer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.TabTransformerMixer.fit">fit</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#mixer.Unit">Unit</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mixer.Unit.fit">fit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mixer.Unit.partial_fit">partial_fit</a></li>
@@ -627,6 +631,24 @@ based on the global SMAPE error across all groups.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mixer.TabTransformerMixer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">TabTransformerMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/tabtransformer.html#TabTransformerMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.TabTransformerMixer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This mixer trains a TabTransformer network (FT variant), using concatenated encoder outputs for each dataset feature as input, to predict the encoded target column representation as output.</p>
+<p>Training logic is based on the Neural mixer, please refer to it for more details on each input parameter.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.TabTransformerMixer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/tabtransformer.html#TabTransformerMixer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.TabTransformerMixer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skip the usual partial_fit call at the end.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
