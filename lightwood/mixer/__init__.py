@@ -36,5 +36,11 @@ except Exception:
     LightGBM = None
     LightGBMArray = None
 
+try:
+    from lightwood.mixer.tabtransformer import TabTransformerMixer
+except Exception:
+    TabTransformerMixer = None
+
 __all__ = ['BaseMixer', 'Neural', 'NeuralTs', 'LightGBM', 'RandomForest', 'LightGBMArray', 'Unit', 'Regression',
-           'SkTime', 'QClassic', 'ProphetMixer', 'ETSMixer', 'ARIMAMixer', 'NHitsMixer', 'GluonTSMixer', 'XGBoostMixer']
+           'SkTime', 'QClassic', 'ProphetMixer', 'ETSMixer', 'ARIMAMixer', 'NHitsMixer', 'GluonTSMixer', 'XGBoostMixer',
+           'TabTransformerMixer']

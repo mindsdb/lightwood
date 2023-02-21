@@ -63,7 +63,7 @@ class Neural(BaseMixer):
         self.epochs_to_best = 0
         self.n_epochs = n_epochs
         self.fit_on_dev = fit_on_dev
-        self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
+        self.net_name = net
         self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
         self.search_hyperparameters = search_hyperparameters
         self.stable = True
@@ -241,6 +241,8 @@ class Neural(BaseMixer):
             return np.mean(running_losses)
 
     def _init_net(self, ds: EncodedDs):
+        self.net_class = DefaultNet if self.net_name == 'DefaultNet' else ArNet
+
         net_kwargs = {'input_size': len(ds[0][0]),
                       'output_size': len(ds[0][1]),
                       'num_hidden': self.num_hidden,
@@ -275,7 +277,8 @@ class Neural(BaseMixer):
         # Find learning rate
         # keep the weights
         self._init_net(train_data)
-        self.lr, self.model = self._find_lr(train_dl)
+        if not self.lr:
+            self.lr, self.model = self._find_lr(train_dl)
 
         # Keep on training
         optimizer = self._select_optimizer()
