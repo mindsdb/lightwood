@@ -6,7 +6,7 @@ import torch
 # import torch.nn as nn
 import numpy as np
 import pandas as pd
-from tab_transformer_pytorch import FTTransformer
+from tab_transformer_pytorch import TabTransformer
 
 # from type_infer.dtype import dtype
 from lightwood.helpers.log import log
@@ -49,9 +49,9 @@ class TabTransformerMixer(Neural):
         self.stable = True  # still experimental
 
     def _init_net(self, ds: EncodedDs):
-        self.net_class = FTTransformer
+        self.net_class = TabTransformer
 
-        self.model = FTTransformer(
+        self.model = TabTransformer(
             categories=(),                                                       # unused here, as by the point it arrives to the mixer, everything is numerical  # noqa
             num_continuous=len(ds[0][0]),  # ds.input_length,                         # TODO define based on DS
             dim=self.train_args.get('dim', 32),
