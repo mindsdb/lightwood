@@ -117,8 +117,8 @@ class ICP(BaseAnalysisBlock):
                     if ns.is_multi_ts:
                         preds = np.array([p[0] for p in ns.normal_predictions['prediction']])
                     else:
-                        preds = ns.normal_predictions['prediction']
-                    predicted_classes = output['label_encoders'].transform(preds.values.reshape(-1, 1))  # inflate OHE
+                        preds = ns.normal_predictions['prediction'].values
+                    predicted_classes = output['label_encoders'].transform(preds.reshape(-1, 1))  # inflate OHE
                     icp.nc_function.model.prediction_cache = predicted_classes
 
             elif ns.is_multi_ts or pred_is_list:
