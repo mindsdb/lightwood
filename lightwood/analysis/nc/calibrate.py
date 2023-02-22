@@ -105,19 +105,20 @@ class ICP(BaseAnalysisBlock):
             icp_df = deepcopy(ns.data)
 
             # setup prediction cache to avoid additional .predict() calls
-            pred_is_list = isinstance(ns.normal_predictions['prediction'], list) and \
-                isinstance(ns.normal_predictions['prediction'][0], list)
+            try:
+                pred_is_list = isinstance(ns.normal_predictions['prediction'][0], list)
+            except KeyError:
+                pred_is_list = False
+
             if ns.is_classification:
                 if ns.predictor.supports_proba:
                     icp.nc_function.model.prediction_cache = ns.normal_predictions[all_cat_cols].values
                 else:
                     if ns.is_multi_ts:
-                        icp.nc_function.model.prediction_cache = np.array(
-                            [p[0] for p in ns.normal_predictions['prediction']])
-                        preds = icp.nc_function.model.prediction_cache
+                        preds = np.array([p[0] for p in ns.normal_predictions['prediction']])
                     else:
-                        preds = ns.normal_predictions['prediction']
-                    predicted_classes = pd.get_dummies(preds).values  # inflate to one-hot enc
+                        preds = ns.normal_predictions['prediction'].values
+                    predicted_classes = output['label_encoders'].transform(preds.reshape(-1, 1))  # inflate OHE
                     icp.nc_function.model.prediction_cache = predicted_classes
 
             elif ns.is_multi_ts or pred_is_list:
@@ -198,8 +199,12 @@ class ICP(BaseAnalysisBlock):
 
                     # save relevant predictions in the caches, then calibrate the ICP
                     pred_cache = icp_df.pop(f'__predicted_{ns.target}').values
-                    if ns.is_multi_ts:
+                    if ns.is_multi_ts and ns.is_classification:
+                        # output['label_encoders'].transform(preds.reshape(-1, 1))
+                        pred_cache = output['label_encoders'].transform([[p[0] for p in pred_cache]])
+                    elif ns.is_multi_ts:
                         pred_cache = np.array([np.array(p) for p in pred_cache])
+
                     icps[tuple(group)].nc_function.model.prediction_cache = pred_cache
                     icp_df, y = clean_df(icp_df, ns, output.get('label_encoders', None))
                     if icps[tuple(group)].nc_function.normalizer is not None:
@@ -334,7 +339,8 @@ class ICP(BaseAnalysisBlock):
                         for icol, cat_col in enumerate(all_cat_cols):
                             row_insights.loc[X.index, cat_col] = class_dists[:, icol]
                     else:
-                        class_dists = pd.get_dummies(preds).values
+                        ohe_enc = ns.analysis['label_encoders']
+                        class_dists = ohe_enc.transform(np.array([p[0] for p in preds]).reshape(-1, 1))
 
                     base_icp.nc_function.model.prediction_cache = class_dists
 
@@ -360,8 +366,8 @@ class ICP(BaseAnalysisBlock):
                     result.loc[X.index, 'significance'] = significances
 
                 else:
-                    significances = get_categorical_conf(all_confs.squeeze())
-                    result.loc[X.index, 'significance'] = significances
+                    significances = get_categorical_conf(all_confs)
+                    result.loc[X.index, 'significance'] = significances.flatten()
 
                 # grouped time series, we replace bounds in rows that have a trained ICP
                 if ns.analysis['icp'].get('__mdb_groups', False):
@@ -386,6 +392,11 @@ class ICP(BaseAnalysisBlock):
                                                                       for i in range(1, ns.tss.horizon)]
                                     icp.nc_function.model.prediction_cache = X[target_cols].values
                                     [X.pop(col) for col in target_cols]
+                                elif is_multi_ts and is_categorical:
+                                    ohe_enc = ns.analysis['label_encoders']
+                                    preds = X.pop(ns.target_name).values
+                                    pred_cache = ohe_enc.transform(np.array([p[0] for p in preds]).reshape(-1, 1))
+                                    icp.nc_function.model.prediction_cache = pred_cache
                                 else:
                                     icp.nc_function.model.prediction_cache = X.pop(ns.target_name).values
                                 if icp.nc_function.normalizer:
@@ -431,7 +442,7 @@ class ICP(BaseAnalysisBlock):
                                     all_ranges = np.array([icp.predict(X.values)])
                                     all_confs = np.swapaxes(np.swapaxes(all_ranges, 0, 2), 0, 1)
                                     significances = get_categorical_conf(all_confs)
-                                    result.loc[X.index, 'significance'] = significances
+                                    result.loc[X.index, 'significance'] = significances.flatten()
 
                 row_insights['confidence'] = result['significance']
 
@@ -519,6 +530,5 @@ class ICP(BaseAnalysisBlock):
             added_cols = [f'{base_col}_timestep_{t}' for t in range(1, tss.horizon)]
             cols = [base_col] + added_cols
             result.loc[df.index, base_col] = result.loc[df.index, cols].values.tolist()
-            # result[base_col] = result[cols].values.tolist()
 
         return result
