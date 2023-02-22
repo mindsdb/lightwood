@@ -107,7 +107,7 @@ class ICP(BaseAnalysisBlock):
             # setup prediction cache to avoid additional .predict() calls
             try:
                 pred_is_list = isinstance(ns.normal_predictions['prediction'][0], list)
-            except TypeError:
+            except KeyError:
                 pred_is_list = False
 
             if ns.is_classification:
