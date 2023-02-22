@@ -118,7 +118,7 @@ class ICP(BaseAnalysisBlock):
                         preds = np.array([p[0] for p in ns.normal_predictions['prediction']])
                     else:
                         preds = ns.normal_predictions['prediction']
-                    predicted_classes = pd.get_dummies(preds).values  # inflate to one-hot enc
+                    predicted_classes = output['label_encoders'].transform(preds.reshape(-1, 1))  # inflate to OHE
                     icp.nc_function.model.prediction_cache = predicted_classes
 
             elif ns.is_multi_ts or pred_is_list:
@@ -200,7 +200,8 @@ class ICP(BaseAnalysisBlock):
                     # save relevant predictions in the caches, then calibrate the ICP
                     pred_cache = icp_df.pop(f'__predicted_{ns.target}').values
                     if ns.is_multi_ts and ns.is_classification:
-                        pred_cache = pd.get_dummies(np.array([p[0] for p in pred_cache])).values  # TODO: don't use dummies if not all columns are present, use OHE instead
+                        # output['label_encoders'].transform(preds.reshape(-1, 1))
+                        pred_cache = output['label_encoders'].transform([[p[0] for p in pred_cache]])
                     elif ns.is_multi_ts:
                         pred_cache = np.array([np.array(p) for p in pred_cache])
 
@@ -338,7 +339,8 @@ class ICP(BaseAnalysisBlock):
                         for icol, cat_col in enumerate(all_cat_cols):
                             row_insights.loc[X.index, cat_col] = class_dists[:, icol]
                     else:
-                        class_dists = pd.get_dummies(preds).values
+                        ohe_enc = ns.analysis['label_encoders']
+                        class_dists = ohe_enc.transform(np.array([p[0] for p in preds]).reshape(-1, 1))
 
                     base_icp.nc_function.model.prediction_cache = class_dists
 
@@ -391,7 +393,10 @@ class ICP(BaseAnalysisBlock):
                                     icp.nc_function.model.prediction_cache = X[target_cols].values
                                     [X.pop(col) for col in target_cols]
                                 elif is_multi_ts and is_categorical:
-                                   icp.nc_function.model.prediction_cache = pd.get_dummies(X.pop(ns.target_name)).values
+                                    ohe_enc = ns.analysis['label_encoders']
+                                    preds = X.pop(ns.target_name).values
+                                    pred_cache = ohe_enc.transform(np.array([p[0] for p in preds]).reshape(-1, 1))
+                                    icp.nc_function.model.prediction_cache = pred_cache
                                 else:
                                     icp.nc_function.model.prediction_cache = X.pop(ns.target_name).values
                                 if icp.nc_function.normalizer:
