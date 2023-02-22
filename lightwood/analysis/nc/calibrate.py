@@ -366,8 +366,8 @@ class ICP(BaseAnalysisBlock):
                     result.loc[X.index, 'significance'] = significances
 
                 else:
-                    significances = get_categorical_conf(all_confs.squeeze())
-                    result.loc[X.index, 'significance'] = significances
+                    significances = get_categorical_conf(all_confs)
+                    result.loc[X.index, 'significance'] = significances.flatten()
 
                 # grouped time series, we replace bounds in rows that have a trained ICP
                 if ns.analysis['icp'].get('__mdb_groups', False):
