@@ -101,7 +101,7 @@ class GluonTSMixer(BaseMixer):
             batch_size=batch_size,
             trainer=Trainer(
                 epochs=self.n_epochs,
-                num_batches_per_epoch=max(1, len(train_ds) // batch_size),
+                num_batches_per_epoch=max(1, len(cat_ds.data_frame) // batch_size),
                 callbacks=[EarlyStop(patience=self.patience), self.model_train_stats])
         )
         self.model = self.estimator.train(train_ds)
