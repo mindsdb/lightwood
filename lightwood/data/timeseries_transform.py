@@ -69,7 +69,7 @@ def transform_timeseries(
     subsets = []
     for group in groups:
         if (tss.group_by and group != '__default') or not tss.group_by:
-            idxs, subset = get_group_matches(data, group, tss.group_by)
+            idxs, subset = get_group_matches(data, group, tss.group_by, copy=True)
             if subset.shape[0] > 0:
                 if periods.get(group, periods['__default']) == 0 and subset.shape[0] > 1:
                     raise Exception(
