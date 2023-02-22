@@ -3,6 +3,7 @@ import pandas as pd
 
 from lightwood.data.encoded_ds import EncodedDs
 from lightwood.api.types import PredictionArguments
+from type_infer.dtype import dtype
 
 
 class BaseMixer:
@@ -33,6 +34,8 @@ class BaseMixer:
         """
         self.stop_after = stop_after
         self.supports_proba = False
+        self.supported_target_datatypes = [dtype.categorical, dtype.binary, dtype.cat_tsarray, dtype.integer, dtype.float, dtype.quantity, dtype.num_tsarray,
+                                           dtype.short_text, dtype.rich_text, dtype.date, dtype.datetime, dtype.tags, dtype.audio, dtype.image, dtype.empty, dtype.invalid]
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """

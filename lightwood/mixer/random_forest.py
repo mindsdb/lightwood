@@ -66,6 +66,8 @@ class RandomForest(BaseMixer):
         self.num_dtypes = [dtype.integer] + self.float_dtypes
         self.supports_proba = dtype_dict[target] in self.cls_dtypes
         self.is_classifier = self.supports_proba
+        self.supported_target_datatypes = [dtype.categorical, dtype.binary, dtype.cat_tsarray, dtype.integer, dtype.float, dtype.quantity, dtype.num_tsarray]
+
 
         self.stable = True
 
