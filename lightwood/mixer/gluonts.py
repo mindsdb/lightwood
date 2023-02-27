@@ -90,13 +90,19 @@ class GluonTSMixer(BaseMixer):
         cat_ds = ConcatedEncodedDs([train_data, dev_data])
         fit_groups = list(cat_ds.data_frame[self.grouped_by[0]].unique()) if self.grouped_by != ['__default'] else None
         train_ds = self._make_initial_ds(cat_ds.data_frame, phase='train', groups=fit_groups)
+        batch_size = 32
         self.model_train_stats = TrainingHistory()
 
         self.estimator = DeepAREstimator(
             freq=train_ds.freq,
             prediction_length=self.horizon,
             distr_output=self.distribution,
-            trainer=Trainer(epochs=self.n_epochs, callbacks=[EarlyStop(patience=self.patience), self.model_train_stats])
+            lags_seq=[i + 1 for i in range(self.window)],
+            batch_size=batch_size,
+            trainer=Trainer(
+                epochs=self.n_epochs,
+                num_batches_per_epoch=max(1, len(cat_ds.data_frame) // batch_size),
+                callbacks=[EarlyStop(patience=self.patience), self.model_train_stats])
         )
         self.model = self.estimator.train(train_ds)
         self.prepared = True
@@ -162,10 +168,10 @@ class GluonTSMixer(BaseMixer):
         return ydf
 
     def _make_initial_ds(self, df=None, phase='predict', groups=None):
-        oby = self.ts_analysis["tss"].order_by
+        oby_col_name = '__gluon_timestamp'
         gby = self.ts_analysis["tss"].group_by if self.ts_analysis["tss"].group_by else []
         freq = self.ts_analysis['sample_freqs']['__default']
-        keep_cols = [f'__mdb_original_{oby}', self.target] + [col for col in gby]
+        keep_cols = [self.target] + [col for col in gby]
 
         if groups is None and gby:
             groups = self.groups
@@ -208,7 +214,8 @@ class GluonTSMixer(BaseMixer):
             gby = '__default_group'
             df[gby] = '__default_group'
 
-        ds = PandasDataset.from_long_dataframe(df, target=self.target, item_id=gby, freq=freq)
+        df[oby_col_name] = df.index
+        ds = PandasDataset.from_long_dataframe(df, target=self.target, item_id=gby, freq=freq, timestamp=oby_col_name)
         return ds
 
 
