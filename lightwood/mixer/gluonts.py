@@ -5,6 +5,7 @@ from typing import Dict, Union, Optional
 import numpy as np
 import pandas as pd
 import mxnet as mx
+from sklearn.preprocessing import OrdinalEncoder
 
 from gluonts.dataset.pandas import PandasDataset
 
@@ -73,6 +74,7 @@ class GluonTSMixer(BaseMixer):
         self.patience = early_stop_patience
         self.seed = seed
         self.trains_once = True
+        self.static_features_cat_encoders = {}
         self.static_features_cat = static_features_cat if static_features_cat else []
         self.static_features_real = static_features_real if static_features_real else []
 
@@ -92,6 +94,9 @@ class GluonTSMixer(BaseMixer):
 
         # prepare data
         cat_ds = ConcatedEncodedDs([train_data, dev_data])
+        for col in self.static_features_cat:
+            self.static_features_cat_encoders[col] = OrdinalEncoder().fit(cat_ds.data_frame[col].values.reshape(-1, 1))
+
         fit_groups = list(cat_ds.data_frame[self.grouped_by[0]].unique()) if self.grouped_by != ['__default'] else None
         train_ds = self._make_initial_ds(cat_ds.data_frame, phase='train', groups=fit_groups)
         batch_size = 32
@@ -227,14 +232,15 @@ class GluonTSMixer(BaseMixer):
             df[gby] = '__default_group'
 
         df[oby_col_name] = df.index
+        for col in self.static_features_cat:
+            df[col] = self.static_features_cat_encoders[col].transform(df[col].values.reshape(-1,1))
+
         ds = PandasDataset.from_long_dataframe(
             df,
             target=self.target,
             item_id=gby,
             freq=freq,
             timestamp=oby_col_name,
-            # feat_dynamic_real=None,
-            # feat_dynamic_cat=None,
             feat_static_real=self.static_features_real if self.static_features_real else None,
             feat_static_cat=self.static_features_cat if self.static_features_cat else None,
         )
