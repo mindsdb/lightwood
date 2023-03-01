@@ -233,7 +233,7 @@ class GluonTSMixer(BaseMixer):
 
         df[oby_col_name] = df.index
         for col in self.static_features_cat:
-            df[col] = self.static_features_cat_encoders[col].transform(df[col].values.reshape(-1,1))
+            df[col] = self.static_features_cat_encoders[col].transform(df[col].values.reshape(-1, 1))
 
         ds = PandasDataset.from_long_dataframe(
             df,
