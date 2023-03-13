@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
 
   
@@ -174,286 +175,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="Build-your-own-training/testing-split">
+  <div class="section" id="Build-your-own-training/testing-split">
 <h1>Build your own training/testing split<a class="headerlink" href="#Build-your-own-training/testing-split" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="Date:-2021.10.07">
 <h2>Date: 2021.10.07<a class="headerlink" href="#Date:-2021.10.07" title="Permalink to this headline">¶</a></h2>
@@ -494,8 +216,8 @@ as a final pass to see what models perform best.</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2142:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2142:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2207:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2207:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <div class="section" id="1)-Load-your-data">
@@ -741,72 +463,72 @@ Text(0.5, 1.0, &#39;Distribution of Classes&#39;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2142:Analyzing a sample of 18424</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:from a total population of 284807, this is equivalent to 6.5% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: Time</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column Time has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V1</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V1 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V2</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V2 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V3</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V3 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V4</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V4 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V5</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V5 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V6</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V6 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V7</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V7 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V8</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V8 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V9</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V9 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V10</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V10 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V11</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V11 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V12</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V12 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V13</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V13 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V14</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V14 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V15</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V15 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V16</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V16 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V17</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V17 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V18</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V18 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V19</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V19 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V20</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V20 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V21</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V21 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V22</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V22 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V23</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V23 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V24</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V24 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V25</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V25 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V26</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V26 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V27</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V27 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: V28</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column V28 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: Amount</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column Amount has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Infering type for: Class</span>
-<span class="ansi-green-fg">INFO:type_infer-2142:Column Class has data type binary</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2142:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2142:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Analyzing a sample of 18424</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:from a total population of 284807, this is equivalent to 6.5% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: Time</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column Time has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V1</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V1 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V2</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V2 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V3</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V3 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V4</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V4 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V5</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V5 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V6</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V6 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V7</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V7 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V8</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V8 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V9</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V9 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V10</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V10 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V11</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V11 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V12</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V12 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V13</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V13 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V14</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V14 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V15</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V15 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V16</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V16 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V17</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V17 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V18</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V18 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V19</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V19 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V20</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V20 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V21</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V21 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V22</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V22 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V23</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V23 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V24</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V24 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V25</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V25 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V26</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V26 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V27</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V27 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: V28</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column V28 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: Amount</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column Amount has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Infering type for: Class</span>
+<span class="ansi-green-fg">INFO:type_infer-2207:Column Class has data type binary</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2207:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2207:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood looks at each of the many columns and indicates they are mostly float, with exception of “<strong>Class</strong>” which is binary.</p>
@@ -963,7 +685,7 @@ Writing MyCustomSplitter.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2142:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2207:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1041,7 +763,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 42768.0,
                 &#34;seconds_per_encoder&#34;: None,
-                &#34;expected_additional_time&#34;: 66.63830065727234,
+                &#34;expected_additional_time&#34;: 77.37600493431091,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -1684,10 +1406,10 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2142:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2142: `preprocess` runtime: 13.53 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2142:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2142: `split` runtime: 1.71 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2207:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2207: `preprocess` runtime: 15.92 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2207:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2207: `split` runtime: 2.35 seconds</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">

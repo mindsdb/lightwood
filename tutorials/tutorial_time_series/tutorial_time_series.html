@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
 
   
@@ -174,286 +175,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="Tutorial---Time-series-forecasting">
+  <div class="section" id="Tutorial---Time-series-forecasting">
 <h1>Tutorial - Time series forecasting<a class="headerlink" href="#Tutorial---Time-series-forecasting" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="Introduction">
 <h2>Introduction<a class="headerlink" href="#Introduction" title="Permalink to this headline">¶</a></h2>
@@ -581,8 +303,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2715:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -650,15 +372,15 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2715:Analyzing a sample of 2467</span>
-<span class="ansi-green-fg">INFO:type_infer-2715:from a total population of 2820, this is equivalent to 87.5% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2715:Infering type for: Month</span>
-<span class="ansi-green-fg">INFO:type_infer-2715:Column Month has data type date</span>
-<span class="ansi-green-fg">INFO:type_infer-2715:Infering type for: Sunspots</span>
-<span class="ansi-green-fg">INFO:type_infer-2715:Column Sunspots has data type float</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Finished statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:type_infer-2149:Analyzing a sample of 2467</span>
+<span class="ansi-green-fg">INFO:type_infer-2149:from a total population of 2820, this is equivalent to 87.5% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2149:Infering type for: Month</span>
+<span class="ansi-green-fg">INFO:type_infer-2149:Column Month has data type date</span>
+<span class="ansi-green-fg">INFO:type_infer-2149:Infering type for: Sunspots</span>
+<span class="ansi-green-fg">INFO:type_infer-2149:Column Sunspots has data type float</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 </div>
@@ -680,25 +402,25 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Learn phase 1/8] - Statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `analyze_data` runtime: 0.24 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Learn phase 2/8] - Data preprocessing</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Transforming timeseries data</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Using 1 processes to reshape.</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `preprocess` runtime: 0.88 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Learn phase 3/8] - Data splitting</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `split` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Learn phase 4/8] - Preparing encoders</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `prepare` runtime: 1.1 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Learn phase 5/8] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `featurize` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Learn phase 6/8] - Mixer training</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Training the mixers</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Learn phase 1/8] - Statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `analyze_data` runtime: 0.26 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Learn phase 2/8] - Data preprocessing</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Transforming timeseries data</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Using 1 processes to reshape.</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `preprocess` runtime: 1.06 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Learn phase 3/8] - Data splitting</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `split` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Learn phase 4/8] - Preparing encoders</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `prepare` runtime: 1.21 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Learn phase 5/8] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `featurize` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Learn phase 6/8] - Mixer training</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Training the mixers</span>
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:118: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/pytorch_ranger/ranger.py:172: UserWarning: This overload of addcmul_ is deprecated:
@@ -706,338 +428,338 @@ div.rendered_html tbody tr:hover {
 Consider using one of the following signatures instead:
         addcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1420.)
   exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss of 1.0329926013946533 with learning rate 0.0001</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss of 1.1903287172317505 with learning rate 0.00014</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Found learning rate of: 0.0001</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss of 1.0329926013946533 with learning rate 0.0001</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss of 1.1903289556503296 with learning rate 0.00014</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Found learning rate of: 0.0001</span>
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:118: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 1: 1.1034736037254333</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 2: 1.095499724149704</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 3: 1.085852950811386</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 4: 1.0747157335281372</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 5: 1.0622906684875488</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 6: 1.048835813999176</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 7: 1.0255087018013</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 8: 1.0098450481891632</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 9: 0.9937421083450317</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 10: 0.9772577881813049</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 11: 0.960514634847641</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 12: 0.9436107277870178</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 13: 0.9162493646144867</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 14: 0.8990498632192612</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 15: 0.8817755430936813</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 16: 0.8645493239164352</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 17: 0.8474227488040924</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 18: 0.8305661082267761</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 19: 0.8041898161172867</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 20: 0.7880957275629044</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 21: 0.7721928060054779</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 22: 0.7565662264823914</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 23: 0.7411786913871765</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 24: 0.7263540625572205</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 25: 0.7029832154512405</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 26: 0.6888644248247147</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 27: 0.6751553416252136</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 28: 0.6619246006011963</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 29: 0.6491803973913193</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 30: 0.6370394378900528</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 31: 0.6186220794916153</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 32: 0.6076711714267731</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 33: 0.5971519649028778</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 34: 0.5871283113956451</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 35: 0.577536404132843</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 36: 0.5685373246669769</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 37: 0.555235281586647</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 38: 0.5476958453655243</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 39: 0.5406313389539719</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 40: 0.533947303891182</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 41: 0.5278284102678299</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 42: 0.5223128944635391</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 43: 0.5145185887813568</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 44: 0.5102018564939499</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 45: 0.5060706585645676</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 46: 0.5022140145301819</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 47: 0.49852943420410156</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 48: 0.4950528144836426</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 49: 0.4899465888738632</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 50: 0.48701466619968414</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 51: 0.48423272371292114</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 52: 0.48161306977272034</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 53: 0.47907809913158417</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 54: 0.4766666442155838</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 55: 0.4730464220046997</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 56: 0.47082801163196564</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 57: 0.4687013477087021</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 58: 0.466646745800972</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 59: 0.4646221846342087</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 60: 0.4626937508583069</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 61: 0.45971645414829254</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 62: 0.45786871016025543</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 63: 0.4560960978269577</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 64: 0.4543367475271225</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 65: 0.4525926560163498</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 66: 0.4509214013814926</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 67: 0.44847191870212555</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 68: 0.4469738304615021</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 69: 0.4454401582479477</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 70: 0.44387951493263245</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 71: 0.4423144459724426</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 72: 0.44085121154785156</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 73: 0.4386959969997406</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 74: 0.43752506375312805</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 75: 0.43645238876342773</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 76: 0.43544429540634155</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 77: 0.43443048000335693</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 78: 0.4335315227508545</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 79: 0.4323187917470932</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 80: 0.4315735548734665</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 81: 0.4308609217405319</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 82: 0.43015851080417633</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 83: 0.4294104278087616</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 84: 0.4288013130426407</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 85: 0.4279433935880661</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 86: 0.4274042397737503</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 87: 0.4268788546323776</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 88: 0.4263428896665573</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 89: 0.4257981479167938</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 90: 0.42538343369960785</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 91: 0.4247908294200897</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 92: 0.4243451952934265</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 93: 0.4238876402378082</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 94: 0.42337436974048615</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 95: 0.42281439900398254</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 96: 0.4223657548427582</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 97: 0.42170411348342896</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 98: 0.42123717069625854</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 99: 0.4207630157470703</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 100: 0.42027655243873596</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 101: 0.4197579324245453</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 102: 0.4193698465824127</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 103: 0.4187876582145691</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 104: 0.4183095842599869</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 105: 0.41787561774253845</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 106: 0.4174632877111435</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 107: 0.41705481708049774</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 108: 0.4167598485946655</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 109: 0.4163133054971695</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 110: 0.41593657433986664</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 111: 0.41559597849845886</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 112: 0.41523370146751404</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 113: 0.41481876373291016</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 114: 0.4145067185163498</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 115: 0.4140743464231491</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 116: 0.4137856662273407</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 117: 0.4134971350431442</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 118: 0.4131678193807602</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 119: 0.41278722882270813</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 120: 0.4125162959098816</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 121: 0.4121018052101135</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 122: 0.41171489655971527</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 123: 0.41137491166591644</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 124: 0.41102515161037445</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 125: 0.4106379449367523</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 126: 0.4103449732065201</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 127: 0.4099235534667969</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 128: 0.4095592498779297</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 129: 0.4091901332139969</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 130: 0.4087667018175125</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 131: 0.40829405188560486</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 132: 0.4079255610704422</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 133: 0.40742477774620056</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 134: 0.407056599855423</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 135: 0.40668636560440063</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 136: 0.4063059389591217</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 137: 0.4058981388807297</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 138: 0.40559080243110657</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 139: 0.40517131984233856</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 140: 0.4048188477754593</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 141: 0.4044704735279083</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 142: 0.40408773720264435</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 143: 0.40365880727767944</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 144: 0.4033213406801224</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 145: 0.40286262333393097</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 146: 0.40249308943748474</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 147: 0.40212681889533997</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 148: 0.40173159539699554</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 149: 0.40130817890167236</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 150: 0.4009907692670822</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 151: 0.4005481004714966</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 152: 0.4001888036727905</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 153: 0.3998541831970215</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 154: 0.3995188772678375</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 155: 0.39915731549263</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 156: 0.39889849722385406</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 157: 0.39856715500354767</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 158: 0.39826273918151855</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 159: 0.39793549478054047</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 160: 0.39756521582603455</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 161: 0.3971714824438095</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 162: 0.39687421917915344</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 163: 0.3964714854955673</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 164: 0.3961322009563446</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 165: 0.3958088755607605</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 166: 0.39547859132289886</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 167: 0.3950991630554199</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 168: 0.39481478929519653</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 169: 0.39445243775844574</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 170: 0.39413176476955414</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 171: 0.3938053101301193</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 172: 0.39344312250614166</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 173: 0.39306651055812836</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 174: 0.3927955627441406</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 175: 0.39242881536483765</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 176: 0.3921295255422592</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 177: 0.3918290287256241</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 178: 0.3915091007947922</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 179: 0.3911389410495758</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 180: 0.39089275896549225</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 181: 0.39062342047691345</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 182: 0.3903680145740509</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 183: 0.39010104537010193</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 184: 0.3898017257452011</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 185: 0.38941918313503265</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 186: 0.3891972750425339</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 187: 0.3890211284160614</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 188: 0.3887673020362854</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 189: 0.3885367214679718</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 190: 0.38822780549526215</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 191: 0.38786838948726654</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 192: 0.387634813785553</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 193: 0.38738885521888733</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 194: 0.3870847672224045</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 195: 0.3867810219526291</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 196: 0.3864058554172516</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 197: 0.3860126733779907</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 198: 0.3857857286930084</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 199: 0.38558681309223175</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 200: 0.3853048235177994</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 201: 0.38501206040382385</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 202: 0.38468727469444275</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 203: 0.3842992037534714</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 204: 0.3840586543083191</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 205: 0.3838392645120621</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 206: 0.38355880975723267</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 207: 0.3833051919937134</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 208: 0.38310182094573975</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 209: 0.38284920156002045</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 210: 0.38270173966884613</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 211: 0.3825438767671585</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 212: 0.3822922259569168</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 213: 0.38207679986953735</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 214: 0.3818265050649643</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 215: 0.38152840733528137</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 216: 0.3813714236021042</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 217: 0.38130733370780945</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 218: 0.38116490840911865</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 219: 0.3809967488050461</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 220: 0.380742684006691</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 221: 0.3804045617580414</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 222: 0.38020919263362885</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 223: 0.3800845742225647</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 224: 0.37988536059856415</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 225: 0.3796888738870621</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 226: 0.3793925493955612</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 227: 0.3790809214115143</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 228: 0.379024863243103</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 229: 0.379000261425972</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 230: 0.37892283499240875</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 231: 0.37871453166007996</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 232: 0.37839168310165405</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 233: 0.3779936134815216</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 234: 0.37781451642513275</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 235: 0.3776834309101105</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 236: 0.3774724453687668</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 237: 0.3773380368947983</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 238: 0.3771781176328659</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 239: 0.37688206136226654</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 240: 0.3767535388469696</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 241: 0.37662486732006073</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 242: 0.3764137476682663</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 243: 0.3762095421552658</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 244: 0.37599408626556396</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 245: 0.37567947804927826</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 246: 0.37559674680233</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 247: 0.37550088763237</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 248: 0.3754040002822876</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 249: 0.375264048576355</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 250: 0.3750218152999878</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 251: 0.3747601807117462</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 252: 0.3746587336063385</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 253: 0.3747314512729645</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 254: 0.3746226578950882</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 255: 0.37449911236763</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 256: 0.3743162304162979</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 257: 0.3740655183792114</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 258: 0.3739108592271805</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 259: 0.37388554215431213</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 260: 0.37373510003089905</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 261: 0.37353916466236115</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 262: 0.37323224544525146</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 263: 0.3729245364665985</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 264: 0.37278231978416443</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 265: 0.37266917526721954</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 266: 0.3724892735481262</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 267: 0.37230175733566284</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 268: 0.37214937806129456</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 269: 0.3718898445367813</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 270: 0.3717384338378906</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 271: 0.3716912418603897</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 272: 0.3715737760066986</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 273: 0.37137043476104736</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 274: 0.371176153421402</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 275: 0.3708418011665344</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 276: 0.37076742947101593</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 277: 0.3707274943590164</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 278: 0.37063850462436676</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 279: 0.3705243021249771</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 280: 0.37024475634098053</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 281: 0.36991408467292786</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 282: 0.3698093146085739</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 283: 0.3698160648345947</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 284: 0.3696894347667694</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 285: 0.369533970952034</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 286: 0.36927981674671173</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 287: 0.36898086965084076</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 288: 0.36898569762706757</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 289: 0.36895960569381714</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 290: 0.3687611222267151</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 291: 0.36866723001003265</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 292: 0.3684963136911392</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 293: 0.36826255917549133</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 294: 0.3682125508785248</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 295: 0.3682198077440262</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 296: 0.36810554563999176</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 297: 0.36807289719581604</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 298: 0.3680167496204376</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 299: 0.36789289116859436</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 300: 0.3678576797246933</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 301: 0.3679788261651993</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 1: 1.1034757792949677</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 2: 1.0955025255680084</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 3: 1.0858566761016846</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 4: 1.074720561504364</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 5: 1.0622966587543488</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 6: 1.0488430857658386</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 7: 1.0255178213119507</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 8: 1.009855031967163</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 9: 0.9937523007392883</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 10: 0.9772686958312988</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 11: 0.960526704788208</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 12: 0.943623960018158</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 13: 0.916264146566391</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 14: 0.8990650027990341</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 15: 0.8817891478538513</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 16: 0.8645622581243515</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 17: 0.8474360257387161</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 18: 0.8305798023939133</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 19: 0.8042044192552567</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 20: 0.7881113737821579</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 21: 0.7722092717885971</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 22: 0.7565832436084747</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 23: 0.7411964237689972</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 24: 0.7263722717761993</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 25: 0.7030004858970642</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 26: 0.6888811439275742</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 27: 0.6751717776060104</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 28: 0.6619397848844528</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 29: 0.6491940468549728</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 30: 0.6370519548654556</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 31: 0.6186335682868958</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 32: 0.6076825112104416</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 33: 0.5971627980470657</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 34: 0.5871386677026749</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 35: 0.5775455087423325</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 36: 0.5685442984104156</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 37: 0.5552400648593903</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 38: 0.5476998388767242</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 39: 0.5406343787908554</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 40: 0.5339495688676834</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 41: 0.5278302431106567</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 42: 0.5223146975040436</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 43: 0.5145181864500046</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 44: 0.5102010816335678</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 45: 0.5060694962739944</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 46: 0.5022127479314804</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 47: 0.49852806329727173</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 48: 0.4950510561466217</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 49: 0.4899446815252304</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 50: 0.48701271414756775</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 51: 0.484230101108551</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 52: 0.481610432267189</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 53: 0.4790750741958618</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 54: 0.4766633212566376</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 55: 0.4730428606271744</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 56: 0.47082389891147614</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 57: 0.4686971753835678</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 58: 0.46664294600486755</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 59: 0.46461842954158783</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 60: 0.46268974244594574</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 61: 0.4597124010324478</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 62: 0.4578649252653122</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 63: 0.45609231293201447</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 64: 0.4543328732252121</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 65: 0.4525885432958603</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 66: 0.45091763138771057</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 67: 0.4484698474407196</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 68: 0.446972131729126</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 69: 0.4454375058412552</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 70: 0.44387562572956085</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 71: 0.44230976700782776</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 72: 0.4408460408449173</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 73: 0.4386903792619705</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 74: 0.4375198483467102</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 75: 0.43645255267620087</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 76: 0.43544571101665497</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 77: 0.4344322979450226</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 78: 0.4335336983203888</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 79: 0.43232113122940063</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 80: 0.43157602846622467</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 81: 0.4308636039495468</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 82: 0.4301615059375763</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 83: 0.4294131100177765</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 84: 0.42880362272262573</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 85: 0.42794719338417053</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 86: 0.42740876972675323</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 87: 0.4268830865621567</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 88: 0.4263469725847244</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 89: 0.42580197751522064</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 90: 0.42538371682167053</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 91: 0.4247855246067047</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 92: 0.4243379682302475</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 93: 0.42387907207012177</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 94: 0.42336490750312805</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 95: 0.4228051155805588</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 96: 0.42235617339611053</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 97: 0.42169424891471863</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 98: 0.42122673988342285</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 99: 0.42075203359127045</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 100: 0.4202682673931122</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 101: 0.4197542518377304</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 102: 0.41937048733234406</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 103: 0.4187891185283661</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 104: 0.4183105081319809</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 105: 0.41787703335285187</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 106: 0.41746383905410767</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 107: 0.4170563220977783</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 108: 0.41675810515880585</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 109: 0.41630710661411285</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 110: 0.4159306436777115</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 111: 0.41558949649333954</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 112: 0.41522859036922455</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 113: 0.4148131161928177</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 114: 0.41449926793575287</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 115: 0.4140652269124985</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 116: 0.4137858748435974</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 117: 0.41350632905960083</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 118: 0.4131753146648407</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 119: 0.41278982162475586</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 120: 0.4125041216611862</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 121: 0.4121049642562866</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 122: 0.4117368906736374</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 123: 0.4113801270723343</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 124: 0.41102470457553864</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 125: 0.410636231303215</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 126: 0.41034242510795593</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 127: 0.40992335975170135</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 128: 0.40955425798892975</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 129: 0.4091830998659134</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 130: 0.4087608754634857</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 131: 0.4082876145839691</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 132: 0.4079163074493408</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 133: 0.4074114263057709</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 134: 0.4070434868335724</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 135: 0.4066742807626724</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 136: 0.40629859268665314</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 137: 0.4059002548456192</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 138: 0.4056140333414078</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 139: 0.40520255267620087</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 140: 0.4048529863357544</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 141: 0.4044959098100662</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 142: 0.40410685539245605</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 143: 0.40366968512535095</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 144: 0.4033207446336746</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 145: 0.4028552174568176</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 146: 0.40249092876911163</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 147: 0.4021315723657608</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 148: 0.4017394334077835</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 149: 0.4013165235519409</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 150: 0.4010044038295746</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 151: 0.40056341886520386</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 152: 0.4001941531896591</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 153: 0.3998589813709259</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 154: 0.39951764047145844</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 155: 0.399153932929039</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 156: 0.39889417588710785</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 157: 0.3985700011253357</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 158: 0.3982636630535126</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 159: 0.39793649315834045</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 160: 0.39756840467453003</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 161: 0.39717191457748413</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 162: 0.39686986804008484</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 163: 0.39647047221660614</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 164: 0.396136075258255</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 165: 0.3958216905593872</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 166: 0.39549075067043304</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 167: 0.39510488510131836</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 168: 0.3948218673467636</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 169: 0.3944642245769501</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 170: 0.3941466361284256</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 171: 0.3938109576702118</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 172: 0.39344681799411774</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 173: 0.3930748403072357</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 174: 0.3928059786558151</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 175: 0.39244344830513</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 176: 0.39213454723358154</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 177: 0.3918306529521942</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 178: 0.3915078490972519</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 179: 0.39113979041576385</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 180: 0.3908892720937729</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 181: 0.39061588048934937</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 182: 0.39035406708717346</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 183: 0.39009228348731995</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 184: 0.3897561877965927</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 185: 0.38939304649829865</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 186: 0.3891978859901428</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 187: 0.3890194743871689</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 188: 0.3887798637151718</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 189: 0.3885416239500046</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 190: 0.388242170214653</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 191: 0.3878808170557022</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 192: 0.38762350380420685</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 193: 0.3873700648546219</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 194: 0.3870806246995926</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 195: 0.38676023483276367</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 196: 0.38638997077941895</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 197: 0.3860142379999161</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 198: 0.38579294085502625</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 199: 0.3856024146080017</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 200: 0.3853355944156647</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 201: 0.38505034148693085</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 202: 0.38471536338329315</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 203: 0.38431210815906525</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 204: 0.3840710520744324</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 205: 0.38385285437107086</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 206: 0.38355542719364166</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 207: 0.38331298530101776</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 208: 0.38313528895378113</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 209: 0.38288500905036926</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 210: 0.3827347755432129</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 211: 0.3825395554304123</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 212: 0.38230787217617035</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 213: 0.3821257948875427</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 214: 0.38186557590961456</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 215: 0.3815431594848633</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 216: 0.38137227296829224</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 217: 0.3812994360923767</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 218: 0.38116663694381714</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 219: 0.3810085356235504</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 220: 0.3807682394981384</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 221: 0.38043564558029175</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 222: 0.3802376985549927</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 223: 0.3800983875989914</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 224: 0.3798963874578476</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 225: 0.3797033876180649</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 226: 0.37942348420619965</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 227: 0.3791119307279587</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 228: 0.3790522515773773</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 229: 0.37901340425014496</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 230: 0.37893709540367126</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 231: 0.3787190914154053</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 232: 0.3784094452857971</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 233: 0.3780142366886139</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 234: 0.37782973051071167</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 235: 0.3776857703924179</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 236: 0.37747083604335785</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 237: 0.3773325979709625</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 238: 0.3771626353263855</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 239: 0.3768766522407532</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 240: 0.3767736554145813</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 241: 0.37662091851234436</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 242: 0.3763560354709625</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 243: 0.37623776495456696</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 244: 0.3759913146495819</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 245: 0.3757423460483551</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 246: 0.37566663324832916</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 247: 0.3755444437265396</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 248: 0.37544749677181244</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 249: 0.37530921399593353</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 250: 0.3750555217266083</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 251: 0.37477584183216095</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 252: 0.3746492713689804</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 253: 0.37470103800296783</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 254: 0.3746049255132675</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 255: 0.3745139092206955</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 256: 0.3743228018283844</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 257: 0.37406571209430695</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 258: 0.37390491366386414</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 259: 0.3738662600517273</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 260: 0.37372417747974396</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 261: 0.37358294427394867</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 262: 0.37326471507549286</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 263: 0.3729262948036194</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 264: 0.37277060747146606</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 265: 0.3726927191019058</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 266: 0.3724825084209442</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 267: 0.37235304713249207</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 268: 0.3721233010292053</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 269: 0.3718733787536621</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 270: 0.37174396216869354</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 271: 0.37168292701244354</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 272: 0.37156306207180023</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 273: 0.37143129110336304</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 274: 0.37113502621650696</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 275: 0.37086041271686554</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 276: 0.37077395617961884</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 277: 0.37073591351509094</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 278: 0.37060514092445374</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 279: 0.3704904764890671</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 280: 0.37026044726371765</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 281: 0.3699415624141693</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 282: 0.3698422908782959</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 283: 0.36978277564048767</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 284: 0.36968599259853363</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 285: 0.36955825984477997</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 286: 0.36929313838481903</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 287: 0.36900097131729126</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 288: 0.36899150907993317</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 289: 0.3689160794019699</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 290: 0.36877527832984924</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 291: 0.36871230602264404</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 292: 0.3685489594936371</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 293: 0.36819958686828613</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 294: 0.36815600097179413</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 295: 0.3682096153497696</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 296: 0.3681083917617798</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 297: 0.3680965453386307</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 298: 0.3680218607187271</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 299: 0.36782488226890564</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 300: 0.36782510578632355</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 301: 0.36800017952919006</span>
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:118: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 1: 0.28049624237147247</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 2: 0.2805606451901523</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 3: 0.2805622599341653</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 4: 0.280827904289419</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 5: 0.2863906432281841</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `fit_mixer` runtime: 13.62 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Started fitting AutoSKTime forecaster for array prediction</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Starting trial with hyperparameters: {&#39;class&#39;: &#39;croston.Croston&#39;}</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2715:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Trial got error: 0.19796658477664864</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Starting trial with hyperparameters: {&#39;class&#39;: &#39;trend.STLForecaster&#39;}</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2715:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Trial got error: 0.5245438066022906</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Starting trial with hyperparameters: {&#39;class&#39;: &#39;trend.PolynomialTrendForecaster&#39;}</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2715:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Trial got error: 0.683102101870188</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Starting trial with hyperparameters: {&#39;class&#39;: &#39;theta.ThetaForecaster&#39;}</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715:Multiplicative seasonality is not appropriate for zero and negative values</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Trial got error: inf</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Selected best model: croston.Croston</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `fit_mixer` runtime: 0.19 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Started fitting AutoETS forecaster for array prediction</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `fit_mixer` runtime: 0.04 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Started fitting AutoARIMA forecaster for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 1: 0.28056446530602197</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 2: 0.28062873536890204</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 3: 0.28062462535771454</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 4: 0.2808774601329457</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 5: 0.28644083033908496</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `fit_mixer` runtime: 16.26 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Started fitting AutoSKTime forecaster for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Starting trial with hyperparameters: {&#39;class&#39;: &#39;croston.Croston&#39;}</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2149:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Trial got error: 0.19796658477664864</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Starting trial with hyperparameters: {&#39;class&#39;: &#39;trend.STLForecaster&#39;}</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2149:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Trial got error: 0.5245438066022906</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Starting trial with hyperparameters: {&#39;class&#39;: &#39;trend.PolynomialTrendForecaster&#39;}</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2149:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Trial got error: 0.683102101870188</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Starting trial with hyperparameters: {&#39;class&#39;: &#39;theta.ThetaForecaster&#39;}</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149:Multiplicative seasonality is not appropriate for zero and negative values</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Trial got error: inf</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Selected best model: croston.Croston</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `fit_mixer` runtime: 0.22 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Started fitting AutoETS forecaster for array prediction</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `fit_mixer` runtime: 0.09 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Started fitting AutoARIMA forecaster for array prediction</span>
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/scipy/optimize/_numdiff.py:576: RuntimeWarning: invalid value encountered in subtract
   df = fun(x) - f0
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]
@@ -1070,40 +792,40 @@ Consider using one of the following signatures instead:
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]
   warnings.warn(
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `fit_mixer` runtime: 13.05 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Ensembling the mixer</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Mixer: NeuralTs got accuracy: 0.875</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2715:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Mixer: SkTime got accuracy: 0.956</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2715:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Mixer: ETSMixer got accuracy: 0.934</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2715:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Mixer: ARIMAMixer got accuracy: 0.951</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Picked best mixer: SkTime</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `fit` runtime: 28.05 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Learn phase 7/8] - Ensemble analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Analyzing the ensemble of mixers</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2715:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:The block ICP is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:The block ConfStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:The block AccStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:The block PermutationFeatureImportance is now running its analyze() method</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2715:Block &#39;PermutationFeatureImportance&#39; does not support time series nor text encoding, skipping...</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `analyze_ensemble` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Learn phase 8/8] - Adjustment on validation requested</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Updating the mixers</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `fit_mixer` runtime: 15.49 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Ensembling the mixer</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Mixer: NeuralTs got accuracy: 0.875</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2149:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Mixer: SkTime got accuracy: 0.956</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2149:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Mixer: ETSMixer got accuracy: 0.934</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2149:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Mixer: ARIMAMixer got accuracy: 0.951</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Picked best mixer: SkTime</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `fit` runtime: 33.48 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Learn phase 7/8] - Ensemble analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Analyzing the ensemble of mixers</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2149:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:The block ICP is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:The block ConfStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:The block AccStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:The block PermutationFeatureImportance is now running its analyze() method</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2149:Block &#39;PermutationFeatureImportance&#39; does not support time series nor text encoding, skipping...</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `analyze_ensemble` runtime: 0.03 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Learn phase 8/8] - Adjustment on validation requested</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Updating the mixers</span>
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:118: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 1: 0.28709037850300473</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 2: 0.2868206674853961</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 3: 0.2878023957212766</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 4: 0.2855246315399806</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 5: 0.28583051015933353</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Loss @ epoch 6: 0.28768110523621243</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Started fitting AutoSKTime forecaster for array prediction</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Selected best model: croston.Croston</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Started fitting AutoETS forecaster for array prediction</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:Started fitting AutoARIMA forecaster for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 1: 0.28714953859647113</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 2: 0.2868755931655566</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 3: 0.28786016752322513</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 4: 0.28557990739742917</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 5: 0.28589416295289993</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Loss @ epoch 6: 0.2877388224005699</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Started fitting AutoSKTime forecaster for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Selected best model: croston.Croston</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Started fitting AutoETS forecaster for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:Started fitting AutoARIMA forecaster for array prediction</span>
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]
@@ -1122,8 +844,8 @@ Consider using one of the following signatures instead:
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]
   warnings.warn(
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `adjust` runtime: 8.68 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `learn` runtime: 39.0 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `adjust` runtime: 10.56 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `learn` runtime: 46.62 seconds</span>
 </pre></div></div>
 </div>
 </div>
@@ -1143,35 +865,35 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Predict phase 1/4] - Data preprocessing</span>
-/tmp/215cd916615d0a21fdf14522218fa25df26234f269c7632616775097233652842.py:566: SettingWithCopyWarning:
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Predict phase 1/4] - Data preprocessing</span>
+/tmp/eb39beab84a7d2ae3ebe0dd646fe0f2f62c6562a047021e91678740764457324.py:566: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
   data[col] = [None] * len(data)
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Transforming timeseries data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `preprocess` runtime: 0.09 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Predict phase 2/4] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `featurize` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Predict phase 3/4] - Calling ensemble</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2715:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2715:[Predict phase 4/4] - Analyzing output</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Transforming timeseries data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `preprocess` runtime: 0.11 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Predict phase 2/4] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `featurize` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Predict phase 3/4] - Calling ensemble</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2149:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2149:[Predict phase 4/4] - Analyzing output</span>
 /home/runner/work/lightwood/lightwood/lightwood/helpers/ts.py:122: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
   df[f&#39;order_{col}&#39;].iloc[idx] = timestamps
-<span class="ansi-green-fg">INFO:lightwood-2715:The block ICP is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:The block ConfStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:The block AccStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:The block PermutationFeatureImportance is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2715:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2715: `predict` runtime: 0.42 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:The block ConfStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:The block PermutationFeatureImportance is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2149:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2149: `predict` runtime: 0.5 seconds</span>
 </pre></div></div>
 </div>
 <p>Let’s check how a single row might look:</p>
@@ -1224,7 +946,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
       <th>10</th>
       <td>10</td>
       <td>[139.64101541907135, 139.64101541907135, 139.6...</td>
-      <td>[-271382400.0, -268704000.0, -266025600.0, -26...</td>
+      <td>[-272592000.0, -269913600.0, -267235200.0, -26...</td>
       <td>[0.99, 0.99, 0.99, 0.99, 0.99, 0.99]</td>
       <td>[138.49473921001066, 137.38729162813206, 132.5...</td>
       <td>[140.78729162813204, 141.89473921001064, 146.6...</td>

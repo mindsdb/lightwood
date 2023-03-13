@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
 
   
@@ -174,286 +175,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="Tutorial---Implementing-a-custom-mixer-in-Lightwood">
+  <div class="section" id="Tutorial---Implementing-a-custom-mixer-in-Lightwood">
 <h1>Tutorial - Implementing a custom mixer in Lightwood<a class="headerlink" href="#Tutorial---Implementing-a-custom-mixer-in-Lightwood" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="Introduction">
 <h2>Introduction<a class="headerlink" href="#Introduction" title="Permalink to this headline">¶</a></h2>
@@ -575,40 +297,42 @@ Writing random_forest_mixer.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2213:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:No torchvision/pillow detected, image encoder not supported</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Analyzing a sample of 298</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:from a total population of 303, this is equivalent to 98.3% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: age</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column age has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: sex</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column sex has data type binary</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: cp</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column cp has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: trestbps</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column trestbps has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: chol</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column chol has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: fbs</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column fbs has data type binary</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: restecg</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column restecg has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: thalach</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column thalach has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: exang</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column exang has data type binary</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: oldpeak</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column oldpeak has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: slope</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column slope has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: ca</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column ca has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: thal</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column thal has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:type_infer-2213:Column target has data type binary</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Finished statistical analysis</span>
+[nltk_data] Downloading package punkt to /home/runner/nltk_data...
+[nltk_data]   Unzipping tokenizers/punkt.zip.
+<span class="ansi-green-fg">INFO:lightwood-2113:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Analyzing a sample of 298</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:from a total population of 303, this is equivalent to 98.3% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: age</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column age has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: sex</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column sex has data type binary</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: cp</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column cp has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: trestbps</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column trestbps has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: chol</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column chol has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: fbs</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column fbs has data type binary</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: restecg</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column restecg has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: thalach</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column thalach has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: exang</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column exang has data type binary</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: oldpeak</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column oldpeak has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: slope</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column slope has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: ca</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column ca has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: thal</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column thal has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:type_infer-2113:Column target has data type binary</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -736,7 +460,7 @@ Writing random_forest_mixer.py
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 42768.0,
         &#34;seconds_per_encoder&#34;: null,
-        &#34;expected_additional_time&#34;: 0.06753754615783691,
+        &#34;expected_additional_time&#34;: 0.0916295051574707,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -804,7 +528,7 @@ Writing random_forest_mixer.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Unable to import black formatter, predictor code might be a bit ugly.</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Unable to import black formatter, predictor code might be a bit ugly.</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -820,15 +544,15 @@ Writing random_forest_mixer.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Learn phase 1/8] - Statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `analyze_data` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Learn phase 2/8] - Data preprocessing</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `preprocess` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Learn phase 3/8] - Data splitting</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Splitting the data into train/test</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Learn phase 1/8] - Statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `analyze_data` runtime: 0.03 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Learn phase 2/8] - Data preprocessing</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `preprocess` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Learn phase 3/8] - Data splitting</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Splitting the data into train/test</span>
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/dataprep_ml/splitters.py:131: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   train_st = train_st.append(df[:train_cutoff])
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/dataprep_ml/splitters.py:132: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
@@ -841,32 +565,32 @@ Writing random_forest_mixer.py
   dev_st = dev_st.append(df[train_cutoff:dev_cutoff])
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/dataprep_ml/splitters.py:133: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
   test_st = test_st.append(df[dev_cutoff:test_cutoff])
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `split` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Learn phase 4/8] - Preparing encoders</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `prepare` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Learn phase 5/8] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `featurize` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Learn phase 6/8] - Mixer training</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Training the mixers</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `fit_mixer` runtime: 2.32 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Ensembling the mixer</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:Mixer: RandomForestMixer got accuracy: 0.835</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:Picked best mixer: RandomForestMixer</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `fit` runtime: 2.58 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Learn phase 7/8] - Ensemble analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Analyzing the ensemble of mixers</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:The block ICP is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:The block ConfStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:The block AccStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:The block PermutationFeatureImportance is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:[PFI] Using a random sample (1000 rows out of 30).</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:[PFI] Set to consider first 10 columns out of 10: [&#39;age&#39;, &#39;sex&#39;, &#39;cp&#39;, &#39;trestbps&#39;, &#39;chol&#39;, &#39;fbs&#39;, &#39;restecg&#39;, &#39;thalach&#39;, &#39;exang&#39;, &#39;oldpeak&#39;].</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `split` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Learn phase 4/8] - Preparing encoders</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `prepare` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Learn phase 5/8] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `featurize` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Learn phase 6/8] - Mixer training</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Training the mixers</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `fit_mixer` runtime: 3.19 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Ensembling the mixer</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:Mixer: RandomForestMixer got accuracy: 0.835</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:Picked best mixer: RandomForestMixer</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `fit` runtime: 3.56 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Learn phase 7/8] - Ensemble analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Analyzing the ensemble of mixers</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:The block ICP is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:The block ConfStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:The block AccStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:The block PermutationFeatureImportance is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:[PFI] Using a random sample (1000 rows out of 30).</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:[PFI] Set to consider first 10 columns out of 10: [&#39;age&#39;, &#39;sex&#39;, &#39;cp&#39;, &#39;trestbps&#39;, &#39;chol&#39;, &#39;fbs&#39;, &#39;restecg&#39;, &#39;thalach&#39;, &#39;exang&#39;, &#39;oldpeak&#39;].</span>
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/sklearn/metrics/_classification.py:1987: UserWarning: y_pred contains classes not in y_true
   warnings.warn(&#34;y_pred contains classes not in y_true&#34;)
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/sklearn/metrics/_classification.py:1987: UserWarning: y_pred contains classes not in y_true
@@ -877,11 +601,11 @@ Writing random_forest_mixer.py
   warnings.warn(&#34;y_pred contains classes not in y_true&#34;)
 /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/sklearn/metrics/_classification.py:1987: UserWarning: y_pred contains classes not in y_true
   warnings.warn(&#34;y_pred contains classes not in y_true&#34;)
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `analyze_ensemble` runtime: 3.08 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Learn phase 8/8] - Adjustment on validation requested</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Updating the mixers</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `adjust` runtime: 0.0 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `learn` runtime: 5.74 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `analyze_ensemble` runtime: 4.27 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Learn phase 8/8] - Adjustment on validation requested</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Updating the mixers</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `adjust` runtime: 0.0 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `learn` runtime: 7.94 seconds</span>
 </pre></div></div>
 </div>
 <p>Finally, we can use the trained predictor to make some predictions, or save it to a pickle for later use</p>
@@ -905,22 +629,22 @@ Writing random_forest_mixer.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Predict phase 1/4] - Data preprocessing</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `preprocess` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Predict phase 2/4] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `featurize` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Predict phase 3/4] - Calling ensemble</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2213:[Predict phase 4/4] - Analyzing output</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:The block ICP is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:The block ConfStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:The block AccStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:The block PermutationFeatureImportance is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2213:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2213: `predict` runtime: 0.06 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Predict phase 1/4] - Data preprocessing</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `preprocess` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Predict phase 2/4] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `featurize` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Predict phase 3/4] - Calling ensemble</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2113:[Predict phase 4/4] - Analyzing output</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:The block ConfStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:The block PermutationFeatureImportance is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2113:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2113: `predict` runtime: 0.08 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

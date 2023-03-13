@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
 
   
@@ -174,287 +175,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="Tutorial---Introduction-to-Lightwood’s-statistical-analysis">
-<h1>Tutorial - Introduction to Lightwood’s statistical analysis<a class="headerlink" href="#Tutorial---Introduction-to-Lightwood’s-statistical-analysis" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="Tutorial---Introduction-to-Lightwood's-statistical-analysis">
+<h1>Tutorial - Introduction to Lightwood’s statistical analysis<a class="headerlink" href="#Tutorial---Introduction-to-Lightwood's-statistical-analysis" title="Permalink to this headline">¶</a></h1>
 <p>As you might already know, Lightwood is designed to be a flexible machine learning (ML) library that is able to abstract and automate the entire ML pipeline. Crucially, it is also designed to be extended or modified very easily according to your needs, essentially offering the entire spectrum between fully automated AutoML and a lightweight wrapper for customized ML pipelines.</p>
 <p>As such, we can identify several different customizable “phases” in the process. The relevant phase for this tutorial is the “statistical analysis” that is normally ran in two different places:</p>
 <ul class="simple">
@@ -568,7 +290,7 @@ div.rendered_html tbody tr:hover {
 </div></div>
 </div>
 <p>This dataset has a handful of important factors to each country’s development index, as well as the index itself (very high, high, medium or low). Each row gives information about a country’s status in terms of their population size, density, and GDP per capita, among others.</p>
-<p>We can see there are columns with integer (e.g. <code class="docutils literal notranslate"><span class="pre">Population</span></code>), float (<code class="docutils literal notranslate"><span class="pre">Pop.</span> <span class="pre">Density</span></code>) or categorical (e.g. <code class="docutils literal notranslate"><span class="pre">Development</span> <span class="pre">Index</span></code>) data.</p>
+<p>We can see there are columns with integer (e.g. <code class="docutils literal notranslate"><span class="pre">Population</span></code>), float (<code class="docutils literal notranslate"><span class="pre">Pop.</span> <span class="pre">Density</span></code>) or categorical (e.g. <code class="docutils literal notranslate"><span class="pre">Development</span> <span class="pre">Index</span></code>) data.</p>
 <p>The task we will consider here is to predicting the development index of each nation based on the rest of the available information.</p>
 <p>Lightwood provides an abstraction called <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> to specify the target column of a dataset, along with other important parameters that you might want to define (for a complete list, check the documentation).</p>
 <p>We will create a simple one:</p>
@@ -587,8 +309,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2761:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2761:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2286:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2286:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <p>Let’s see how this object has been populated. <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> is a Python <code class="docutils literal notranslate"><span class="pre">dataclass</span></code>, so it comes with some convenient tools to achieve this:</p>
@@ -647,22 +369,22 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2761:Analyzing a sample of 222</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:from a total population of 225, this is equivalent to 98.7% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Infering type for: Population</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Column Population has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Infering type for: Area (sq. mi.)</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Column Area (sq. mi.) has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Infering type for: Pop. Density </span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Column Pop. Density  has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Infering type for: GDP ($ per capita)</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Column GDP ($ per capita) has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Infering type for: Literacy (%)</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Column Literacy (%) has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Infering type for: Infant mortality </span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Column Infant mortality  has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Infering type for: Development Index</span>
-<span class="ansi-green-fg">INFO:type_infer-2761:Column Development Index has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Analyzing a sample of 222</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:from a total population of 225, this is equivalent to 98.7% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Infering type for: Population</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Column Population has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Infering type for: Area (sq. mi.)</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Column Area (sq. mi.) has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Infering type for: Pop. Density </span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Column Pop. Density  has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Infering type for: GDP ($ per capita)</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Column GDP ($ per capita) has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Infering type for: Literacy (%)</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Column Literacy (%) has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Infering type for: Infant mortality </span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Column Infant mortality  has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Infering type for: Development Index</span>
+<span class="ansi-green-fg">INFO:type_infer-2286:Column Development Index has data type categorical</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -724,8 +446,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2761:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2761:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2286:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2286:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </div>
@@ -1032,7 +754,7 @@ Biased buckets: [650.86, 6183.17, 976.29, 325.43, 0.0]
 <div class="section" id="Final-thoughts">
 <h1>Final thoughts<a class="headerlink" href="#Final-thoughts" title="Permalink to this headline">¶</a></h1>
 <p>Lightwood automatically tries to leverage all the information provided by a <code class="docutils literal notranslate"><span class="pre">StatisticalAnalysis</span></code> instance when generating a predictor for any given dataset and problem definition. Additionally, it is a valuable tool to explore the data as a user.</p>
-<p>Finally, be aware that you can access these insights when creating custom blocks (e.g. encoders, mixers, or analyzers) if you want, you just need to pass whatever is necessary as arguments to these blocks inside the Json AI object.</p>
+<p>Finally, be aware that you can access these insights when creating custom blocks (e.g. encoders, mixers, or analyzers) if you want, you just need to pass whatever is necessary as arguments to these blocks inside the Json AI object.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>

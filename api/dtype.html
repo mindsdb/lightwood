@@ -184,31 +184,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="data-types-dtypes">
+  <div class="section" id="data-types-dtypes">
 <h1>Data Types (dtypes)<a class="headerlink" href="#data-types-dtypes" title="Permalink to this headline">¶</a></h1>
 <p>Lightwood supports several data types used in standard machine learning pipelines. The <code class="docutils literal notranslate"><span class="pre">dtype</span></code> class is used to label columns of information as the right input format. The type inference procedure affects what feature engineering methodology is used on a labeled column.</p>
 <p>Currently, the supported way to encourage new data types is to include a custom tag in this file and to import a custom cleaning approach. Users may inherit the basic functionality of the cleaner and include their own flag specific to their data type. For steps on how to do this, please see the tutorials.</p>
