@@ -140,7 +140,7 @@ class NeuralTs(Neural):
         all_probs: List[List[float]] = []
         rev_map = {}
 
-        length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
+        length = sum(ds.encoded_ds_lengths) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         pred_cols = [f'prediction_{i}' for i in range(self.timeseries_settings.horizon)]
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),

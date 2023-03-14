@@ -144,7 +144,7 @@ class ConcatedEncodedDs(EncodedDs):
     def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
         # @TODO: missing super() call here?
         self.encoded_ds_arr = encoded_ds_arr
-        self.encoded_ds_lenghts = [len(x) for x in self.encoded_ds_arr]
+        self.encoded_ds_lengths = [len(x) for x in self.encoded_ds_arr]
         self.encoders = self.encoded_ds_arr[0].encoders
         self.encoder_spans = self.encoded_ds_arr[0].encoder_spans
         self.target = self.encoded_ds_arr[0].target
@@ -155,13 +155,13 @@ class ConcatedEncodedDs(EncodedDs):
         See `lightwood.data.encoded_ds.EncodedDs.__len__()`.
         """
         # @TODO: behavior here is not intuitive
-        return max(0, np.sum(self.encoded_ds_lenghts) - 2)
+        return max(0, np.sum(self.encoded_ds_lengths) - 2)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         See `lightwood.data.encoded_ds.EncodedDs.__getitem__()`.
         """
-        for ds_idx, length in enumerate(self.encoded_ds_lenghts):
+        for ds_idx, length in enumerate(self.encoded_ds_lengths):
             if idx - length < 0:
                 return self.encoded_ds_arr[ds_idx][idx]
             else:

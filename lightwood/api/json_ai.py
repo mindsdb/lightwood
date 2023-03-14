@@ -571,21 +571,30 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
         mixers[i]["args"]["stop_after"] = mixers[i]["args"].get("stop_after", "$problem_definition.seconds_per_mixer")
 
         # specific
-        if mixers[i]["module"] in ("Neural", "NeuralTs"):
+        if mixers[i]["module"] in ("Neural", "NeuralTs", "TabTransformerMixer"):
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
-            mixers[i]["args"]["net"] = mixers[i]["args"].get(
-                "net",
-                '"DefaultNet"'
-                if not tss.is_timeseries or not tss.use_previous_target
-                else '"ArNet"',
-            )
+
+            if mixers[i]["module"] in ("Neural", "NeuralTs"):
+                mixers[i]["args"]["net"] = mixers[i]["args"].get(
+                    "net",
+                    '"DefaultNet"'
+                    if not tss.is_timeseries or not tss.use_previous_target
+                    else '"ArNet"',
+                )
+                mixers[i]["args"]["search_hyperparameters"] = mixers[i]["args"].get("search_hyperparameters", True)
+                mixers[i]["args"]["fit_on_dev"] = mixers[i]["args"].get("fit_on_dev", True)
+
             if mixers[i]["module"] == "NeuralTs":
                 mixers[i]["args"]["timeseries_settings"] = mixers[i]["args"].get(
                     "timeseries_settings", "$problem_definition.timeseries_settings"
                 )
                 mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get("ts_analysis", "$ts_analysis")
+
+            if mixers[i]["module"] == "TabTransformerMixer":
+                mixers[i]["args"]["search_hyperparameters"] = mixers[i]["args"].get("search_hyperparameters", False)
+                mixers[i]["args"]["fit_on_dev"] = mixers[i]["args"].get("fit_on_dev", False)
 
         elif mixers[i]["module"] in ("LightGBM", "XGBoostMixer"):
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
@@ -1025,7 +1034,12 @@ self.mixers = [{', '.join([call(x) for x in json_ai.model["args"]["submodels"]])
 trained_mixers = []
 for mixer in self.mixers:
     try:
-        self.fit_mixer(mixer, encoded_train_data, encoded_dev_data)
+        if mixer.trains_once:
+            self.fit_mixer(mixer,
+                           ConcatedEncodedDs([encoded_train_data, encoded_dev_data]),
+                           encoded_test_data)
+        else:
+            self.fit_mixer(mixer, encoded_train_data, encoded_dev_data)
         trained_mixers.append(mixer)
     except Exception as e:
         log.warning(f'Exception: {{e}} when training mixer: {{mixer}}')
@@ -1107,7 +1121,7 @@ train_data = EncodedDs(self.encoders, train_data, self.target)
 log.info('Updating the mixers')
 
 for mixer in self.mixers:
-    mixer.partial_fit(train_data, dev_data, adjust_args)
+        mixer.partial_fit(train_data, dev_data, adjust_args)
 """  # noqa
 
     adjust_body = align(adjust_body, 2)
@@ -1154,8 +1168,7 @@ self.analyze_ensemble(enc_train_test)
 # SET `json_ai.problem_definition.fit_on_all=False` TO TURN THIS BLOCK OFF.
 
 # Update the mixers with partial fit
-if self.problem_definition.fit_on_all:
-
+if self.problem_definition.fit_on_all and all([not m.trains_once for m in self.mixers]):
     log.info(f'[Learn phase 8/{n_phases}] - Adjustment on validation requested')
     self.adjust(enc_train_test["test"].data_frame, ConcatedEncodedDs([enc_train_test["train"],
                                                                       enc_train_test["dev"]]).data_frame,

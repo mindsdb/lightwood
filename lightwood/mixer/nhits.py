@@ -162,7 +162,7 @@ class NHitsMixer(BaseMixer):
         if args.predict_proba:
             log.warning('This mixer does not output probability estimates')
 
-        length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
+        length = sum(ds.encoded_ds_lengths) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=np.arange(length),
                            columns=['prediction', 'lower', 'upper'],

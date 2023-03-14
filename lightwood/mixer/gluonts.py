@@ -5,15 +5,16 @@ from typing import Dict, Union, Optional
 import numpy as np
 import pandas as pd
 import mxnet as mx
+from sklearn.preprocessing import OrdinalEncoder
 
 from gluonts.dataset.pandas import PandasDataset
 
-from gluonts.model.deepar import DeepAREstimator  # @TODO: support for other estimators
-from gluonts.mx import Trainer
+from gluonts.mx import DeepAREstimator, Trainer  # @TODO: support for other estimators
 from gluonts.mx.trainer.callback import TrainingHistory
 from gluonts.mx.distribution.student_t import StudentTOutput
 
 from lightwood.helpers.log import log
+from lightwood.helpers.ts import get_group_matches
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
@@ -36,9 +37,13 @@ class GluonTSMixer(BaseMixer):
             early_stop_patience: int = 3,
             distribution_output: str = '',
             seed: int = 0,
+            static_features_cat: Optional[list[str]] = None,
+            static_features_real: Optional[list[str]] = None,
     ):
         """
         Wrapper around GluonTS probabilistic deep learning models. For now, only DeepAR is supported.
+
+        Due to inference speed, predictions are only generated for the last data point (as opposed to other mixers).  
 
         :param stop_after: time budget in seconds.
         :param target: column to forecast.
@@ -68,6 +73,10 @@ class GluonTSMixer(BaseMixer):
         self.train_cache = None
         self.patience = early_stop_patience
         self.seed = seed
+        self.trains_once = True
+        self.static_features_cat_encoders = {}
+        self.static_features_cat = static_features_cat if static_features_cat else []
+        self.static_features_real = static_features_real if static_features_real else []
 
         dist_module = importlib.import_module('.'.join(['gluonts.mx.distribution',
                                                         *distribution_output.split(".")[:-1]]))
@@ -85,15 +94,26 @@ class GluonTSMixer(BaseMixer):
 
         # prepare data
         cat_ds = ConcatedEncodedDs([train_data, dev_data])
+        for col in self.static_features_cat:
+            self.static_features_cat_encoders[col] = OrdinalEncoder().fit(cat_ds.data_frame[col].values.reshape(-1, 1))
+
         fit_groups = list(cat_ds.data_frame[self.grouped_by[0]].unique()) if self.grouped_by != ['__default'] else None
         train_ds = self._make_initial_ds(cat_ds.data_frame, phase='train', groups=fit_groups)
+        batch_size = 32
         self.model_train_stats = TrainingHistory()
 
         self.estimator = DeepAREstimator(
             freq=train_ds.freq,
             prediction_length=self.horizon,
             distr_output=self.distribution,
-            trainer=Trainer(epochs=self.n_epochs, callbacks=[EarlyStop(patience=self.patience), self.model_train_stats])
+            lags_seq=[i + 1 for i in range(self.window)],
+            batch_size=batch_size,
+            use_feat_static_cat=True if self.static_features_cat else False,
+            use_feat_static_real=True if self.static_features_real else False,
+            trainer=Trainer(
+                epochs=self.n_epochs,
+                num_batches_per_epoch=max(1, len(cat_ds.data_frame) // batch_size),
+                callbacks=[EarlyStop(patience=self.patience), self.model_train_stats])
         )
         self.model = self.estimator.train(train_ds)
         self.prepared = True
@@ -129,11 +149,15 @@ class GluonTSMixer(BaseMixer):
         """ 
         Calls the mixer to emit forecasts.
         """  # noqa
-        length = sum(ds.encoded_ds_lenghts) if isinstance(ds, ConcatedEncodedDs) else len(ds)
-        ydf = pd.DataFrame(0,  # zero-filled
-                           index=np.arange(length),
-                           columns=['prediction', 'lower', 'upper'],
-                           dtype=object)
+        mx.random.seed(self.seed)
+        np.random.seed(self.seed)
+        length = sum(ds.encoded_ds_lengths) if isinstance(ds, ConcatedEncodedDs) else len(ds)
+
+        ydf = pd.DataFrame(index=np.arange(length), dtype=object)
+        init_arr = [0 for _ in range(self.ts_analysis['tss'].horizon)]
+        for col in ['prediction', 'lower', 'upper']:
+            ydf.at[:, col] = [init_arr for _ in range(len(ydf))]
+
         ydf['index'] = ds.data_frame.index
         conf = args.fixed_confidence if args.fixed_confidence else 0.9
         ydf['confidence'] = conf
@@ -141,28 +165,30 @@ class GluonTSMixer(BaseMixer):
         gby = self.ts_analysis["tss"].group_by if self.ts_analysis["tss"].group_by else []
         groups = ds.data_frame[gby[0]].unique().tolist() if gby else None
 
-        for idx in range(length):
-            df = ds.data_frame.iloc[:idx] if idx != 0 else None
-            input_ds = self._make_initial_ds(df, groups=groups)
-            if not input_ds:
-                # edge case: new group
-                for col in ['prediction', 'lower', 'upper']:
-                    ydf.at[idx, col] = [0 for _ in range(self.ts_analysis["tss"].horizon)]
-            else:
-                mx.random.seed(self.seed)
-                np.random.seed(self.seed)
-                forecasts = list(self.model.predict(input_ds))[0]
-                ydf.at[idx, 'prediction'] = [entry for entry in forecasts.quantile(0.5)]
-                ydf.at[idx, 'lower'] = [entry for entry in forecasts.quantile(1 - conf)]
-                ydf.at[idx, 'upper'] = [entry for entry in forecasts.quantile(conf)]
+        df = ds.data_frame
+        ydf['__original_index'] = df['__mdb_original_index'].values
+        input_ds = self._make_initial_ds(df, groups=groups)  # TODO test with novel group
+        forecasts = list(self.model.predict(input_ds))
+        for group, group_forecast in zip(groups, forecasts):
+            _, subdf = get_group_matches(df, (group, ), gby)
+            idx = ydf[ydf['__original_index'] == max(subdf['__mdb_original_index'])].index.values[0]
+            ydf.at[idx, 'prediction'] = [entry for entry in group_forecast.quantile(0.5)]
+            ydf.at[idx, 'lower'] = [entry for entry in group_forecast.quantile(1 - conf)]
+            ydf.at[idx, 'upper'] = [entry for entry in group_forecast.quantile(conf)]
 
         return ydf
 
     def _make_initial_ds(self, df=None, phase='predict', groups=None):
-        oby = self.ts_analysis["tss"].order_by
+        oby_col_name = '__gluon_timestamp'
         gby = self.ts_analysis["tss"].group_by if self.ts_analysis["tss"].group_by else []
         freq = self.ts_analysis['sample_freqs']['__default']
-        keep_cols = [f'__mdb_original_{oby}', self.target] + [col for col in gby]
+        keep_cols = [self.target] + [col for col in gby] + self.static_features_cat + self.static_features_real
+
+        agg_map = {self.target: 'sum'}
+        for col in self.static_features_cat:
+            agg_map[col] = 'first'
+        for col in self.static_features_real:
+            agg_map[col] = 'mean'
 
         if groups is None and gby:
             groups = self.groups
@@ -198,14 +224,26 @@ class GluonTSMixer(BaseMixer):
             return None
 
         if gby:
-            df = df.groupby(by=gby[0]).resample(freq).sum().reset_index(level=[0])
             # @TODO: multiple group support and remove groups without enough data
+            df = df.groupby(by=gby[0]).resample(freq).agg(agg_map).reset_index(level=[0])
         else:
-            df = df.resample(freq).sum()
+            df = df.resample(freq).agg(agg_map)
             gby = '__default_group'
             df[gby] = '__default_group'
 
-        ds = PandasDataset.from_long_dataframe(df, target=self.target, item_id=gby, freq=freq)
+        df[oby_col_name] = df.index
+        for col in self.static_features_cat:
+            df[col] = self.static_features_cat_encoders[col].transform(df[col].values.reshape(-1, 1))
+
+        ds = PandasDataset.from_long_dataframe(
+            df,
+            target=self.target,
+            item_id=gby,
+            freq=freq,
+            timestamp=oby_col_name,
+            feat_static_real=self.static_features_real if self.static_features_real else None,
+            feat_static_cat=self.static_features_cat if self.static_features_cat else None,
+        )
         return ds
 
 

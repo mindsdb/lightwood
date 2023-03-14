@@ -63,7 +63,7 @@ class Neural(BaseMixer):
         self.epochs_to_best = 0
         self.n_epochs = n_epochs
         self.fit_on_dev = fit_on_dev
-        self.net_class = DefaultNet if net == 'DefaultNet' else ArNet
+        self.net_name = net
         self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
         self.search_hyperparameters = search_hyperparameters
         self.stable = True
@@ -80,7 +80,7 @@ class Neural(BaseMixer):
                     for X, Y in data:
                         X = X.to(self.model.device)
                         Y = Y.to(self.model.device)
-                        Yh = self.model(X)
+                        Yh = self._net_call(X)
 
                         Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
                         Y = torch.unsqueeze(Y, 0) if len(Y.shape) < 2 else Y
@@ -134,7 +134,7 @@ class Neural(BaseMixer):
                 Y = Y.to(self.model.device)
                 with LightwoodAutocast():
                     optimizer.zero_grad()
-                    Yh = self.model(X)
+                    Yh = self._net_call(X)
                     loss = criterion(Yh, Y)
                     if LightwoodAutocast.active:
                         scaler.scale(loss).backward()
@@ -179,7 +179,7 @@ class Neural(BaseMixer):
                 Y = Y.to(self.model.device)
                 with LightwoodAutocast():
                     optimizer.zero_grad()
-                    Yh = self.model(X)
+                    Yh = self._net_call(X)
                     loss = criterion(Yh, Y)
                     if LightwoodAutocast.active:
                         scaler.scale(loss).backward()
@@ -236,11 +236,13 @@ class Neural(BaseMixer):
             for X, Y in dev_dl:
                 X = X.to(self.model.device)
                 Y = Y.to(self.model.device)
-                Yh = self.model(X)
+                Yh = self._net_call(X)
                 running_losses.append(criterion(Yh, Y).item())
             return np.mean(running_losses)
 
     def _init_net(self, ds: EncodedDs):
+        self.net_class = DefaultNet if self.net_name == 'DefaultNet' else ArNet
+
         net_kwargs = {'input_size': len(ds[0][0]),
                       'output_size': len(ds[0][1]),
                       'num_hidden': self.num_hidden,
@@ -251,6 +253,9 @@ class Neural(BaseMixer):
             net_kwargs['target_name'] = self.target
 
         self.model = self.net_class(**net_kwargs)
+
+    def _net_call(self, x: torch.Tensor) -> torch.Tensor:
+        return self.model(x)
 
     # @TODO: Compare partial fitting fully on and fully off on the benchmarks!
     # @TODO: Writeup on the methodology for partial fitting
@@ -275,7 +280,8 @@ class Neural(BaseMixer):
         # Find learning rate
         # keep the weights
         self._init_net(train_data)
-        self.lr, self.model = self._find_lr(train_dl)
+        if not self.lr:
+            self.lr, self.model = self._find_lr(train_dl)
 
         # Keep on training
         optimizer = self._select_optimizer()
@@ -333,7 +339,7 @@ class Neural(BaseMixer):
         with torch.no_grad():
             for idx, (X, Y) in enumerate(ds):
                 X = X.to(self.model.device)
-                Yh = self.model(X)
+                Yh = self._net_call(X)
                 Yh = torch.unsqueeze(Yh, 0) if len(Yh.shape) < 2 else Yh
 
                 kwargs = {}

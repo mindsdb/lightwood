@@ -21,11 +21,12 @@ class BaseMixer:
     - stable: If set to `True`, this mixer should always work. Any mixer with `stable=False` can be expected to fail under some circumstances.
     - fit_data_len: Length of the training data.
     - supports_proba: For classification tasks, whether the mixer supports yielding per-class scores rather than only returning the predicted label. 
-
+    - trains_once: If True, the mixer is trained once during learn, using all available input data (`train` and `dev` splits for training, `test` for validation). Otherwise, it trains once with the `train`` split & `dev` for validation, and optionally (depending on the problem definition `fit_on_all` and mixer-wise `fit_on_dev` arguments) a second time after post-training analysis via partial_fit, with `train` and `dev` splits as training subset, and `test` split as validation. Should only be set to True for mixers that don't require post-training analysis, as otherwise actual validation data would be treated as a held-out portion, which is a mistake. 
     """  # noqa
     stable: bool
     fit_data_len: int  # @TODO (Patricio): should this really be in `BaseMixer`?
     supports_proba: bool
+    trains_once: bool
 
     def __init__(self, stop_after: float):
         """
@@ -33,6 +34,7 @@ class BaseMixer:
         """
         self.stop_after = stop_after
         self.supports_proba = False
+        self.trains_once = False
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
