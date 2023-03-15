@@ -196,7 +196,12 @@ class SkTime(BaseMixer):
                 series = series.loc[~pd.isnull(series.values)]  # remove NaN  # @TODO: benchmark imputation vs this?
 
                 if self.model_path == 'fbprophet.Prophet':
-                    series = self._transform_index_to_datetime(series, series_oby, options['freq'])
+                    try:
+                        series = self._transform_index_to_datetime(series, series_oby, options['freq'])
+                    except Exception as e:
+                        if group == '__default':
+                            # out of bounds with true freq in __default group is fine, we skip it
+                            continue
 
                 series = series.astype(float)
 
