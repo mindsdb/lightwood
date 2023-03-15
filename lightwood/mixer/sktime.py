@@ -198,7 +198,7 @@ class SkTime(BaseMixer):
                 if self.model_path == 'fbprophet.Prophet':
                     try:
                         series = self._transform_index_to_datetime(series, series_oby, options['freq'])
-                    except Exception as e:
+                    except Exception:
                         if group == '__default':
                             # out of bounds with true freq in __default group is fine, we skip it
                             continue
