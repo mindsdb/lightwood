@@ -4,9 +4,9 @@ mindsdb-evaluator ==0.0.6
 numpy
 nltk >=3,<3.6
 python-dateutil >=2.8.1
-pandas >=1.1.5
+pandas >=1.1.5, <1.5.0
 schema >=0.6.8
-torch >=1.9.0
+torch >=1.13.0, <1.14.0
 requests >=2.0.0
 transformers
 optuna >=2.8.0,<2.10.0
@@ -18,7 +18,7 @@ scikit-learn >=1.0.0, <=1.0.2
 dataclasses_json >=0.5.4
 dill ==0.3.4
 sktime >=0.14.0,<0.15.0
-statsforecast ==0.7.0
+statsforecast ==1.4.0
 torch_optimizer ==0.1.0
 black >=21.9b0
 typing_extensions
