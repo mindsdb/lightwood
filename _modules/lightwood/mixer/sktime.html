@@ -369,7 +369,12 @@
                 <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">values</span><span class="p">)]</span>  <span class="c1"># remove NaN  # @TODO: benchmark imputation vs this?</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">==</span> <span class="s1">&#39;fbprophet.Prophet&#39;</span><span class="p">:</span>
-                    <span class="n">series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_index_to_datetime</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">series_oby</span><span class="p">,</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">])</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_index_to_datetime</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">series_oby</span><span class="p">,</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;freq&#39;</span><span class="p">])</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">group</span> <span class="o">==</span> <span class="s1">&#39;__default&#39;</span><span class="p">:</span>
+                            <span class="c1"># out of bounds with true freq in __default group is fine, we skip it</span>
+                            <span class="k">continue</span>
 
                 <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
 
