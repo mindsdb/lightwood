@@ -11,7 +11,7 @@ class PredictorInterface:
     Abstraction of a Lightwood predictor. The ``PredictorInterface`` encompasses how Lightwood interacts with the full ML pipeline. Internally,
 
     The ``PredictorInterface`` class must have several expected functions:
-    
+
     - ``analyze_data``: Peform a statistical analysis on the unprocessed data; this helps inform downstream encoders and mixers on how to treat the data types.
     - ``preprocess``: Apply cleaning functions to each of the columns within the dataset to prepare them for featurization
     - ``split``: Split the input dataset into a train/dev/test set according to your splitter function
@@ -24,7 +24,7 @@ class PredictorInterface:
     For simplification, we offer an end-to-end approach that allows you to input raw data and follow every step of the process until you reach a trained predictor with the ``learn`` function:
 
         - ``learn``: An end-to-end technique specifying how to pre-process, featurize, and train the model(s) of interest. The expected input is raw, untrained data. No explicit output is provided, but the Predictor object will "host" the trained model thus.
-    
+
     You can also use the predictor to now estimate new data:
 
     - ``predict``: Deploys the chosen best model, and evaluates the given data to provide target estimates.
@@ -85,7 +85,7 @@ class PredictorInterface:
 
     def fit(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         """
-        Fits "mixer" models to train predictors on the featurized data. Instantiates a set of trained mixers and an ensemble of them. 
+        Fits "mixer" models to train predictors on the featurized data. Instantiates a set of trained mixers and an ensemble of them.
 
         :param enc_data: Pre-processed and featurized data, split into the relevant train/test splits. Keys expected are "train", "dev", and "test"
         """  # noqa
@@ -103,7 +103,7 @@ class PredictorInterface:
         """
         Trains the attribute model starting from raw data. Raw data is pre-processed and cleaned accordingly. As data is assigned a particular type (ex: numerical, categorical, etc.), the respective feature encoder will convert it into a representation useable for training ML models. Of all ML models requested, these models are compiled and fit on the training data.
 
-        This step amalgates ``preprocess`` -> ``featurize`` -> ``fit`` with the necessary splitting + analyze_data that occurs. 
+        This step amalgates ``preprocess`` -> ``featurize`` -> ``fit`` with the necessary splitting + analyze_data that occurs.
 
         :param data: (Unprocessed) Data used in training the model(s).
 
@@ -116,7 +116,7 @@ class PredictorInterface:
         """
         Adjusts a previously trained model on new data. Adopts the same process as ``learn`` but with the exception that the `adjust` function expects the best model to have been already trained.
 
-        .. warning:: This is experimental and subject to change. 
+        .. warning:: This is experimental and subject to change.
         :param new_data: New data used to adjust a previously trained model.
         :param old_data: In some situations, the old data is still required to train a model (i.e. Regression mixer) to ensure the new data doesn't entirely override it.
         :param adjust_args: Optional dictionary with parameters to customize the finetuning process.
@@ -136,13 +136,71 @@ class PredictorInterface:
         """  # noqa
         pass
 
-    def save(self, file_path: str) -> None:
+
+
+        """
+            NOTE FROM CONTRIBUTOR - will remove before finalizing
+
+            I spotted this code snippet in the custom_cleaner.ipynb file
+            I figured we could maybe have the user pass it optionally
+            in instead of calling code_to_json_ai so it doesn't break
+            current expected functionality. Let me know what you think,
+            and sorry if I'm missing something obvious. I'm still
+            working on figuring out the codebase I only started
+            looking into the repo a few days ago.
+
+            code = code_from_json_ai(json_ai)
+            # Save code to a file (Optional)
+            with open('custom_cleaner_pipeline.py', 'w') as fp:
+            fp.write(code)
+
+            Here was my initial starting point for outlining the idea:
+
+            import json
+            import dill
+
+            class Predictor:
+                # Existing code ...
+
+                def save(self, file_path: str) -> None:
+
+                    # With a provided file path, saves the Predictor instance for later use.
+                    # :param file_path: Location to store your Predictor Instance.
+                    # :returns: Saves Predictor instance.
+
+                    predictor_dict = {}
+                    predictor_dict['predictor'] = self.__dict__
+                    predictor_dict['code'] = json.loads(self.to_json())
+
+                    with open(file_path, "wb") as fp:
+                        dill.dump(predictor_dict, fp)
+
+
+            Original code for save method:
+            def save(self, file_path: str) -> None:
+                # With a provided file path, saves the Predictor instance for later use.
+                # :param file_path: Location to store your Predictor Instance.
+                # :returns: Saves Predictor instance.
+                with open(file_path, "wb") as fp:
+                    dill.dump(self, fp)
+
+        """
+
+
+    def save(self, file_path: str, json_ai_code: Optional[str] = None) -> None:
         """
         With a provided file path, saves the Predictor instance for later use.
 
         :param file_path: Location to store your Predictor Instance.
+        :param code: The code generated by the user's specification (optional)
 
         :returns: Saves Predictor instance.
         """
+        predictor_dict = {}
+        predictor_dict['predictor'] = self
+
+        if json_ai_code is not None:
+            predictor_dict['code'] = json_ai_code
+
         with open(file_path, "wb") as fp:
-            dill.dump(self, fp)
+            dill.dump(predictor_dict, fp)
