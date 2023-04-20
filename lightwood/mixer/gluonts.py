@@ -241,8 +241,8 @@ class GluonTSMixer(BaseMixer):
             item_id=gby,
             freq=freq,
             timestamp=oby_col_name,
-            feat_static_real=self.static_features_real if self.static_features_real else None,
-            feat_static_cat=self.static_features_cat if self.static_features_cat else None,
+            feat_static_real=self.static_features_real if self.static_features_real else [],
+            feat_static_cat=self.static_features_cat if self.static_features_cat else [],
         )
         return ds
 
