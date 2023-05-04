@@ -184,7 +184,7 @@
 <span class="sd">    Abstraction of a Lightwood predictor. The ``PredictorInterface`` encompasses how Lightwood interacts with the full ML pipeline. Internally,</span>
 
 <span class="sd">    The ``PredictorInterface`` class must have several expected functions:</span>
-<span class="sd">    </span>
+
 <span class="sd">    - ``analyze_data``: Peform a statistical analysis on the unprocessed data; this helps inform downstream encoders and mixers on how to treat the data types.</span>
 <span class="sd">    - ``preprocess``: Apply cleaning functions to each of the columns within the dataset to prepare them for featurization</span>
 <span class="sd">    - ``split``: Split the input dataset into a train/dev/test set according to your splitter function</span>
@@ -197,7 +197,7 @@
 <span class="sd">    For simplification, we offer an end-to-end approach that allows you to input raw data and follow every step of the process until you reach a trained predictor with the ``learn`` function:</span>
 
 <span class="sd">        - ``learn``: An end-to-end technique specifying how to pre-process, featurize, and train the model(s) of interest. The expected input is raw, untrained data. No explicit output is provided, but the Predictor object will &quot;host&quot; the trained model thus.</span>
-<span class="sd">    </span>
+
 <span class="sd">    You can also use the predictor to now estimate new data:</span>
 
 <span class="sd">    - ``predict``: Deploys the chosen best model, and evaluates the given data to provide target estimates.</span>
@@ -258,7 +258,7 @@
 
 <div class="viewcode-block" id="PredictorInterface.fit"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enc_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Fits &quot;mixer&quot; models to train predictors on the featurized data. Instantiates a set of trained mixers and an ensemble of them. </span>
+<span class="sd">        Fits &quot;mixer&quot; models to train predictors on the featurized data. Instantiates a set of trained mixers and an ensemble of them.</span>
 
 <span class="sd">        :param enc_data: Pre-processed and featurized data, split into the relevant train/test splits. Keys expected are &quot;train&quot;, &quot;dev&quot;, and &quot;test&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
@@ -276,7 +276,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trains the attribute model starting from raw data. Raw data is pre-processed and cleaned accordingly. As data is assigned a particular type (ex: numerical, categorical, etc.), the respective feature encoder will convert it into a representation useable for training ML models. Of all ML models requested, these models are compiled and fit on the training data.</span>
 
-<span class="sd">        This step amalgates ``preprocess`` -&gt; ``featurize`` -&gt; ``fit`` with the necessary splitting + analyze_data that occurs. </span>
+<span class="sd">        This step amalgates ``preprocess`` -&gt; ``featurize`` -&gt; ``fit`` with the necessary splitting + analyze_data that occurs.</span>
 
 <span class="sd">        :param data: (Unprocessed) Data used in training the model(s).</span>
 
@@ -289,7 +289,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adjusts a previously trained model on new data. Adopts the same process as ``learn`` but with the exception that the `adjust` function expects the best model to have been already trained.</span>
 
-<span class="sd">        .. warning:: This is experimental and subject to change. </span>
+<span class="sd">        .. warning:: This is experimental and subject to change.</span>
 <span class="sd">        :param new_data: New data used to adjust a previously trained model.</span>
 <span class="sd">        :param old_data: In some situations, the old data is still required to train a model (i.e. Regression mixer) to ensure the new data doesn&#39;t entirely override it.</span>
 <span class="sd">        :param adjust_args: Optional dictionary with parameters to customize the finetuning process.</span>
@@ -312,13 +312,28 @@
 <div class="viewcode-block" id="PredictorInterface.save"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        With a provided file path, saves the Predictor instance for later use.</span>
-
 <span class="sd">        :param file_path: Location to store your Predictor Instance.</span>
-
 <span class="sd">        :returns: Saves Predictor instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
-            <span class="n">dill</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span></div></div>
+            <span class="n">dill</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PredictorInterface.export"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">json_ai_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exports both the predictor object and its code to a single binary file for later usage.</span>
+
+<span class="sd">        :param file_path: Location to store your Predictor Instance.</span>
+<span class="sd">        :param json_ai_code: The code generated by the user&#39;s specification.</span>
+
+<span class="sd">        :returns: Saves Predictor instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">predictor_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">predictor_dict</span><span class="p">[</span><span class="s1">&#39;predictor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">predictor_dict</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_ai_code</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">dill</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">predictor_dict</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
