@@ -24,17 +24,19 @@ class TestBasic(unittest.TestCase):
         return submodels
 
     def test_0_regression(self):
-        df = pd.read_csv('tests/data/arrivals.csv')
-        target = 'Traffic'
+        from lightwood.mixer.nhits import NHitsMixer
+        if NHitsMixer is not None:
+            df = pd.read_csv('tests/data/arrivals.csv')
+            target = 'Traffic'
 
-        pdef = ProblemDefinition.from_dict({'target': target, 'timeseries_settings': {'order_by': 'T',
-                                                                                      'group_by': ['Country'],
-                                                                                      'window': 4,
-                                                                                      'horizon': 4}})
-        jai = json_ai_from_problem(df, pdef)
-        jai.model['args']['submodels'] = self.get_submodels()
-        code = code_from_json_ai(jai)
-        predictor = predictor_from_code(code)
+            pdef = ProblemDefinition.from_dict({'target': target, 'timeseries_settings': {'order_by': 'T',
+                                                                                          'group_by': ['Country'],
+                                                                                          'window': 4,
+                                                                                          'horizon': 4}})
+            jai = json_ai_from_problem(df, pdef)
+            jai.model['args']['submodels'] = self.get_submodels()
+            code = code_from_json_ai(jai)
+            predictor = predictor_from_code(code)
 
-        predictor.learn(df)
-        predictor.predict(df)
+            predictor.learn(df)
+            predictor.predict(df)
