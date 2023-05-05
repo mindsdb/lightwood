@@ -24,7 +24,7 @@ class TestBasic(unittest.TestCase):
         return submodels
 
     def test_0_regression(self):
-        from lightwood.mixer.nhits import NHitsMixer
+        from lightwood.mixer import NHitsMixer
         if NHitsMixer is not None:
             df = pd.read_csv('tests/data/arrivals.csv')
             target = 'Traffic'
