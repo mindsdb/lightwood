@@ -14,7 +14,10 @@ class TestBasic(unittest.TestCase):
             {
                 'module': 'NHitsMixer',
                 'args': {
-                    'train_args': {'max_epochs': 10},
+                    'train_args': {
+                        'trainer_args': {'max_epochs': 10},
+                        'conf_levels': [90],
+                    }
                 }
             },
         ]
