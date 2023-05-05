@@ -94,8 +94,7 @@ class NHitsMixer(BaseMixer):
             n_time = df[gby].value_counts().min()
         else:
             n_time = len(df[f'__mdb_original_{oby_col}'].unique())
-        n_ts_val = max(int(.1 * n_time), self.horizon)  # at least self.horizon to validate&test on
-        n_ts_test = max(int(.1 * n_time), self.horizon)
+        n_ts_val = max(int(.1 * n_time), self.horizon)  # at least self.horizon to validate on
 
         # train the model
         n_time_out = self.horizon
