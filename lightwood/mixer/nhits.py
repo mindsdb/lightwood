@@ -3,9 +3,8 @@ from copy import deepcopy
 
 import numpy as np
 import pandas as pd
-from hyperopt import hp
-import neuralforecast as nf
-from neuralforecast.models.mqnhits.mqnhits import MQNHITS
+from neuralforecast import NeuralForecast
+from neuralforecast.models.nhits import NHITS
 
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
@@ -29,10 +28,11 @@ class NHitsMixer(BaseMixer):
             window: int,
             dtype_dict: Dict,
             ts_analysis: Dict,
-            pretrained: bool = False
+            pretrained: bool = False,
+            train_args: Optional[Dict] = None,
     ):
         """
-        Wrapper around a MQN-HITS deep learning model.
+        Wrapper around an N-HITS deep learning model.
         
         :param stop_after: time budget in seconds.
         :param target: column to forecast.
@@ -50,6 +50,7 @@ class NHitsMixer(BaseMixer):
         self.dtype_dict = dtype_dict
         self.ts_analysis = ts_analysis
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
+        self.train_args = train_args if train_args else {}
 
         self.pretrained = pretrained
         self.base_url = 'https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/'
@@ -99,7 +100,7 @@ class NHitsMixer(BaseMixer):
                                                    None)
             self.model_name = self.model_names['hourly'] if self.model_name is None else self.model_name
             ckpt_url = self.base_url + self.model_name
-            self.model = MQNHITS.load_from_checkpoint(ckpt_url)
+            self.model = NHITS.load_from_checkpoint(ckpt_url)
 
             if not self.window < self.model.hparams.n_time_in:
                 log.info(f'NOTE: Provided window ({self.window}) is smaller than specified model input length ({self.model.hparams.n_time_in}). Will train a new model from scratch.')  # noqa
@@ -115,37 +116,13 @@ class NHitsMixer(BaseMixer):
                 new_window = max(1, n_time - self.horizon - 1)
                 self.window = new_window
                 log.info(f'Window {self.window} is too long for data provided (group: {df[gby].value_counts()[::-1].index[0]}), reducing window to {new_window}.')  # noqa
-            self.model = nf.auto.MQNHITS(horizon=n_time_out)
-            self.model.space['max_steps'] = hp.choice('max_steps', [1e4])
-            self.model.space['max_epochs'] = hp.choice('max_epochs', [50])
-            self.model.space['n_time_in'] = hp.choice('n_time_in', [self.window])
-            self.model.space['n_time_out'] = hp.choice('n_time_out', [self.horizon])
-            self.model.space['n_x_hidden'] = hp.choice('n_x_hidden', [0])
-            self.model.space['n_s_hidden'] = hp.choice('n_s_hidden', [0])
-            self.model.space['complete_windows'] = hp.choice('complete_windows', [False])
-            self.model.space['frequency'] = hp.choice('frequency', [self.ts_analysis['sample_freqs']['__default']])
-            self.model.space['random_seed'] = hp.choice('random_seed', [42])
-            self.model.fit(Y_df=Y_df,
-                           X_df=None,       # Exogenous variables
-                           S_df=None,       # Static variables
-                           hyperopt_steps=5,
-                           n_ts_val=n_ts_val,
-                           n_ts_test=n_ts_test,
-                           results_dir='./results/autonhits',
-                           save_trials=False,
-                           loss_function_val=nf.losses.numpy.mqloss,
-                           loss_functions_test={'MQ': nf.losses.numpy.mqloss},
-                           return_test_forecast=False,
-                           verbose=False)
+            model = NHITS(h=n_time_out, input_size=self.window, **self.train_args)
+            self.model = NeuralForecast(models=[model], freq=self.ts_analysis['sample_freqs']['__default'])
+            self.model.fit(df=Y_df, val_size=n_ts_val)
             log.info('Successfully trained N-HITS forecasting model.')
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
-        """
-        Due to how lightwood implements the `update` procedure, expected inputs for this method are:
-        
-        :param dev_data: original `test` split (used to validate and select model if ensemble is `BestOf`).
-        :param train_data: concatenated original `train` and `dev` splits.
-        """  # noqa
+        # TODO: reimplement this with automatic novel-row differential
         self.hyperparam_search = False
         self.fit(dev_data, train_data)
         self.prepared = True
@@ -171,7 +148,7 @@ class NHitsMixer(BaseMixer):
         input_df = self._make_initial_df(deepcopy(ds.data_frame))
         ydf['index'] = input_df['index']
 
-        pred_cols = ['y_5', 'y_50', 'y_95']
+        pred_cols = ['NHITS', 'NHITS', 'NHITS']  # these should be quantiles, but for now we output the point prediction only   # noqa
         target_cols = ['lower', 'prediction', 'upper']
         for target_col in target_cols:
             ydf[target_col] = [[0 for _ in range(self.horizon)] for _ in range(len(ydf))]  # zero-filled arrays
@@ -179,7 +156,7 @@ class NHitsMixer(BaseMixer):
         group_ends = []
         for group in input_df['unique_id'].unique():
             group_ends.append(input_df[input_df['unique_id'] == group]['index'].iloc[-1])
-        fcst = self.model.forecast(Y_df=input_df)
+        fcst = self.model.predict(futr_df=input_df).reset_index()
 
         for gidx, group in zip(group_ends, input_df['unique_id'].unique()):
             for pred_col, target_col in zip(pred_cols, target_cols):
