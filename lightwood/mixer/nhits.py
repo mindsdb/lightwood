@@ -160,7 +160,7 @@ class NHitsMixer(BaseMixer):
         group_ends = []
         for group in input_df['unique_id'].unique():
             group_ends.append(input_df[input_df['unique_id'] == group]['index'].iloc[-1])
-        fcst = self.model.predict(futr_df=input_df).reset_index()
+        fcst = self.model.predict(input_df).reset_index()
 
         for gidx, group in zip(group_ends, input_df['unique_id'].unique()):
             for pred_col, target_col in zip(pred_cols, target_cols):
