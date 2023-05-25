@@ -158,8 +158,8 @@ class NHitsMixer(BaseMixer):
         pred_cols = ['NHITS-median']
 
         # provided quantile must match one of the training levels, else we default to the largest one of these
-        if args.fixed_confidence is not None and int(args.fixed_confidence*100) in self.conf_level:
-            level = int(args.fixed_confidence*100)
+        if args.fixed_confidence is not None and int(args.fixed_confidence * 100) in self.conf_level:
+            level = int(args.fixed_confidence * 100)
         else:
             level = max(self.conf_level)
         pred_cols.extend([f'NHITS-lo-{level}', f'NHITS-hi-{level}'])
@@ -179,7 +179,7 @@ class NHitsMixer(BaseMixer):
                 idx = ydf[ydf['index'] == gidx].index[0]
                 ydf.at[idx, target_col] = group_preds
 
-        ydf['confidence'] = level/100
+        ydf['confidence'] = level / 100
         return ydf
 
     def _make_initial_df(self, df):
