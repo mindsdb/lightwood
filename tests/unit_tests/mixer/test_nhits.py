@@ -15,8 +15,10 @@ class TestBasic(unittest.TestCase):
                 'module': 'NHitsMixer',
                 'args': {
                     'train_args': {
-                        'trainer_args': {'max_epochs': 10},
-                        'conf_levels': [90],
+                        'trainer_args': {
+                            'max_epochs': 10,
+                            'conf_level': [90, 95],
+                        },
                     }
                 }
             },
@@ -39,4 +41,4 @@ class TestBasic(unittest.TestCase):
             predictor = predictor_from_code(code)
 
             predictor.learn(df)
-            predictor.predict(df)
+            predictor.predict(df, args={'fixed_confidence': 0.9})
