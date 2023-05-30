@@ -55,6 +55,7 @@ class NHitsMixer(BaseMixer):
         self.ts_analysis = ts_analysis
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.train_args = train_args.get('trainer_args', {}) if train_args else {}
+        self.train_args['early_stop_patience_steps'] = self.train_args.get('early_stop_patience_steps', 10)
         self.conf_level = self.train_args.pop('conf_level', [90])
         for level in self.conf_level:
             assert 0 <= level <= 100, f'A provided level is not in the [0, 100] range (found: {level})'
@@ -131,7 +132,7 @@ class NHitsMixer(BaseMixer):
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         # TODO: reimplement this with automatic novel-row differential
         self.hyperparam_search = False
-        self.fit(dev_data, train_data)
+        self.fit(dev_data, train_data)  # TODO: add support for passing args (e.g. n_epochs)
         self.prepared = True
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
