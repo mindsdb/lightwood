@@ -3,7 +3,6 @@ from typing import Dict, List, Tuple, Optional
 from dataprep_ml import StatisticalAnalysis
 
 from lightwood.helpers.log import log
-from lightwood.helpers.ts import filter_ds
 from type_infer.dtype import dtype
 from lightwood.ensemble import BaseEnsemble
 from lightwood.analysis.base import BaseAnalysisBlock
@@ -60,8 +59,6 @@ def model_analyzer(
     normal_predictions = None
 
     if len(analysis_blocks) > 0:
-        filtered_df = filter_ds(encoded_val_data, tss)
-        encoded_val_data = EncodedDs(encoded_val_data.encoders, filtered_df, encoded_val_data.target)
         normal_predictions = predictor(encoded_val_data, args=PredictionArguments.from_dict(args))
         normal_predictions = normal_predictions.set_index(encoded_val_data.data_frame.index)
 

@@ -997,7 +997,16 @@ for col_name, encoder in self.encoders.items():
     feature_body = f"""
 log.info('Featurizing the data')
 
-feature_data = {{ key: EncodedDs(self.encoders, data, self.target) for key, data in split_data.items() if key != "stratified_on"}}
+tss = self.problem_definition.timeseries_settings
+
+feature_data = dict()
+for key, data in split_data.items():
+    if key != 'stratified_on':
+        if key not in self.feature_cache:
+            featurized_split = EncodedDs(self.encoders, filter_ts(data, tss), self.target)
+
+        self.feature_cache[key] = featurized_split
+        feature_data[key] = self.feature_cache[key]
 
 return feature_data
 
@@ -1019,8 +1028,6 @@ self.mode = 'train'
 encoded_train_data = enc_data['train']
 encoded_dev_data = enc_data['dev']
 encoded_test_data = enc_data['test']
-filtered_df = filter_ds(encoded_test_data, self.problem_definition.timeseries_settings)
-encoded_test_data = EncodedDs(encoded_test_data.encoders, filtered_df, encoded_test_data.target)
 
 log.info('Training the mixers')
 
@@ -1174,6 +1181,7 @@ if self.problem_definition.fit_on_all and all([not m.trains_once for m in self.m
                                                                       enc_train_test["dev"]]).data_frame,
                                                                       adjust_args={'learn_call': True})
 
+self.feature_cache = dict()  # empty feature cache to avoid large predictor objects
 """
     learn_body = align(learn_body, 2)
     # ----------------- #
@@ -1251,6 +1259,9 @@ class Predictor(PredictorInterface):
         self.ts_analysis = None
         self.runtime_log = dict()
         self.global_insights = dict()
+
+        # Feature cache
+        self.feature_cache = dict()
 
     @timed
     def analyze_data(self, data: pd.DataFrame) -> None:
