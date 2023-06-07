@@ -1,15 +1,12 @@
-"""
-"""
+import os
 import time
+from typing import Iterable
+from collections import deque
+
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
-import os
 import pandas as pd
-from lightwood.encoder.text.helpers.pretrained_helpers import TextEmbed
-from lightwood.helpers.device import get_device_from_name
-from lightwood.encoder.base import BaseEncoder
-from lightwood.helpers.log import log
-from lightwood.helpers.torch import LightwoodAutocast
 from type_infer.dtype import dtype
 from transformers import (
     DistilBertModel,
@@ -18,8 +15,14 @@ from transformers import (
     AdamW,
     get_linear_schedule_with_warmup,
 )
+from sklearn.model_selection import train_test_split
+
+from lightwood.encoder.text.helpers.pretrained_helpers import TextEmbed
+from lightwood.helpers.device import get_device_from_name
+from lightwood.encoder.base import BaseEncoder
+from lightwood.helpers.log import log
+from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.helpers.general import is_none
-from typing import Iterable
 
 
 class PretrainedLangEncoder(BaseEncoder):
@@ -38,7 +41,7 @@ class PretrainedLangEncoder(BaseEncoder):
         is_target: bool = False,
         batch_size: int = 10,
         max_position_embeddings: int = None,
-        frozen: bool = False,
+        frozen: bool = True,
         epochs: int = 1,
         output_type: str = None,
         embed_mode: bool = True,
@@ -48,7 +51,6 @@ class PretrainedLangEncoder(BaseEncoder):
         :param is_target: Whether this encoder represents the target. NOT functional for text generation yet.
         :param batch_size: size of batch while fine-tuning
         :param max_position_embeddings: max sequence length of input text
-        :param custom_train: If True, trains model on target procided
         :param frozen: If True, freezes transformer layers during training.
         :param epochs: number of epochs to train model with
         :param output_type: Data dtype of the target; if categorical/binary, the option to return logits is possible.
@@ -64,12 +66,14 @@ class PretrainedLangEncoder(BaseEncoder):
         self._frozen = frozen
         self._batch_size = batch_size
         self._epochs = epochs
+        self._patience = 3  # measured in batches rather than epochs
+        self._val_loss_every = -1  # how many batches to wait before checking val loss. If -1, will check train loss instead of val for early stopping.  # noqa
+        self._tr_loss_every = 2  # same as above, but only applies if `_val_loss_every` is set to -1
 
         # Model setup
         self._model = None
         self.model_type = None
 
-        # TODO: Other LMs; Distilbert is a good balance of speed/performance
         self._classifier_model_class = DistilBertForSequenceClassification
         self._embeddings_model_class = DistilBertModel
         self._pretrained_model_name = "distilbert-base-uncased"
@@ -90,46 +94,45 @@ class PretrainedLangEncoder(BaseEncoder):
 
     def prepare(
         self,
-        train_priming_data: Iterable[str],
-        dev_priming_data: Iterable[str],
+        train_priming_data: pd.Series,
+        dev_priming_data: pd.Series,
         encoded_target_values: torch.Tensor,
     ):
         """
         Fine-tunes a transformer on the priming data.
 
-        CURRENTLY WIP; train + dev are placeholders for a validation-based approach. 
-
-        Train + Dev are concatenated together and a transformer is then fine tuned with weight-decay applied on the transformer parameters. The option to freeze the underlying transformer and only train a linear layer exists if `frozen=True`. This trains faster, with the exception that the performance is often lower than fine-tuning on internal benchmarks.
+        Transformer is fine-tuned with weight-decay on training split. 
+        By default, underlying transformer is frozen and only final linear layer is trained. This trains faster, often as tradeoff for performance.
 
         :param train_priming_data: Text data in the train set
-        :param dev_priming_data: Text data in the dev set (not currently supported; can be empty)
+        :param dev_priming_data: Text data in the dev set
         :param encoded_target_values: Encoded target labels in Nrows x N_output_dimension
         """ # noqa
         if self.is_prepared:
             raise Exception("Encoder is already prepared.")
 
         os.environ['TOKENIZERS_PARALLELISM'] = 'true'
+        val_size = (len(dev_priming_data)) / len(train_priming_data)
 
-        # TODO -> we shouldn't be concatenating these together
-        if len(dev_priming_data) > 0:
-            priming_data = pd.concat([train_priming_data, dev_priming_data]).values
-        else:
-            priming_data = train_priming_data.tolist()
+        # remove empty strings (`None`s for dtype `object`)
+        priming_data = pd.concat([
+            train_priming_data[~train_priming_data.isna()],
+            dev_priming_data[~dev_priming_data.isna()]]
+        ).tolist()
 
-        # Replaces empty strings with ''
-        priming_data = [x if x is not None else "" for x in priming_data]
+        # Label encode the OHE/binary output for classification
+        labels = encoded_target_values.argmax(dim=1)
+
+        # Split into train and validation sets
+        train_texts, val_texts, train_labels, val_labels = train_test_split(priming_data, labels, test_size=val_size)
 
         # If classification, then fine-tune
-        if (self.output_type in (dtype.categorical, dtype.binary)):
-            log.info("Training model.")
+        if self.output_type in (dtype.categorical, dtype.binary):
+            log.info("Training model.\n\tOutput trained is categorical")
 
             # Prepare priming data into tokenized form + attention masks
-            text = self._tokenizer(priming_data, truncation=True, padding=True)
-
-            log.info("\tOutput trained is categorical")
-
-            # Label encode the OHE/binary output for classification
-            labels = encoded_target_values.argmax(dim=1)
+            training_text = self._tokenizer(train_texts, truncation=True, padding=True)
+            validation_text = self._tokenizer(val_texts, truncation=True, padding=True)
 
             # Construct the model
             self._model = self._classifier_model_class.from_pretrained(
@@ -138,8 +141,12 @@ class PretrainedLangEncoder(BaseEncoder):
             ).to(self.device)
 
             # Construct the dataset for training
-            xinp = TextEmbed(text, labels)
-            dataset = DataLoader(xinp, batch_size=self._batch_size, shuffle=True)
+            xinp = TextEmbed(training_text, train_labels)
+            train_dataset = DataLoader(xinp, batch_size=self._batch_size, shuffle=True)
+
+            # Construct the dataset for validation
+            xvalinp = TextEmbed(validation_text, val_labels)
+            val_dataset = DataLoader(xvalinp, batch_size=self._batch_size, shuffle=True)
 
             # Set max length of input string; affects input to the model
             if self._max_len is None:
@@ -148,8 +155,7 @@ class PretrainedLangEncoder(BaseEncoder):
             if self._frozen:
                 log.info("\tFrozen Model + Training Classifier Layers")
                 """
-                Freeze the base transformer model and train
-                a linear layer on top
+                Freeze the base transformer model and train a linear layer on top
                 """
                 # Freeze all the transformer parameters
                 for param in self._model.base_model.parameters():
@@ -189,12 +195,12 @@ class PretrainedLangEncoder(BaseEncoder):
             scheduler = get_linear_schedule_with_warmup(
                 optimizer,
                 num_warmup_steps=0,  # default value for GLUE
-                num_training_steps=len(dataset) * self._epochs,
+                num_training_steps=len(train_dataset) * self._epochs,
             )
 
             # Train model; declare optimizer earlier if desired.
             self._tune_model(
-                dataset, optim=optimizer, scheduler=scheduler, n_epochs=self._epochs
+                train_dataset, val_dataset, optim=optimizer, scheduler=scheduler, n_epochs=self._epochs
             )
 
         else:
@@ -206,8 +212,7 @@ class PretrainedLangEncoder(BaseEncoder):
             ).to(self.device)
 
             # TODO: Not a great flag
-            # Currently, if the task is not classification, you must have
-            # an embedding generator only.
+            # Currently, if the task is not classification, you must have an embedding generator only
             if self.embed_mode is False:
                 log.info("Embedding mode must be ON for non-classification targets.")
                 self.embed_mode = True
@@ -216,19 +221,15 @@ class PretrainedLangEncoder(BaseEncoder):
         encoded = self.encode(priming_data[0:1])
         self.output_size = len(encoded[0])
 
-    def _tune_model(self, dataset, optim, scheduler, n_epochs=1):
+    def _tune_model(self, train_dataset, val_dataset, optim, scheduler, n_epochs=1):
         """
-        Given a model, train for n_epochs.
-        Specifically intended for tuning; it does NOT use loss/
-        stopping criterion.
+        Given a model, tune for n_epochs.
 
-        model - torch.nn model;
-        dataset - torch.DataLoader; dataset to train
-        device - torch.device; cuda/cpu
-        log - lightwood.logger.log; log.info output
+        train_dataset - torch.DataLoader; dataset to train
+        val_dataset - torch.DataLoader; dataset used to compute validation loss + early stopping
         optim - transformers.optimization.AdamW; optimizer
         scheduler - scheduling params
-        n_epochs - number of epochs to train
+        n_epochs - max number of epochs to train for, provided there is no early stopping
 
         """ # noqa
         self._model.train()
@@ -244,20 +245,21 @@ class PretrainedLangEncoder(BaseEncoder):
         else:
             log.info("Scheduler provided.")
 
+        best_tr_loss = best_val_loss = float("inf")
+        tr_loss_queue = deque(maxlen=self._patience)
+        patience_counter = self._patience
+
         started = time.time()
         for epoch in range(n_epochs):
             total_loss = 0
 
-            for batch in dataset:
+            for bidx, batch in enumerate(train_dataset):
                 optim.zero_grad()
 
                 with LightwoodAutocast():
-                    inpids = batch["input_ids"].to(self.device)
-                    attn = batch["attention_mask"].to(self.device)
-                    labels = batch["labels"].to(self.device)
-                    outputs = self._model(inpids, attention_mask=attn, labels=labels)
-                    loss = outputs[0]
+                    loss = self._call(batch)
 
+                tr_loss_queue.append(loss.item())
                 total_loss += loss.item()
 
                 loss.backward()
@@ -267,9 +269,48 @@ class PretrainedLangEncoder(BaseEncoder):
                 if time.time() - started > self.stop_after:
                     break
 
+                # val-based early stopping
+                if (self._val_loss_every != -1) and (bidx % self._val_loss_every == 0):
+                    self._model.eval()
+                    val_loss = 0
+
+                    for vbatch in val_dataset:
+                        val_loss += self._call(vbatch).item()
+
+                    log.info(f"Epoch {epoch+1} train batch {bidx+1} - Validation loss: {val_loss/len(val_dataset)}")
+                    if val_loss / len(val_dataset) >= best_val_loss:
+                        break
+
+                    best_val_loss = val_loss / len(val_dataset)
+                    self._model.train()
+
+                # train-based early stopping
+                elif (bidx + 1) % self._tr_loss_every == 0:
+                    self._model.eval()
+
+                    tr_loss = np.average(tr_loss_queue)
+                    log.info(f"Epoch {epoch} train batch {bidx} - Train loss: {tr_loss}")  # noqa
+                    self._model.train()
+
+                    if tr_loss >= best_tr_loss and patience_counter == 0:
+                        break
+                    elif patience_counter > 0:
+                        patience_counter -= 1
+                    elif tr_loss < best_tr_loss:
+                        best_tr_loss = tr_loss
+                        patience_counter = self._patience
+
             if time.time() - started > self.stop_after:
                 break
-            self._train_callback(epoch, total_loss / len(dataset))
+            self._train_callback(epoch, total_loss / len(train_dataset))
+
+    def _call(self, batch):
+        inpids = batch["input_ids"].to(self.device)
+        attn = batch["attention_mask"].to(self.device)
+        labels = batch["labels"].to(self.device)
+        outputs = self._model(inpids, attention_mask=attn, labels=labels)
+        loss = outputs[0]
+        return loss
 
     def _train_callback(self, epoch, loss):
         log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
