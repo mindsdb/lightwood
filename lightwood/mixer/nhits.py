@@ -55,7 +55,11 @@ class NHitsMixer(BaseMixer):
         self.ts_analysis = ts_analysis
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.train_args = train_args.get('trainer_args', {}) if train_args else {}
-        self.conf_level = self.train_args.pop('conf_level', 90)
+        self.train_args['early_stop_patience_steps'] = self.train_args.get('early_stop_patience_steps', 10)
+        self.conf_level = self.train_args.pop('conf_level', [90])
+        for level in self.conf_level:
+            assert 0 <= level <= 100, f'A provided level is not in the [0, 100] range (found: {level})'
+            assert isinstance(level, int), f'A provided level is not an integer (found: {level})'
 
         self.pretrained = pretrained
         self.base_url = 'https://nixtla-public.s3.amazonaws.com/transfer/pretrained_models/'
@@ -120,7 +124,7 @@ class NHitsMixer(BaseMixer):
                 new_window = max(1, n_time - self.horizon - 1)
                 self.window = new_window
                 log.info(f'Window {self.window} is too long for data provided (group: {df[gby].value_counts()[::-1].index[0]}), reducing window to {new_window}.')  # noqa
-            model = NHITS(h=n_time_out, input_size=self.window, **self.train_args, loss=MQLoss(level=[self.conf_level]))
+            model = NHITS(h=n_time_out, input_size=self.window, **self.train_args, loss=MQLoss(level=self.conf_level))
             self.model = NeuralForecast(models=[model], freq=self.ts_analysis['sample_freqs']['__default'])
             self.model.fit(df=Y_df, val_size=n_ts_val)
             log.info('Successfully trained N-HITS forecasting model.')
@@ -128,7 +132,7 @@ class NHitsMixer(BaseMixer):
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         # TODO: reimplement this with automatic novel-row differential
         self.hyperparam_search = False
-        self.fit(dev_data, train_data)
+        self.fit(dev_data, train_data)  # TODO: add support for passing args (e.g. n_epochs)
         self.prepared = True
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
@@ -152,15 +156,23 @@ class NHitsMixer(BaseMixer):
         input_df = self._make_initial_df(deepcopy(ds.data_frame))
         ydf['index'] = input_df['index']
 
-        pred_cols = [f'NHITS-lo-{self.conf_level}', 'NHITS-median', f'NHITS-hi-{self.conf_level}']
-        target_cols = ['lower', 'prediction', 'upper']
+        pred_cols = ['NHITS-median']
+
+        # provided quantile must match one of the training levels, else we default to the largest one of these
+        if args.fixed_confidence is not None and int(args.fixed_confidence * 100) in self.conf_level:
+            level = int(args.fixed_confidence * 100)
+        else:
+            level = max(self.conf_level)
+        pred_cols.extend([f'NHITS-lo-{level}', f'NHITS-hi-{level}'])
+
+        target_cols = ['prediction', 'lower', 'upper']
         for target_col in target_cols:
             ydf[target_col] = [[0 for _ in range(self.horizon)] for _ in range(len(ydf))]  # zero-filled arrays
 
         group_ends = []
         for group in input_df['unique_id'].unique():
             group_ends.append(input_df[input_df['unique_id'] == group]['index'].iloc[-1])
-        fcst = self.model.predict(futr_df=input_df).reset_index()
+        fcst = self.model.predict(input_df).reset_index()
 
         for gidx, group in zip(group_ends, input_df['unique_id'].unique()):
             for pred_col, target_col in zip(pred_cols, target_cols):
@@ -168,7 +180,7 @@ class NHitsMixer(BaseMixer):
                 idx = ydf[ydf['index'] == gidx].index[0]
                 ydf.at[idx, target_col] = group_preds
 
-        ydf['confidence'] = 0.9  # TODO: set through `args`
+        ydf['confidence'] = level / 100
         return ydf
 
     def _make_initial_df(self, df):
