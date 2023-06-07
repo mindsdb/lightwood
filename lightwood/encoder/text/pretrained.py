@@ -41,7 +41,7 @@ class PretrainedLangEncoder(BaseEncoder):
         is_target: bool = False,
         batch_size: int = 10,
         max_position_embeddings: int = None,
-        frozen: bool = True,
+        frozen: bool = False,
         epochs: int = 1,
         output_type: str = None,
         embed_mode: bool = True,
@@ -67,7 +67,7 @@ class PretrainedLangEncoder(BaseEncoder):
         self._batch_size = batch_size
         self._epochs = epochs
         self._patience = 3  # measured in batches rather than epochs
-        self._val_loss_every = -1  # how many batches to wait before checking val loss. If -1, will check train loss instead of val for early stopping.  # noqa
+        self._val_loss_every = 5  # how many batches to wait before checking val loss. If -1, will check train loss instead of val for early stopping.  # noqa
         self._tr_loss_every = 2  # same as above, but only applies if `_val_loss_every` is set to -1
 
         # Model setup
@@ -270,7 +270,7 @@ class PretrainedLangEncoder(BaseEncoder):
                     break
 
                 # val-based early stopping
-                if (self._val_loss_every != -1) and (bidx % self._val_loss_every == 0):
+                if False and (self._val_loss_every != -1) and (bidx % self._val_loss_every == 0):
                     self._model.eval()
                     val_loss = 0
 
@@ -285,7 +285,7 @@ class PretrainedLangEncoder(BaseEncoder):
                     self._model.train()
 
                 # train-based early stopping
-                elif (bidx + 1) % self._tr_loss_every == 0:
+                elif False and (bidx + 1) % self._tr_loss_every == 0:
                     self._model.eval()
 
                     tr_loss = np.average(tr_loss_queue)
