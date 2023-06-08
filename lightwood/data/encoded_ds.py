@@ -33,6 +33,9 @@ class EncodedDs(Dataset):
                                            self.input_length + self.encoders[col].output_size)
                 self.input_length += self.encoders[col].output_size
 
+        # if cache enabled, we immediately build it
+        self.build_cache()  # TODO: ensure we remove these instances from predictor object before serializing
+
     def __len__(self):
         """
         The length of an `EncodedDs` datasource equals the amount of rows of the original dataframe.
@@ -56,21 +59,28 @@ class EncodedDs(Dataset):
             if self.cache[idx] is not None:
                 return self.cache[idx]
 
+        X, Y = self._encode_idxs(idx)
+
+        if self.cache_encoded:
+            X = torch.cat(X, dim=1).float().squeeze()
+            self.cache[idx] = (X, Y)
+
+    def _encode_idxs(self, idxs):
         X = []
         Y = torch.FloatTensor()
         for col in self.data_frame:
             if self.encoders.get(col, None):
                 kwargs = {}
                 if 'dependency_data' in inspect.signature(self.encoders[col].encode).parameters:
-                    kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idx][dep]]
+                    kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idxs][dep]]
                                                  for dep in self.encoders[col].dependencies}
                 if hasattr(self.encoders[col], 'data_window'):
                     cols = [self.target] + [f'{self.target}_timestep_{i}'
                                             for i in range(1, self.encoders[col].data_window)]
-                    data = [self.data_frame[cols].iloc[idx].values]
+                    data = [self.data_frame[cols].iloc[idxs].values]  # TODO: this is likely to fail as is
                 else:
                     cols = [col]
-                    data = self.data_frame[cols].iloc[idx].values
+                    data = self.data_frame[cols].iloc[idxs].values.flatten()
 
                 encoded_tensor = self.encoders[col].encode(data, **kwargs)
                 if torch.isnan(encoded_tensor).any() or torch.isinf(encoded_tensor).any():
@@ -81,11 +91,17 @@ class EncodedDs(Dataset):
                 else:
                     Y = encoded_tensor.squeeze()
 
-        if self.cache_encoded:
-            X = torch.cat(X, dim=1).float().squeeze()
-            self.cache[idx] = (X, Y)
-
+        # concatenate features into single tensor
+        X = torch.concat(X, dim=1)
         return X, Y
+
+    def build_cache(self):
+        assert self.cache_encoded
+        idxs = list(range(len(self.data_frame)))
+        X, Y = self._encode_idxs(idxs)
+
+        for i, (x, y) in enumerate(zip(X, Y)):
+            self.cache[i] = (x, y)
 
     def get_column_original_data(self, column_name: str) -> pd.Series:
         """
