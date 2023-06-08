@@ -1,5 +1,6 @@
 import time
 from copy import deepcopy
+from collections import deque
 from typing import Dict, List, Optional
 
 import torch
@@ -42,7 +43,8 @@ class Neural(BaseMixer):
             net: str,
             fit_on_dev: bool,
             search_hyperparameters: bool,
-            n_epochs: Optional[int] = None
+            n_epochs: Optional[int] = None,
+            lr: Optional[float] = None,
     ):
         """
         The Neural mixer trains a fully connected dense network from concatenated encoded outputs of each of the features in the dataset to predicted the encoded output. 
@@ -55,6 +57,7 @@ class Neural(BaseMixer):
         :param fit_on_dev: If we should fit on the dev dataset
         :param search_hyperparameters: If the network should run a more through hyperparameter search (currently disabled)
         :param n_epochs: amount of epochs that the network will be trained for. Supersedes all other early stopping criteria if specified.
+        :param lr: learning rate for the network. By default, it is automatically selected based on an initial search process.
         """ # noqa
         super().__init__(stop_after)
         self.dtype_dict = dtype_dict
@@ -62,6 +65,8 @@ class Neural(BaseMixer):
         self.target_encoder = target_encoder
         self.epochs_to_best = 0
         self.n_epochs = n_epochs
+        self.lr = lr
+        self.loss_hist_len = 5  # length of queue to use for early stopping
         self.fit_on_dev = fit_on_dev
         self.net_name = net
         self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
@@ -106,12 +111,12 @@ class Neural(BaseMixer):
 
         return criterion
 
-    def _select_optimizer(self) -> Optimizer:
-        optimizer = ad_optim.Ranger(self.model.parameters(), lr=self.lr, weight_decay=2e-2)
+    def _select_optimizer(self, lr) -> Optimizer:
+        optimizer = ad_optim.Ranger(self.model.parameters(), lr=lr, weight_decay=2e-2)
         return optimizer
 
     def _find_lr(self, dl):
-        optimizer = self._select_optimizer()
+        optimizer = self._select_optimizer(lr=1e-3)  # magic number for ranger optimizer, should be good starting point
         criterion = self._select_criterion()
         scaler = GradScaler()
 
@@ -168,7 +173,7 @@ class Neural(BaseMixer):
     def _max_fit(self, train_dl, dev_dl, criterion, optimizer, scaler, stop_after, return_model_after):
         epochs_to_best = 0
         best_dev_error = pow(2, 32)
-        running_errors = []
+        running_errors = deque(maxlen=self.loss_hist_len)
         best_model = self.model
 
         for epoch in range(1, return_model_after + 1):
@@ -215,10 +220,11 @@ class Neural(BaseMixer):
 
             # automated early stopping
             else:
-                if len(running_errors) >= 5:
-                    delta_mean = np.average([running_errors[-i - 1] - running_errors[-i] for i in range(1, 5)],
-                                            weights=[(1 / 2)**i for i in range(1, 5)])
-                    if delta_mean <= 0:
+                if len(running_errors) >= self.loss_hist_len:
+                    delta_mean = np.average([
+                        running_errors[-i - 1] - running_errors[-i] for i in range(len(running_errors)-1)],
+                        weights=[(1 / 2)**i for i in range(len(running_errors)-1)])
+                    if delta_mean >= 0:
                         break
                 elif (time.time() - self.started) > stop_after:
                     break
@@ -274,7 +280,6 @@ class Neural(BaseMixer):
         dev_dl = DataLoader(dev_data, batch_size=self.batch_size, shuffle=False)
         train_dl = DataLoader(train_data, batch_size=self.batch_size, shuffle=False)
 
-        self.lr = 1e-4
         self.num_hidden = 1
 
         # Find learning rate
@@ -284,7 +289,7 @@ class Neural(BaseMixer):
             self.lr, self.model = self._find_lr(train_dl)
 
         # Keep on training
-        optimizer = self._select_optimizer()
+        optimizer = self._select_optimizer(lr=self.lr)
         criterion = self._select_criterion()
         scaler = GradScaler()
 
@@ -314,7 +319,7 @@ class Neural(BaseMixer):
         self.started = time.time()
         train_dl = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
         dev_dl = DataLoader(dev_data, batch_size=self.batch_size, shuffle=True)
-        optimizer = self._select_optimizer()
+        optimizer = self._select_optimizer(lr=self.lr)
         criterion = self._select_criterion()
         scaler = GradScaler()
 

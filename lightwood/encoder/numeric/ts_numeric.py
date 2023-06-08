@@ -107,14 +107,8 @@ class TsNumericEncoder(NumericEncoder):
                     if self.positive_domain:
                         real_value = abs(real_value)
 
-                    if self._type == 'int':
-                        real_value = int(round(real_value, 0))
-
             else:
                 real_value = vector[0] * self._abs_mean
-
-                if self._type == 'int':
-                    real_value = round(real_value)
 
             ret.append(real_value)
         return ret

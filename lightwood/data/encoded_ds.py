@@ -67,10 +67,10 @@ class EncodedDs(Dataset):
                 if hasattr(self.encoders[col], 'data_window'):
                     cols = [self.target] + [f'{self.target}_timestep_{i}'
                                             for i in range(1, self.encoders[col].data_window)]
-                    data = [self.data_frame[cols].iloc[idx].tolist()]
+                    data = [self.data_frame[cols].iloc[idx].values]
                 else:
                     cols = [col]
-                    data = self.data_frame[cols].iloc[idx].tolist()
+                    data = self.data_frame[cols].iloc[idx].values
 
                 encoded_tensor = self.encoders[col].encode(data, **kwargs)
                 if torch.isnan(encoded_tensor).any() or torch.isinf(encoded_tensor).any():
