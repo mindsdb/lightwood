@@ -63,10 +63,11 @@ class Neural(BaseMixer):
         self.dtype_dict = dtype_dict
         self.target = target
         self.target_encoder = target_encoder
+        self.num_hidden = 1
         self.epochs_to_best = 0
         self.n_epochs = n_epochs
         self.lr = lr
-        self.loss_hist_len = 5  # length of queue to use for early stopping
+        self.loss_hist_len = 7  # length of queue to use for early stopping
         self.fit_on_dev = fit_on_dev
         self.net_name = net
         self.supports_proba = dtype_dict[target] in [dtype.binary, dtype.categorical]
@@ -116,27 +117,31 @@ class Neural(BaseMixer):
         return optimizer
 
     def _find_lr(self, dl):
-        optimizer = self._select_optimizer(lr=1e-3)  # magic number for ranger optimizer, should be good starting point
+        lr = 1e-5  # good starting point as search escalates
+        lrs = deque([5e-5, 1e-4, 5e-4, 1e-3, 2e-3, 3e-3, 5e-3, 1e-2, 5e-2, 1e-1])
+        starting_model = deepcopy(self.model)
         criterion = self._select_criterion()
         scaler = GradScaler()
 
-        running_losses: List[float] = []
-        cum_loss = 0
-        lr_log = []
+        running_losses = deque(maxlen=self.loss_hist_len)
+        lr_log = deque(maxlen=self.loss_hist_len)
         best_model = self.model
         stop = False
-        batches = 0
-        for epoch in range(1, 101):
-            if stop:
-                break
 
-            for i, (X, Y) in enumerate(dl):
-                if stop:
-                    break
+        _, test_batch = next(enumerate(dl))
+        X, Y = test_batch
+        n_steps = 10
+        cum_loss = 0
 
-                batches += len(X)
+        while stop is False:
+            # overfit learning on first sample (yes, biased, but we only really want an intuition on what LR is decent)
+            optimizer = self._select_optimizer(lr=lr)
+            self.model = starting_model
+
+            for i in range(n_steps):
                 X = X.to(self.model.device)
                 Y = Y.to(self.model.device)
+
                 with LightwoodAutocast():
                     optimizer.zero_grad()
                     Yh = self._net_call(X)
@@ -150,20 +155,16 @@ class Neural(BaseMixer):
                         optimizer.step()
                 cum_loss += loss.item()
 
-                # Account for ranger lookahead update
-                if (i + 1) * epoch % 6:
-                    batches = 0
-                    lr = optimizer.param_groups[0]['lr']
-                    log.info(f'Loss of {cum_loss} with learning rate {lr}')
-                    running_losses.append(cum_loss)
-                    lr_log.append(lr)
-                    cum_loss = 0
-                    if len(running_losses) < 2 or np.mean(running_losses[:-1]) > np.mean(running_losses):
-                        optimizer.param_groups[0]['lr'] = lr * 1.4
-                        # Time saving since we don't have to start training fresh
-                        best_model = deepcopy(self.model)
-                    else:
-                        stop = True
+            log.info(f'Loss of {cum_loss} with learning rate {lr}')
+            running_losses.append(cum_loss)
+            lr_log.append(lr)
+            cum_loss = 0
+
+            if len(running_losses) < 2 or np.mean(list(running_losses)[:-1]) > np.mean(running_losses) and len(lrs) > 0:
+                lr = lrs.popleft()
+                best_model = deepcopy(self.model)  # store model for slight time savings
+            else:
+                stop = True
 
         best_loss_lr = lr_log[np.argmin(running_losses)]
         lr = best_loss_lr
@@ -280,13 +281,13 @@ class Neural(BaseMixer):
         dev_dl = DataLoader(dev_data, batch_size=self.batch_size, shuffle=False)
         train_dl = DataLoader(train_data, batch_size=self.batch_size, shuffle=False)
 
-        self.num_hidden = 1
-
-        # Find learning rate
-        # keep the weights
+        # Find learning rate & keep initial weights
         self._init_net(train_data)
         if not self.lr:
-            self.lr, self.model = self._find_lr(train_dl)
+            sample_dl = DataLoader(train_data,
+                                   batch_size=min(len(train_data.data_frame), 32, self.batch_size),
+                                   shuffle=True)
+            self.lr, self.model = self._find_lr(sample_dl)
 
         # Keep on training
         optimizer = self._select_optimizer(lr=self.lr)
