@@ -1004,8 +1004,8 @@ for key, data in split_data.items():
     if key != 'stratified_on':
         if key not in self.feature_cache:
             featurized_split = EncodedDs(self.encoders, filter_ts(data, tss), self.target)
+            self.feature_cache[key] = featurized_split
 
-        self.feature_cache[key] = featurized_split
         feature_data[key] = self.feature_cache[key]
 
 return feature_data
