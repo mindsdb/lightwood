@@ -223,8 +223,8 @@ class Neural(BaseMixer):
             else:
                 if len(running_errors) >= self.loss_hist_len:
                     delta_mean = np.average([
-                        running_errors[-i - 1] - running_errors[-i] for i in range(len(running_errors)-1)],
-                        weights=[(1 / 2)**i for i in range(len(running_errors)-1)])
+                        running_errors[-i - 1] - running_errors[-i] for i in range(len(running_errors) - 1)],
+                        weights=[(1 / 2)**i for i in range(len(running_errors) - 1)])
                     if delta_mean >= 0:
                         break
                 elif (time.time() - self.started) > stop_after:
