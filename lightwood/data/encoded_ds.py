@@ -21,10 +21,10 @@ class EncodedDs(Dataset):
         self.data_frame = data_frame
         self.encoders = encoders
         self.target = target
-        self.cache_encoded = True
+        self.use_cache = True
         self.cache = [None] * len(self.data_frame)
         self.encoder_spans = {}
-        self.input_length = 0
+        self.input_length = 0  # feature tensor dim
 
         # save encoder span, has to use same iterator as in __getitem__ for correct indeces
         for col in self.data_frame:
@@ -34,7 +34,7 @@ class EncodedDs(Dataset):
                 self.input_length += self.encoders[col].output_size
 
         # if cache enabled, we immediately build it
-        self.build_cache()  # TODO: ensure we remove these instances from predictor object before serializing
+        self.build_cache()
 
     def __len__(self):
         """
@@ -55,18 +55,19 @@ class EncodedDs(Dataset):
         :return: tuple (X, y) with encoded data.
         
         """  # noqa
-        if self.cache_encoded:
-            if self.cache[idx] is not None:
-                return self.cache[idx]
+        if self.use_cache and self.cache[idx] is not None:
+            X, Y = self.cache[idx]
+        else:
+            X, Y = self._encode_idxs([idx, ])
+            if self.use_cache:
+                self.cache[idx] = [X, Y]
+        return X, Y
 
-        X, Y = self._encode_idxs(idx)
+    def _encode_idxs(self, idxs: list):
+        if not isinstance(idxs, list):
+            raise Exception(f"Passed indexes is not an iterable. Check the type! Index: {idxs}")
 
-        if self.cache_encoded:
-            X = torch.cat(X, dim=1).float().squeeze()
-            self.cache[idx] = (X, Y)
-
-    def _encode_idxs(self, idxs):
-        X = []
+        X = torch.zeros((len(idxs), self.input_length))
         Y = torch.FloatTensor()
         for col in self.data_frame:
             if self.encoders.get(col, None):
@@ -87,21 +88,28 @@ class EncodedDs(Dataset):
                     raise Exception(f'Encoded tensor: {encoded_tensor} contains nan or inf values, this tensor is \
                                       the encoding of column {col} using {self.encoders[col].__class__}')
                 if col != self.target:
-                    X.append(encoded_tensor)
-                else:
-                    Y = encoded_tensor.ravel()
+                    a, b = self.encoder_spans[col]
+                    X[:, a:b] = torch.squeeze(encoded_tensor, dim=list(range(2, len(encoded_tensor.shape))))
 
-        # concatenate features into single tensor
-        X = torch.concat(X, dim=1)
+                # target post-processing
+                else:
+                    if len(encoded_tensor.shape) > 1:
+                        Y = encoded_tensor.squeeze()
+                    else:
+                        Y = encoded_tensor.ravel()
+
         return X, Y
 
     def build_cache(self):
-        assert self.cache_encoded
+        """ This method builds a cache for the entire dataframe provided at initialization. """
+        if not self.use_cache:
+            raise RuntimeError("Cannot build a cache for EncodedDS with `use_cache` set to False.")
+
         idxs = list(range(len(self.data_frame)))
         X, Y = self._encode_idxs(idxs)
 
         for i, (x, y) in enumerate(zip(X, Y)):
-            self.cache[i] = (x, y)
+            self.cache[i] = [x, y]
 
     def get_column_original_data(self, column_name: str) -> pd.Series:
         """
@@ -157,6 +165,7 @@ class ConcatedEncodedDs(EncodedDs):
     """
     `ConcatedEncodedDs` abstracts over multiple encoded datasources (`EncodedDs`) as if they were a single entity.
     """  # noqa
+
     # TODO: We should probably delete this abstraction, it's not really useful and it adds complexity/overhead
     def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
         # @TODO: missing super() call here?
