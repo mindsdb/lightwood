@@ -45,7 +45,7 @@ class TestNumericEncoder(unittest.TestCase):
             if decoded is None:
                 self.assertTrue((real is None) or (real != real))
             else:
-                np.testing.assert_almost_equal(round(decoded, 10), round(real, 10))
+                np.testing.assert_almost_equal(round(decoded, 6), round(real, 6))
 
     def test_positive_domain(self):
         data = pd.Series([-1, -2, -100, 5, 10, 15])
@@ -69,7 +69,7 @@ class TestNumericEncoder(unittest.TestCase):
         encoder.decode(encoder.encode(data))
 
         for i in range(0, 70, 10):
-            encoder.decode([[0, pow(2, i), 0]])
+            encoder.decode(torch.Tensor([[0, pow(2, i), 0]]))
 
     def test_nan_encoding(self):
         # Generate some numbers

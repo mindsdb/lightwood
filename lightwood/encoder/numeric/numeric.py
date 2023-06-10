@@ -57,8 +57,6 @@ class NumericEncoder(BaseEncoder):
         if isinstance(data, pd.Series):
             data = data.values
 
-        data = np.nan_to_num(data, nan=0).astype(float)
-
         if not self.positive_domain:
             sign = np.vectorize(self._sign_fn, otypes=[float])(data)
         else:
@@ -72,7 +70,6 @@ class NumericEncoder(BaseEncoder):
         if self.is_target:
             components = [sign, log_value, norm]
         else:
-            # todo: if can't encode return 0s and log.error(f'Can\'t encode input value: {real}, exception: {e}')
             nones = np.vectorize(self._none_fn, otypes=[float])(data)
             components = [sign, log_value, norm, nones]
 
@@ -114,6 +111,13 @@ class NumericEncoder(BaseEncoder):
         # set "divergent" value as default (note: finfo.max() instead of pow(10, 63))
         ret = np.full((ev.shape[0],), dtype=float, fill_value=np.finfo(np.float64).max)
 
+        # `none` filter (if not a target column)
+        if not self.is_target:
+            mask_none = ev[:, -1] == 1
+            ret[mask_none] = np.nan
+        else:
+            mask_none = np.zeros_like(ret)
+
         # sign component
         sign = np.ones(ev.shape[0], dtype=float)
         mask_sign = ev[:, 0] < 0.5
@@ -135,7 +139,9 @@ class NumericEncoder(BaseEncoder):
 
         ret[valid_mask] = real_value[valid_mask]
 
-        nan_mask = ret[:, ] == np.nan
-        ret[nan_mask] = None
+        # set nan back to None
+        if mask_none.sum() > 0:
+            ret = ret.astype(object)
+            ret[mask_none] = None
 
         return ret.tolist()  # TODO: update signature on BaseEncoder and replace all encs to return ndarrays
