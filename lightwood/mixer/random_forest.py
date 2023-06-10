@@ -57,7 +57,7 @@ class RandomForest(BaseMixer):
 
         self.model = None
         self.positive_domain = False
-        self.num_trials = 20
+        self.num_trials = 5
         self.cv = 3
         self.map = {}
 

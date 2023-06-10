@@ -44,7 +44,7 @@ class EncodedDs(Dataset):
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         The getter yields a tuple (X, y), where:
-          - `X `is a concatenation of all encoded representations of the row
+          - `X `is a concatenation of all encoded representations of the row. Size: (n_features,)
           - `y` is the encoded target
           
         :param idx: index of the row to access.
@@ -56,7 +56,7 @@ class EncodedDs(Dataset):
             if self.cache[idx] is not None:
                 return self.cache[idx]
 
-        X = torch.FloatTensor()
+        X = []
         Y = torch.FloatTensor()
         for col in self.data_frame:
             if self.encoders.get(col, None):
@@ -72,16 +72,17 @@ class EncodedDs(Dataset):
                     cols = [col]
                     data = self.data_frame[cols].iloc[idx].tolist()
 
-                encoded_tensor = self.encoders[col].encode(data, **kwargs)[0]
+                encoded_tensor = self.encoders[col].encode(data, **kwargs)
                 if torch.isnan(encoded_tensor).any() or torch.isinf(encoded_tensor).any():
                     raise Exception(f'Encoded tensor: {encoded_tensor} contains nan or inf values, this tensor is \
                                       the encoding of column {col} using {self.encoders[col].__class__}')
                 if col != self.target:
-                    X = torch.cat([X, encoded_tensor])
+                    X.append(encoded_tensor)
                 else:
-                    Y = encoded_tensor
+                    Y = encoded_tensor.ravel()
 
         if self.cache_encoded:
+            X = torch.cat(X, dim=1).float().squeeze()
             self.cache[idx] = (X, Y)
 
         return X, Y
