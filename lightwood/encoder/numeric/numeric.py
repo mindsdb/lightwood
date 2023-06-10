@@ -74,7 +74,7 @@ class NumericEncoder(BaseEncoder):
             nones = np.vectorize(lambda x: 1 if is_none(x) else 0)(data)
             components = [sign, log_value, exp, nones]
 
-        ret = torch.Tensor(np.array(components)).T
+        ret = torch.Tensor(np.asarray(components)).T
         return torch.Tensor(ret)
 
     def decode(self, encoded_values: Union[List[Number], torch.Tensor], decode_log: bool = None) -> list:

@@ -128,8 +128,8 @@ class Neural(BaseMixer):
         best_model = self.model
         stop = False
 
-        _, test_batch = next(enumerate(dl))
-        X, Y = test_batch
+        dl_iter = iter(dl)
+        X, Y = next(dl_iter)
         n_steps = 10
         cum_loss = 0
 
