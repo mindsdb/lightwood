@@ -7,10 +7,8 @@ import pandas as pd
 
 import torch
 from torch import nn
-import torch_optimizer as ad_optim
 from torch.cuda.amp import GradScaler
 from torch.utils.data import DataLoader
-from torch.optim.optimizer import Optimizer
 
 from type_infer.dtype import dtype
 from lightwood.api.types import PredictionArguments
@@ -76,10 +74,6 @@ class NeuralTs(Neural):
 
         return criterion
 
-    def _select_optimizer(self) -> Optimizer:
-        optimizer = ad_optim.Ranger(self.model.parameters(), lr=self.lr)
-        return optimizer
-
     def _fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
         :param train_data: The network is fit/trained on this
@@ -109,7 +103,7 @@ class NeuralTs(Neural):
         self.lr, self.model = self._find_lr(train_dl)
 
         # Keep on training
-        optimizer = self._select_optimizer()
+        optimizer = self._select_optimizer(lr=self.lr)
         criterion = self._select_criterion()
         scaler = GradScaler()
 

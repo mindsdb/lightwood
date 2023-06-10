@@ -1,9 +1,10 @@
-import math
+from typing import Union, List, Dict
+
 import torch
 import numpy as np
+import pandas as pd
+
 from lightwood.encoder.numeric import NumericEncoder
-from lightwood.helpers.general import is_none
-from lightwood.helpers.log import log
 
 
 class TsNumericEncoder(NumericEncoder):
@@ -20,95 +21,93 @@ class TsNumericEncoder(NumericEncoder):
         self.dependencies = grouped_by
         self.output_size = 1
 
-    def encode(self, data, dependency_data={}):
+    def encode(self, data: Union[np.ndarray, pd.Series], dependency_data: Dict[str, List[pd.Series]] = {}):
         """
+        :param data: A pandas series containing the numbers to be encoded
         :param dependency_data: dict with grouped_by column info, to retrieve the correct normalizer for each datum
+
+        :returns: A torch tensor with the representations of each number
         """  # noqa
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
+
         if not dependency_data:
             dependency_data = {'__default': [None] * len(data)}
 
-        ret = []
-        for real, group in zip(data, list(zip(*dependency_data.values()))):
+        if isinstance(data, pd.Series):
+            data = data.values
+
+        # get array of series-wise observed means
+        if self.normalizers is None:
+            means = np.full((len(data)), fill_value=self._abs_mean)
+        else:
+            # use global mean as default for novel series
             try:
-                real = float(real)
+                means = np.full((len(data)), fill_value=self.normalizers['__default'].abs_mean)
             except Exception:
-                try:
-                    real = float(real.replace(',', '.'))
-                except Exception:
-                    real = None
-            if self.is_target:
-                vector = [0]
-                if group is not None and self.normalizers is not None:
-                    try:
-                        mean = self.normalizers[tuple(group)].abs_mean
-                    except KeyError:
-                        # novel group-by, we use default normalizer mean
-                        mean = self.normalizers['__default'].abs_mean
+                print('!')
+
+            def _get_group_mean(group) -> float:
+                if (group, ) in self.normalizers:
+                    return self.normalizers[(group, )].abs_mean
                 else:
-                    mean = self._abs_mean
+                    return self.normalizers['__default'].abs_mean
 
-                if not is_none(real):
-                    vector[0] = real / mean if mean != 0 else real
-                else:
-                    pass
-                    # This should raise an exception *once* we fix the TsEncoder such that this doesn't get feed `nan`
-                    # raise Exception(f'Can\'t encode target value: {real}')
-            else:
-                vector = [0]
-                try:
-                    if not is_none(real):
-                        vector[0] = real / self._abs_mean
-                except Exception as e:
-                    log.error(f'Can\'t encode input value: {real}, exception: {e}')
+            for i, group in enumerate(list(zip(*dependency_data.values()))):  # TODO: support multigroup
+                if group is not None:
+                    means = np.vectorize(_get_group_mean, otypes=[float])(group[0].values)
 
-            ret.append(vector)
+        def _norm_fn(x: float, mean: float) -> float:
+            return x / mean
 
-        return torch.Tensor(ret)
+        # nones = np.vectorize(self._none_fn, otypes=[float])(data)  # TODO
+        encoded = np.vectorize(_norm_fn, otypes=[float])(data, means)
+        # encoded[nones] = 0  # if measurement is None, it is zeroed out  # TODO
 
-    def decode(self, encoded_values, decode_log=None, dependency_data=None):
+        # TODO: mask for where mean is 0, then pass real as-is
+
+        return torch.Tensor(encoded).unsqueeze(1)
+
+    def decode(self, encoded_values: torch.Tensor, decode_log: bool = None, dependency_data=None):
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
-        if decode_log is None:
-            decode_log = self.decode_log
+        assert isinstance(encoded_values, torch.Tensor), 'It is not a tensor!'  # TODO: debug purposes
+        assert not decode_log  # TODO: debug purposes
 
-        ret = []
         if not dependency_data:
             dependency_data = {'__default': [None] * len(encoded_values)}
-        if isinstance(encoded_values, torch.Tensor):
-            encoded_values = encoded_values.tolist()
 
-        for vector, group in zip(encoded_values, list(zip(*dependency_data.values()))):
-            if self.is_target:
-                if np.isnan(vector[0]) or vector[0] == float('inf'):
-                    log.error(f'Got weird target value to decode: {vector}')
-                    real_value = pow(10, 63)
-                else:
-                    if decode_log:
-                        sign = -1 if vector[0] < 0 else 1
-                        try:
-                            real_value = math.exp(vector[0]) * sign
-                        except OverflowError:
-                            real_value = pow(10, 63) * sign
+        # force = True prevents side effects on the original encoded_values
+        ev = encoded_values.numpy(force=True)
+
+        # set global mean as default
+        ret = np.full((ev.shape[0],), dtype=float, fill_value=self._abs_mean)
+
+        # TODO: perhaps capture nan, infs, etc and set to pow(10,63)?
+
+        # set means array
+        if self.normalizers is None:
+            means = np.full((ev.shape[0],), fill_value=self._abs_mean)
+        else:
+            means = np.full((len(encoded_values)), fill_value=self.normalizers['__default'].abs_mean)
+            for i, group in enumerate(list(zip(*dependency_data.values()))):
+                if group is not None:
+                    if tuple(group) in self.normalizers:
+                        means[i] = self.normalizers[tuple(group)].abs_mean
                     else:
-                        if group is not None and self.normalizers is not None:
-                            try:
-                                mean = self.normalizers[tuple(group)].abs_mean
-                            except KeyError:
-                                # decode new group with default normalizer
-                                mean = self.normalizers['__default'].abs_mean
-                        else:
-                            mean = self._abs_mean
+                        means[i] = self.normalizers['__default'].abs_mean
+                else:
+                    means[i] = self._abs_mean
 
-                        real_value = vector[0] * mean
+        # set real value
+        real_value = np.multiply(ev[:].reshape(-1,), means)
+        valid_mask = np.ones_like(real_value, dtype=bool)
 
-                    if self.positive_domain:
-                        real_value = abs(real_value)
+        # final filters
+        if self.positive_domain:
+            real_value = abs(real_value)
 
-            else:
-                real_value = vector[0] * self._abs_mean
+        ret[valid_mask] = real_value[valid_mask]  # TODO probably not needed
 
-            ret.append(real_value)
-        return ret
+        return ret.tolist()

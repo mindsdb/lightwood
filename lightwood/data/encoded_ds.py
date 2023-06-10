@@ -83,7 +83,7 @@ class EncodedDs(Dataset):
                 if hasattr(self.encoders[col], 'data_window'):
                     cols = [self.target] + [f'{self.target}_timestep_{i}'
                                             for i in range(1, self.encoders[col].data_window)]
-                    data = [self.data_frame[cols].iloc[idxs].values]  # TODO: this is likely to fail as is
+                    data = self.data_frame[cols].iloc[idxs].values
                 else:
                     cols = [col]
                     data = self.data_frame[cols].iloc[idxs].values.flatten()
