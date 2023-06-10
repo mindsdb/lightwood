@@ -1002,11 +1002,17 @@ tss = self.problem_definition.timeseries_settings
 feature_data = dict()
 for key, data in split_data.items():
     if key != 'stratified_on':
-        if key not in self.feature_cache:
-            featurized_split = EncodedDs(self.encoders, filter_ts(data, tss), self.target)
-            self.feature_cache[key] = featurized_split
 
-        feature_data[key] = self.feature_cache[key]
+        # compute and store two splits - full and filtered (useful for time series post-train analysis)
+        if key not in self.feature_cache:
+            featurized_split = EncodedDs(self.encoders, data, self.target)
+            filtered_subset = EncodedDs(self.encoders, filter_ts(data, tss), self.target)
+
+            for k, s in zip((key, f'{{key}}_filtered'), (featurized_split, filtered_subset)):
+                self.feature_cache[k] = s
+
+        for k in (key, f'{{key}}_filtered'):
+            feature_data[k] = self.feature_cache[k]
 
 return feature_data
 
@@ -1027,7 +1033,7 @@ self.mode = 'train'
 # Extract the featurized data into train/dev/test
 encoded_train_data = enc_data['train']
 encoded_dev_data = enc_data['dev']
-encoded_test_data = enc_data['test']
+encoded_test_data = enc_data['test_filtered']
 
 log.info('Training the mixers')
 

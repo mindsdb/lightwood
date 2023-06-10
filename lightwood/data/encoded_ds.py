@@ -79,7 +79,7 @@ class EncodedDs(Dataset):
                 if col != self.target:
                     X.append(encoded_tensor)
                 else:
-                    Y = encoded_tensor.squeeze()
+                    Y = encoded_tensor.ravel()
 
         if self.cache_encoded:
             X = torch.cat(X, dim=1).float().squeeze()
