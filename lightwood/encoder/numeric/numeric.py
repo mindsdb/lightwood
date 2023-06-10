@@ -48,34 +48,53 @@ class NumericEncoder(BaseEncoder):
         self._abs_mean = priming_data.abs().mean()
         self.is_prepared = True
 
-    def encode(self, data: pd.Series):
+    def encode(self, data: Union[np.ndarray, pd.Series]):
         """
-        :param data: A pandas series containing the numbers to be encoded
+        :param data: A pandas series or numpy array containing the numbers to be encoded
         :returns: A torch tensor with the representations of each number
         """
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
-        # todo: wrap with try/except to cover non-real edge cases
+        if isinstance(data, pd.Series):
+            data = data.values
+
+        data = np.nan_to_num(data, nan=0).astype(float)
+
         if not self.positive_domain:
-            sign = np.vectorize(lambda x: 0 if x < 0 else 1)(data)
+            sign = np.vectorize(self._sign_fn, otypes=[float])(data)
         else:
             sign = np.zeros(len(data))
-        log_value = np.vectorize(lambda x: math.log(abs(x)) if abs(x) > 0 else -20)(data)
+        log_value = np.vectorize(self._log_fn, otypes=[float])(data)
         log_value = np.nan_to_num(log_value, nan=0, posinf=20, neginf=-20)
 
-        exp = np.vectorize(lambda x: x / self._abs_mean)(data)
-        exp = np.nan_to_num(exp, nan=0, posinf=20, neginf=-20)
+        norm = np.vectorize(self._norm_fn, otypes=[float])(data)
+        norm = np.nan_to_num(norm, nan=0, posinf=20, neginf=-20)
 
         if self.is_target:
-            components = [sign, log_value, exp]
+            components = [sign, log_value, norm]
         else:
             # todo: if can't encode return 0s and log.error(f'Can\'t encode input value: {real}, exception: {e}')
-            nones = np.vectorize(lambda x: 1 if is_none(x) else 0)(data)
-            components = [sign, log_value, exp, nones]
+            nones = np.vectorize(self._none_fn, otypes=[float])(data)
+            components = [sign, log_value, norm, nones]
 
         ret = torch.Tensor(np.asarray(components)).T
         return torch.Tensor(ret)
+
+    @staticmethod
+    def _sign_fn(x: float) -> float:
+        return 0 if x < 0 else 1
+
+    @staticmethod
+    def _log_fn(x: float) -> float:
+        return math.log(abs(x)) if abs(x) > 0 else -20
+
+    def _norm_fn(self, x: float) -> float:
+        return x / self._abs_mean
+
+    @staticmethod
+    def _none_fn(x: float) -> float:
+        return 1 if is_none(x) else 0
 
     def decode(self, encoded_values: Union[List[Number], torch.Tensor], decode_log: bool = None) -> list:
         """
