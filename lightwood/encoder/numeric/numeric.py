@@ -73,8 +73,7 @@ class NumericEncoder(BaseEncoder):
             nones = np.vectorize(self._none_fn, otypes=[float])(data)
             components = [sign, log_value, norm, nones]
 
-        ret = torch.Tensor(np.asarray(components)).T
-        return torch.Tensor(ret)
+        return torch.Tensor(np.asarray(components)).T
 
     @staticmethod
     def _sign_fn(x: float) -> float:

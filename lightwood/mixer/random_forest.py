@@ -14,7 +14,7 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from type_infer.dtype import dtype
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
 
@@ -203,7 +203,7 @@ class RandomForest(BaseMixer):
 
         :return: dataframe with predictions.
         """
-        data = ds.get_encoded_data(include_target=False)
+        data = ds.get_encoded_data(include_target=False).numpy()
 
         if self.is_classifier:
             predictions = self.model.predict_proba(data)

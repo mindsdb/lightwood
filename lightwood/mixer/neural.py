@@ -250,8 +250,9 @@ class Neural(BaseMixer):
     def _init_net(self, ds: EncodedDs):
         self.net_class = DefaultNet if self.net_name == 'DefaultNet' else ArNet
 
-        net_kwargs = {'input_size': len(ds[0][0]),
-                      'output_size': len(ds[0][1]),
+        X, Y = ds[0]
+        net_kwargs = {'input_size': len(X),
+                      'output_size': len(Y),
                       'num_hidden': self.num_hidden,
                       'dropout': 0}
 

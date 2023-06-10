@@ -87,13 +87,7 @@ class Regression(BaseMixer):
 
         :returns: A dataframe cotaining the decoded predictions and (depending on the args) additional information such as the probabilites for each target class
         """ # noqa
-        X = []
-        for x, _ in ds:
-            entry = x.numpy()
-            if len(entry.shape) > 1:
-                entry = entry[0]
-            X.append(entry)
-
+        X = ds.get_encoded_data(include_target=False)
         Yh = self.model.predict(X)
 
         decoded_predictions = self.target_encoder.decode(torch.Tensor(Yh))
