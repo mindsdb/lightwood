@@ -1216,13 +1216,14 @@ encoded_data = encoded_ds.get_encoded_data(include_target=False)
 log.info(f'[Predict phase 3/{{n_phases}}] - Calling ensemble')
 df = self.ensemble(encoded_ds, args=self.pred_args)
 
-if self.pred_args.all_mixers:
-    return df
-else:
+if not self.pred_args.all_mixers:
     log.info(f'[Predict phase 4/{{n_phases}}] - Analyzing output')
-    insights, global_insights = {call(json_ai.explainer)}
+    df, global_insights = {call(json_ai.explainer)}
     self.global_insights = {{**self.global_insights, **global_insights}}
-    return insights
+
+self.feature_cache = dict()  # empty feature cache to avoid large predictor objects
+
+return df
 """
 
     predict_body = align(predict_body, 2)
