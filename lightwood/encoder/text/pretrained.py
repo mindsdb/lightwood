@@ -102,8 +102,9 @@ class PretrainedLangEncoder(BaseEncoder):
         Fine-tunes a transformer on the priming data.
 
         Transformer is fine-tuned with weight-decay on training split. 
-        By default, underlying transformer is frozen and only final linear layer is trained. This trains faster, often as tradeoff for performance.
-
+        
+        Train + Dev are concatenated together and a transformer is then fine tuned with weight-decay applied on the transformer parameters. The option to freeze the underlying transformer and only train a linear layer exists if `frozen=True`. This trains faster, with the exception that the performance is often lower than fine-tuning on internal benchmarks.
+        
         :param train_priming_data: Text data in the train set
         :param dev_priming_data: Text data in the dev set
         :param encoded_target_values: Encoded target labels in Nrows x N_output_dimension
