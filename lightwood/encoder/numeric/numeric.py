@@ -1,14 +1,12 @@
 import math
-from typing import List, Union
+from typing import Union
 
 import torch
 import numpy as np
 import pandas as pd
-from torch.types import Number
 from type_infer.dtype import dtype
 
 from lightwood.encoder.base import BaseEncoder
-from lightwood.helpers.log import log
 from lightwood.helpers.general import is_none
 
 
@@ -96,50 +94,48 @@ class NumericEncoder(BaseEncoder):
     def _none_fn(x: float) -> float:
         return 1 if is_none(x) else 0
 
-    def decode(self, encoded_values: Union[List[Number], torch.Tensor], decode_log: bool = None) -> list:
+    def decode(self, encoded_values: torch.Tensor, decode_log: bool = None) -> list:
         """
         :param encoded_values: The encoded values to decode into single numbers
         :param decode_log: Whether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part
 
-        :returns: The decoded number
+        :returns: The decoded array
         """ # noqa
+
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if decode_log is None:
             decode_log = self.decode_log
 
-        ret = []
-        if isinstance(encoded_values, torch.Tensor):
-            encoded_values = encoded_values.tolist()
+        # force = True prevents side effects on the original encoded_values
+        ev = encoded_values.numpy(force=True)
 
-        for vector in encoded_values:
-            # check for none
-            if len(vector) == 4 and vector[-1] == 1:
-                ret.append(None)
-                continue
+        # set "divergent" value as default (note: finfo.max() instead of pow(10, 63))
+        ret = np.full((ev.shape[0],), dtype=float, fill_value=np.finfo(np.float64).max)
 
-            # edge case: divergence
-            elif np.isnan(vector[0]) or vector[0] == float('inf') or \
-                    np.isnan(vector[1]) or vector[1] == float('inf') or \
-                    np.isnan(vector[2]) or vector[2] == float('inf'):
+        # sign component
+        sign = np.ones(ev.shape[0], dtype=float)
+        mask_sign = ev[:, 0] < 0.5
+        sign[mask_sign] = -1
 
-                log.error(f'Got weird target value to decode: {vector}')
-                real_value = pow(10, 63)
+        # real component
+        if decode_log:
+            real_value = np.exp(ev[:, 1]) * sign
+            overflow_mask = ev[:, 1] >= 63
+            real_value[overflow_mask] = 10 ** 63
+            valid_mask = ~overflow_mask
+        else:
+            real_value = ev[:, 2] * self._abs_mean
+            valid_mask = np.ones_like(real_value, dtype=bool)
 
-            elif decode_log:
-                sign = -1 if vector[0] < 0.5 else 1
-                try:
-                    real_value = math.exp(vector[1]) * sign
-                except OverflowError:
-                    real_value = pow(10, 63) * sign
-            else:
-                real_value = vector[2] * self._abs_mean
+        # final filters
+        if self.positive_domain:
+            real_value = abs(real_value)
 
-            if self.positive_domain:
-                real_value = abs(real_value)
+        ret[valid_mask] = real_value[valid_mask]
 
-            # if isinstance(real_value, torch.Tensor):
-            #     real_value = real_value.item()
-            ret.append(real_value)
-        return ret
+        nan_mask = ret[:, ] == np.nan
+        ret[nan_mask] = None
+
+        return ret.tolist()  # TODO: update signature on BaseEncoder and replace all encs to return ndarrays

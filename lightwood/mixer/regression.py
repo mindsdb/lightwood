@@ -89,7 +89,10 @@ class Regression(BaseMixer):
         """ # noqa
         X = []
         for x, _ in ds:
-            X.append(x.tolist())
+            entry = x.numpy()
+            if len(entry.shape) > 1:
+                entry = entry[0]
+            X.append(entry)
 
         Yh = self.model.predict(X)
 
