@@ -1002,11 +1002,17 @@ tss = self.problem_definition.timeseries_settings
 feature_data = dict()
 for key, data in split_data.items():
     if key != 'stratified_on':
-        if key not in self.feature_cache:
-            featurized_split = EncodedDs(self.encoders, filter_ts(data, tss), self.target)
-            self.feature_cache[key] = featurized_split
 
-        feature_data[key] = self.feature_cache[key]
+        # compute and store two splits - full and filtered (useful for time series post-train analysis)
+        if key not in self.feature_cache:
+            featurized_split = EncodedDs(self.encoders, data, self.target)
+            filtered_subset = EncodedDs(self.encoders, filter_ts(data, tss), self.target)
+
+            for k, s in zip((key, f'{{key}}_filtered'), (featurized_split, filtered_subset)):
+                self.feature_cache[k] = s
+
+        for k in (key, f'{{key}}_filtered'):
+            feature_data[k] = self.feature_cache[k]
 
 return feature_data
 
@@ -1027,7 +1033,7 @@ self.mode = 'train'
 # Extract the featurized data into train/dev/test
 encoded_train_data = enc_data['train']
 encoded_dev_data = enc_data['dev']
-encoded_test_data = enc_data['test']
+encoded_test_data = enc_data['test_filtered']
 
 log.info('Training the mixers')
 
@@ -1216,13 +1222,14 @@ encoded_data = encoded_ds.get_encoded_data(include_target=False)
 log.info(f'[Predict phase 3/{{n_phases}}] - Calling ensemble')
 df = self.ensemble(encoded_ds, args=self.pred_args)
 
-if self.pred_args.all_mixers:
-    return df
-else:
+if not self.pred_args.all_mixers:
     log.info(f'[Predict phase 4/{{n_phases}}] - Analyzing output')
-    insights, global_insights = {call(json_ai.explainer)}
+    df, global_insights = {call(json_ai.explainer)}
     self.global_insights = {{**self.global_insights, **global_insights}}
-    return insights
+
+self.feature_cache = dict()  # empty feature cache to avoid large predictor objects
+
+return df
 """
 
     predict_body = align(predict_body, 2)

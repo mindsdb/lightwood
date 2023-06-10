@@ -102,8 +102,9 @@ class PretrainedLangEncoder(BaseEncoder):
         Fine-tunes a transformer on the priming data.
 
         Transformer is fine-tuned with weight-decay on training split. 
-        By default, underlying transformer is frozen and only final linear layer is trained. This trains faster, often as tradeoff for performance.
-
+        
+        Train + Dev are concatenated together and a transformer is then fine tuned with weight-decay applied on the transformer parameters. The option to freeze the underlying transformer and only train a linear layer exists if `frozen=True`. This trains faster, with the exception that the performance is often lower than fine-tuning on internal benchmarks.
+        
         :param train_priming_data: Text data in the train set
         :param dev_priming_data: Text data in the dev set
         :param encoded_target_values: Encoded target labels in Nrows x N_output_dimension
@@ -112,13 +113,17 @@ class PretrainedLangEncoder(BaseEncoder):
             raise Exception("Encoder is already prepared.")
 
         os.environ['TOKENIZERS_PARALLELISM'] = 'true'
-        val_size = (len(dev_priming_data)) / len(train_priming_data)
 
         # remove empty strings (`None`s for dtype `object`)
-        priming_data = pd.concat([
-            train_priming_data[~train_priming_data.isna()],
-            dev_priming_data[~dev_priming_data.isna()]]
-        ).tolist()
+        filtered_tr = train_priming_data[~train_priming_data.isna()]
+        filtered_dev = dev_priming_data[~dev_priming_data.isna()]
+
+        if filtered_dev.shape[0] > 0:
+            priming_data = pd.concat([filtered_tr, filtered_dev]).tolist()
+            val_size = (len(dev_priming_data)) / len(train_priming_data)
+        else:
+            priming_data = filtered_tr.tolist()
+            val_size = 0.1  # leave out 0.1 for validation
 
         # Label encode the OHE/binary output for classification
         labels = encoded_target_values.argmax(dim=1)

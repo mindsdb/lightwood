@@ -89,7 +89,7 @@ class EncodedDs(Dataset):
                 if col != self.target:
                     X.append(encoded_tensor)
                 else:
-                    Y = encoded_tensor.squeeze()
+                    Y = encoded_tensor.ravel()
 
         # concatenate features into single tensor
         X = torch.concat(X, dim=1)
