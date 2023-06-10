@@ -54,8 +54,11 @@ class TsNumericEncoder(NumericEncoder):
                     return self.normalizers['__default'].abs_mean
 
             for i, group in enumerate(list(zip(*dependency_data.values()))):  # TODO: support multigroup
-                if group is not None:
-                    means = np.vectorize(_get_group_mean, otypes=[float])(group[0].values)
+                if group[0] is not None:
+                    try:
+                        means = np.vectorize(_get_group_mean, otypes=[float])(group[0].values)
+                    except Exception:
+                        print("!")
 
         def _norm_fn(x: float, mean: float) -> float:
             return x / mean
