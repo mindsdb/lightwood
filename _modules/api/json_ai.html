@@ -1170,7 +1170,22 @@
     <span class="n">feature_body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">log.info(&#39;Featurizing the data&#39;)</span>
 
-<span class="s2">feature_data = </span><span class="se">{{</span><span class="s2"> key: EncodedDs(self.encoders, data, self.target) for key, data in split_data.items() if key != &quot;stratified_on&quot;</span><span class="se">}}</span>
+<span class="s2">tss = self.problem_definition.timeseries_settings</span>
+
+<span class="s2">feature_data = dict()</span>
+<span class="s2">for key, data in split_data.items():</span>
+<span class="s2">    if key != &#39;stratified_on&#39;:</span>
+
+<span class="s2">        # compute and store two splits - full and filtered (useful for time series post-train analysis)</span>
+<span class="s2">        if key not in self.feature_cache:</span>
+<span class="s2">            featurized_split = EncodedDs(self.encoders, data, self.target)</span>
+<span class="s2">            filtered_subset = EncodedDs(self.encoders, filter_ts(data, tss), self.target)</span>
+
+<span class="s2">            for k, s in zip((key, f&#39;</span><span class="se">{{</span><span class="s2">key</span><span class="se">}}</span><span class="s2">_filtered&#39;), (featurized_split, filtered_subset)):</span>
+<span class="s2">                self.feature_cache[k] = s</span>
+
+<span class="s2">        for k in (key, f&#39;</span><span class="se">{{</span><span class="s2">key</span><span class="se">}}</span><span class="s2">_filtered&#39;):</span>
+<span class="s2">            feature_data[k] = self.feature_cache[k]</span>
 
 <span class="s2">return feature_data</span>
 
@@ -1191,9 +1206,7 @@
 <span class="s2"># Extract the featurized data into train/dev/test</span>
 <span class="s2">encoded_train_data = enc_data[&#39;train&#39;]</span>
 <span class="s2">encoded_dev_data = enc_data[&#39;dev&#39;]</span>
-<span class="s2">encoded_test_data = enc_data[&#39;test&#39;]</span>
-<span class="s2">filtered_df = filter_ds(encoded_test_data, self.problem_definition.timeseries_settings)</span>
-<span class="s2">encoded_test_data = EncodedDs(encoded_test_data.encoders, filtered_df, encoded_test_data.target)</span>
+<span class="s2">encoded_test_data = enc_data[&#39;test_filtered&#39;]</span>
 
 <span class="s2">log.info(&#39;Training the mixers&#39;)</span>
 
@@ -1347,6 +1360,7 @@
 <span class="s2">                                                                      enc_train_test[&quot;dev&quot;]]).data_frame,</span>
 <span class="s2">                                                                      adjust_args={&#39;learn_call&#39;: True})</span>
 
+<span class="s2">self.feature_cache = dict()  # empty feature cache to avoid large predictor objects</span>
 <span class="s2">&quot;&quot;&quot;</span>
     <span class="n">learn_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">learn_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
     <span class="c1"># ----------------- #</span>
@@ -1381,13 +1395,14 @@
 <span class="s2">log.info(f&#39;[Predict phase 3/</span><span class="se">{{</span><span class="s2">n_phases</span><span class="se">}}</span><span class="s2">] - Calling ensemble&#39;)</span>
 <span class="s2">df = self.ensemble(encoded_ds, args=self.pred_args)</span>
 
-<span class="s2">if self.pred_args.all_mixers:</span>
-<span class="s2">    return df</span>
-<span class="s2">else:</span>
+<span class="s2">if not self.pred_args.all_mixers:</span>
 <span class="s2">    log.info(f&#39;[Predict phase 4/</span><span class="se">{{</span><span class="s2">n_phases</span><span class="se">}}</span><span class="s2">] - Analyzing output&#39;)</span>
-<span class="s2">    insights, global_insights = </span><span class="si">{</span><span class="n">call</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">explainer</span><span class="p">)</span><span class="si">}</span>
+<span class="s2">    df, global_insights = </span><span class="si">{</span><span class="n">call</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">explainer</span><span class="p">)</span><span class="si">}</span>
 <span class="s2">    self.global_insights = </span><span class="se">{{</span><span class="s2">**self.global_insights, **global_insights</span><span class="se">}}</span>
-<span class="s2">    return insights</span>
+
+<span class="s2">self.feature_cache = dict()  # empty feature cache to avoid large predictor objects</span>
+
+<span class="s2">return df</span>
 <span class="s2">&quot;&quot;&quot;</span>
 
     <span class="n">predict_body</span> <span class="o">=</span> <span class="n">align</span><span class="p">(</span><span class="n">predict_body</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -1424,6 +1439,9 @@
 <span class="s2">        self.ts_analysis = None</span>
 <span class="s2">        self.runtime_log = dict()</span>
 <span class="s2">        self.global_insights = dict()</span>
+
+<span class="s2">        # Feature cache</span>
+<span class="s2">        self.feature_cache = dict()</span>
 
 <span class="s2">    @timed</span>
 <span class="s2">    def analyze_data(self, data: pd.DataFrame) -&gt; None:</span>

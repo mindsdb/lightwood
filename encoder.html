@@ -1006,7 +1006,6 @@ C &amp;= [0, 0, 1]\]</div>
 <li><p><strong>is_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether this encoder represents the target. NOT functional for text generation yet.</p></li>
 <li><p><strong>batch_size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – size of batch while fine-tuning</p></li>
 <li><p><strong>max_position_embeddings</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – max sequence length of input text</p></li>
-<li><p><strong>custom_train</strong> – If True, trains model on target procided</p></li>
 <li><p><strong>frozen</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If True, freezes transformer layers during training.</p></li>
 <li><p><strong>epochs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – number of epochs to train model with</p></li>
 <li><p><strong>output_type</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Data dtype of the target; if categorical/binary, the option to return logits is possible.</p></li>
@@ -1058,13 +1057,13 @@ transformer base + pre-classifier linear layer + classifier layer</p>
 <dt class="sig sig-object py" id="encoder.PretrainedLangEncoder.prepare">
 <span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_priming_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoded_target_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/text/pretrained.html#PretrainedLangEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.PretrainedLangEncoder.prepare" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fine-tunes a transformer on the priming data.</p>
-<p>CURRENTLY WIP; train + dev are placeholders for a validation-based approach.</p>
+<p>Transformer is fine-tuned with weight-decay on training split.</p>
 <p>Train + Dev are concatenated together and a transformer is then fine tuned with weight-decay applied on the transformer parameters. The option to freeze the underlying transformer and only train a linear layer exists if <cite>frozen=True</cite>. This trains faster, with the exception that the performance is often lower than fine-tuning on internal benchmarks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>train_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Text data in the train set</p></li>
-<li><p><strong>dev_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Text data in the dev set (not currently supported; can be empty)</p></li>
+<li><p><strong>train_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code>) – Text data in the train set</p></li>
+<li><p><strong>dev_priming_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code>) – Text data in the dev set</p></li>
 <li><p><strong>encoded_target_values</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – Encoded target labels in Nrows x N_output_dimension</p></li>
 </ul>
 </dd>

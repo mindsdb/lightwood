@@ -217,7 +217,7 @@
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The getter yields a tuple (X, y), where:</span>
-<span class="sd">          - `X `is a concatenation of all encoded representations of the row</span>
+<span class="sd">          - `X `is a concatenation of all encoded representations of the row. Size: (n_features,)</span>
 <span class="sd">          - `y` is the encoded target</span>
 <span class="sd">          </span>
 <span class="sd">        :param idx: index of the row to access.</span>
@@ -229,7 +229,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
 
-        <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">()</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">Y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoders</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
@@ -245,16 +245,17 @@
                     <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="p">]</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-                <span class="n">encoded_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">encoded_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">encoded_tensor</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="n">torch</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">encoded_tensor</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Encoded tensor: </span><span class="si">{</span><span class="n">encoded_tensor</span><span class="si">}</span><span class="s1"> contains nan or inf values, this tensor is </span><span class="se">\</span>
 <span class="s1">                                      the encoding of column </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1"> using </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="vm">__class__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">:</span>
-                    <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">X</span><span class="p">,</span> <span class="n">encoded_tensor</span><span class="p">])</span>
+                    <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">encoded_tensor</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">Y</span> <span class="o">=</span> <span class="n">encoded_tensor</span>
+                    <span class="n">Y</span> <span class="o">=</span> <span class="n">encoded_tensor</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_encoded</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span>

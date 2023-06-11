@@ -470,13 +470,12 @@
     <span class="k">return</span> <span class="n">candidate_sps</span>
 
 
-<span class="k">def</span> <span class="nf">filter_ds</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">tss</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">filter_ts</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tss</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method triggers only for timeseries datasets.</span>
 
 <span class="sd">    It returns a dataframe that filters out all but the first ``n_rows`` per group.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span>
     <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
         <span class="n">gby</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span>
         <span class="k">if</span> <span class="n">gby</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

@@ -31,10 +31,10 @@
    "id": "happy-wheat",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-05-30T20:49:26.146805Z",
-     "iopub.status.busy": "2023-05-30T20:49:26.146394Z",
-     "iopub.status.idle": "2023-05-30T20:49:29.723843Z",
-     "shell.execute_reply": "2023-05-30T20:49:29.723011Z"
+     "iopub.execute_input": "2023-06-11T03:51:00.955573Z",
+     "iopub.status.busy": "2023-06-11T03:51:00.954304Z",
+     "iopub.status.idle": "2023-06-11T03:51:04.581204Z",
+     "shell.execute_reply": "2023-06-11T03:51:04.580413Z"
     }
    },
    "outputs": [
@@ -42,8 +42,8 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2944:No torchvision detected, image helpers not supported.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2944:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2677:No torchvision detected, image helpers not supported.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2677:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
      ]
     }
    ],
@@ -81,10 +81,10 @@
    "id": "recognized-parish",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-05-30T20:49:29.728256Z",
-     "iopub.status.busy": "2023-05-30T20:49:29.727643Z",
-     "iopub.status.idle": "2023-05-30T20:49:30.843129Z",
-     "shell.execute_reply": "2023-05-30T20:49:30.842298Z"
+     "iopub.execute_input": "2023-06-11T03:51:04.585723Z",
+     "iopub.status.busy": "2023-06-11T03:51:04.585103Z",
+     "iopub.status.idle": "2023-06-11T03:51:05.759913Z",
+     "shell.execute_reply": "2023-06-11T03:51:05.759192Z"
     }
    },
    "outputs": [
@@ -215,10 +215,10 @@
    "id": "chicken-truth",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-05-30T20:49:30.847755Z",
-     "iopub.status.busy": "2023-05-30T20:49:30.847321Z",
-     "iopub.status.idle": "2023-05-30T20:49:47.996405Z",
-     "shell.execute_reply": "2023-05-30T20:49:47.995242Z"
+     "iopub.execute_input": "2023-06-11T03:51:05.763677Z",
+     "iopub.status.busy": "2023-06-11T03:51:05.763256Z",
+     "iopub.status.idle": "2023-06-11T03:51:23.090692Z",
+     "shell.execute_reply": "2023-06-11T03:51:23.089883Z"
     }
    },
    "outputs": [
@@ -226,20 +226,20 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2944:Dropping features: ['url_legal', 'license', 'standard_error']\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2944:Analyzing a sample of 2478\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2944:from a total population of 2834, this is equivalent to 87.4% of your data.\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2944:Infering type for: id\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2944:Doing text detection for column: id\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2944:Column id has data type categorical\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2944:Infering type for: excerpt\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2944:Doing text detection for column: excerpt\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2944:Infering type for: target\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2944:Column target has data type float\u001b[0m\n",
-      "\u001b[33mWARNING:type_infer-2944:Column id is an identifier of type \"Hash-like identifier\"\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2944:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2944:Dropping features: ['id']\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2944:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2677:Dropping features: ['url_legal', 'license', 'standard_error']\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2677:Analyzing a sample of 2478\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2677:from a total population of 2834, this is equivalent to 87.4% of your data.\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2677:Infering type for: id\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2677:Doing text detection for column: id\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2677:Column id has data type categorical\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2677:Infering type for: excerpt\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2677:Doing text detection for column: excerpt\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2677:Infering type for: target\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2677:Column target has data type float\u001b[0m\n",
+      "\u001b[33mWARNING:type_infer-2677:Column id is an identifier of type \"Hash-like identifier\"\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2677:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2677:Dropping features: ['id']\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2677:Finished statistical analysis\u001b[0m\n"
      ]
     }
    ],
@@ -276,10 +276,10 @@
    "id": "designed-condition",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-05-30T20:49:48.000324Z",
-     "iopub.status.busy": "2023-05-30T20:49:47.999936Z",
-     "iopub.status.idle": "2023-05-30T20:49:48.004555Z",
-     "shell.execute_reply": "2023-05-30T20:49:48.004032Z"
+     "iopub.execute_input": "2023-06-11T03:51:23.094669Z",
+     "iopub.status.busy": "2023-06-11T03:51:23.094233Z",
+     "iopub.status.idle": "2023-06-11T03:51:23.099492Z",
+     "shell.execute_reply": "2023-06-11T03:51:23.098931Z"
     }
    },
    "outputs": [
@@ -350,7 +350,7 @@
       "        \"unbias_target\": true,\n",
       "        \"seconds_per_mixer\": 21384.0,\n",
       "        \"seconds_per_encoder\": 85536.0,\n",
-      "        \"expected_additional_time\": 17.10779619216919,\n",
+      "        \"expected_additional_time\": 17.28640604019165,\n",
       "        \"time_aim\": 259200,\n",
       "        \"target_weights\": null,\n",
       "        \"positive_domain\": false,\n",
@@ -433,10 +433,10 @@
    "id": "325d8f1b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-05-30T20:49:48.007896Z",
-     "iopub.status.busy": "2023-05-30T20:49:48.007666Z",
-     "iopub.status.idle": "2023-05-30T20:49:48.013707Z",
-     "shell.execute_reply": "2023-05-30T20:49:48.013015Z"
+     "iopub.execute_input": "2023-06-11T03:51:23.103191Z",
+     "iopub.status.busy": "2023-06-11T03:51:23.102722Z",
+     "iopub.status.idle": "2023-06-11T03:51:23.110515Z",
+     "shell.execute_reply": "2023-06-11T03:51:23.109830Z"
     }
    },
    "outputs": [
@@ -559,10 +559,10 @@
    "id": "f030f8ca",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-05-30T20:49:48.017274Z",
-     "iopub.status.busy": "2023-05-30T20:49:48.016830Z",
-     "iopub.status.idle": "2023-05-30T20:49:48.020593Z",
-     "shell.execute_reply": "2023-05-30T20:49:48.019905Z"
+     "iopub.execute_input": "2023-06-11T03:51:23.113596Z",
+     "iopub.status.busy": "2023-06-11T03:51:23.113232Z",
+     "iopub.status.idle": "2023-06-11T03:51:23.116956Z",
+     "shell.execute_reply": "2023-06-11T03:51:23.116269Z"
     }
    },
    "outputs": [],
@@ -624,10 +624,10 @@
    "id": "floating-patent",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-05-30T20:49:48.023731Z",
-     "iopub.status.busy": "2023-05-30T20:49:48.023300Z",
-     "iopub.status.idle": "2023-05-30T20:49:48.237870Z",
-     "shell.execute_reply": "2023-05-30T20:49:48.237074Z"
+     "iopub.execute_input": "2023-06-11T03:51:23.119972Z",
+     "iopub.status.busy": "2023-06-11T03:51:23.119616Z",
+     "iopub.status.idle": "2023-06-11T03:51:23.347669Z",
+     "shell.execute_reply": "2023-06-11T03:51:23.346921Z"
     }
    },
    "outputs": [
@@ -635,7 +635,7 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2944:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2677:Unable to import black formatter, predictor code might be a bit ugly.\u001b[0m\n"
      ]
     },
     {
@@ -712,7 +712,7 @@
       "                \"unbias_target\": True,\n",
       "                \"seconds_per_mixer\": 21384.0,\n",
       "                \"seconds_per_encoder\": 85536.0,\n",
-      "                \"expected_additional_time\": 17.10779619216919,\n",
+      "                \"expected_additional_time\": 17.28640604019165,\n",
       "                \"time_aim\": 259200,\n",
       "                \"target_weights\": None,\n",
       "                \"positive_domain\": False,\n",
@@ -754,6 +754,9 @@
       "        self.ts_analysis = None\n",
       "        self.runtime_log = dict()\n",
       "        self.global_insights = dict()\n",
+      "\n",
+      "        # Feature cache\n",
+      "        self.feature_cache = dict()\n",
       "\n",
       "    @timed\n",
       "    def analyze_data(self, data: pd.DataFrame) -> None:\n",
@@ -901,11 +904,25 @@
       "\n",
       "        log.info(\"Featurizing the data\")\n",
       "\n",
-      "        feature_data = {\n",
-      "            key: EncodedDs(self.encoders, data, self.target)\n",
-      "            for key, data in split_data.items()\n",
-      "            if key != \"stratified_on\"\n",
-      "        }\n",
+      "        tss = self.problem_definition.timeseries_settings\n",
+      "\n",
+      "        feature_data = dict()\n",
+      "        for key, data in split_data.items():\n",
+      "            if key != \"stratified_on\":\n",
+      "                # compute and store two splits - full and filtered (useful for time series post-train analysis)\n",
+      "                if key not in self.feature_cache:\n",
+      "                    featurized_split = EncodedDs(self.encoders, data, self.target)\n",
+      "                    filtered_subset = EncodedDs(\n",
+      "                        self.encoders, filter_ts(data, tss), self.target\n",
+      "                    )\n",
+      "\n",
+      "                    for k, s in zip(\n",
+      "                        (key, f\"{key}_filtered\"), (featurized_split, filtered_subset)\n",
+      "                    ):\n",
+      "                        self.feature_cache[k] = s\n",
+      "\n",
+      "                for k in (key, f\"{key}_filtered\"):\n",
+      "                    feature_data[k] = self.feature_cache[k]\n",
       "\n",
       "        return feature_data\n",
       "\n",
@@ -921,13 +938,7 @@
       "        # Extract the featurized data into train/dev/test\n",
       "        encoded_train_data = enc_data[\"train\"]\n",
       "        encoded_dev_data = enc_data[\"dev\"]\n",
-      "        encoded_test_data = enc_data[\"test\"]\n",
-      "        filtered_df = filter_ds(\n",
-      "            encoded_test_data, self.problem_definition.timeseries_settings\n",
-      "        )\n",
-      "        encoded_test_data = EncodedDs(\n",
-      "            encoded_test_data.encoders, filtered_df, encoded_test_data.target\n",
-      "        )\n",
+      "        encoded_test_data = enc_data[\"test_filtered\"]\n",
       "\n",
       "        log.info(\"Training the mixers\")\n",
       "\n",
@@ -1102,6 +1113,10 @@
       "                adjust_args={\"learn_call\": True},\n",
       "            )\n",
       "\n",
+      "        self.feature_cache = (\n",
+      "            dict()\n",
+      "        )  # empty feature cache to avoid large predictor objects\n",
+      "\n",
       "    @timed\n",
       "    def adjust(\n",
       "        self,\n",
@@ -1179,11 +1194,9 @@
       "        log.info(f\"[Predict phase 3/{n_phases}] - Calling ensemble\")\n",
       "        df = self.ensemble(encoded_ds, args=self.pred_args)\n",
       "\n",
-      "        if self.pred_args.all_mixers:\n",
-      "            return df\n",
-      "        else:\n",
+      "        if not self.pred_args.all_mixers:\n",
       "            log.info(f\"[Predict phase 4/{n_phases}] - Analyzing output\")\n",
-      "            insights, global_insights = explain(\n",
+      "            df, global_insights = explain(\n",
       "                data=data,\n",
       "                encoded_data=encoded_data,\n",
       "                predictions=df,\n",
@@ -1197,7 +1210,12 @@
       "                pred_args=self.pred_args,\n",
       "            )\n",
       "            self.global_insights = {**self.global_insights, **global_insights}\n",
-      "            return insights\n",
+      "\n",
+      "        self.feature_cache = (\n",
+      "            dict()\n",
+      "        )  # empty feature cache to avoid large predictor objects\n",
+      "\n",
+      "        return df\n",
       "\n"
      ]
     }
@@ -1268,10 +1286,10 @@
    "id": "violent-guard",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-05-30T20:49:48.242010Z",
-     "iopub.status.busy": "2023-05-30T20:49:48.241506Z",
-     "iopub.status.idle": "2023-05-30T20:49:48.250962Z",
-     "shell.execute_reply": "2023-05-30T20:49:48.250352Z"
+     "iopub.execute_input": "2023-06-11T03:51:23.351456Z",
+     "iopub.status.busy": "2023-06-11T03:51:23.350991Z",
+     "iopub.status.idle": "2023-06-11T03:51:23.360530Z",
+     "shell.execute_reply": "2023-06-11T03:51:23.359926Z"
     }
    },
    "outputs": [],
@@ -1286,10 +1304,10 @@
    "id": "closing-episode",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-05-30T20:49:48.254174Z",
-     "iopub.status.busy": "2023-05-30T20:49:48.253729Z",
-     "iopub.status.idle": "2023-05-30T20:49:48.415614Z",
-     "shell.execute_reply": "2023-05-30T20:49:48.414892Z"
+     "iopub.execute_input": "2023-06-11T03:51:23.363509Z",
+     "iopub.status.busy": "2023-06-11T03:51:23.363134Z",
+     "iopub.status.idle": "2023-06-11T03:51:23.736547Z",
+     "shell.execute_reply": "2023-06-11T03:51:23.735816Z"
     }
    },
    "outputs": [
@@ -1297,16 +1315,16 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2944:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2944:Dropping features: ['id']\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2944:Finished statistical analysis\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2944: `analyze_data` runtime: 0.06 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2944:Cleaning the data\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2944:Dropping features: ['id']\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2944:Cleaning column =excerpt\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2944:Cleaning column =target\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2944:Converted target into strictly non-negative\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2944: `preprocess` runtime: 0.1 seconds\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2677:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2677:Dropping features: ['id']\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2677:Finished statistical analysis\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2677: `analyze_data` runtime: 0.06 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2677:Cleaning the data\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2677:Dropping features: ['id']\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2677:Cleaning column =excerpt\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2677:Cleaning column =target\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2677:Converted target into strictly non-negative\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2677: `preprocess` runtime: 0.1 seconds\u001b[0m\n"
      ]
     },
     {
@@ -1396,10 +1414,10 @@
    "id": "major-stake",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-05-30T20:49:48.419448Z",
-     "iopub.status.busy": "2023-05-30T20:49:48.418784Z",
-     "iopub.status.idle": "2023-05-30T20:49:48.426428Z",
-     "shell.execute_reply": "2023-05-30T20:49:48.425066Z"
+     "iopub.execute_input": "2023-06-11T03:51:23.739897Z",
+     "iopub.status.busy": "2023-06-11T03:51:23.739433Z",
+     "iopub.status.idle": "2023-06-11T03:51:23.744843Z",
+     "shell.execute_reply": "2023-06-11T03:51:23.744311Z"
     }
    },
    "outputs": [

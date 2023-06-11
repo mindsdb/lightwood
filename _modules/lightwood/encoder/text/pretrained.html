@@ -171,18 +171,15 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.encoder.text.pretrained</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">lightwood.encoder.text.helpers.pretrained_helpers</span> <span class="kn">import</span> <span class="n">TextEmbed</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.device</span> <span class="kn">import</span> <span class="n">get_device_from_name</span>
-<span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.torch</span> <span class="kn">import</span> <span class="n">LightwoodAutocast</span>
 <span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DistilBertModel</span><span class="p">,</span>
@@ -191,8 +188,14 @@
     <span class="n">AdamW</span><span class="p">,</span>
     <span class="n">get_linear_schedule_with_warmup</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="kn">from</span> <span class="nn">lightwood.encoder.text.helpers.pretrained_helpers</span> <span class="kn">import</span> <span class="n">TextEmbed</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.device</span> <span class="kn">import</span> <span class="n">get_device_from_name</span>
+<span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.torch</span> <span class="kn">import</span> <span class="n">LightwoodAutocast</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.general</span> <span class="kn">import</span> <span class="n">is_none</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
 
 
 <div class="viewcode-block" id="PretrainedLangEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.PretrainedLangEncoder">[docs]</a><span class="k">class</span> <span class="nc">PretrainedLangEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
@@ -221,7 +224,6 @@
 <span class="sd">        :param is_target: Whether this encoder represents the target. NOT functional for text generation yet.</span>
 <span class="sd">        :param batch_size: size of batch while fine-tuning</span>
 <span class="sd">        :param max_position_embeddings: max sequence length of input text</span>
-<span class="sd">        :param custom_train: If True, trains model on target procided</span>
 <span class="sd">        :param frozen: If True, freezes transformer layers during training.</span>
 <span class="sd">        :param epochs: number of epochs to train model with</span>
 <span class="sd">        :param output_type: Data dtype of the target; if categorical/binary, the option to return logits is possible.</span>
@@ -237,12 +239,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_frozen</span> <span class="o">=</span> <span class="n">frozen</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patience</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># measured in batches rather than epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_val_loss_every</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># how many batches to wait before checking val loss. If -1, will check train loss instead of val for early stopping.  # noqa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tr_loss_every</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># same as above, but only applies if `_val_loss_every` is set to -1</span>
 
         <span class="c1"># Model setup</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># TODO: Other LMs; Distilbert is a good balance of speed/performance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_classifier_model_class</span> <span class="o">=</span> <span class="n">DistilBertForSequenceClassification</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_embeddings_model_class</span> <span class="o">=</span> <span class="n">DistilBertModel</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pretrained_model_name</span> <span class="o">=</span> <span class="s2">&quot;distilbert-base-uncased&quot;</span>
@@ -263,19 +267,19 @@
 
 <div class="viewcode-block" id="PretrainedLangEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.PretrainedLangEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">train_priming_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">train_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
         <span class="n">encoded_target_values</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fine-tunes a transformer on the priming data.</span>
 
-<span class="sd">        CURRENTLY WIP; train + dev are placeholders for a validation-based approach. </span>
-
+<span class="sd">        Transformer is fine-tuned with weight-decay on training split. </span>
+<span class="sd">        </span>
 <span class="sd">        Train + Dev are concatenated together and a transformer is then fine tuned with weight-decay applied on the transformer parameters. The option to freeze the underlying transformer and only train a linear layer exists if `frozen=True`. This trains faster, with the exception that the performance is often lower than fine-tuning on internal benchmarks.</span>
-
+<span class="sd">        </span>
 <span class="sd">        :param train_priming_data: Text data in the train set</span>
-<span class="sd">        :param dev_priming_data: Text data in the dev set (not currently supported; can be empty)</span>
+<span class="sd">        :param dev_priming_data: Text data in the dev set</span>
 <span class="sd">        :param encoded_target_values: Encoded target labels in Nrows x N_output_dimension</span>
 <span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
@@ -283,26 +287,30 @@
 
         <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TOKENIZERS_PARALLELISM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;true&#39;</span>
 
-        <span class="c1"># TODO -&gt; we shouldn&#39;t be concatenating these together</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dev_priming_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">priming_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">train_priming_data</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">])</span><span class="o">.</span><span class="n">values</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">priming_data</span> <span class="o">=</span> <span class="n">train_priming_data</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="c1"># remove empty strings (`None`s for dtype `object`)</span>
+        <span class="n">filtered_tr</span> <span class="o">=</span> <span class="n">train_priming_data</span><span class="p">[</span><span class="o">~</span><span class="n">train_priming_data</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span>
+        <span class="n">filtered_dev</span> <span class="o">=</span> <span class="n">dev_priming_data</span><span class="p">[</span><span class="o">~</span><span class="n">dev_priming_data</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span>
 
-        <span class="c1"># Replaces empty strings with &#39;&#39;</span>
-        <span class="n">priming_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">priming_data</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">filtered_dev</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">priming_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">filtered_tr</span><span class="p">,</span> <span class="n">filtered_dev</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">val_size</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dev_priming_data</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_priming_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">priming_data</span> <span class="o">=</span> <span class="n">filtered_tr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">val_size</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># leave out 0.1 for validation</span>
+
+        <span class="c1"># Label encode the OHE/binary output for classification</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">encoded_target_values</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Split into train and validation sets</span>
+        <span class="n">train_texts</span><span class="p">,</span> <span class="n">val_texts</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">,</span> <span class="n">val_labels</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">priming_data</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="n">val_size</span><span class="p">)</span>
 
         <span class="c1"># If classification, then fine-tune</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">)):</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Training model.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">binary</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Training model.</span><span class="se">\n\t</span><span class="s2">Output trained is categorical&quot;</span><span class="p">)</span>
 
             <span class="c1"># Prepare priming data into tokenized form + attention masks</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="p">(</span><span class="n">priming_data</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Output trained is categorical&quot;</span><span class="p">)</span>
-
-            <span class="c1"># Label encode the OHE/binary output for classification</span>
-            <span class="n">labels</span> <span class="o">=</span> <span class="n">encoded_target_values</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">training_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="p">(</span><span class="n">train_texts</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">validation_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="p">(</span><span class="n">val_texts</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="c1"># Construct the model</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classifier_model_class</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
@@ -311,8 +319,12 @@
             <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
             <span class="c1"># Construct the dataset for training</span>
-            <span class="n">xinp</span> <span class="o">=</span> <span class="n">TextEmbed</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
-            <span class="n">dataset</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">xinp</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">xinp</span> <span class="o">=</span> <span class="n">TextEmbed</span><span class="p">(</span><span class="n">training_text</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">)</span>
+            <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">xinp</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># Construct the dataset for validation</span>
+            <span class="n">xvalinp</span> <span class="o">=</span> <span class="n">TextEmbed</span><span class="p">(</span><span class="n">validation_text</span><span class="p">,</span> <span class="n">val_labels</span><span class="p">)</span>
+            <span class="n">val_dataset</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">xvalinp</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="c1"># Set max length of input string; affects input to the model</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -321,8 +333,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frozen</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Frozen Model + Training Classifier Layers&quot;</span><span class="p">)</span>
 <span class="w">                </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">                Freeze the base transformer model and train</span>
-<span class="sd">                a linear layer on top</span>
+<span class="sd">                Freeze the base transformer model and train a linear layer on top</span>
 <span class="sd">                &quot;&quot;&quot;</span>
                 <span class="c1"># Freeze all the transformer parameters</span>
                 <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">base_model</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
@@ -362,12 +373,12 @@
             <span class="n">scheduler</span> <span class="o">=</span> <span class="n">get_linear_schedule_with_warmup</span><span class="p">(</span>
                 <span class="n">optimizer</span><span class="p">,</span>
                 <span class="n">num_warmup_steps</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># default value for GLUE</span>
-                <span class="n">num_training_steps</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epochs</span><span class="p">,</span>
+                <span class="n">num_training_steps</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epochs</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Train model; declare optimizer earlier if desired.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_tune_model</span><span class="p">(</span>
-                <span class="n">dataset</span><span class="p">,</span> <span class="n">optim</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_epochs</span>
+                <span class="n">train_dataset</span><span class="p">,</span> <span class="n">val_dataset</span><span class="p">,</span> <span class="n">optim</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_epochs</span>
             <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -379,8 +390,7 @@
             <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
             <span class="c1"># TODO: Not a great flag</span>
-            <span class="c1"># Currently, if the task is not classification, you must have</span>
-            <span class="c1"># an embedding generator only.</span>
+            <span class="c1"># Currently, if the task is not classification, you must have an embedding generator only</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">embed_mode</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Embedding mode must be ON for non-classification targets.&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">embed_mode</span> <span class="o">=</span> <span class="kc">True</span>
@@ -389,19 +399,15 @@
         <span class="n">encoded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">priming_data</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">encoded</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-    <span class="k">def</span> <span class="nf">_tune_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">optim</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_tune_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">,</span> <span class="n">val_dataset</span><span class="p">,</span> <span class="n">optim</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Given a model, train for n_epochs.</span>
-<span class="sd">        Specifically intended for tuning; it does NOT use loss/</span>
-<span class="sd">        stopping criterion.</span>
+<span class="sd">        Given a model, tune for n_epochs.</span>
 
-<span class="sd">        model - torch.nn model;</span>
-<span class="sd">        dataset - torch.DataLoader; dataset to train</span>
-<span class="sd">        device - torch.device; cuda/cpu</span>
-<span class="sd">        log - lightwood.logger.log; log.info output</span>
+<span class="sd">        train_dataset - torch.DataLoader; dataset to train</span>
+<span class="sd">        val_dataset - torch.DataLoader; dataset used to compute validation loss + early stopping</span>
 <span class="sd">        optim - transformers.optimization.AdamW; optimizer</span>
 <span class="sd">        scheduler - scheduling params</span>
-<span class="sd">        n_epochs - number of epochs to train</span>
+<span class="sd">        n_epochs - max number of epochs to train for, provided there is no early stopping</span>
 
 <span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
@@ -417,20 +423,21 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Scheduler provided.&quot;</span><span class="p">)</span>
 
+        <span class="n">best_tr_loss</span> <span class="o">=</span> <span class="n">best_val_loss</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+        <span class="n">tr_loss_queue</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_patience</span><span class="p">)</span>
+        <span class="n">patience_counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patience</span>
+
         <span class="n">started</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_epochs</span><span class="p">):</span>
             <span class="n">total_loss</span> <span class="o">=</span> <span class="mi">0</span>
 
-            <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">bidx</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">):</span>
                 <span class="n">optim</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
 
                 <span class="k">with</span> <span class="n">LightwoodAutocast</span><span class="p">():</span>
-                    <span class="n">inpids</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-                    <span class="n">attn</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;attention_mask&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-                    <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-                    <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">(</span><span class="n">inpids</span><span class="p">,</span> <span class="n">attention_mask</span><span class="o">=</span><span class="n">attn</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
-                    <span class="n">loss</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
 
+                <span class="n">tr_loss_queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
                 <span class="n">total_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
                 <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
@@ -440,9 +447,48 @@
                 <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">started</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span><span class="p">:</span>
                     <span class="k">break</span>
 
+                <span class="c1"># val-based early stopping</span>
+                <span class="k">if</span> <span class="kc">False</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_val_loss_every</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bidx</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val_loss_every</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+                    <span class="n">val_loss</span> <span class="o">=</span> <span class="mi">0</span>
+
+                    <span class="k">for</span> <span class="n">vbatch</span> <span class="ow">in</span> <span class="n">val_dataset</span><span class="p">:</span>
+                        <span class="n">val_loss</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">vbatch</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> train batch </span><span class="si">{</span><span class="n">bidx</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> - Validation loss: </span><span class="si">{</span><span class="n">val_loss</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">val_dataset</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">val_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_dataset</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">best_val_loss</span><span class="p">:</span>
+                        <span class="k">break</span>
+
+                    <span class="n">best_val_loss</span> <span class="o">=</span> <span class="n">val_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_dataset</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+                <span class="c1"># train-based early stopping</span>
+                <span class="k">elif</span> <span class="kc">False</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bidx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tr_loss_every</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+                    <span class="n">tr_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">tr_loss_queue</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2"> train batch </span><span class="si">{</span><span class="n">bidx</span><span class="si">}</span><span class="s2"> - Train loss: </span><span class="si">{</span><span class="n">tr_loss</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># noqa</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="n">tr_loss</span> <span class="o">&gt;=</span> <span class="n">best_tr_loss</span> <span class="ow">and</span> <span class="n">patience_counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="k">elif</span> <span class="n">patience_counter</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">patience_counter</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="k">elif</span> <span class="n">tr_loss</span> <span class="o">&lt;</span> <span class="n">best_tr_loss</span><span class="p">:</span>
+                        <span class="n">best_tr_loss</span> <span class="o">=</span> <span class="n">tr_loss</span>
+                        <span class="n">patience_counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patience</span>
+
             <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">started</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span><span class="p">:</span>
                 <span class="k">break</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_train_callback</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">total_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_train_callback</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">total_loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="n">inpids</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">attn</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;attention_mask&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">(</span><span class="n">inpids</span><span class="p">,</span> <span class="n">attention_mask</span><span class="o">=</span><span class="n">attn</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">loss</span>
 
     <span class="k">def</span> <span class="nf">_train_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">loss</span><span class="p">):</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> at epoch </span><span class="si">{</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> and loss </span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
