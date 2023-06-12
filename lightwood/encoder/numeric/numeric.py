@@ -57,15 +57,15 @@ class NumericEncoder(BaseEncoder):
         if isinstance(data, pd.Series):
             data = data.values
 
+        data = np.nan_to_num(data.astype(float), nan=0, posinf=20, neginf=-20)
+
         if not self.positive_domain:
             sign = np.vectorize(self._sign_fn, otypes=[float])(data)
         else:
             sign = np.zeros(len(data))
-        log_value = np.vectorize(self._log_fn, otypes=[float])(data)
-        log_value = np.nan_to_num(log_value, nan=0, posinf=20, neginf=-20)
 
+        log_value = np.vectorize(self._log_fn, otypes=[float])(data)
         norm = np.vectorize(self._norm_fn, otypes=[float])(data)
-        norm = np.nan_to_num(norm, nan=0, posinf=20, neginf=-20)
 
         if self.is_target:
             components = [sign, log_value, norm]
