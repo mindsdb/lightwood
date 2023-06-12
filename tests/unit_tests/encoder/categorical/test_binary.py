@@ -72,7 +72,7 @@ class TestBinary(unittest.TestCase):
         """ Ensure binary strictly enforces binary typing """
         data = ["apple", "apple", "orange", "banana", "apple", "orange"]
 
-        enc = BinaryEncoder()
+        enc = BinaryEncoder(handle_unknown='error')
         self.assertRaises(ValueError, enc.prepare, data)
 
     def test_check_probabilities(self):
