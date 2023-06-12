@@ -142,7 +142,12 @@ class Neural(BaseMixer):
             optimizer = self._select_optimizer(self.model, lr=lr)
 
             for i in range(n_steps):
-                X, Y = next(dl_iter)
+                try:
+                    X, Y = next(dl_iter)
+                except StopIteration:
+                    dl_iter = iter(dl)
+                    X, Y = next(dl_iter)
+
                 X = X.to(self.model.device)
                 Y = Y.to(self.model.device)
 

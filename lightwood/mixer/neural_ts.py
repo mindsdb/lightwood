@@ -100,10 +100,10 @@ class NeuralTs(Neural):
         # Find learning rate
         # keep the weights
         self._init_net(train_data)
-        self.lr, self.model = self._find_lr(train_dl)
+        self.lr, self.model = self._find_lr(train_data)
 
         # Keep on training
-        optimizer = self._select_optimizer(lr=self.lr)
+        optimizer = self._select_optimizer(self.model, lr=self.lr)
         criterion = self._select_criterion()
         scaler = GradScaler()
 
