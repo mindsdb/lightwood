@@ -54,6 +54,11 @@ class TsNumericEncoder(NumericEncoder):
                 if group[0] is not None:
                     means = np.vectorize(_get_group_mean, otypes=[float])(group[0].values)
 
+        if len(data.shape) > 1 and data.shape[1] > 1:
+            if len(means.shape) == 1:
+                means = np.expand_dims(means, 1)
+            means = np.repeat(means, data.shape[1], axis=1)
+
         def _norm_fn(x: float, mean: float) -> float:
             return x / mean
 

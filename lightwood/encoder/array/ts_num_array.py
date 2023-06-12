@@ -1,8 +1,6 @@
 from typing import List, Dict, Iterable, Optional
 
 import torch
-import torch.nn.functional as F
-import numpy as np
 
 from lightwood.encoder import BaseEncoder
 from lightwood.encoder.numeric import TsNumericEncoder
@@ -54,34 +52,9 @@ class TsArrayNumericEncoder(BaseEncoder):
         if not dependency_data:
             dependency_data = {'__default': [None] * len(data)}
 
-        ret = []
-        for series in data:
-            ret.append(self.encode_one(series, dependency_data=dependency_data))
+        ret = self.sub_encoder.encode(data, dependency_data=dependency_data)
 
-        return torch.vstack(ret).nan_to_num(self.nan_value)
-
-    def encode_one(self, data: np.ndarray, dependency_data: Optional[Dict[str, str]] = {}) -> torch.Tensor:
-        """
-        Encodes a single windowed slice of any given time series.
-
-        :param data: windowed slice of a numerical time series.
-        :param dependency_data: used to determine the correct normalizer for the input.
-        
-        :return: an encoded time series array, as per the underlying `TsNumericEncoder` object. 
-        The output of this encoder for all time steps is concatenated, so the final shape of the tensor is (1, NxK), where N: self.data_window and K: sub-encoder # of output features. 
-        """  # noqa
-        ret = []
-
-        for data_point in data.reshape(-1, 1):
-            ret.append(self.sub_encoder.encode(data_point, dependency_data=dependency_data))
-
-        ret = torch.hstack(ret)
-        padding_size = self.output_size - ret.shape[-1]
-
-        if padding_size > 0:
-            ret = F.pad(ret, (0, padding_size))
-
-        return ret
+        return torch.Tensor(ret).nan_to_num(self.nan_value)
 
     def decode(self, encoded_values, dependency_data=None) -> List[List]:
         """
