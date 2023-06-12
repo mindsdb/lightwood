@@ -49,7 +49,6 @@ class BinaryEncoder(BaseEncoder):
         self.output_size = 2
         self.encoder_class_type = str
         self.handle_unknown = handle_unknown
-        self.UNK_IDX = 2
 
         # Weight-balance info if encoder represents target
         self.target_weights = None
@@ -115,7 +114,7 @@ class BinaryEncoder(BaseEncoder):
         for idx, word in enumerate(column_data):
             index = self.map.get(word, None)
 
-            if index is None or index == self.UNK_IDX:
+            if index is None or index >= self.output_size:
                 pass  # any unknown value is ignored
             else:
                 ret[idx, index] = 1
@@ -141,7 +140,7 @@ class BinaryEncoder(BaseEncoder):
                 ret.append(_UNCOMMON_WORD)
             else:
                 idx = np.argmax(vector)
-                if idx == self.UNK_IDX:
+                if idx >= self.output_size:
                     ret.append(_UNCOMMON_WORD)  # known, but not either of the supported categories
                 else:
                     ret.append(self.rev_map[idx])
