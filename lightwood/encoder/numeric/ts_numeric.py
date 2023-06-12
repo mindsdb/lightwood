@@ -42,10 +42,7 @@ class TsNumericEncoder(NumericEncoder):
             means = np.full((len(data)), fill_value=self._abs_mean)
         else:
             # use global mean as default for novel series
-            try:
-                means = np.full((len(data)), fill_value=self.normalizers['__default'].abs_mean)
-            except Exception:
-                print('!')
+            means = np.full((len(data)), fill_value=self.normalizers['__default'].abs_mean)
 
             def _get_group_mean(group) -> float:
                 if (group, ) in self.normalizers:
@@ -55,10 +52,7 @@ class TsNumericEncoder(NumericEncoder):
 
             for i, group in enumerate(list(zip(*dependency_data.values()))):  # TODO: support multigroup
                 if group[0] is not None:
-                    try:
-                        means = np.vectorize(_get_group_mean, otypes=[float])(group[0].values)
-                    except Exception:
-                        print("!")
+                    means = np.vectorize(_get_group_mean, otypes=[float])(group[0].values)
 
         def _norm_fn(x: float, mean: float) -> float:
             return x / mean

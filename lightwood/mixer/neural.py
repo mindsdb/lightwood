@@ -166,7 +166,7 @@ class Neural(BaseMixer):
             else:
                 stop = True
 
-        best_loss_lr = lr_log[np.argmin(running_losses)]
+        best_loss_lr = lr_log[np.nanargmin(running_losses)]  # nanargmin ignores nans that may arise
         lr = best_loss_lr
         log.info(f'Found learning rate of: {lr}')
         return lr, best_model

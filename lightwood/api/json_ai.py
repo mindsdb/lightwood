@@ -617,7 +617,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
-            mixers[i]["args"]["use_optuna"] = True
 
         elif mixers[i]["module"] == "LightGBMArray":
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
