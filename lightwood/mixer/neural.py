@@ -112,13 +112,13 @@ class Neural(BaseMixer):
 
         return criterion
 
-    def _select_optimizer(self, lr) -> Optimizer:
-        optimizer = ad_optim.Ranger(self.model.parameters(), lr=lr, weight_decay=2e-2)
+    def _select_optimizer(self, model, lr) -> Optimizer:
+        optimizer = ad_optim.Ranger(model.parameters(), lr=lr, weight_decay=2e-2)
         return optimizer
 
-    def _find_lr(self, dl):
-        lr = 1e-5  # good starting point as search escalates
-        lrs = deque([5e-5, 1e-4, 5e-4, 1e-3, 2e-3, 3e-3, 5e-3, 1e-2, 5e-2, 1e-1])
+    def _find_lr(self, train_data):
+        lr = 1e-4  # good starting point as search escalates
+        lrs = deque([5e-4, 1e-3, 2e-3, 3e-3, 5e-3, 1e-2, 5e-2, 1e-1])
         starting_model = deepcopy(self.model)
         criterion = self._select_criterion()
         scaler = GradScaler()
@@ -128,17 +128,21 @@ class Neural(BaseMixer):
         best_model = self.model
         stop = False
 
-        dl_iter = iter(dl)
-        X, Y = next(dl_iter)
         n_steps = 10
         cum_loss = 0
 
         while stop is False:
-            # overfit learning on first sample (yes, biased, but we only really want an intuition on what LR is decent)
-            optimizer = self._select_optimizer(lr=lr)
-            self.model = starting_model
+            # overfit learning on first n_steps samples (biased, but we only want an intuition on what LR is decent)
+            dl = DataLoader(train_data,
+                            batch_size=min(len(train_data.data_frame), 32, self.batch_size),
+                            shuffle=False)
+            dl_iter = iter(dl)
+            self.model = deepcopy(starting_model)
+            self.model.train()
+            optimizer = self._select_optimizer(self.model, lr=lr)
 
             for i in range(n_steps):
+                X, Y = next(dl_iter)
                 X = X.to(self.model.device)
                 Y = Y.to(self.model.device)
 
@@ -159,14 +163,17 @@ class Neural(BaseMixer):
             running_losses.append(cum_loss)
             lr_log.append(lr)
             cum_loss = 0
-
-            if len(running_losses) < 2 or np.mean(list(running_losses)[:-1]) > np.mean(running_losses) and len(lrs) > 0:
-                lr = lrs.popleft()
-                best_model = deepcopy(self.model)  # store model for slight time savings
-            else:
+            lr = lrs.popleft()
+            if len(lrs) == 0:
                 stop = True
 
-        best_loss_lr = lr_log[np.nanargmin(running_losses)]  # nanargmin ignores nans that may arise
+            # store model if best so far
+            inv_running_losses = list(running_losses)[::-1]  # invert so when tied we pick the most aggresive LR
+            best_loss_idx = np.nanargmin(inv_running_losses)  # nanargmin ignores nans that may arise
+            if best_loss_idx == 0:
+                best_model = deepcopy(self.model)  # store model for slight time savings
+                best_loss_lr = lr_log[-1]
+
         lr = best_loss_lr
         log.info(f'Found learning rate of: {lr}')
         return lr, best_model
@@ -285,13 +292,10 @@ class Neural(BaseMixer):
         # Find learning rate & keep initial weights
         self._init_net(train_data)
         if not self.lr:
-            sample_dl = DataLoader(train_data,
-                                   batch_size=min(len(train_data.data_frame), 32, self.batch_size),
-                                   shuffle=True)
-            self.lr, self.model = self._find_lr(sample_dl)
+            self.lr, self.model = self._find_lr(train_data)
 
         # Keep on training
-        optimizer = self._select_optimizer(lr=self.lr)
+        optimizer = self._select_optimizer(self.model, lr=self.lr)
         criterion = self._select_criterion()
         scaler = GradScaler()
 
@@ -321,7 +325,7 @@ class Neural(BaseMixer):
         self.started = time.time()
         train_dl = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
         dev_dl = DataLoader(dev_data, batch_size=self.batch_size, shuffle=True)
-        optimizer = self._select_optimizer(lr=self.lr)
+        optimizer = self._select_optimizer(self.model, lr=self.lr)
         criterion = self._select_criterion()
         scaler = GradScaler()
 
