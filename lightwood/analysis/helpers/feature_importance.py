@@ -81,6 +81,7 @@ class PermutationFeatureImportance(BaseAnalysisBlock):
                 shuffle_data = deepcopy(ref_data)
                 shuffle_data.clear_cache()
                 shuffle_data.data_frame[col] = shuffle(shuffle_data.data_frame[col].values)
+                shuffle_data.build_cache()  # TODO: bottleneck, add a method to build a single column instead!
 
                 shuffled_preds = ns.predictor(shuffle_data, args=PredictionArguments.from_dict(args))
                 shuffled_col_accuracy[col] = np.mean(list(evaluate_accuracies(

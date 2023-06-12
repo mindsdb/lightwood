@@ -55,7 +55,7 @@ class ShortTextEncoder(BaseEncoder):
         unique_tokens = set()
         max_words_per_sent = 0
         for sent in no_null_sentences:
-            tokens = tokenize_text(sent)
+            tokens = list(tokenize_text(sent))
             max_words_per_sent = max(max_words_per_sent, len(tokens))
             for tok in tokens:
                 unique_tokens.add(tok)
@@ -78,7 +78,7 @@ class ShortTextEncoder(BaseEncoder):
         no_null_sentences = (x if x is not None else '' for x in column_data)
         output = []
         for sent in no_null_sentences:
-            tokens = tokenize_text(sent)
+            tokens = list(tokenize_text(sent))
             encoded_words = self.cae.encode(tokens)
             encoded_sent = self._combine_fn(encoded_words)
             output.append(torch.Tensor(encoded_sent))

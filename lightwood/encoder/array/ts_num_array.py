@@ -1,14 +1,13 @@
 from typing import List, Dict, Iterable, Optional
 
 import torch
-import torch.nn.functional as F
 
 from lightwood.encoder import BaseEncoder
 from lightwood.encoder.numeric import TsNumericEncoder
 
 
 class TsArrayNumericEncoder(BaseEncoder):
-    def __init__(self, timesteps: int, is_target: bool = False, positive_domain: bool = False, grouped_by=None):
+    def __init__(self, timesteps: int, is_target: bool = False, positive_domain: bool = False, grouped_by=None, nan=0):
         """
         This encoder handles arrays of numerical time series data by wrapping the numerical encoder with behavior specific to time series tasks.
         
@@ -23,6 +22,7 @@ class TsArrayNumericEncoder(BaseEncoder):
         self.dependencies = grouped_by
         self.data_window = timesteps
         self.positive_domain = positive_domain
+        self.nan_value = nan
         self.sub_encoder = TsNumericEncoder(is_target=is_target, positive_domain=positive_domain, grouped_by=grouped_by)
         self.output_size = self.data_window * self.sub_encoder.output_size
 
@@ -52,34 +52,9 @@ class TsArrayNumericEncoder(BaseEncoder):
         if not dependency_data:
             dependency_data = {'__default': [None] * len(data)}
 
-        ret = []
-        for series in data:
-            ret.append(self.encode_one(series, dependency_data=dependency_data))
+        ret = self.sub_encoder.encode(data, dependency_data=dependency_data)
 
-        return torch.vstack(ret)
-
-    def encode_one(self, data: Iterable, dependency_data: Optional[Dict[str, str]] = {}) -> torch.Tensor:
-        """
-        Encodes a single windowed slice of any given time series.
-
-        :param data: windowed slice of a numerical time series.
-        :param dependency_data: used to determine the correct normalizer for the input.
-        
-        :return: an encoded time series array, as per the underlying `TsNumericEncoder` object. 
-        The output of this encoder for all time steps is concatenated, so the final shape of the tensor is (1, NxK), where N: self.data_window and K: sub-encoder # of output features. 
-        """  # noqa
-        ret = []
-
-        for data_point in data:
-            ret.append(self.sub_encoder.encode([data_point], dependency_data=dependency_data))
-
-        ret = torch.hstack(ret)
-        padding_size = self.output_size - ret.shape[-1]
-
-        if padding_size > 0:
-            ret = F.pad(ret, (0, padding_size))
-
-        return ret
+        return torch.Tensor(ret).nan_to_num(self.nan_value)
 
     def decode(self, encoded_values, dependency_data=None) -> List[List]:
         """

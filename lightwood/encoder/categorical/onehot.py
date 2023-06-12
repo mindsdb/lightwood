@@ -68,12 +68,12 @@ class OneHotEncoder(BaseEncoder):
         unq_cats = np.unique([i for i in priming_data if i is not None]).tolist()
 
         if self.use_unknown:
-            log.info("Encoding UNKNOWN categories as index 0")
+            log.debug("Encoding UNKNOWN categories as index 0")
             self.map = {cat: indx + 1 for indx, cat in enumerate(unq_cats)}
             self.map.update({_UNCOMMON_WORD: 0})
             self.rev_map = {indx: cat for cat, indx in self.map.items()}
         else:
-            log.info("Encoding UNKNOWN categories as vector of all 0s")
+            log.debug("Encoding UNKNOWN categories as vector of all 0s")
             self.map = {cat: indx for indx, cat in enumerate(unq_cats)}
             self.rev_map = {indx: cat for cat, indx in self.map.items()}
 

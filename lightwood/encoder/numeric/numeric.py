@@ -1,12 +1,13 @@
 import math
-from typing import Iterable, List, Union
+from typing import Union
+
 import torch
 import numpy as np
-from torch.types import Number
-from lightwood.encoder.base import BaseEncoder
-from lightwood.helpers.log import log
-from lightwood.helpers.general import is_none
+import pandas as pd
 from type_infer.dtype import dtype
+
+from lightwood.encoder.base import BaseEncoder
+from lightwood.helpers.general import is_none
 
 
 class NumericEncoder(BaseEncoder):
@@ -28,13 +29,12 @@ class NumericEncoder(BaseEncoder):
         :param positive_domain: Forces the encoder to always output positive values
         """
         super().__init__(is_target)
-        self._type = data_type
         self._abs_mean = None
         self.positive_domain = positive_domain
         self.decode_log = False
         self.output_size = 4 if not self.is_target else 3
 
-    def prepare(self, priming_data: Iterable):
+    def prepare(self, priming_data: pd.Series):
         """
         "NumericalEncoder" uses a rule-based form to prepare results on training (priming) data. The averages etc. are taken from this distribution.
 
@@ -43,109 +43,104 @@ class NumericEncoder(BaseEncoder):
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
-        value_type = 'int'
-        for number in priming_data:
-            if not is_none(number):
-                if int(number) != number:
-                    value_type = 'float'
-
-        self._type = value_type if self._type is None else self._type
-        non_null_priming_data = [x for x in priming_data if not is_none(x)]
-        self._abs_mean = np.mean(np.abs(non_null_priming_data))
+        self._abs_mean = priming_data.abs().mean()
         self.is_prepared = True
 
-    def encode(self, data: Iterable):
+    def encode(self, data: Union[np.ndarray, pd.Series]):
         """
-        :param data: An iterable data structure containing the numbers to be encoded
-
+        :param data: A pandas series or numpy array containing the numbers to be encoded
         :returns: A torch tensor with the representations of each number
         """
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
-        ret = []
-        for real in data:
-            try:
-                real = float(real)
-            except Exception:
-                real = None
-            if self.is_target:
-                # Will crash if ``real`` is not a float, this is fine, targets should always have a value
-                vector = [0] * 3
-                vector[0] = 1 if real < 0 and not self.positive_domain else 0
-                vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-                vector[2] = real / self._abs_mean
+        if isinstance(data, pd.Series):
+            data = data.values
 
-            else:
-                vector = [0] * 4
-                try:
-                    if is_none(real):
-                        vector[0] = 0
-                    else:
-                        vector[0] = 1
-                        vector[1] = math.log(abs(real)) if abs(real) > 0 else -20
-                        vector[2] = 1 if real < 0 and not self.positive_domain else 0
-                        vector[3] = real / self._abs_mean
-                except Exception as e:
-                    vector = [0] * 4
-                    log.error(f'Can\'t encode input value: {real}, exception: {e}')
+        if not self.positive_domain:
+            sign = np.vectorize(self._sign_fn, otypes=[float])(data)
+        else:
+            sign = np.zeros(len(data))
+        log_value = np.vectorize(self._log_fn, otypes=[float])(data)
+        log_value = np.nan_to_num(log_value, nan=0, posinf=20, neginf=-20)
 
-            ret.append(vector)
+        norm = np.vectorize(self._norm_fn, otypes=[float])(data)
+        norm = np.nan_to_num(norm, nan=0, posinf=20, neginf=-20)
 
-        return torch.Tensor(ret)
+        if self.is_target:
+            components = [sign, log_value, norm]
+        else:
+            nones = np.vectorize(self._none_fn, otypes=[float])(data)
+            components = [sign, log_value, norm, nones]
 
-    def decode(self, encoded_values: Union[List[Number], torch.Tensor], decode_log: bool = None) -> list:
+        return torch.Tensor(np.asarray(components)).T
+
+    @staticmethod
+    def _sign_fn(x: float) -> float:
+        return 0 if x < 0 else 1
+
+    @staticmethod
+    def _log_fn(x: float) -> float:
+        return math.log(abs(x)) if abs(x) > 0 else -20
+
+    def _norm_fn(self, x: float) -> float:
+        return x / self._abs_mean
+
+    @staticmethod
+    def _none_fn(x: float) -> float:
+        return 1 if is_none(x) else 0
+
+    def decode(self, encoded_values: torch.Tensor, decode_log: bool = None) -> list:
         """
         :param encoded_values: The encoded values to decode into single numbers
         :param decode_log: Whether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part
 
-        :returns: The decoded number
+        :returns: The decoded array
         """ # noqa
+
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
 
         if decode_log is None:
             decode_log = self.decode_log
 
-        ret = []
-        if isinstance(encoded_values, torch.Tensor):
-            encoded_values = encoded_values.tolist()
+        # force = True prevents side effects on the original encoded_values
+        ev = encoded_values.numpy(force=True)
 
-        for vector in encoded_values:
-            if self.is_target:
-                if np.isnan(
-                        vector[0]) or vector[0] == float('inf') or np.isnan(
-                        vector[1]) or vector[1] == float('inf') or np.isnan(
-                        vector[2]) or vector[2] == float('inf'):
-                    log.error(f'Got weird target value to decode: {vector}')
-                    real_value = pow(10, 63)
-                else:
-                    if decode_log:
-                        sign = -1 if vector[0] > 0.5 else 1
-                        try:
-                            real_value = math.exp(vector[1]) * sign
-                        except OverflowError:
-                            real_value = pow(10, 63) * sign
-                    else:
-                        real_value = vector[2] * self._abs_mean
+        # set "divergent" value as default (note: finfo.max() instead of pow(10, 63))
+        ret = np.full((ev.shape[0],), dtype=float, fill_value=np.finfo(np.float64).max)
 
-                    if self.positive_domain:
-                        real_value = abs(real_value)
+        # `none` filter (if not a target column)
+        if not self.is_target:
+            mask_none = ev[:, -1] == 1
+            ret[mask_none] = np.nan
+        else:
+            mask_none = np.zeros_like(ret)
 
-                    if self._type == 'int':
-                        real_value = int(real_value)
+        # sign component
+        sign = np.ones(ev.shape[0], dtype=float)
+        mask_sign = ev[:, 0] < 0.5
+        sign[mask_sign] = -1
 
-            else:
-                if vector[0] < 0.5:
-                    ret.append(None)
-                    continue
+        # real component
+        if decode_log:
+            real_value = np.exp(ev[:, 1]) * sign
+            overflow_mask = ev[:, 1] >= 63
+            real_value[overflow_mask] = 10 ** 63
+            valid_mask = ~overflow_mask
+        else:
+            real_value = ev[:, 2] * self._abs_mean
+            valid_mask = np.ones_like(real_value, dtype=bool)
 
-                real_value = vector[3] * self._abs_mean
+        # final filters
+        if self.positive_domain:
+            real_value = abs(real_value)
 
-                if self._type == 'int':
-                    real_value = round(real_value)
+        ret[valid_mask] = real_value[valid_mask]
 
-            if isinstance(real_value, torch.Tensor):
-                real_value = real_value.item()
-            ret.append(real_value)
-        return ret
+        # set nan back to None
+        if mask_none.sum() > 0:
+            ret = ret.astype(object)
+            ret[mask_none] = None
+
+        return ret.tolist()  # TODO: update signature on BaseEncoder and replace all encs to return ndarrays

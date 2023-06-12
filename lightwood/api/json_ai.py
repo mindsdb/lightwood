@@ -94,7 +94,7 @@ def lookup_encoder(
         dtype.binary: "BinaryEncoder",
         dtype.categorical: "CategoricalAutoEncoder"
         if statistical_analysis is None
-        or len(statistical_analysis.histograms[col_name]) > 100
+        or len(statistical_analysis.histograms[col_name]['x']) > 16
         else "OneHotEncoder",
         dtype.tags: "MultiHotEncoder",
         dtype.date: "DatetimeEncoder",
@@ -617,7 +617,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["target_encoder"] = mixers[i]["args"].get(
                 "target_encoder", "$encoders[self.target]"
             )
-            mixers[i]["args"]["use_optuna"] = True
 
         elif mixers[i]["module"] == "LightGBMArray":
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
@@ -944,14 +943,17 @@ prepped_encoders = {{}}
 parallel_encoding = parallel_encoding_check(data['train'], self.encoders)
 
 if parallel_encoding:
+    log.debug('Preparing in parallel...')
     for col_name, encoder in self.encoders.items():
         if col_name != self.target and not encoder.is_trainable_encoder:
             prepped_encoders[col_name] = (encoder, concatenated_train_dev[col_name], 'prepare')
     prepped_encoders = mut_method_call(prepped_encoders)
 
 else:
+    log.debug('Preparing sequentially...')
     for col_name, encoder in self.encoders.items():
         if col_name != self.target and not encoder.is_trainable_encoder:
+            log.debug(f'Preparing encoder for {{col_name}}...')
             encoder.prepare(concatenated_train_dev[col_name])
             prepped_encoders[col_name] = encoder
 

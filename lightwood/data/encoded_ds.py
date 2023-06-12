@@ -1,5 +1,5 @@
 import inspect
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import torch
 import numpy as np
 import pandas as pd
@@ -8,7 +8,7 @@ from lightwood.encoder.base import BaseEncoder
 
 
 class EncodedDs(Dataset):
-    def __init__(self, encoders: List[BaseEncoder], data_frame: pd.DataFrame, target: str) -> None:
+    def __init__(self, encoders: Dict[str, BaseEncoder], data_frame: pd.DataFrame, target: str) -> None:
         """
         Create a Lightwood datasource from a data frame and some encoders. This class inherits from `torch.utils.data.Dataset`.
         
@@ -21,10 +21,8 @@ class EncodedDs(Dataset):
         self.data_frame = data_frame
         self.encoders = encoders
         self.target = target
-        self.cache_encoded = True
-        self.cache = [None] * len(self.data_frame)
         self.encoder_spans = {}
-        self.input_length = 0
+        self.input_length = 0  # feature tensor dim
 
         # save encoder span, has to use same iterator as in __getitem__ for correct indeces
         for col in self.data_frame:
@@ -32,6 +30,13 @@ class EncodedDs(Dataset):
                 self.encoder_spans[col] = (self.input_length,
                                            self.input_length + self.encoders[col].output_size)
                 self.input_length += self.encoders[col].output_size
+
+        # if cache enabled, we immediately build it
+        self.use_cache = True
+        self.cache_built = False
+        self.X_cache: torch.Tensor = torch.full((len(self.data_frame),), fill_value=torch.nan)
+        self.Y_cache: torch.Tensor = torch.full((len(self.data_frame),), fill_value=torch.nan)
+        self.build_cache()
 
     def __len__(self):
         """
@@ -44,46 +49,65 @@ class EncodedDs(Dataset):
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         The getter yields a tuple (X, y), where:
-          - `X `is a concatenation of all encoded representations of the row. Size: (n_features,)
-          - `y` is the encoded target
+          - `X `is a concatenation of all encoded representations of the row. Size: (B, n_features)
+          - `y` is the encoded target. Size: (B, n_features)
           
         :param idx: index of the row to access.
         
         :return: tuple (X, y) with encoded data.
         
         """  # noqa
-        if self.cache_encoded:
-            if self.cache[idx] is not None:
-                return self.cache[idx]
+        if self.use_cache and self.X_cache[idx] is not torch.nan:
+            X = self.X_cache[idx, :]
+            Y = self.Y_cache[idx]
+        else:
+            X, Y = self._encode_idxs([idx, ])
+            if self.use_cache:
+                self.X_cache[idx, :] = X
+                self.Y_cache[idx, :] = Y
 
-        X = []
-        Y = torch.FloatTensor()
+        return X, Y
+
+    def _encode_idxs(self, idxs: list):
+        if not isinstance(idxs, list):
+            raise Exception(f"Passed indexes is not an iterable. Check the type! Index: {idxs}")
+
+        X = torch.zeros((len(idxs), self.input_length))
+        Y = torch.zeros((len(idxs),))
         for col in self.data_frame:
             if self.encoders.get(col, None):
                 kwargs = {}
                 if 'dependency_data' in inspect.signature(self.encoders[col].encode).parameters:
-                    kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idx][dep]]
+                    kwargs['dependency_data'] = {dep: [self.data_frame.iloc[idxs][dep]]
                                                  for dep in self.encoders[col].dependencies}
                 if hasattr(self.encoders[col], 'data_window'):
                     cols = [self.target] + [f'{self.target}_timestep_{i}'
                                             for i in range(1, self.encoders[col].data_window)]
-                    data = [self.data_frame[cols].iloc[idx].tolist()]
+                    data = self.data_frame[cols].iloc[idxs].values
                 else:
                     cols = [col]
-                    data = self.data_frame[cols].iloc[idx].tolist()
+                    data = self.data_frame[cols].iloc[idxs].values.flatten()
 
                 encoded_tensor = self.encoders[col].encode(data, **kwargs)
                 if torch.isnan(encoded_tensor).any() or torch.isinf(encoded_tensor).any():
                     raise Exception(f'Encoded tensor: {encoded_tensor} contains nan or inf values, this tensor is \
                                       the encoding of column {col} using {self.encoders[col].__class__}')
                 if col != self.target:
-                    X.append(encoded_tensor)
-                else:
-                    Y = encoded_tensor.ravel()
+                    a, b = self.encoder_spans[col]
+                    X[:, a:b] = torch.squeeze(encoded_tensor, dim=list(range(2, len(encoded_tensor.shape))))
 
-        if self.cache_encoded:
-            X = torch.cat(X, dim=1).float().squeeze()
-            self.cache[idx] = (X, Y)
+                # target post-processing
+                else:
+                    Y = encoded_tensor
+
+                    if len(encoded_tensor.shape) > 2:
+                        Y = encoded_tensor.squeeze()
+
+                    if len(encoded_tensor.shape) < 2:
+                        Y = encoded_tensor.unsqueeze(1)
+
+                    # else:
+                    #     Y = encoded_tensor.ravel()
 
         return X, Y
 
@@ -103,20 +127,35 @@ class EncodedDs(Dataset):
         :param column_name: name of the column.
         :return: A `torch.Tensor` with the encoded data of the `column_name` column.
         """
+        if self.use_cache and self.cache_built:
+            if column_name == self.target and self.Y_cache is not None:
+                return self.Y_cache
+            elif self.X_cache is not torch.nan:
+                a, b = self.encoder_spans[column_name]
+                return self.X_cache[:, a:b]
+
         kwargs = {}
         if 'dependency_data' in inspect.signature(self.encoders[column_name].encode).parameters:
             deps = [dep for dep in self.encoders[column_name].dependencies if dep in self.data_frame.columns]
-            kwargs['dependency_data'] = {dep: self.data_frame[dep].tolist() for dep in deps}
+            kwargs['dependency_data'] = {dep: self.data_frame[dep] for dep in deps}
         encoded_data = self.encoders[column_name].encode(self.data_frame[column_name], **kwargs)
         if torch.isnan(encoded_data).any() or torch.isinf(encoded_data).any():
             raise Exception(f'Encoded tensor: {encoded_data} contains nan or inf values')
 
         if not isinstance(encoded_data, torch.Tensor):
             raise Exception(
-                f'The encoder: {self.encoders[column_name]} for column: {column_name} does not return a Tensor !')
+                f'The encoder: {self.encoders[column_name]} for column: {column_name} does not return a Tensor!')
+
+        if self.use_cache and not self.cache_built:
+            if column_name == self.target:
+                self.Y_cache = encoded_data
+            else:
+                a, b = self.encoder_spans[column_name]
+                self.X_cache = self.X_cache[:, a:b]
+
         return encoded_data
 
-    def get_encoded_data(self, include_target=True) -> torch.Tensor:
+    def get_encoded_data(self, include_target: bool = True) -> torch.Tensor:
         """
         Gets all encoded data.
 
@@ -130,17 +169,29 @@ class EncodedDs(Dataset):
 
         return torch.cat(encoded_dfs, 1)
 
+    def build_cache(self):
+        """ This method builds a cache for the entire dataframe provided at initialization. """
+        if not self.use_cache:
+            raise RuntimeError("Cannot build a cache for EncodedDS with `use_cache` set to False.")
+
+        idxs = list(range(len(self.data_frame)))
+        X, Y = self._encode_idxs(idxs)
+        self.X_cache = X
+        self.Y_cache = Y
+        self.cache_built = True
+
     def clear_cache(self):
-        """
-        Clears the `EncodedDs` cache.
-        """
-        self.cache = [None] * len(self.data_frame)
+        """ Clears the `EncodedDs` cache. """
+        self.X_cache = torch.full((len(self.data_frame),), fill_value=torch.nan)
+        self.Y_cache = torch.full((len(self.data_frame),), fill_value=torch.nan)
+        self.cache_built = False
 
 
 class ConcatedEncodedDs(EncodedDs):
     """
     `ConcatedEncodedDs` abstracts over multiple encoded datasources (`EncodedDs`) as if they were a single entity.
     """  # noqa
+
     # TODO: We should probably delete this abstraction, it's not really useful and it adds complexity/overhead
     def __init__(self, encoded_ds_arr: List[EncodedDs]) -> None:
         # @TODO: missing super() call here?

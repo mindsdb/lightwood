@@ -14,7 +14,7 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from type_infer.dtype import dtype
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
-from lightwood.data.encoded_ds import ConcatedEncodedDs, EncodedDs
+from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
 
@@ -33,8 +33,8 @@ class RandomForest(BaseMixer):
             target: str,
             dtype_dict: Dict[str, str],
             fit_on_dev: bool,
-            use_optuna: bool,
-            target_encoder: BaseEncoder
+            target_encoder: BaseEncoder,
+            use_optuna: bool = False,
     ):
         """
         The `RandomForest` mixer supports both regression and classification tasks. 
@@ -100,7 +100,6 @@ class RandomForest(BaseMixer):
         init_params = {
             'n_estimators': 50,
             'max_depth': 5,
-            'max_features': 1.,
             'bootstrap': True,
             'n_jobs': -1,
             'random_state': 0
@@ -128,15 +127,10 @@ class RandomForest(BaseMixer):
             else (mean_squared_error, 'predict')
 
         def objective(trial: trial_module.Trial):
-            criterion = trial.suggest_categorical("criterion",
-                                                  ["gini", "entropy"]) if self.is_classifier else 'squared_error'
+            criterion = trial.suggest_categorical("criterion", "gini") if self.is_classifier else 'squared_error'
 
             params = {
                 'n_estimators': trial.suggest_int('n_estimators', 2, 512),
-                'max_depth': trial.suggest_int('max_depth', 2, 15),
-                'min_samples_split': trial.suggest_int("min_samples_split", 2, 20),
-                'min_samples_leaf': trial.suggest_int("min_samples_leaf", 1, 20),
-                'max_features': trial.suggest_float("max_features", 0.1, 1),
                 'criterion': criterion,
             }
 
@@ -203,7 +197,7 @@ class RandomForest(BaseMixer):
 
         :return: dataframe with predictions.
         """
-        data = ds.get_encoded_data(include_target=False)
+        data = ds.get_encoded_data(include_target=False).numpy()
 
         if self.is_classifier:
             predictions = self.model.predict_proba(data)
