@@ -7,6 +7,7 @@ from scipy.special import softmax
 
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.constants import _UNCOMMON_WORD
+from lightwood.helpers.log import log
 
 
 class BinaryEncoder(BaseEncoder):
@@ -34,17 +35,21 @@ class BinaryEncoder(BaseEncoder):
         self,
         is_target: bool = False,
         target_weights: Dict[str, float] = None,
+        handle_unknown: str = 'use_encoded_value'
     ):
         super().__init__(is_target)
         """
         :param is_target: Whether encoder featurizes target column
         :param target_weights: Percentage of total population represented by each category (from [0, 1]), as a dictionary.
+        :param handle_unknown: if set to `use_encoded_value`, will encode all classes with index greater than 1 to a special UNKNOWN index that decodes back to `None`. `error` will raise an error when preparing the encoder.
         """  # noqa
 
         self.map = {}  # category name -> index
         self.rev_map = {}  # index -> category name
-        self.output_size = 2
+        self.output_size = 3
         self.encoder_class_type = str
+        self.handle_unknown = handle_unknown
+        self.UNK_IDX = 2
 
         # Weight-balance info if encoder represents target
         self.target_weights = None
@@ -67,13 +72,17 @@ class BinaryEncoder(BaseEncoder):
         self.rev_map = {indx: cat for cat, indx in self.map.items()}
 
         # Enforce only binary; map must have exactly 2 classes.
-        if len(self.map) > 2:
-            raise ValueError(f'Issue with dtype; data has > 2 classes. All classes are: {self.map}')
+        if len(self.map) > 2 and self.handle_unknown == 'use_encoded_value':
+            log.warning('Warning: dtype for binary encoder has > 2 classes. Extra classes will be encoded to an invalid token and performance will not be optimal. Try overriding this encoder with a multi-class categorical encoder.')  # noqa
+            log.warning(f'Observed classes are: {self.map}.')
+        elif self.handle_unknown == 'error':
+            raise Exception(f'Issue with dtype; data has > 2 classes. All classes are: {self.map}. Aborting.')
 
         # For target-only, report on relative weights of classes
         if self.is_target:
 
-            self.index_weights = torch.Tensor([1, 1])  # Equally wt. both classes
+            self.index_weights = torch.ones(self.output_size)  # Equally wt. both classes
+            self.index_weights[self.UNK_IDX] = 0  # set unknown index to have no effect
 
             # If target weights provided, weight by inverse
             if self.target_weights is not None:
@@ -102,13 +111,17 @@ class BinaryEncoder(BaseEncoder):
                 'You need to call "prepare" before calling "encode" or "decode".'
             )
 
-        ret = torch.zeros(size=(len(column_data), 2))
+        ret = torch.zeros(size=(len(column_data), self.output_size))
 
         for idx, word in enumerate(column_data):
             index = self.map.get(word, None)
 
-            if index is not None:
-                ret[idx, index] = 1
+            if index is None:
+                index = self.UNK_IDX  # any unknown value maps to UNK_IDX
+            else:
+                index = min(index, self.UNK_IDX)  # any known value beyond first two also maps to index UNK_IDX
+
+            ret[idx, index] = 1
 
         return torch.Tensor(ret)
 
@@ -130,7 +143,11 @@ class BinaryEncoder(BaseEncoder):
             if not np.any(vector):  # Vector of all 0s -> unknown category
                 ret.append(_UNCOMMON_WORD)
             else:
-                ret.append(self.rev_map[np.argmax(vector)])
+                idx = np.argmax(vector)
+                if idx == self.UNK_IDX:
+                    ret.append(None)  # known, but not either of the supported categories
+                else:
+                    ret.append(self.rev_map[idx])
 
         return ret
 
