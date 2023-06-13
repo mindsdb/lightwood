@@ -58,7 +58,7 @@ class NumericEncoder(BaseEncoder):
             data = data.values
 
         if not self.positive_domain:
-            sign_data = np.nan_to_num(data, nan=0, posinf=0, neginf=0)
+            sign_data = np.nan_to_num(data.astype(float), nan=0, posinf=0, neginf=0)
             sign = np.vectorize(self._sign_fn, otypes=[float])(sign_data)
         else:
             sign = np.zeros(len(data))
