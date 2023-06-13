@@ -173,8 +173,7 @@ def lookup_encoder(
     if encoder_dict["module"] == "PretrainedLangEncoder" and not is_target:
         encoder_dict["args"]["output_type"] = "$dtype_dict[$target]"
 
-    enc_cls = eval(encoder_dict["module"])
-    if enc_cls.is_trainable_encoder and hasattr(enc_cls, 'stop_after'):
+    if eval(encoder_dict["module"]).is_trainable_encoder:
         encoder_dict["args"]["stop_after"] = "$problem_definition.seconds_per_encoder"
 
     if is_target_predicting_encoder:

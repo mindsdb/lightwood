@@ -8,6 +8,8 @@ import pandas as pd
 
 
 class ShortTextEncoder(BaseEncoder):
+    is_trainable_encoder = False
+
     def __init__(self, is_target=False, mode=None, device=''):
         """
         :param is_target:
