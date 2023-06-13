@@ -9,9 +9,9 @@ MAX_SEQ_LEN = 100_000
 
 
 def get_nr_procs(df=None):
-    if 'MINDSDB_N_WORKERS' in os.environ:
+    if 'LIGHTWOOD_N_WORKERS' in os.environ:
         try:
-            n = int(os.environ['MINDSDB_N_WORKERS'])
+            n = int(os.environ['LIGHTWOOD_N_WORKERS'])
         except ValueError:
             n = 1
         return n
