@@ -213,8 +213,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2547:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2547:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2475:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2475:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 </div>
@@ -362,32 +362,32 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2547:Analyzing a sample of 6920</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Infering type for: model</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Analyzing a sample of 6920</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Infering type for: model</span>
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
   return _methods._mean(a, axis=axis, dtype=dtype,
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
   ret = ret.dtype.type(ret / rcount)
-<span class="ansi-green-fg">INFO:type_infer-2547:Column model has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Infering type for: year</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Column year has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Infering type for: price</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Column price has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Infering type for: transmission</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Column transmission has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Infering type for: mileage</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Column mileage has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Infering type for: fuelType</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Column fuelType has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Infering type for: tax</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Column tax has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Infering type for: mpg</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Column mpg has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Infering type for: engineSize</span>
-<span class="ansi-green-fg">INFO:type_infer-2547:Column engineSize has data type float</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2547:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2547:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Column model has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Infering type for: year</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Column year has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Infering type for: price</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Column price has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Infering type for: transmission</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Column transmission has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Infering type for: mileage</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Column mileage has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Infering type for: fuelType</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Column fuelType has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Infering type for: tax</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Column tax has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Infering type for: mpg</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Column mpg has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Infering type for: engineSize</span>
+<span class="ansi-green-fg">INFO:type_infer-2475:Column engineSize has data type float</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2475:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2475:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Let’s take a look at our JSON-AI and print to file.</p>
@@ -501,7 +501,7 @@
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 1.6399507522583008,
+        &#34;expected_additional_time&#34;: 1.914231777191162,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -727,7 +727,7 @@ assignments for a data type</p>
 <div class="section" id="5)-Generate-code-and-your-predictor-from-JSON-AI">
 <h1>5) Generate code and your predictor from JSON-AI<a class="headerlink" href="#5)-Generate-code-and-your-predictor-from-JSON-AI" title="Permalink to this headline">¶</a></h1>
 <p>Now, let’s use this JSON-AI object to generate code and make a predictor. This can be done in 2 simple lines, below:</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
@@ -738,14 +738,6 @@ assignments for a data type</p>
 <span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2547:Unable to import black formatter, predictor code might be a bit ugly.</span>
-</pre></div></div>
 </div>
 <p>Now, let’s run our pipeline. To do so, let’s first:</p>
 <ol class="arabic simple">
@@ -780,25 +772,25 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2547:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2547:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2547: `analyze_data` runtime: 0.28 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2547:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2547: `preprocess` runtime: 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2547:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2547: `split` runtime: 0.0 seconds</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2547:Preparing sequentially...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2547:Preparing encoder for year...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2547:Preparing encoder for mileage...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2547:Preparing encoder for tax...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2547:Preparing encoder for mpg...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2547:Preparing encoder for engineSize...</span>
-<span class="ansi-green-fg">INFO:lightwood-2547:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2547:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2547:Categories Detected = 1</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2547: `prepare` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2547:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2547: `featurize` runtime: 0.34 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2475:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2475:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2475: `analyze_data` runtime: 0.33 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2475:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2475: `preprocess` runtime: 0.12 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2475:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2475: `split` runtime: 0.0 seconds</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2475:Preparing sequentially...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2475:Preparing encoder for year...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2475:Preparing encoder for mileage...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2475:Preparing encoder for tax...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2475:Preparing encoder for mpg...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2475:Preparing encoder for engineSize...</span>
+<span class="ansi-green-fg">INFO:lightwood-2475:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2475:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2475:Categories Detected = 1</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2475: `prepare` runtime: 0.03 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2475:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2475: `featurize` runtime: 0.4 seconds</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>
