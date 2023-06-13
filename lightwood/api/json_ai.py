@@ -1338,15 +1338,16 @@ class Predictor(PredictorInterface):
     if black is not None:
         try:
             formatted_predictor_code = black.format_str(predictor_code, mode=black.FileMode())
+
+            if type(predictor_from_code(formatted_predictor_code)).__name__ == 'Predictor':
+                predictor_code = formatted_predictor_code
+            else:
+                log.info('Black formatter output is invalid, predictor code might be a bit ugly')
+
         except Exception:
             log.info('Black formatter failed to run, predictor code might be a bit ugly')
     else:
         log.info('Unable to import black formatter, predictor code might be a bit ugly.')
-
-    if type(predictor_from_code(formatted_predictor_code)).__name__ == 'Predictor':
-        predictor_code = formatted_predictor_code
-    else:
-        log.info('Black formatter output is invalid, predictor code might be a bit ugly')
 
     return predictor_code
 
