@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.encoder.categorical.binary &mdash; lightwood 23.5.1.1 documentation</title>
+  <title>lightwood.encoder.categorical.binary &mdash; lightwood 23.6.2.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                23.5.1.1
+                23.6.2.0
               </div>
             
           
@@ -180,6 +180,7 @@
 
 <span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.constants</span> <span class="kn">import</span> <span class="n">_UNCOMMON_WORD</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 
 
 <div class="viewcode-block" id="BinaryEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.BinaryEncoder">[docs]</a><span class="k">class</span> <span class="nc">BinaryEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
@@ -207,17 +208,20 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">target_weights</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">handle_unknown</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;use_encoded_value&#39;</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="p">)</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param is_target: Whether encoder featurizes target column</span>
 <span class="sd">        :param target_weights: Percentage of total population represented by each category (from [0, 1]), as a dictionary.</span>
+<span class="sd">        :param handle_unknown: if set to `use_encoded_value`, will assign all classes with index greater than 1 to a special UNKNOWN index. This doesn&#39;t affect the encoded representation of shape (B, 2). During decoding, any unknown or otherwise known but &quot;out-of-bounds&quot; word will be decoded back to the lightwood unknown category token. If this argument is set to `error`, the encoder will raise an error while preparing if there are more than two observed classes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># category name -&gt; index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># index -&gt; category name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">encoder_class_type</span> <span class="o">=</span> <span class="nb">str</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span> <span class="o">=</span> <span class="n">handle_unknown</span>
 
         <span class="c1"># Weight-balance info if encoder represents target</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="o">=</span> <span class="kc">None</span>
@@ -240,13 +244,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">indx</span><span class="p">:</span> <span class="n">cat</span> <span class="k">for</span> <span class="n">cat</span><span class="p">,</span> <span class="n">indx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
         <span class="c1"># Enforce only binary; map must have exactly 2 classes.</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Issue with dtype; data has &gt; 2 classes. All classes are: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span> <span class="o">==</span> <span class="s1">&#39;use_encoded_value&#39;</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Warning: dtype for binary encoder has &gt; 2 classes. Extra classes will be pointed to an invalid token. Try overriding this encoder with a multi-class categorical encoder, otherwise performance may not be optimal.&#39;</span><span class="p">)</span>  <span class="c1"># noqa</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Observed classes are: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_unknown</span> <span class="o">==</span> <span class="s1">&#39;error&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Data has &gt; 2 classes and encoder is in strict mode. Aborting. All classes are: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>  <span class="c1"># noqa</span>
 
         <span class="c1"># For target-only, report on relative weights of classes</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">:</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>  <span class="c1"># Equally wt. both classes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">)</span>  <span class="c1"># Equally wt. both classes</span>
 
             <span class="c1"># If target weights provided, weight by inverse</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -275,12 +282,14 @@
                 <span class="s1">&#39;You need to call &quot;prepare&quot; before calling &quot;encode&quot; or &quot;decode&quot;.&#39;</span>
             <span class="p">)</span>
 
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">column_data</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">column_data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">))</span>
 
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">column_data</span><span class="p">):</span>
             <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">:</span>
+                <span class="k">pass</span>  <span class="c1"># any unknown value is ignored</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="n">ret</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
@@ -303,7 +312,11 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">vector</span><span class="p">):</span>  <span class="c1"># Vector of all 0s -&gt; unknown category</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_UNCOMMON_WORD</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">vector</span><span class="p">)])</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_UNCOMMON_WORD</span><span class="p">)</span>  <span class="c1"># known, but not either of the supported categories</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rev_map</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="n">ret</span></div>
 

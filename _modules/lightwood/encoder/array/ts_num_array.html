@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.encoder.array.ts_num_array &mdash; lightwood 23.5.1.1 documentation</title>
+  <title>lightwood.encoder.array.ts_num_array &mdash; lightwood 23.6.2.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                23.5.1.1
+                23.6.2.0
               </div>
             
           
@@ -174,14 +174,13 @@
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.encoder</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.numeric</span> <span class="kn">import</span> <span class="n">TsNumericEncoder</span>
 
 
 <div class="viewcode-block" id="TsArrayNumericEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder">[docs]</a><span class="k">class</span> <span class="nc">TsArrayNumericEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">grouped_by</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">grouped_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This encoder handles arrays of numerical time series data by wrapping the numerical encoder with behavior specific to time series tasks.</span>
 <span class="sd">        </span>
@@ -196,6 +195,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">=</span> <span class="n">grouped_by</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_window</span> <span class="o">=</span> <span class="n">timesteps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">positive_domain</span> <span class="o">=</span> <span class="n">positive_domain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nan_value</span> <span class="o">=</span> <span class="n">nan</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span> <span class="o">=</span> <span class="n">TsNumericEncoder</span><span class="p">(</span><span class="n">is_target</span><span class="o">=</span><span class="n">is_target</span><span class="p">,</span> <span class="n">positive_domain</span><span class="o">=</span><span class="n">positive_domain</span><span class="p">,</span> <span class="n">grouped_by</span><span class="o">=</span><span class="n">grouped_by</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_window</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">output_size</span>
 
@@ -225,34 +225,9 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">dependency_data</span><span class="p">:</span>
             <span class="n">dependency_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;__default&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)}</span>
 
-        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">series</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encode_one</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="n">dependency_data</span><span class="p">))</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="n">dependency_data</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="TsArrayNumericEncoder.encode_one"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.encode_one">[docs]</a>    <span class="k">def</span> <span class="nf">encode_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">dependency_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Encodes a single windowed slice of any given time series.</span>
-
-<span class="sd">        :param data: windowed slice of a numerical time series.</span>
-<span class="sd">        :param dependency_data: used to determine the correct normalizer for the input.</span>
-<span class="sd">        </span>
-<span class="sd">        :return: an encoded time series array, as per the underlying `TsNumericEncoder` object. </span>
-<span class="sd">        The output of this encoder for all time steps is concatenated, so the final shape of the tensor is (1, NxK), where N: self.data_window and K: sub-encoder # of output features. </span>
-<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">for</span> <span class="n">data_point</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">([</span><span class="n">data_point</span><span class="p">],</span> <span class="n">dependency_data</span><span class="o">=</span><span class="n">dependency_data</span><span class="p">))</span>
-
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
-        <span class="n">padding_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">-</span> <span class="n">ret</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">padding_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">padding_size</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="n">ret</span></div>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nan_value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TsArrayNumericEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_values</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

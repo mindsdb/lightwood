@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.analysis.helpers.feature_importance &mdash; lightwood 23.5.1.1 documentation</title>
+  <title>lightwood.analysis.helpers.feature_importance &mdash; lightwood 23.6.2.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                23.5.1.1
+                23.6.2.0
               </div>
             
           
@@ -254,6 +254,7 @@
                 <span class="n">shuffle_data</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">ref_data</span><span class="p">)</span>
                 <span class="n">shuffle_data</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
                 <span class="n">shuffle_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">shuffle</span><span class="p">(</span><span class="n">shuffle_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+                <span class="n">shuffle_data</span><span class="o">.</span><span class="n">build_cache</span><span class="p">()</span>  <span class="c1"># TODO: bottleneck, add a method to build a single column instead!</span>
 
                 <span class="n">shuffled_preds</span> <span class="o">=</span> <span class="n">ns</span><span class="o">.</span><span class="n">predictor</span><span class="p">(</span><span class="n">shuffle_data</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">PredictionArguments</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
                 <span class="n">shuffled_col_accuracy</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">evaluate_accuracies</span><span class="p">(</span>

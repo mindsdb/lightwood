@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.mixer.random_forest &mdash; lightwood 23.5.1.1 documentation</title>
+  <title>lightwood.mixer.random_forest &mdash; lightwood 23.6.2.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                23.5.1.1
+                23.6.2.0
               </div>
             
           
@@ -187,7 +187,7 @@
 <span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
-<span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">ConcatedEncodedDs</span><span class="p">,</span> <span class="n">EncodedDs</span>
+<span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.base</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
 
@@ -206,8 +206,8 @@
             <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
             <span class="n">fit_on_dev</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-            <span class="n">use_optuna</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-            <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span>
+            <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">,</span>
+            <span class="n">use_optuna</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The `RandomForest` mixer supports both regression and classification tasks. </span>
@@ -273,7 +273,6 @@
         <span class="n">init_params</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
             <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-            <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="mf">1.</span><span class="p">,</span>
             <span class="s1">&#39;bootstrap&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s1">&#39;n_jobs&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
             <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="mi">0</span>
@@ -301,15 +300,10 @@
             <span class="k">else</span> <span class="p">(</span><span class="n">mean_squared_error</span><span class="p">,</span> <span class="s1">&#39;predict&#39;</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">trial</span><span class="p">:</span> <span class="n">trial_module</span><span class="o">.</span><span class="n">Trial</span><span class="p">):</span>
-            <span class="n">criterion</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s2">&quot;criterion&quot;</span><span class="p">,</span>
-                                                  <span class="p">[</span><span class="s2">&quot;gini&quot;</span><span class="p">,</span> <span class="s2">&quot;entropy&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span> <span class="k">else</span> <span class="s1">&#39;squared_error&#39;</span>
+            <span class="n">criterion</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s2">&quot;criterion&quot;</span><span class="p">,</span> <span class="s2">&quot;gini&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span> <span class="k">else</span> <span class="s1">&#39;squared_error&#39;</span>
 
             <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">&#39;n_estimators&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span>
-                <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">&#39;max_depth&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
-                <span class="s1">&#39;min_samples_split&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s2">&quot;min_samples_split&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
-                <span class="s1">&#39;min_samples_leaf&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s2">&quot;min_samples_leaf&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
-                <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s2">&quot;max_features&quot;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                 <span class="s1">&#39;criterion&#39;</span><span class="p">:</span> <span class="n">criterion</span><span class="p">,</span>
             <span class="p">}</span>
 
@@ -376,7 +370,7 @@
 
 <span class="sd">        :return: dataframe with predictions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">get_encoded_data</span><span class="p">(</span><span class="n">include_target</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">get_encoded_data</span><span class="p">(</span><span class="n">include_target</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span><span class="p">:</span>
             <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>

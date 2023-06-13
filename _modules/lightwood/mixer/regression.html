@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.mixer.regression &mdash; lightwood 23.5.1.1 documentation</title>
+  <title>lightwood.mixer.regression &mdash; lightwood 23.6.2.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                23.5.1.1
+                23.6.2.0
               </div>
             
           
@@ -260,10 +260,7 @@
 
 <span class="sd">        :returns: A dataframe cotaining the decoded predictions and (depending on the args) additional information such as the probabilites for each target class</span>
 <span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
-            <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
-
+        <span class="n">X</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">get_encoded_data</span><span class="p">(</span><span class="n">include_target</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">Yh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
         <span class="n">decoded_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">Yh</span><span class="p">))</span>
