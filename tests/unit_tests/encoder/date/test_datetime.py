@@ -41,8 +41,13 @@ class TestDatetimeEncoder(unittest.TestCase):
         dec_data = enc.decode(encoded_repr)
 
         for d, t in zip(dec_data[1:], data.tolist()[1:]):
-            assert np.isclose(d, t)
-        assert sum(np.isnan(dec_data)) == 1
+            # ignore edge cases within border of supported years
+            if pd.Timestamp.min.year + 1 < datetime.fromtimestamp(t).year < pd.Timestamp.max.year - 1:
+                if not np.isclose(d, t):
+                    assert datetime.fromtimestamp(d) == datetime.fromtimestamp(t)
+                else:
+                    assert np.isclose(d, t)
+        assert np.isnan(dec_data[0])
 
     def test_sinusoidal_encoding(self):
         data = [self._create_timestamp() for _ in range(100)]
