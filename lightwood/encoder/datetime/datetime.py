@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from lightwood.encoder.base import BaseEncoder
+from lightwood.helpers.log import log
 
 
 class DatetimeEncoder(BaseEncoder):
@@ -23,8 +24,8 @@ class DatetimeEncoder(BaseEncoder):
         self.output_size = len(self.constant_keys)
         self.empty_vector = np.zeros((self.output_size, ))
 
-        self.max_vals = torch.Tensor([2999, 12, 31, 23, 59, 59])
-        self.min_vals = torch.Tensor([0, 1, 1, 0, 0, 0])
+        self.max_vals = torch.Tensor([pd.Timestamp.max.year - 1, 12, 31, 23, 59, 59])
+        self.min_vals = torch.Tensor([pd.Timestamp.min.year + 1, 1, 1, 0, 0, 0])
 
     def prepare(self, priming_data):
         self.is_prepared = True
@@ -64,14 +65,19 @@ class DatetimeEncoder(BaseEncoder):
 
         df = pd.DataFrame(ret, columns=self.constant_keys)
         nan_mask = df[
-            (df['year'] == pd.Timestamp.max.year) &
+            (df['year'] == int(self.max_vals[0])) &
             (df['month'] == pd.Timestamp.max.month) &
             (df['day'] == pd.Timestamp.max.day)
         ].index
 
         dt = df.apply(lambda r: datetime.datetime(year=r['year'], month=r['month'], day=r['day'],
                                                   hour=r['hour'], minute=r['minute'], second=r['second']),
-                      axis=1).dt.to_pydatetime()
+                      axis=1)
+
+        if hasattr(dt, 'dt'):
+            dt = dt.dt.to_pydatetime()  # return to Python datetime microsecond precision
+        else:
+            log.warning('DatetimeEncoder has failed to decode using microsecond precision, reverting to nanosecond. This may lead to minor discrepancies in reconstruction.')  # noqa
 
         if return_as_datetime is True:
             decoded = dt

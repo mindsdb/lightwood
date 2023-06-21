@@ -1,11 +1,11 @@
 import unittest
-import random
 from datetime import datetime
 import numpy as np
 import pandas as pd
 import torch
 from lightwood.encoder.datetime.datetime import DatetimeEncoder
 from lightwood.encoder.datetime.datetime_sin_normalizer import DatetimeNormalizerEncoder
+np.random.seed(1)
 
 
 class TestDatetimeEncoder(unittest.TestCase):
@@ -40,9 +40,8 @@ class TestDatetimeEncoder(unittest.TestCase):
         assert not torch.isnan(encoded_repr).any()
         dec_data = enc.decode(encoded_repr)
 
-        for d in dec_data:
-            if d == d:
-                assert d in data.tolist()
+        for d, t in zip(dec_data[1:], data.tolist()[1:]):
+            assert np.isclose(d, t)
         assert sum(np.isnan(dec_data)) == 1
 
     def test_sinusoidal_encoding(self):
