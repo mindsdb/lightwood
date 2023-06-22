@@ -5,7 +5,6 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 from lightwood.helpers.parallelism import get_nr_procs
-from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches
 
 from type_infer.dtype import dtype
 from lightwood.api.types import TimeseriesSettings, PredictionArguments
@@ -56,7 +55,8 @@ def transform_timeseries(
 
     # initial stable sort and per-partition deduplication
     data = data.sort_values(by=oby_col, kind='mergesort')
-    data = data.drop_duplicates(subset=[oby_col, *gb_arr], keep='first')  # TODO evaluate if truly needed (without it, test 9 fails)
+    # TODO evaluate if truly needed (w/o it, test 9 fails)
+    data = data.drop_duplicates(subset=[oby_col, *gb_arr], keep='first')
 
     # pass seconds to timestamps according to each group's inferred freq, and force this freq on index
     grouped = data.groupby(by=tss.group_by) if tss.group_by else data.groupby(lambda x: True)
