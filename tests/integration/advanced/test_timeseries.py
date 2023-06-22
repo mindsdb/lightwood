@@ -109,7 +109,7 @@ class TestTimeseries(unittest.TestCase):
             preds = pred.predict(test)
             self.check_ts_prediction_df(preds, horizon, [order_by])
 
-            latest_timestamp = pd.to_datetime(test[order_by]).max().timestamp()
+            latest_timestamp = pd.to_datetime(test[order_by], utc=True).max().timestamp()
             for idx, row in preds.iterrows():
                 row[f'order_{order_by}'] = [row[f'order_{order_by}']] if horizon == 1 else row[f'order_{order_by}']
                 for timestamp in row[f'order_{order_by}']:
@@ -165,7 +165,7 @@ class TestTimeseries(unittest.TestCase):
             preds = pred.predict(test_df)
             self.check_ts_prediction_df(preds, horizon, [order_by])
 
-            latest_timestamp = pd.to_datetime(test_df[order_by]).max().timestamp()
+            latest_timestamp = pd.to_datetime(test_df[order_by], utc=True).max().timestamp()
             for idx, row in preds.iterrows():
                 row[f'order_{order_by}'] = [row[f'order_{order_by}']] if horizon == 1 else row[f'order_{order_by}']
                 for timestamp in row[f'order_{order_by}']:
@@ -421,7 +421,7 @@ class TestTimeseries(unittest.TestCase):
 
             assert ps.iloc[-1]['original_index'] == (len(train) - 1)  # fixed at the last seen training point
             start_predtime = datetime.utcfromtimestamp(ps.iloc[-1][f'order_{oby}'][0])
-            start_test = datetime.utcfromtimestamp(pd.to_datetime(test.iloc[0][oby]).value // 1e9)
+            start_test = datetime.utcfromtimestamp(pd.to_datetime(test.iloc[0][oby], utc=True).value // 1e9)
             assert start_test - start_predtime <= timedelta(days=2)
 
             if idx is None:
@@ -499,7 +499,7 @@ class TestTimeseries(unittest.TestCase):
             for idx, row in preds.iterrows():
                 row[f'order_{order_by}'] = [row[f'order_{order_by}']] if horizon == 1 else row[f'order_{order_by}']
                 for timestamp in row[f'order_{order_by}']:
-                    assert timestamp > pd.to_datetime(test[order_by]).max().timestamp()
+                    assert timestamp > pd.to_datetime(test[order_by], utc=True).max().timestamp()
 
     def test_9_ts_dedupe(self):
         """ Test time series de-duplication procedures """

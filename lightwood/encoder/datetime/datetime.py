@@ -1,4 +1,3 @@
-import datetime
 from typing import Union
 
 import torch
@@ -40,9 +39,8 @@ class DatetimeEncoder(BaseEncoder):
         if isinstance(data, np.ndarray):
             data = pd.Series(data)
 
-        data = data.fillna(pd.Timestamp.max.timestamp())  # TODO: replace with mean once encoded?
-
-        ret = [data.apply(datetime.datetime.fromtimestamp)]
+        data = data.fillna(pd.Timestamp.max.timestamp())  # TODO: replace with mean?
+        ret = [pd.to_datetime(data, unit='s', origin=-1, utc=True)]
         for i, attr in enumerate(self.constant_keys):
             def _get_ts_attr(ts):
                 return getattr(ts, attr)
@@ -69,20 +67,16 @@ class DatetimeEncoder(BaseEncoder):
             (df['month'] == pd.Timestamp.max.month) &
             (df['day'] == pd.Timestamp.max.day)
         ].index
+        dt = pd.to_datetime(df, utc=True)
 
-        dt = df.apply(lambda r: datetime.datetime(year=r['year'], month=r['month'], day=r['day'],
-                                                  hour=r['hour'], minute=r['minute'], second=r['second']),
-                      axis=1)
-
-        if hasattr(dt, 'dt'):
-            dt = dt.dt.to_pydatetime()  # return to Python datetime microsecond precision
-        else:
+        if not hasattr(dt, 'dt'):
             log.warning('DatetimeEncoder has failed to decode using microsecond precision, reverting to nanosecond. This may lead to minor discrepancies in reconstruction.')  # noqa
 
         if return_as_datetime is True:
+            dt = dt.dt.to_pydatetime()  # return to Python datetime microsecond precision
             decoded = dt
         else:
-            decoded = np.vectorize(lambda x: x.timestamp())(dt)
+            decoded = dt.values.astype(np.float64) // 10 ** 9
 
         decoded[nan_mask] = np.nan
         return decoded.tolist()
