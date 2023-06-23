@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 
 from lightwood.helpers.log import log
-from lightwood.mixer.helpers.ts import _apply_stl_on_training, _stl_transform, _stl_inverse_transform
 from lightwood.encoder.base import BaseEncoder
 from lightwood.mixer.base import BaseMixer
 from lightwood.mixer.lightgbm import LightGBM
@@ -61,9 +60,6 @@ class LightGBMArray(BaseMixer):
         original_train = deepcopy(train_data.data_frame)
         original_dev = deepcopy(dev_data.data_frame)
 
-        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
-            _apply_stl_on_training(train_data, dev_data, self.target, self.tss, self.ts_analysis)
-
         for timestep in range(self.horizon):
             getattr(self.models[timestep], submodel_method)(train_data, dev_data)
 
@@ -90,14 +86,8 @@ class LightGBMArray(BaseMixer):
                            index=np.arange(length),
                            columns=[f'prediction_{i}' for i in range(self.horizon)])
 
-        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
-            ds.data_frame = _stl_transform(ydf, ds, self.target, self.tss, self.ts_analysis)
-
         for timestep in range(self.horizon):
             ydf[f'prediction_{timestep}'] = self.models[timestep](ds, args)['prediction'].values
-
-        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
-            ydf = _stl_inverse_transform(ydf, ds, self.tss, self.ts_analysis)
 
         if self.models[0].positive_domain:
             ydf = ydf.clip(0)

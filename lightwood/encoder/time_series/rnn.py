@@ -17,7 +17,6 @@ from lightwood.helpers.torch import LightwoodAutocast
 from lightwood.encoder.datetime import DatetimeNormalizerEncoder
 from lightwood.encoder.time_series.helpers.rnn_helpers import EncoderRNNNumerical, DecoderRNNNumerical
 from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
-from lightwood.helpers.ts import get_group_matches
 from lightwood.encoder.time_series.helpers.transformer_helpers import TransformerEncoder, get_chunk, len_to_mask
 
 
@@ -198,12 +197,13 @@ class TimeSeriesEncoder(BaseEncoder):
                 dep_data['group_info'] = {group: dependency_data[group]['data'] for group in self.grouped_by}
                 data = torch.zeros((len(priming_data), lengths_data.max().int().item(), 1))
                 all_idxs = set(range(len(data)))
+                grouped = dep_data['data'].groupby(by=self.grouped_by)
                 for group_name, normalizer in self.dep_norms[dep_name].items():
                     if group_name != '__default':
-                        idxs, subset = get_group_matches(dep_data, normalizer.combination)
+                        subset = grouped.get_group(normalizer.combination)
                         normalized = normalizer.encode(subset).unsqueeze(-1)
-                        data[idxs, :, :] = normalized
-                        all_idxs -= set(idxs)
+                        data[subset.index, :, :] = normalized
+                        all_idxs -= set(subset.index)
                 if len(all_idxs) > 0 and '__default' in self.dep_norms[dep_name].keys():
                     default_norm = self.dep_norms[dep_name]['__default']
                     subset = [dep_data['data'][idx] for idx in list(all_idxs)]
@@ -379,14 +379,14 @@ class TimeSeriesEncoder(BaseEncoder):
                     tensor = torch.zeros((len(dep_data), len(dep_data[0]), 1)).to(self.device)
                     all_idxs = set(range(len(dep_data)))
 
+                    grouped = dep_info['data'].groupby(by=self.grouped_by)
                     for combination in [c for c in self._group_combinations if c != '__default']:
                         normalizer = self.dep_norms[dep].get(tuple(combination), None)
                         if normalizer is None:
                             normalizer = self.dep_norms[dep]['__default']
-                        idxs, subset = get_group_matches(dep_info, normalizer.combination)
-                        if idxs:
-                            tensor[idxs, :, :] = torch.Tensor(normalizer.encode(subset)).unsqueeze(-1).to(self.device)
-                            all_idxs -= set(idxs)
+                        subdf = grouped.get_group(normalizer.combination)
+                        tensor[subdf.index, :, :] = torch.Tensor(normalizer.encode(subdf)).unsqueeze(-1).to(self.device)
+                        all_idxs -= set(subdf.index)
 
                     # encode all remaining rows (not belonging to any grouped combination) with default normalizer
                     if all_idxs:

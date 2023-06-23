@@ -17,7 +17,6 @@ from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 from lightwood.mixer.neural import Neural
 from lightwood.mixer.helpers.ar_net import ArNet
 from lightwood.mixer.helpers.default_net import DefaultNet
-from lightwood.mixer.helpers.ts import _apply_stl_on_training, _stl_transform, _stl_inverse_transform
 from lightwood.api.types import TimeseriesSettings
 
 
@@ -83,10 +82,6 @@ class NeuralTs(Neural):
         original_train = deepcopy(train_data.data_frame)
         original_dev = deepcopy(dev_data.data_frame)
 
-        # Use STL blocks if available
-        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
-            _apply_stl_on_training(train_data, dev_data, self.target, self.timeseries_settings, self.ts_analysis)
-
         # ConcatedEncodedDs
         self.batch_size = min(200, int(len(train_data) / 10))
         self.batch_size = max(40, self.batch_size)
@@ -141,9 +136,6 @@ class NeuralTs(Neural):
                            dtype=object,
                            columns=pred_cols)
 
-        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
-            ds.data_frame = _stl_transform(ydf, ds, self.target, self.timeseries_settings, self.ts_analysis)
-
         with torch.no_grad():
             for idx, (X, Y) in enumerate(ds):
                 X = X.to(self.model.device)
@@ -166,9 +158,6 @@ class NeuralTs(Neural):
         if len(decoded_predictions.shape) == 1:
             decoded_predictions = np.expand_dims(decoded_predictions, axis=1)
         ydf[pred_cols] = decoded_predictions
-
-        if self.use_stl and self.ts_analysis.get('stl_transforms', False):
-            ydf = _stl_inverse_transform(ydf, ds, self.timeseries_settings, self.ts_analysis)
 
         ydf['prediction'] = ydf.values.tolist()
 
