@@ -16,17 +16,12 @@ def get_ts_groups(df: pd.DataFrame, tss) -> list:
 
 def get_delta(
         df: pd.DataFrame,
-        dtype_dict: dict,
-        group_combinations: list,
-        target: str,
         tss
 ) -> Tuple[Dict, Dict, Dict]:
     """
     Infer the sampling interval of each time series, by picking the most popular time interval observed in the training data.
 
     :param df: Dataframe with time series data.
-    :param group_combinations: all tuples with distinct values for `TimeseriesSettings.group_by` columns, defining all available time series.
-    :param target: name of target column
     :param tss: timeseries settings
 
     :return:
@@ -40,7 +35,6 @@ def get_delta(
     periods = {"__default": [period]}
     freqs = {"__default": freq}
 
-    # TODO should optimize to use groupby instead
     if tss.group_by:
         grouped = df.groupby(by=tss.group_by)
         for group, subset in grouped:

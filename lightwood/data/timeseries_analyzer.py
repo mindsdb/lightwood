@@ -36,7 +36,7 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     """  # noqa
     tss = timeseries_settings
     groups = get_ts_groups(data['train'], tss)
-    deltas, periods, freqs = get_delta(data['train'], dtype_dict, groups, target, tss)
+    deltas, periods, freqs = get_delta(data['train'], tss)
 
     normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
 

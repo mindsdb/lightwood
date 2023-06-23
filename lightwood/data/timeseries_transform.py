@@ -42,6 +42,7 @@ def transform_timeseries(
     gb_arr = tss.group_by if tss.group_by is not None else []
     oby = tss.order_by
     window = tss.window
+    oby_col = tss.order_by
 
     if tss.use_previous_target and target not in data.columns:
         raise Exception(f"Cannot transform. Missing historical values for target column {target} (`use_previous_target` is set to True).")  # noqa
@@ -49,9 +50,6 @@ def transform_timeseries(
     for hcol in tss.historical_columns:
         if hcol not in data.columns or data[hcol].isna().any():
             raise Exception(f"Cannot transform. Missing values in historical column {hcol}.")
-
-    # infer frequency with get_delta
-    oby_col = tss.order_by
 
     # initial stable sort and per-partition deduplication
     data = data.sort_values(by=oby_col, kind='mergesort')
