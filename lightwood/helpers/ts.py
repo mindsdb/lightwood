@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union, Dict
+from typing import Tuple, Dict
 from datetime import datetime
 
 import numpy as np
@@ -12,35 +12,6 @@ def get_ts_groups(df: pd.DataFrame, tss) -> list:
                   for g in list(df.groupby(by=tss.group_by).groups.keys())]
         group_combinations.extend(groups)
     return group_combinations
-
-
-def get_group_matches(
-        data: Union[pd.Series, pd.DataFrame],
-        combination: tuple,
-        group_columns: List[str],
-        copy: bool = False
-) -> Tuple[list, pd.DataFrame]:
-    """Given a particular group combination, return the data subset that belongs to it."""
-    raise NotImplementedError()
-    # TODO: should optimize, horribly slow!
-
-    # if type(data) == pd.Series:
-    #     data = pd.DataFrame(data)
-    # elif type(data) != pd.DataFrame:
-    #     raise Exception(f"Wrong data type {type(data)}, must be pandas.DataFrame or pd.Series")
-    #
-    # if combination == '__default':
-    #     return list(data.index), data
-    # else:
-    #     subset = data
-    #     for val, col in zip(combination, group_columns):
-    #         subset = subset[subset[col] == val]
-    #     if len(subset) > 0:
-    #         if copy:
-    #             subset = subset.copy()
-    #         return list(subset.index), subset
-    #     else:
-    #         return [], pd.DataFrame()
 
 
 def get_delta(
