@@ -122,12 +122,12 @@ def get_stls(df: pd.DataFrame,
              ) -> Dict[str, object]:
     stls = {}
     grouped = df.groupby(by=tss.group_by) if tss.group_by else df.groupby(lambda x: '__default')
-    for group, subset in grouped:
-        if subset.shape[0] > 0 and sps.get(group, False):
-            group_freq = subset['__mdb_inferred_freq'].iloc[0]
-            subset = deepcopy(subset)[target]
-            subset.index = pd.date_range(start=subset.iloc[0], freq=group_freq, periods=len(subset)).to_period()
-            stl = _pick_ST(subset, sps[group], test_size=test_size)
+    for group, subdf in grouped:
+        if subdf.shape[0] > 0 and sps.get(group, False):
+            group_freq = subdf['__mdb_inferred_freq'].iloc[0]
+            subdf = deepcopy(subdf)[target]
+            subdf.index = pd.date_range(start=subdf.index[0], freq=group_freq, periods=len(subdf)).to_period()
+            stl = _pick_ST(subdf, sps[group], test_size=test_size)
             log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
             stls[group] = stl
 

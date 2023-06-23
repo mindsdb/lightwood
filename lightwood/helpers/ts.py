@@ -77,7 +77,7 @@ def get_delta(
                 deltas[group] = subset[order_col].rolling(window=2).apply(np.diff).value_counts().index[0]
                 freq, period = detect_freq_period(deltas[group], tss, len(subset))
                 freqs[group] = freq
-                periods[group] = [period]
+                periods[group] = [period] if period is not None else [1]
             else:
                 deltas[group] = 1.0
                 periods[group] = [1]
