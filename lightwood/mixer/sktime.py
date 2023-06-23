@@ -2,7 +2,6 @@ import inspect
 import importlib
 from copy import deepcopy
 from datetime import datetime
-from itertools import product
 from typing import Dict, Union, Optional
 
 import optuna
@@ -245,19 +244,14 @@ class SkTime(BaseMixer):
         df = df.rename_axis('__sktime_index').reset_index()
 
         gby = self.ts_analysis['tss'].group_by
-        length = sum(ds.encoded_ds_lengths) if isinstance(ds, ConcatedEncodedDs) else len(ds)
         ydf = pd.DataFrame(0,  # zero-filled
                            index=df.index,
                            columns=['prediction'],
                            dtype=object)
 
-        group_values = {gcol: df[gcol].tolist() for gcol in self.grouped_by} if gby \
-            else {'': ['__default' for _ in range(length)]}
-
         pending_idxs = set(df.index)
         grouped = df.groupby(by=gby) if gby else df.groupby(lambda x: '__default')
         for group, series_data in grouped:
-            group = group if isinstance(group, tuple) else (group,)
             if series_data.size > 0:
                 start_ts = series_data['__sktime_index'].iloc[0]
                 series = series_data[self.target]

@@ -43,7 +43,7 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
         naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'], target, tss, groups)
         differencers = get_differencers(data['train'], target, tss.group_by)
-        tsz = round(len(data['dev'])/len(data['train']), 2)
+        tsz = round(len(data['dev']) / len(data['train']), 2)
         stl_transforms = get_stls(pd.concat([data['train'], data['dev']]), target, periods, tss, test_size=tsz)
     else:
         naive_forecast_residuals, scale_factor = {}, {}
@@ -143,8 +143,8 @@ def _pick_ST(data: pd.Series, sp: list, test_size: float = 0.2):
     :param sp: list of candidate seasonal periods
     :return: best deseasonalizer and detrender combination based on dev_loss
     """  # noqa
-    tr_subset = data.iloc[:int(len(data)*(1-test_size))]
-    dev_subset = data.iloc[-int(len(data)*test_size):]
+    tr_subset = data.iloc[:int(len(data) * (1 - test_size))]
+    dev_subset = data.iloc[-int(len(data) * test_size):]
 
     def _ST_objective(trial: optuna.Trial):
         trend_degree = trial.suggest_categorical("trend_degree", [1])

@@ -4,6 +4,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
+
 def get_ts_groups(df: pd.DataFrame, tss) -> list:
     group_combinations = ['__default']
     if tss.group_by:
@@ -71,8 +72,7 @@ def get_delta(
     # TODO should optimize to use groupby instead
     if tss.group_by:
         grouped = df.groupby(by=tss.group_by)
-        for name, subset in grouped:
-            group = name if isinstance(name, tuple) else (name, )
+        for group, subset in grouped:
             if subset.shape[0] > 1:
                 deltas[group] = subset[order_col].rolling(window=2).apply(np.diff).value_counts().index[0]
                 freq, period = detect_freq_period(deltas[group], tss, len(subset))
