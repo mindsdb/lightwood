@@ -137,7 +137,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#encoder.DatetimeEncoder">DatetimeEncoder</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.DatetimeEncoder.decode">decode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.DatetimeEncoder.encode">encode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#encoder.DatetimeEncoder.encode_one">encode_one</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.DatetimeEncoder.prepare">prepare</a></li>
 </ul>
 </li>
@@ -625,17 +624,20 @@ The input to <cite>decode</cite> makes no presumption on whether the data is alr
 <dt class="sig sig-object py" id="encoder.DatetimeEncoder">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">DatetimeEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime.html#DatetimeEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeEncoder" title="Permalink to this definition">¶</a></dt>
 <dd><p>This encoder produces an encoded representation for timestamps.</p>
-<p>The approach consists on decomposing the timestamp objects into its constituent units (e.g. day-of-week, month, year, etc), and describing each of those with a single value that represents the magnitude in a sensible cycle length.</p>
+<p>The approach consists on decomposing the timestamp objects into its constituent units (e.g. month, year, etc), and describing each of those with a single value that represents the magnitude in a sensible cycle length.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="encoder.DatetimeEncoder.decode">
 <span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_as_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime.html#DatetimeEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeEncoder.decode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given an encoded representation, returns the decoded value. Decoded values may not exist for all encoders (ex: rich text, audio, etc.)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>encoded_data</strong> – The input representation in encoded format</p>
+<dd class="field-odd"><p><strong>encoded_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – The input representation in encoded format</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The decoded representation of data, per column, in the original data-type presented.</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The decoded representation of data, per column, in the original data-type presented.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -645,20 +647,15 @@ The input to <cite>decode</cite> makes no presumption on whether the data is alr
 <span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime.html#DatetimeEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeEncoder.encode" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – # &#64;TODO: receive a consistent data type here; currently either list of lists or pd.Series w/lists</p>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code>]) – a pandas series with numerical dtype, previously cleaned with dataprep_ml</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>encoded data</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>encoded data, shape (len(data), self.output_size)</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="encoder.DatetimeEncoder.encode_one">
-<span class="sig-name descname"><span class="pre">encode_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unix_timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/datetime/datetime.html#DatetimeEncoder.encode_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.DatetimeEncoder.encode_one" title="Permalink to this definition">¶</a></dt>
-<dd><p>Encodes a list of unix_timestamps, or a list of tensors with unix_timestamps
-:param data: list of unix_timestamps (unix_timestamp resolution is seconds)
-:return: a list of vectors</p>
 </dd></dl>
 
 <dl class="py method">
