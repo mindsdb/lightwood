@@ -157,7 +157,8 @@ class SkTime(BaseMixer):
             sp = self.sp if self.sp else self.ts_analysis['periods'].get(group, [1])[0]
 
             options = self.model_kwargs
-            options['sp'] = sp                   # seasonality period
+            if sp > 1:
+                options['sp'] = sp               # seasonality period
             options['suppress_warnings'] = True  # ignore warnings if possible
             options['error_action'] = 'raise'    # avoids fit() failing silently
 
@@ -205,7 +206,7 @@ class SkTime(BaseMixer):
 
                 # if data is huge, filter out old records for quicker fitting
                 if self.auto_size:
-                    cutoff = min(len(series), max(500, options['sp'] * self.cutoff_factor))
+                    cutoff = min(len(series), max(500, options.get('sp', 1) * self.cutoff_factor))
                     series = series.iloc[-cutoff:]
                 try:
                     self.models[group].fit(series, fh=self.fh)
