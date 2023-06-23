@@ -10,7 +10,6 @@ def generate_target_group_normalizers(
         data: pd.DataFrame,
         target: str,
         dtype_dict: dict,
-        groups: list,
         tss: TimeseriesSettings
 ):
     """

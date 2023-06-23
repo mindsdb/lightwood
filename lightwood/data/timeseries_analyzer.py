@@ -38,10 +38,10 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     groups = get_ts_groups(data['train'], tss)
     deltas, periods, freqs = get_delta(data['train'], tss)
 
-    normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
+    normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, tss)
 
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
-        naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'], target, tss, groups)
+        naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'], target, tss)
         differencers = get_differencers(data['train'], target, tss.group_by)
         tsz = round(len(data['dev']) / len(data['train']), 2)
         stl_transforms = get_stls(pd.concat([data['train'], data['dev']]), target, periods, tss, test_size=tsz)
@@ -88,8 +88,8 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
 def get_grouped_naive_residuals(
         info: pd.DataFrame,
         target: str,
-        tss: TimeseriesSettings,
-        group_combinations: List) -> Tuple[Dict, Dict]:
+        tss: TimeseriesSettings
+) -> Tuple[Dict, Dict]:
     """
     Wraps `get_naive_residuals` for a dataframe with multiple co-existing time series.
     """  # noqa
@@ -156,7 +156,7 @@ def _pick_ST(data: pd.Series, sp: list, test_size: float = 0.2):
 
         detrender = Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))
         deseasonalizer = ConditionalDeseasonalizer(sp=ds_sp, model=decomp_type)
-        transformer = STLTransformer(detrender=detrender, deseasonalizer=deseasonalizer, type=decomp_type)
+        transformer = STLTransformer(detrender=detrender, deseasonalizer=deseasonalizer, typ=decomp_type)
         transformer.fit(tr_subset)
         residuals = transformer.transform(dev_subset)
 
@@ -174,14 +174,14 @@ def _pick_ST(data: pd.Series, sp: list, test_size: float = 0.2):
 
 
 class STLTransformer:
-    def __init__(self, detrender: Detrender, deseasonalizer: ConditionalDeseasonalizer, type: str = 'additive'):
+    def __init__(self, detrender: Detrender, deseasonalizer: ConditionalDeseasonalizer, typ: str = 'additive'):
         """
         Class that handles STL transformation and inverse, given specific detrender and deseasonalizer instances.
         :param detrender: Already initialized. 
         :param deseasonalizer: Already initialized. 
-        :param type: Either 'additive' or 'multiplicative'.
+        :param typ: Either 'additive' or 'multiplicative'.
         """  # noqa
-        self._type = type
+        self._type = typ
         self.detrender = detrender
         self.deseasonalizer = deseasonalizer
         self.op = {

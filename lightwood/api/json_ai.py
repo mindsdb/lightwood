@@ -741,7 +741,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "dtype_dict": "$dtype_dict",
                 "target": "$target",
                 "mode": "$mode",
-                "ts_analysis": "$ts_analysis",
                 "pred_args": "$pred_args",
             },
         },

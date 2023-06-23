@@ -14,10 +14,7 @@ def get_ts_groups(df: pd.DataFrame, tss) -> list:
     return group_combinations
 
 
-def get_delta(
-        df: pd.DataFrame,
-        tss
-) -> Tuple[Dict, Dict, Dict]:
+def get_delta(df: pd.DataFrame, tss) -> Tuple[Dict, Dict, Dict]:
     """
     Infer the sampling interval of each time series, by picking the most popular time interval observed in the training data.
 
@@ -212,7 +209,7 @@ def detect_freq_period(deltas: pd.DataFrame, tss, n_points) -> tuple:
     return freq_to_pandas(freq, multiplier=multiplier), freq_to_period.get(freq, 1)
 
 
-def freq_to_pandas(freq, multiplier=1, sample_row=None):
+def freq_to_pandas(freq, multiplier=1):
     mapping = {
         'constant': 'N',
         'nanosecond': 'N',

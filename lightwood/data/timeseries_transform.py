@@ -12,7 +12,7 @@ from lightwood.helpers.log import log
 
 
 def transform_timeseries(
-        data: pd.DataFrame, dtype_dict: Dict[str, str], ts_analysis: dict,
+        data: pd.DataFrame, dtype_dict: Dict[str, str],
         timeseries_settings: TimeseriesSettings, target: str, mode: str,
         pred_args: Optional[PredictionArguments] = None
 ) -> pd.DataFrame:
@@ -28,7 +28,6 @@ def transform_timeseries(
     
     :param data: Dataframe with data to transform.
     :param dtype_dict: Dictionary with the types of each column.
-    :param ts_analysis: dictionary with various insights into each series passed as training input.
     :param timeseries_settings: A `TimeseriesSettings` object.
     :param target: The name of the target column to forecast.
     :param mode: Either "train" or "predict", depending on what phase is calling this procedure.
