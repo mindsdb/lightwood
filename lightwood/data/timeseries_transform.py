@@ -75,7 +75,7 @@ def transform_timeseries(
                     raise Exception(
                         f"Partition is not valid, faulty group {group}. Please make sure you group by a set of columns that ensures unique measurements for each grouping through time.")  # noqa
 
-                index = pd.to_datetime(subset[oby_col], unit='s')
+                index = pd.to_datetime(subset[oby_col], unit='s', utc=True)
                 subset.index = pd.date_range(start=index.iloc[0],
                                              freq=freqs.get(group, freqs['__default']),
                                              periods=len(subset))
