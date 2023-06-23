@@ -3,8 +3,6 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-from statsmodels.tsa.stattools import pacf
-
 
 def get_ts_groups(df: pd.DataFrame, tss) -> list:
     group_combinations = ['__default']
@@ -22,24 +20,26 @@ def get_group_matches(
         copy: bool = False
 ) -> Tuple[list, pd.DataFrame]:
     """Given a particular group combination, return the data subset that belongs to it."""
+    raise NotImplementedError()
+    # TODO: should optimize, horribly slow!
 
-    if type(data) == pd.Series:
-        data = pd.DataFrame(data)
-    elif type(data) != pd.DataFrame:
-        raise Exception(f"Wrong data type {type(data)}, must be pandas.DataFrame or pd.Series")
-
-    if combination == '__default':
-        return list(data.index), data
-    else:
-        subset = data
-        for val, col in zip(combination, group_columns):
-            subset = subset[subset[col] == val]
-        if len(subset) > 0:
-            if copy:
-                subset = subset.copy()
-            return list(subset.index), subset
-        else:
-            return [], pd.DataFrame()
+    # if type(data) == pd.Series:
+    #     data = pd.DataFrame(data)
+    # elif type(data) != pd.DataFrame:
+    #     raise Exception(f"Wrong data type {type(data)}, must be pandas.DataFrame or pd.Series")
+    #
+    # if combination == '__default':
+    #     return list(data.index), data
+    # else:
+    #     subset = data
+    #     for val, col in zip(combination, group_columns):
+    #         subset = subset[subset[col] == val]
+    #     if len(subset) > 0:
+    #         if copy:
+    #             subset = subset.copy()
+    #         return list(subset.index), subset
+    #     else:
+    #         return [], pd.DataFrame()
 
 
 def get_delta(
@@ -60,7 +60,7 @@ def get_delta(
     :return:
     Dictionary with group combination tuples as keys. Values are dictionaries with the inferred delta for each series.
     """  # noqa
-    df = df.copy()
+    df = df.copy()  # TODO: necessary?
     original_col = f'__mdb_original_{tss.order_by}'
     order_col = original_col if original_col in df.columns else tss.order_by
     deltas = {"__default": df[order_col].astype(float).rolling(window=2).apply(np.diff).value_counts().index[0]}
@@ -68,22 +68,20 @@ def get_delta(
     periods = {"__default": [period]}
     freqs = {"__default": freq}
 
+    # TODO should optimize to use groupby instead
     if tss.group_by:
-        for group in group_combinations:
-            if group != "__default":
-                _, subset = get_group_matches(df, group, tss.group_by)
-                if subset.shape[0] > 1:
-                    deltas[group] = subset[order_col].rolling(window=2).apply(np.diff).value_counts().index[0]
-                    freq, period = detect_freq_period(deltas[group], tss, len(subset))
-                    freqs[group] = freq
-                    if period:
-                        periods[group] = [period]
-                    else:
-                        periods[group] = [max_pacf(df, group_combinations, target, tss)[group][0]]
-                else:
-                    deltas[group] = 1.0
-                    periods[group] = [1]
-                    freqs[group] = 'S'
+        grouped = df.groupby(by=tss.group_by)
+        for name, subset in grouped:
+            group = name if isinstance(name, tuple) else (name, )
+            if subset.shape[0] > 1:
+                deltas[group] = subset[order_col].rolling(window=2).apply(np.diff).value_counts().index[0]
+                freq, period = detect_freq_period(deltas[group], tss, len(subset))
+                freqs[group] = freq
+                periods[group] = [period]
+            else:
+                deltas[group] = 1.0
+                periods[group] = [1]
+                freqs[group] = 'S'
 
     return deltas, periods, freqs
 
@@ -274,29 +272,6 @@ def freq_to_pandas(freq, multiplier=1, sample_row=None):
     return ''.join(items)
 
 
-def max_pacf(data: pd.DataFrame, group_combinations, target, tss):
-    def min_k(top_k, data):
-        return min(top_k, len(data))
-
-    top_k = 5
-    k = min_k(top_k, data[target])
-    candidate_sps = {'__default': (1 + np.argpartition(pacf(data[target].values)[1:], -k))[-k:].tolist()[::-1]}
-    if tss.group_by:
-        for group in group_combinations:
-            if group != "__default":
-                _, subset = get_group_matches(data, group, tss.group_by)
-                try:
-                    k = min_k(top_k, subset[target])
-                    candidates = (1 + np.argpartition(pacf(subset[target].values)[1:], -k))[-k:].tolist()[::-1]
-                    candidate_sps[group] = candidates
-                except Exception:
-                    candidate_sps[group] = None
-            if not candidate_sps[group]:
-                candidate_sps[group] = [1]
-
-    return candidate_sps
-
-
 def filter_ts(df: pd.DataFrame, tss, n_rows=1):
     """
     This method triggers only for timeseries datasets.
@@ -309,9 +284,9 @@ def filter_ts(df: pd.DataFrame, tss, n_rows=1):
             df = df.iloc[[0]]
         else:
             ndf = pd.DataFrame(columns=df.columns)
-            for group in get_ts_groups(df, tss):
+            grouped = df.groupby(by=tss.group_by)
+            for group, subdf in grouped:
                 if group != '__default':
-                    _, subdf = get_group_matches(df, group, tss.group_by)
                     ndf = pd.concat([ndf, subdf.iloc[:n_rows]])
             df = ndf
     return df
