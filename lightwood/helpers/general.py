@@ -1,3 +1,6 @@
+from typing import Iterable
+
+import numpy as np
 from type_infer.helpers import is_nan_numeric
 
 
@@ -11,6 +14,17 @@ def is_none(value):
 
     It also checks some extra values (like ``''``) that pandas never converts ``None`` to (hopefully). But lightwood would still consider those values "None values", and this will allow for more generic use later.
     """ # noqa
+    # TODO: consider removing this helper entirely
+
+    # start dispatch with types that are expensive to e.g. cast into strings
+    if type(value) in (np.ndarray,) and value.size == 0:
+        return True
+
+    if isinstance(value, Iterable) and value == []:
+        return True
+    elif isinstance(value, Iterable):
+        return False
+
     if value is None:
         return True
 

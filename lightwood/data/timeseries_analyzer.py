@@ -1,17 +1,11 @@
-from copy import deepcopy
-from typing import Dict, Tuple, List, Union
+from typing import Dict, Tuple, List
 
-import optuna
 import numpy as np
 import pandas as pd
 from type_infer.dtype import dtype
-from sktime.transformations.series.detrend import Detrender
-from sktime.forecasting.trend import PolynomialTrendForecaster
-from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
 from lightwood.helpers.ts import get_ts_groups, get_delta, Differencer
-from lightwood.helpers.log import log
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 
 
@@ -43,12 +37,9 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
         naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'], target, tss)
         differencers = get_differencers(data['train'], target, tss.group_by)
-        tsz = round(len(data['dev']) / len(data['train']), 2)
-        stl_transforms = get_stls(pd.concat([data['train'], data['dev']]), target, periods, tss, test_size=tsz)
     else:
         naive_forecast_residuals, scale_factor = {}, {}
         differencers = {}
-        stl_transforms = {}
 
     return {'target_normalizers': normalizers,
             'deltas': deltas,
@@ -58,7 +49,7 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
             'ts_naive_mae': scale_factor,
             'periods': periods,
             'sample_freqs': freqs,
-            'stl_transforms': stl_transforms,
+            'stl_transforms': {},  # TODO: remove, or provide from outside as user perhaps
             'differencers': differencers
             }
 
@@ -112,93 +103,3 @@ def get_differencers(data: pd.DataFrame, target: str, group_cols: List):
         differencer.fit(subset[target].values)
         differencers[group] = differencer
     return differencers
-
-
-def get_stls(df: pd.DataFrame,
-             target: str,
-             sps: Dict,
-             tss: TimeseriesSettings,
-             test_size: float = 0.2
-             ) -> Dict[str, object]:
-    stls = {}
-    grouped = df.groupby(by=tss.group_by) if tss.group_by else df.groupby(lambda x: '__default')
-    for group, subdf in grouped:
-        if subdf.shape[0] > 0 and sps.get(group, False):
-            group_freq = subdf['__mdb_inferred_freq'].iloc[0]
-            subdf = deepcopy(subdf)[target]
-            subdf.index = pd.date_range(start=subdf.index[0], freq=group_freq, periods=len(subdf)).to_period()
-            stl = _pick_ST(subdf, sps[group], test_size=test_size)
-            log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
-            stls[group] = stl
-
-    stls['__default'] = None  # TODO: check if actually needed
-    return stls
-
-
-def _pick_ST(data: pd.Series, sp: list, test_size: float = 0.2):
-    """
-    Perform hyperparam search with optuna to find best combination of ST transforms for a time series.
-
-    :param data: series used for fitting blocks. Index should be datetime, and values are the actual time series.
-    :param sp: list of candidate seasonal periods
-    :return: best deseasonalizer and detrender combination based on dev_loss
-    """  # noqa
-    tr_subset = data.iloc[:int(len(data) * (1 - test_size))]
-    dev_subset = data.iloc[-int(len(data) * test_size):]
-
-    def _ST_objective(trial: optuna.Trial):
-        trend_degree = trial.suggest_categorical("trend_degree", [1])
-        ds_sp = trial.suggest_categorical("ds_sp", sp)  # seasonality period to use in deseasonalizer
-        if min(min(tr_subset), min(dev_subset)) <= 0:
-            decomp_type = trial.suggest_categorical("decomp_type", ['additive'])
-        else:
-            decomp_type = trial.suggest_categorical("decomp_type", ['additive', 'multiplicative'])
-
-        detrender = Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))
-        deseasonalizer = ConditionalDeseasonalizer(sp=ds_sp, model=decomp_type)
-        transformer = STLTransformer(detrender=detrender, deseasonalizer=deseasonalizer, typ=decomp_type)
-        transformer.fit(tr_subset)
-        residuals = transformer.transform(dev_subset)
-
-        trial.set_user_attr("transformer", transformer)
-        return np.power(residuals, 2).sum()
-
-    space = {"trend_degree": [1, 2], "ds_sp": sp, "decomp_type": ['additive', 'multiplicative']}
-    study = optuna.create_study(sampler=optuna.samplers.GridSampler(space))
-    study.optimize(_ST_objective, n_trials=8)
-
-    return {
-        "transformer": study.best_trial.user_attrs['transformer'],
-        "best_params": study.best_params
-    }
-
-
-class STLTransformer:
-    def __init__(self, detrender: Detrender, deseasonalizer: ConditionalDeseasonalizer, typ: str = 'additive'):
-        """
-        Class that handles STL transformation and inverse, given specific detrender and deseasonalizer instances.
-        :param detrender: Already initialized. 
-        :param deseasonalizer: Already initialized. 
-        :param typ: Either 'additive' or 'multiplicative'.
-        """  # noqa
-        self._type = typ
-        self.detrender = detrender
-        self.deseasonalizer = deseasonalizer
-        self.op = {
-            'additive': lambda x, y: x - y,
-            'multiplicative': lambda x, y: x / y
-        }
-        self.iop = {
-            'additive': lambda x, y: x + y,
-            'multiplicative': lambda x, y: x * y
-        }
-
-    def fit(self, x: Union[pd.DataFrame, pd.Series]):
-        self.deseasonalizer.fit(x)
-        self.detrender.fit(self.op[self._type](x, self.deseasonalizer.transform(x)))
-
-    def transform(self, x: Union[pd.DataFrame, pd.Series]):
-        return self.detrender.transform(self.deseasonalizer.transform(x))
-
-    def inverse_transform(self, x: Union[pd.DataFrame, pd.Series]):
-        return self.deseasonalizer.inverse_transform(self.detrender.inverse_transform(x))
