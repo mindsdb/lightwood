@@ -69,7 +69,7 @@ class SkTime(BaseMixer):
         :param use_stl: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.
         """  # noqa
         super().__init__(stop_after)
-        self.stable = True
+        self.stable = False
         self.prepared = False
         self.supports_proba = False
         self.target = target
@@ -156,8 +156,7 @@ class SkTime(BaseMixer):
             sp = self.sp if self.sp else self.ts_analysis['periods'].get(group, [1])[0]
 
             options = self.model_kwargs
-            if sp > 1:
-                options['sp'] = sp               # seasonality period
+            options['sp'] = sp               # seasonality period
             options['suppress_warnings'] = True  # ignore warnings if possible
             options['error_action'] = 'raise'    # avoids fit() failing silently
 

@@ -50,9 +50,8 @@ def transform_timeseries(
         if hcol not in data.columns or data[hcol].isna().any():
             raise Exception(f"Cannot transform. Missing values in historical column {hcol}.")
 
-    # initial stable sort and per-partition deduplication
+    # initial stable sort and per-partition deduplication TODO: slow, add a top-level param to disable if needed
     data = data.sort_values(by=oby_col, kind='mergesort')
-    # TODO evaluate if truly needed (w/o it, test 9 fails)
     data = data.drop_duplicates(subset=[oby_col, *gb_arr], keep='first')
 
     # pass seconds to timestamps according to each group's inferred freq, and force this freq on index
