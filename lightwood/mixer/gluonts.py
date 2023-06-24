@@ -14,7 +14,6 @@ from gluonts.mx.trainer.callback import TrainingHistory
 from gluonts.mx.distribution.student_t import StudentTOutput
 
 from lightwood.helpers.log import log
-from lightwood.helpers.ts import get_group_matches
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
@@ -169,8 +168,8 @@ class GluonTSMixer(BaseMixer):
         ydf['__original_index'] = df['__mdb_original_index'].values
         input_ds = self._make_initial_ds(df, groups=groups)  # TODO test with novel group
         forecasts = list(self.model.predict(input_ds))
-        for group, group_forecast in zip(groups, forecasts):
-            _, subdf = get_group_matches(df, (group, ), gby)
+        grouped = df.groupby(by=gby) if gby else df.groupby(lambda x: '__default')
+        for (group, subdf), group_forecast in zip(grouped, forecasts):
             idx = ydf[ydf['__original_index'] == max(subdf['__mdb_original_index'])].index.values[0]
             ydf.at[idx, 'prediction'] = [entry for entry in group_forecast.quantile(0.5)]
             ydf.at[idx, 'lower'] = [entry for entry in group_forecast.quantile(1 - conf)]

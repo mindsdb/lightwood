@@ -4,13 +4,13 @@ from typing import Dict, Tuple, List, Union
 import optuna
 import numpy as np
 import pandas as pd
+from type_infer.dtype import dtype
 from sktime.transformations.series.detrend import Detrender
 from sktime.forecasting.trend import PolynomialTrendForecaster
 from sktime.transformations.series.detrend import ConditionalDeseasonalizer
 
 from lightwood.api.types import TimeseriesSettings
-from type_infer.dtype import dtype
-from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches, Differencer
+from lightwood.helpers.ts import get_ts_groups, get_delta, Differencer
 from lightwood.helpers.log import log
 from lightwood.encoder.time_series.helpers.common import generate_target_group_normalizers
 
@@ -36,14 +36,15 @@ def timeseries_analyzer(data: Dict[str, pd.DataFrame], dtype_dict: Dict[str, str
     """  # noqa
     tss = timeseries_settings
     groups = get_ts_groups(data['train'], tss)
-    deltas, periods, freqs = get_delta(data['train'], dtype_dict, groups, target, tss)
+    deltas, periods, freqs = get_delta(data['train'], tss)
 
-    normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, groups, tss)
+    normalizers = generate_target_group_normalizers(data['train'], target, dtype_dict, tss)
 
     if dtype_dict[target] in (dtype.integer, dtype.float, dtype.num_tsarray):
-        naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'], target, tss, groups)
-        differencers = get_differencers(data['train'], target, groups, tss.group_by)
-        stl_transforms = get_stls(data['train'], data['dev'], target, periods, groups, tss)
+        naive_forecast_residuals, scale_factor = get_grouped_naive_residuals(data['dev'], target, tss)
+        differencers = get_differencers(data['train'], target, tss.group_by)
+        tsz = round(len(data['dev']) / len(data['train']), 2)
+        stl_transforms = get_stls(pd.concat([data['train'], data['dev']]), target, periods, tss, test_size=tsz)
     else:
         naive_forecast_residuals, scale_factor = {}, {}
         differencers = {}
@@ -87,15 +88,15 @@ def get_naive_residuals(target_data: pd.DataFrame, m: int = 1) -> Tuple[List, fl
 def get_grouped_naive_residuals(
         info: pd.DataFrame,
         target: str,
-        tss: TimeseriesSettings,
-        group_combinations: List) -> Tuple[Dict, Dict]:
+        tss: TimeseriesSettings
+) -> Tuple[Dict, Dict]:
     """
     Wraps `get_naive_residuals` for a dataframe with multiple co-existing time series.
     """  # noqa
     group_residuals = {}
     group_scale_factors = {}
-    for group in group_combinations:
-        idxs, subset = get_group_matches(info, group, tss.group_by)
+    grouped = info.groupby(by=tss.group_by) if tss.group_by else info.groupby(lambda x: '__default')
+    for group, subset in grouped:
         if subset.shape[0] > 1:
             residuals, scale_factor = get_naive_residuals(subset[target])  # @TODO: pass m once we handle seasonality
             group_residuals[group] = residuals
@@ -103,51 +104,47 @@ def get_grouped_naive_residuals(
     return group_residuals, group_scale_factors
 
 
-def get_differencers(data: pd.DataFrame, target: str, groups: List, group_cols: List):
+def get_differencers(data: pd.DataFrame, target: str, group_cols: List):
     differencers = {}
-    for group in groups:
-        idxs, subset = get_group_matches(data, group, group_cols)
+    grouped = data.groupby(by=group_cols) if group_cols else data.groupby(lambda x: True)
+    for group, subset in grouped:
         differencer = Differencer()
         differencer.fit(subset[target].values)
         differencers[group] = differencer
     return differencers
 
 
-def get_stls(train_df: pd.DataFrame,
-             dev_df: pd.DataFrame,
+def get_stls(df: pd.DataFrame,
              target: str,
              sps: Dict,
-             groups: list,
-             tss: TimeseriesSettings
+             tss: TimeseriesSettings,
+             test_size: float = 0.2
              ) -> Dict[str, object]:
-    stls = {'__default': None}
-    for group in groups:
-        if group != '__default':
-            _, tr_subset = get_group_matches(train_df, group, tss.group_by)
-            _, dev_subset = get_group_matches(dev_df, group, tss.group_by)
-            if tr_subset.shape[0] > 0 and dev_subset.shape[0] > 0 and sps.get(group, False):
-                group_freq = tr_subset['__mdb_inferred_freq'].iloc[0]
-                tr_subset = deepcopy(tr_subset)[target]
-                dev_subset = deepcopy(dev_subset)[target]
-                tr_subset.index = pd.date_range(start=tr_subset.iloc[0], freq=group_freq,
-                                                periods=len(tr_subset)).to_period()
-                dev_subset.index = pd.date_range(start=dev_subset.iloc[0], freq=group_freq,
-                                                 periods=len(dev_subset)).to_period()
-                stl = _pick_ST(tr_subset, dev_subset, sps[group])
-                log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
-                stls[group] = stl
+    stls = {}
+    grouped = df.groupby(by=tss.group_by) if tss.group_by else df.groupby(lambda x: '__default')
+    for group, subdf in grouped:
+        if subdf.shape[0] > 0 and sps.get(group, False):
+            group_freq = subdf['__mdb_inferred_freq'].iloc[0]
+            subdf = deepcopy(subdf)[target]
+            subdf.index = pd.date_range(start=subdf.index[0], freq=group_freq, periods=len(subdf)).to_period()
+            stl = _pick_ST(subdf, sps[group], test_size=test_size)
+            log.info(f'Best STL decomposition params for group {group} are: {stl["best_params"]}')
+            stls[group] = stl
+
+    stls['__default'] = None  # TODO: check if actually needed
     return stls
 
 
-def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: list):
+def _pick_ST(data: pd.Series, sp: list, test_size: float = 0.2):
     """
     Perform hyperparam search with optuna to find best combination of ST transforms for a time series.
 
-    :param tr_subset: training series used for fitting blocks. Index should be datetime, and values are the actual time series.
-    :param dev_subset: dev series used for computing loss. Index should be datetime, and values are the actual time series.
+    :param data: series used for fitting blocks. Index should be datetime, and values are the actual time series.
     :param sp: list of candidate seasonal periods
     :return: best deseasonalizer and detrender combination based on dev_loss
     """  # noqa
+    tr_subset = data.iloc[:int(len(data) * (1 - test_size))]
+    dev_subset = data.iloc[-int(len(data) * test_size):]
 
     def _ST_objective(trial: optuna.Trial):
         trend_degree = trial.suggest_categorical("trend_degree", [1])
@@ -159,7 +156,7 @@ def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: list):
 
         detrender = Detrender(forecaster=PolynomialTrendForecaster(degree=trend_degree))
         deseasonalizer = ConditionalDeseasonalizer(sp=ds_sp, model=decomp_type)
-        transformer = STLTransformer(detrender=detrender, deseasonalizer=deseasonalizer, type=decomp_type)
+        transformer = STLTransformer(detrender=detrender, deseasonalizer=deseasonalizer, typ=decomp_type)
         transformer.fit(tr_subset)
         residuals = transformer.transform(dev_subset)
 
@@ -177,14 +174,14 @@ def _pick_ST(tr_subset: pd.Series, dev_subset: pd.Series, sp: list):
 
 
 class STLTransformer:
-    def __init__(self, detrender: Detrender, deseasonalizer: ConditionalDeseasonalizer, type: str = 'additive'):
+    def __init__(self, detrender: Detrender, deseasonalizer: ConditionalDeseasonalizer, typ: str = 'additive'):
         """
         Class that handles STL transformation and inverse, given specific detrender and deseasonalizer instances.
         :param detrender: Already initialized. 
         :param deseasonalizer: Already initialized. 
-        :param type: Either 'additive' or 'multiplicative'.
+        :param typ: Either 'additive' or 'multiplicative'.
         """  # noqa
-        self._type = type
+        self._type = typ
         self.detrender = detrender
         self.deseasonalizer = deseasonalizer
         self.op = {

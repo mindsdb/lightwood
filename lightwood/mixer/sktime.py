@@ -2,7 +2,6 @@ import inspect
 import importlib
 from copy import deepcopy
 from datetime import datetime
-from itertools import product
 from typing import Dict, Union, Optional
 
 import optuna
@@ -16,7 +15,6 @@ from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
 from lightwood.helpers.log import log
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
-from lightwood.helpers.ts import get_group_matches
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
 
@@ -134,6 +132,7 @@ class SkTime(BaseMixer):
         Internal method that fits forecasters to a given dataframe.
         """
         df = data.data_frame.sort_values(by=f'__mdb_original_{self.ts_analysis["tss"].order_by}')
+        gby = self.ts_analysis['tss'].group_by
 
         if not self.hyperparam_search and not self.study:
             module_name = self.model_path
@@ -151,12 +150,13 @@ class SkTime(BaseMixer):
         except AttributeError:
             model_class = AutoARIMA  # use AutoARIMA when the provided class does not exist
 
-        for group in self.ts_analysis['group_combinations']:
+        grouped = df.groupby(by=gby) if gby else df.groupby(lambda x: '__default')
+        for group, series_data in grouped:
             kwargs = {}
-            sp = self.sp if self.sp else self.ts_analysis['periods'].get(group, '__default')[0]
+            sp = self.sp if self.sp else self.ts_analysis['periods'].get(group, [1])[0]
 
             options = self.model_kwargs
-            options['sp'] = sp                   # seasonality period
+            options['sp'] = sp               # seasonality period
             options['suppress_warnings'] = True  # ignore warnings if possible
             options['error_action'] = 'raise'    # avoids fit() failing silently
 
@@ -181,14 +181,11 @@ class SkTime(BaseMixer):
 
             oby_col = self.ts_analysis['tss'].order_by
             if self.grouped_by == ['__default']:
-                series_data = df
                 series_oby = df[oby_col]
-                self.cutoffs[group] = series_oby.index[-1]  # defines the 'present' time for each partition
             else:
-                series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
                 series_oby = series_data[oby_col]
-                self.cutoffs[group] = series_idxs[-1]  # defines the 'present' time for each partition
 
+            self.cutoffs[group] = series_oby.index[-1]  # defines the 'present' time for each partition
             series = series_data[self.target]
             if series_data.size > self.ts_analysis['tss'].window:
                 series = series.sort_index(ascending=True)
@@ -207,7 +204,7 @@ class SkTime(BaseMixer):
 
                 # if data is huge, filter out old records for quicker fitting
                 if self.auto_size:
-                    cutoff = min(len(series), max(500, options['sp'] * self.cutoff_factor))
+                    cutoff = min(len(series), max(500, options.get('sp', 1) * self.cutoff_factor))
                     series = series.iloc[-cutoff:]
                 try:
                     self.models[group].fit(series, fh=self.fh)
@@ -245,34 +242,25 @@ class SkTime(BaseMixer):
         df = deepcopy(ds.data_frame)
         df = df.rename_axis('__sktime_index').reset_index()
 
-        length = sum(ds.encoded_ds_lengths) if isinstance(ds, ConcatedEncodedDs) else len(ds)
+        gby = self.ts_analysis['tss'].group_by
         ydf = pd.DataFrame(0,  # zero-filled
                            index=df.index,
                            columns=['prediction'],
                            dtype=object)
 
-        group_values = {gcol: df[gcol].tolist() for gcol in self.grouped_by} \
-            if self.ts_analysis['tss'].group_by \
-            else {'': ['__default' for _ in range(length)]}
-
         pending_idxs = set(df.index)
-        all_group_combinations = list(product(*[set(x) for x in group_values.values()]))
-        for group in all_group_combinations:
-            group = tuple(group)
-            group = '__default' if group[0] == '__default' else group
-            series_idxs, series_data = get_group_matches(df, group, self.grouped_by)
-
+        grouped = df.groupby(by=gby) if gby else df.groupby(lambda x: '__default')
+        for group, series_data in grouped:
             if series_data.size > 0:
                 start_ts = series_data['__sktime_index'].iloc[0]
                 series = series_data[self.target]
-                series_idxs = sorted(series_idxs)
+                series_idxs = series.index
                 if self.models.get(group, False) and self.models[group].is_fitted:
                     freq = self.ts_analysis['deltas'][group]
                     delta = (start_ts - self.cutoffs[group]).total_seconds()
                     offset = round(delta / freq)
                     forecaster = self.models[group]
                     ydf = self._call_groupmodel(ydf, forecaster, series, offset=offset)
-                    # log.debug(f'[SkTime] Forecasting for group {group}, start at {start_ts} (offset by {offset} for cutoff at {self.cutoffs[group]} (relative {self.models[group].cutoff}))')  # noqa
                 else:
                     log.warning(f"Applying naive forecaster for novel group {group}. Performance might not be optimal.")
                     ydf = self._call_default(ydf, series.values, series_idxs)

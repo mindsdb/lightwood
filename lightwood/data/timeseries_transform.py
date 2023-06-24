@@ -5,7 +5,6 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 from lightwood.helpers.parallelism import get_nr_procs
-from lightwood.helpers.ts import get_ts_groups, get_delta, get_group_matches
 
 from type_infer.dtype import dtype
 from lightwood.api.types import TimeseriesSettings, PredictionArguments
@@ -13,7 +12,7 @@ from lightwood.helpers.log import log
 
 
 def transform_timeseries(
-        data: pd.DataFrame, dtype_dict: Dict[str, str], ts_analysis: dict,
+        data: pd.DataFrame, dtype_dict: Dict[str, str],
         timeseries_settings: TimeseriesSettings, target: str, mode: str,
         pred_args: Optional[PredictionArguments] = None
 ) -> pd.DataFrame:
@@ -29,7 +28,6 @@ def transform_timeseries(
     
     :param data: Dataframe with data to transform.
     :param dtype_dict: Dictionary with the types of each column.
-    :param ts_analysis: dictionary with various insights into each series passed as training input.
     :param timeseries_settings: A `TimeseriesSettings` object.
     :param target: The name of the target column to forecast.
     :param mode: Either "train" or "predict", depending on what phase is calling this procedure.
@@ -43,6 +41,7 @@ def transform_timeseries(
     gb_arr = tss.group_by if tss.group_by is not None else []
     oby = tss.order_by
     window = tss.window
+    oby_col = tss.order_by
 
     if tss.use_previous_target and target not in data.columns:
         raise Exception(f"Cannot transform. Missing historical values for target column {target} (`use_previous_target` is set to True).")  # noqa
@@ -51,37 +50,31 @@ def transform_timeseries(
         if hcol not in data.columns or data[hcol].isna().any():
             raise Exception(f"Cannot transform. Missing values in historical column {hcol}.")
 
-    # infer frequency with get_delta
-    oby_col = tss.order_by
-    groups = get_ts_groups(data, tss)
-
-    # initial stable sort and per-partition deduplication
+    # initial stable sort and per-partition deduplication TODO: slow, add a top-level param to disable if needed
     data = data.sort_values(by=oby_col, kind='mergesort')
     data = data.drop_duplicates(subset=[oby_col, *gb_arr], keep='first')
 
-    if not ts_analysis:
-        _, periods, freqs = get_delta(data, dtype_dict, groups, target, tss)
-    else:
-        periods = ts_analysis['periods']
-        freqs = ts_analysis['sample_freqs']
-
     # pass seconds to timestamps according to each group's inferred freq, and force this freq on index
-    subsets = []
-    for group in groups:
-        if (tss.group_by and group != '__default') or not tss.group_by:
-            idxs, subset = get_group_matches(data, group, tss.group_by, copy=True)
-            if subset.shape[0] > 0:
-                if periods.get(group, periods['__default']) == 0 and subset.shape[0] > 1:
-                    raise Exception(
-                        f"Partition is not valid, faulty group {group}. Please make sure you group by a set of columns that ensures unique measurements for each grouping through time.")  # noqa
+    grouped = data.groupby(by=tss.group_by) if tss.group_by else data.groupby(lambda x: True)
+    reindexed = []
+    for name, group in grouped:
+        name = name if tss.group_by and len(tss.group_by) > 1 else (name, )  # guaranteed tuple type
+        if group.shape[0] > 0:
+            if group[tss.order_by].value_counts().max() > 1 and group.shape[0] > 1:
+                raise Exception(f"Partition is not valid, faulty group {name}. Please make sure you group by a set of columns that ensures unique measurements for each grouping through time.")  # noqa
 
-                index = pd.to_datetime(subset[oby_col], unit='s', utc=True)
-                subset.index = pd.date_range(start=index.iloc[0],
-                                             freq=freqs.get(group, freqs['__default']),
-                                             periods=len(subset))
-                subset['__mdb_inferred_freq'] = subset.index.freq   # sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa
-                subsets.append(subset)
-    original_df = pd.concat(subsets).sort_values(by='__mdb_original_index')
+            index = pd.to_datetime(group[oby_col], unit='s', utc=True)
+            group.index = pd.date_range(start=index.iloc[0], end=index.iloc[-1], periods=len(group))
+            resampled = group
+            group['__mdb_inferred_freq'] = None
+            if len(group) > 2:
+                freq = pd.infer_freq(group.index)
+                if freq is not None:
+                    group['__mdb_inferred_freq'] = freq  # sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa
+                    resampled = group.resample(freq).first()
+            reindexed.append(resampled)
+
+    original_df = pd.concat(reindexed).sort_values(by='__mdb_original_index')
 
     if '__mdb_forecast_offset' in original_df.columns:
         """ This special column can be either None or an integer. If this column is passed, then the TS transformation will react to the values within:

@@ -4,14 +4,12 @@ import pandas as pd
 from lightwood.api.types import TimeseriesSettings
 from type_infer.dtype import dtype
 from lightwood.encoder.helpers import MinMaxNormalizer, CatNormalizer
-from lightwood.helpers.ts import get_group_matches
 
 
 def generate_target_group_normalizers(
         data: pd.DataFrame,
         target: str,
         dtype_dict: dict,
-        groups: list,
         tss: TimeseriesSettings
 ):
     """
@@ -29,20 +27,19 @@ def generate_target_group_normalizers(
 
     # numerical normalizers, here we spawn one per each group combination
     else:
-        for combination in groups:
-            if combination not in ('__default', ()):
-                combination = tuple(combination)
-                idxs, subset = get_group_matches(data, combination, tss.group_by)
-                if subset.shape[0] > 0:
-                    target_data = subset[target].values
-                    if target_dtype == dtype.num_tsarray:
-                        target_data = target_data.reshape(-1, 1).astype(float)
+        grouped = data.groupby(by=tss.group_by) if tss.group_by else data.groupby(lambda x: '__default')
+        for name, subset in grouped:
+            if subset.shape[0] > 0:
+                target_data = subset[target].values
+                if target_dtype == dtype.num_tsarray:
+                    target_data = target_data.reshape(-1, 1).astype(float)
 
-                    normalizers[combination] = MinMaxNormalizer(combination=combination)
-                    normalizers[combination].prepare(target_data)
+                normalizers[name] = MinMaxNormalizer(combination=name)
+                normalizers[name].prepare(target_data)
 
-        # ...plus a default one, used at inference time and fitted with all training data
-        normalizers['__default'] = MinMaxNormalizer()
-        normalizers['__default'].prepare(data[target].values)
+        if not normalizers.get('__default'):
+            # ...plus a default one, used at inference time and fitted with all training data
+            normalizers['__default'] = MinMaxNormalizer()
+            normalizers['__default'].prepare(data[target].values)
 
     return normalizers
