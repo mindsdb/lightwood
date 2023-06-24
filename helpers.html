@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Helpers &mdash; lightwood 23.6.2.0 documentation</title>
+  <title>Helpers &mdash; lightwood 23.6.4.0 documentation</title>
   
 
   
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                23.6.2.0
+                23.6.4.0
               </div>
             
           
@@ -108,7 +108,6 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.LightwoodAutocast">LightwoodAutocast</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.add_tn_num_conf_bounds">add_tn_num_conf_bounds</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers.get_group_matches">get_group_matches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.is_none">is_none</a></li>
 </ul>
 </li>
@@ -197,17 +196,6 @@ to activate the feature only when the GPU has tensor cores to leverage AMP.</p>
 <p>Add confidence (and bounds if applicable) to t+n predictions, for n&gt;1
 TODO: active research question: how to guarantee 1-e coverage for t+n, n&gt;1
 For now, (conservatively) increases width by the confidence times the log of the time step (and a scaling factor).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="helpers.get_group_matches">
-<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">get_group_matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/ts.html#get_group_matches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.get_group_matches" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a particular group combination, return the data subset that belongs to it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">

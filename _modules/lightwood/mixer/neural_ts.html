@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.mixer.neural_ts &mdash; lightwood 23.6.2.0 documentation</title>
+  <title>lightwood.mixer.neural_ts &mdash; lightwood 23.6.4.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                23.6.2.0
+                23.6.4.0
               </div>
             
           
@@ -190,7 +190,6 @@
 <span class="kn">from</span> <span class="nn">lightwood.mixer.neural</span> <span class="kn">import</span> <span class="n">Neural</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.helpers.ar_net</span> <span class="kn">import</span> <span class="n">ArNet</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.helpers.default_net</span> <span class="kn">import</span> <span class="n">DefaultNet</span>
-<span class="kn">from</span> <span class="nn">lightwood.mixer.helpers.ts</span> <span class="kn">import</span> <span class="n">_apply_stl_on_training</span><span class="p">,</span> <span class="n">_stl_transform</span><span class="p">,</span> <span class="n">_stl_inverse_transform</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span>
 
 
@@ -256,10 +255,6 @@
         <span class="n">original_train</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">train_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">)</span>
         <span class="n">original_dev</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">dev_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">)</span>
 
-        <span class="c1"># Use STL blocks if available</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_stl</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stl_transforms&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-            <span class="n">_apply_stl_on_training</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">)</span>
-
         <span class="c1"># ConcatedEncodedDs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train_data</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
@@ -314,9 +309,6 @@
                            <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">,</span>
                            <span class="n">columns</span><span class="o">=</span><span class="n">pred_cols</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_stl</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stl_transforms&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-            <span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span> <span class="o">=</span> <span class="n">_stl_transform</span><span class="p">(</span><span class="n">ydf</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">)</span>
-
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
                 <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
@@ -339,9 +331,6 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">decoded_predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">decoded_predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">decoded_predictions</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">ydf</span><span class="p">[</span><span class="n">pred_cols</span><span class="p">]</span> <span class="o">=</span> <span class="n">decoded_predictions</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_stl</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stl_transforms&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-            <span class="n">ydf</span> <span class="o">=</span> <span class="n">_stl_inverse_transform</span><span class="p">(</span><span class="n">ydf</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_settings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">)</span>
 
         <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ydf</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 

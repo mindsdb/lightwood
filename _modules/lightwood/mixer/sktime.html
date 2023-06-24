@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.mixer.sktime &mdash; lightwood 23.6.2.0 documentation</title>
+  <title>lightwood.mixer.sktime &mdash; lightwood 23.6.4.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                23.6.2.0
+                23.6.4.0
               </div>
             
           
@@ -175,7 +175,6 @@
 <span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">optuna</span>
@@ -189,7 +188,6 @@
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.base</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">get_group_matches</span>
 <span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span>
 
 
@@ -307,6 +305,7 @@
 <span class="sd">        Internal method that fits forecasters to a given dataframe.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;__mdb_original_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s2">&quot;tss&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">order_by</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">gby</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_search</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="p">:</span>
             <span class="n">module_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span>
@@ -324,12 +323,13 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="n">model_class</span> <span class="o">=</span> <span class="n">AutoARIMA</span>  <span class="c1"># use AutoARIMA when the provided class does not exist</span>
 
-        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;group_combinations&#39;</span><span class="p">]:</span>
+        <span class="n">grouped</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">gby</span><span class="p">)</span> <span class="k">if</span> <span class="n">gby</span> <span class="k">else</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;__default&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">group</span><span class="p">,</span> <span class="n">series_data</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">:</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="n">sp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sp</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sp</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;periods&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;__default&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">sp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sp</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sp</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;periods&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
 
             <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_kwargs</span>
-            <span class="n">options</span><span class="p">[</span><span class="s1">&#39;sp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sp</span>                   <span class="c1"># seasonality period</span>
+            <span class="n">options</span><span class="p">[</span><span class="s1">&#39;sp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sp</span>               <span class="c1"># seasonality period</span>
             <span class="n">options</span><span class="p">[</span><span class="s1">&#39;suppress_warnings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># ignore warnings if possible</span>
             <span class="n">options</span><span class="p">[</span><span class="s1">&#39;error_action&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;raise&#39;</span>    <span class="c1"># avoids fit() failing silently</span>
 
@@ -354,14 +354,11 @@
 
             <span class="n">oby_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">order_by</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]:</span>
-                <span class="n">series_data</span> <span class="o">=</span> <span class="n">df</span>
                 <span class="n">series_oby</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">oby_col</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cutoffs</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">series_oby</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># defines the &#39;present&#39; time for each partition</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">series_idxs</span><span class="p">,</span> <span class="n">series_data</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span><span class="p">)</span>
                 <span class="n">series_oby</span> <span class="o">=</span> <span class="n">series_data</span><span class="p">[</span><span class="n">oby_col</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cutoffs</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">series_idxs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># defines the &#39;present&#39; time for each partition</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">cutoffs</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">series_oby</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># defines the &#39;present&#39; time for each partition</span>
             <span class="n">series</span> <span class="o">=</span> <span class="n">series_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">series_data</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">window</span><span class="p">:</span>
                 <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -380,7 +377,7 @@
 
                 <span class="c1"># if data is huge, filter out old records for quicker fitting</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_size</span><span class="p">:</span>
-                    <span class="n">cutoff</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;sp&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_factor</span><span class="p">))</span>
+                    <span class="n">cutoff</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sp&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_factor</span><span class="p">))</span>
                     <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="n">cutoff</span><span class="p">:]</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">fh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">)</span>
@@ -418,34 +415,25 @@
         <span class="n">df</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_frame</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename_axis</span><span class="p">(</span><span class="s1">&#39;__sktime_index&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 
-        <span class="n">length</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">encoded_ds_lengths</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="n">gby</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span>
         <span class="n">ydf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># zero-filled</span>
                            <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">],</span>
                            <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
 
-        <span class="n">group_values</span> <span class="o">=</span> <span class="p">{</span><span class="n">gcol</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="n">gcol</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">gcol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span><span class="p">}</span> \
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;tss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">group_by</span> \
-            <span class="k">else</span> <span class="p">{</span><span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;__default&#39;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)]}</span>
-
         <span class="n">pending_idxs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="n">all_group_combinations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">group_values</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
-        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">all_group_combinations</span><span class="p">:</span>
-            <span class="n">group</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
-            <span class="n">group</span> <span class="o">=</span> <span class="s1">&#39;__default&#39;</span> <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;__default&#39;</span> <span class="k">else</span> <span class="n">group</span>
-            <span class="n">series_idxs</span><span class="p">,</span> <span class="n">series_data</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped_by</span><span class="p">)</span>
-
+        <span class="n">grouped</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">gby</span><span class="p">)</span> <span class="k">if</span> <span class="n">gby</span> <span class="k">else</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;__default&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">group</span><span class="p">,</span> <span class="n">series_data</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">series_data</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">start_ts</span> <span class="o">=</span> <span class="n">series_data</span><span class="p">[</span><span class="s1">&#39;__sktime_index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">series</span> <span class="o">=</span> <span class="n">series_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
-                <span class="n">series_idxs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">series_idxs</span><span class="p">)</span>
+                <span class="n">series_idxs</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">index</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">is_fitted</span><span class="p">:</span>
                     <span class="n">freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;deltas&#39;</span><span class="p">][</span><span class="n">group</span><span class="p">]</span>
                     <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">start_ts</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoffs</span><span class="p">[</span><span class="n">group</span><span class="p">])</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
                     <span class="n">offset</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">delta</span> <span class="o">/</span> <span class="n">freq</span><span class="p">)</span>
                     <span class="n">forecaster</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span>
                     <span class="n">ydf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_groupmodel</span><span class="p">(</span><span class="n">ydf</span><span class="p">,</span> <span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
-                    <span class="c1"># log.debug(f&#39;[SkTime] Forecasting for group {group}, start at {start_ts} (offset by {offset} for cutoff at {self.cutoffs[group]} (relative {self.models[group].cutoff}))&#39;)  # noqa</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Applying naive forecaster for novel group </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">. Performance might not be optimal.&quot;</span><span class="p">)</span>
                     <span class="n">ydf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_default</span><span class="p">(</span><span class="n">ydf</span><span class="p">,</span> <span class="n">series</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">series_idxs</span><span class="p">)</span>

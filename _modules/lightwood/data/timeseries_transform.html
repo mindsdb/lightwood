@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.data.timeseries_transform &mdash; lightwood 23.6.2.0 documentation</title>
+  <title>lightwood.data.timeseries_transform &mdash; lightwood 23.6.4.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                23.6.2.0
+                23.6.4.0
               </div>
             
           
@@ -178,7 +178,6 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.parallelism</span> <span class="kn">import</span> <span class="n">get_nr_procs</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">get_ts_groups</span><span class="p">,</span> <span class="n">get_delta</span><span class="p">,</span> <span class="n">get_group_matches</span>
 
 <span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">PredictionArguments</span>
@@ -186,7 +185,7 @@
 
 
 <div class="viewcode-block" id="transform_timeseries"><a class="viewcode-back" href="../../../data.html#data.transform_timeseries">[docs]</a><span class="k">def</span> <span class="nf">transform_timeseries</span><span class="p">(</span>
-        <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">ts_analysis</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
         <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">pred_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PredictionArguments</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -202,7 +201,6 @@
 <span class="sd">    </span>
 <span class="sd">    :param data: Dataframe with data to transform.</span>
 <span class="sd">    :param dtype_dict: Dictionary with the types of each column.</span>
-<span class="sd">    :param ts_analysis: dictionary with various insights into each series passed as training input.</span>
 <span class="sd">    :param timeseries_settings: A `TimeseriesSettings` object.</span>
 <span class="sd">    :param target: The name of the target column to forecast.</span>
 <span class="sd">    :param mode: Either &quot;train&quot; or &quot;predict&quot;, depending on what phase is calling this procedure.</span>
@@ -216,6 +214,7 @@
     <span class="n">gb_arr</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
     <span class="n">oby</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span>
     <span class="n">window</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">window</span>
+    <span class="n">oby_col</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span>
 
     <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">use_previous_target</span> <span class="ow">and</span> <span class="n">target</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot transform. Missing historical values for target column </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> (`use_previous_target` is set to True).&quot;</span><span class="p">)</span>  <span class="c1"># noqa</span>
@@ -224,37 +223,31 @@
         <span class="k">if</span> <span class="n">hcol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="n">hcol</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot transform. Missing values in historical column </span><span class="si">{</span><span class="n">hcol</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
-    <span class="c1"># infer frequency with get_delta</span>
-    <span class="n">oby_col</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span>
-    <span class="n">groups</span> <span class="o">=</span> <span class="n">get_ts_groups</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
-
-    <span class="c1"># initial stable sort and per-partition deduplication</span>
+    <span class="c1"># initial stable sort and per-partition deduplication TODO: slow, add a top-level param to disable if needed</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">oby_col</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;mergesort&#39;</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">oby_col</span><span class="p">,</span> <span class="o">*</span><span class="n">gb_arr</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">ts_analysis</span><span class="p">:</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">periods</span><span class="p">,</span> <span class="n">freqs</span> <span class="o">=</span> <span class="n">get_delta</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype_dict</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">periods</span> <span class="o">=</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;periods&#39;</span><span class="p">]</span>
-        <span class="n">freqs</span> <span class="o">=</span> <span class="n">ts_analysis</span><span class="p">[</span><span class="s1">&#39;sample_freqs&#39;</span><span class="p">]</span>
-
     <span class="c1"># pass seconds to timestamps according to each group&#39;s inferred freq, and force this freq on index</span>
-    <span class="n">subsets</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">and</span> <span class="n">group</span> <span class="o">!=</span> <span class="s1">&#39;__default&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
-            <span class="n">idxs</span><span class="p">,</span> <span class="n">subset</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">subset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">periods</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">periods</span><span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">subset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Partition is not valid, faulty group </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">. Please make sure you group by a set of columns that ensures unique measurements for each grouping through time.&quot;</span><span class="p">)</span>  <span class="c1"># noqa</span>
+    <span class="n">grouped</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">reindexed</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">)</span>  <span class="c1"># guaranteed tuple type</span>
+        <span class="k">if</span> <span class="n">group</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">group</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Partition is not valid, faulty group </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">. Please make sure you group by a set of columns that ensures unique measurements for each grouping through time.&quot;</span><span class="p">)</span>  <span class="c1"># noqa</span>
 
-                <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">subset</span><span class="p">[</span><span class="n">oby_col</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">utc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="n">subset</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">index</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                             <span class="n">freq</span><span class="o">=</span><span class="n">freqs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">freqs</span><span class="p">[</span><span class="s1">&#39;__default&#39;</span><span class="p">]),</span>
-                                             <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">))</span>
-                <span class="n">subset</span><span class="p">[</span><span class="s1">&#39;__mdb_inferred_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span>   <span class="c1"># sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa</span>
-                <span class="n">subsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
-    <span class="n">original_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">subsets</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;__mdb_original_index&#39;</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="n">oby_col</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">utc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">group</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">index</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">end</span><span class="o">=</span><span class="n">index</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">))</span>
+            <span class="n">resampled</span> <span class="o">=</span> <span class="n">group</span>
+            <span class="n">group</span><span class="p">[</span><span class="s1">&#39;__mdb_inferred_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">freq</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">infer_freq</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">group</span><span class="p">[</span><span class="s1">&#39;__mdb_inferred_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">freq</span>  <span class="c1"># sets constant column because pd.concat forgets freq (see: https://github.com/pandas-dev/pandas/issues/3232)  # noqa</span>
+                    <span class="n">resampled</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="n">reindexed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resampled</span><span class="p">)</span>
+
+    <span class="n">original_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">reindexed</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;__mdb_original_index&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;__mdb_forecast_offset&#39;</span> <span class="ow">in</span> <span class="n">original_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; This special column can be either None or an integer. If this column is passed, then the TS transformation will react to the values within:</span>

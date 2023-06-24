@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>lightwood.helpers.ts &mdash; lightwood 23.6.2.0 documentation</title>
+  <title>lightwood.helpers.ts &mdash; lightwood 23.6.4.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                23.6.2.0
+                23.6.4.0
               </div>
             
           
@@ -171,12 +171,11 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.helpers.ts</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">statsmodels.tsa.stattools</span> <span class="kn">import</span> <span class="n">pacf</span>
 
 
 <span class="k">def</span> <span class="nf">get_ts_groups</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
@@ -188,75 +187,36 @@
     <span class="k">return</span> <span class="n">group_combinations</span>
 
 
-<div class="viewcode-block" id="get_group_matches"><a class="viewcode-back" href="../../../helpers.html#helpers.get_group_matches">[docs]</a><span class="k">def</span> <span class="nf">get_group_matches</span><span class="p">(</span>
-        <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
-        <span class="n">combination</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
-        <span class="n">group_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">copy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a particular group combination, return the data subset that belongs to it.&quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrong data type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">, must be pandas.DataFrame or pd.Series&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">combination</span> <span class="o">==</span> <span class="s1">&#39;__default&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">data</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">subset</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">combination</span><span class="p">,</span> <span class="n">group_columns</span><span class="p">):</span>
-            <span class="n">subset</span> <span class="o">=</span> <span class="n">subset</span><span class="p">[</span><span class="n">subset</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="n">val</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
-                <span class="n">subset</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">subset</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">subset</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[],</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span></div>
-
-
-<span class="k">def</span> <span class="nf">get_delta</span><span class="p">(</span>
-        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-        <span class="n">dtype_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-        <span class="n">group_combinations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-        <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">tss</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">get_delta</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tss</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Infer the sampling interval of each time series, by picking the most popular time interval observed in the training data.</span>
 
 <span class="sd">    :param df: Dataframe with time series data.</span>
-<span class="sd">    :param group_combinations: all tuples with distinct values for `TimeseriesSettings.group_by` columns, defining all available time series.</span>
-<span class="sd">    :param target: name of target column</span>
 <span class="sd">    :param tss: timeseries settings</span>
 
 <span class="sd">    :return:</span>
 <span class="sd">    Dictionary with group combination tuples as keys. Values are dictionaries with the inferred delta for each series.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># TODO: necessary?</span>
     <span class="n">original_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;__mdb_original_</span><span class="si">{</span><span class="n">tss</span><span class="o">.</span><span class="n">order_by</span><span class="si">}</span><span class="s1">&#39;</span>
     <span class="n">order_col</span> <span class="o">=</span> <span class="n">original_col</span> <span class="k">if</span> <span class="n">original_col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="n">tss</span><span class="o">.</span><span class="n">order_by</span>
-    <span class="n">deltas</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;__default&quot;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="n">order_col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
+    <span class="n">deltas</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;__default&quot;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="n">order_col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
     <span class="n">freq</span><span class="p">,</span> <span class="n">period</span> <span class="o">=</span> <span class="n">detect_freq_period</span><span class="p">(</span><span class="n">deltas</span><span class="p">[</span><span class="s2">&quot;__default&quot;</span><span class="p">],</span> <span class="n">tss</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
     <span class="n">periods</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;__default&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">period</span><span class="p">]}</span>
     <span class="n">freqs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;__default&quot;</span><span class="p">:</span> <span class="n">freq</span><span class="p">}</span>
 
     <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">group_combinations</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">group</span> <span class="o">!=</span> <span class="s2">&quot;__default&quot;</span><span class="p">:</span>
-                <span class="n">_</span><span class="p">,</span> <span class="n">subset</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">subset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">deltas</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">subset</span><span class="p">[</span><span class="n">order_col</span><span class="p">]</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">freq</span><span class="p">,</span> <span class="n">period</span> <span class="o">=</span> <span class="n">detect_freq_period</span><span class="p">(</span><span class="n">deltas</span><span class="p">[</span><span class="n">group</span><span class="p">],</span> <span class="n">tss</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">))</span>
-                    <span class="n">freqs</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">freq</span>
-                    <span class="k">if</span> <span class="n">period</span><span class="p">:</span>
-                        <span class="n">periods</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">period</span><span class="p">]</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">periods</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">max_pacf</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">group_combinations</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">tss</span><span class="p">)[</span><span class="n">group</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">deltas</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
-                    <span class="n">periods</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="n">freqs</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;S&#39;</span>
+        <span class="n">grouped</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">group</span><span class="p">,</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">subset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">deltas</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">subset</span><span class="p">[</span><span class="n">order_col</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">freq</span><span class="p">,</span> <span class="n">period</span> <span class="o">=</span> <span class="n">detect_freq_period</span><span class="p">(</span><span class="n">deltas</span><span class="p">[</span><span class="n">group</span><span class="p">],</span> <span class="n">tss</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">))</span>
+                <span class="n">freqs</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">freq</span>
+                <span class="n">periods</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">period</span><span class="p">]</span> <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">deltas</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">periods</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">freqs</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;S&#39;</span>
 
     <span class="k">return</span> <span class="n">deltas</span><span class="p">,</span> <span class="n">periods</span><span class="p">,</span> <span class="n">freqs</span>
 
@@ -422,7 +382,7 @@
     <span class="k">return</span> <span class="n">freq_to_pandas</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="n">multiplier</span><span class="p">),</span> <span class="n">freq_to_period</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">freq_to_pandas</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sample_row</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">freq_to_pandas</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;constant&#39;</span><span class="p">:</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span>
         <span class="s1">&#39;nanosecond&#39;</span><span class="p">:</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span>
@@ -447,29 +407,6 @@
     <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">max_pacf</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">group_combinations</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">tss</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">min_k</span><span class="p">(</span><span class="n">top_k</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">top_k</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-
-    <span class="n">top_k</span> <span class="o">=</span> <span class="mi">5</span>
-    <span class="n">k</span> <span class="o">=</span> <span class="n">min_k</span><span class="p">(</span><span class="n">top_k</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
-    <span class="n">candidate_sps</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;__default&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">pacf</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)[</span><span class="mi">1</span><span class="p">:],</span> <span class="o">-</span><span class="n">k</span><span class="p">))[</span><span class="o">-</span><span class="n">k</span><span class="p">:]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]}</span>
-    <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">group_combinations</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">group</span> <span class="o">!=</span> <span class="s2">&quot;__default&quot;</span><span class="p">:</span>
-                <span class="n">_</span><span class="p">,</span> <span class="n">subset</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">k</span> <span class="o">=</span> <span class="n">min_k</span><span class="p">(</span><span class="n">top_k</span><span class="p">,</span> <span class="n">subset</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
-                    <span class="n">candidates</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">pacf</span><span class="p">(</span><span class="n">subset</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)[</span><span class="mi">1</span><span class="p">:],</span> <span class="o">-</span><span class="n">k</span><span class="p">))[</span><span class="o">-</span><span class="n">k</span><span class="p">:]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="n">candidate_sps</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">candidates</span>
-                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="n">candidate_sps</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">candidate_sps</span><span class="p">[</span><span class="n">group</span><span class="p">]:</span>
-                <span class="n">candidate_sps</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">candidate_sps</span>
-
-
 <span class="k">def</span> <span class="nf">filter_ts</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tss</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method triggers only for timeseries datasets.</span>
@@ -482,9 +419,9 @@
             <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="mi">0</span><span class="p">]]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ndf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">get_ts_groups</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">tss</span><span class="p">):</span>
+            <span class="n">grouped</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">group</span><span class="p">,</span> <span class="n">subdf</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">group</span> <span class="o">!=</span> <span class="s1">&#39;__default&#39;</span><span class="p">:</span>
-                    <span class="n">_</span><span class="p">,</span> <span class="n">subdf</span> <span class="o">=</span> <span class="n">get_group_matches</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span>
                     <span class="n">ndf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">ndf</span><span class="p">,</span> <span class="n">subdf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="n">n_rows</span><span class="p">]])</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">ndf</span>
     <span class="k">return</span> <span class="n">df</span>
