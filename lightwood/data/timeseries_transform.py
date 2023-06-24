@@ -179,39 +179,11 @@ def transform_timeseries(
         else:
             raise Exception(f'Not enough historical context to make a timeseries prediction (`allow_incomplete_history` is set to False). Please provide a number of rows greater or equal to the window size - currently (number_rows, window_size) = ({min(group_lengths)}, {tss.window}). If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` timeseries setting to `True`, but this might lead to subpar predictions depending on the mixer.') # noqa
 
-    df_gb_map = None
     if n_groups > 1:
         df_gb_list = list(combined_df.groupby(tss.group_by))
         df_gb_map = {}
         for gb, df in df_gb_list:
             df_gb_map['_' + '_'.join(str(gb))] = df
-
-    timeseries_row_mapping = {}
-    idx = 0
-
-    # TODO: vectorize
-    if df_gb_map is None:
-        for i in range(len(combined_df)):
-            row = combined_df.iloc[i]
-            if not cutoff_mode:
-                timeseries_row_mapping[idx] = int(
-                    row['original_index']) if row['original_index'] is not None and not np.isnan(
-                    row['original_index']) else None
-            else:
-                timeseries_row_mapping[idx] = idx
-            idx += 1
-    else:
-        for gb in df_gb_map:
-            for i in range(len(df_gb_map[gb])):
-                row = df_gb_map[gb].iloc[i]
-                if not cutoff_mode:
-                    timeseries_row_mapping[idx] = int(
-                        row['original_index']) if row['original_index'] is not None and not np.isnan(
-                        row['original_index']) else None
-                else:
-                    timeseries_row_mapping[idx] = idx
-
-                idx += 1
 
     del combined_df['original_index']
 
