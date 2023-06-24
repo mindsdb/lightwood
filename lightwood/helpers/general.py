@@ -14,15 +14,15 @@ def is_none(value):
 
     It also checks some extra values (like ``''``) that pandas never converts ``None`` to (hopefully). But lightwood would still consider those values "None values", and this will allow for more generic use later.
     """ # noqa
-    # TODO: consider removing this helper entirely
+    # TODO: consider removing this helper entirely, arguably should move into dataprep_ml
 
     # start dispatch with types that are expensive to e.g. cast into strings
     if type(value) in (np.ndarray,) and value.size == 0:
         return True
 
-    if isinstance(value, Iterable) and value == []:
+    if type(value) != str and isinstance(value, Iterable) and value == []:
         return True
-    elif isinstance(value, Iterable):
+    elif type(value) != str and isinstance(value, Iterable):
         return False
 
     if value is None:
@@ -34,7 +34,7 @@ def is_none(value):
     if str(value) == '':
         return True
 
-    if str(value) in ('None', 'nan', 'NaN', 'np.nan'):
+    if str(value) in ('None', 'nan', 'NaN', 'np.nan', 'NAN', 'NONE'):
         return True
 
     return False
