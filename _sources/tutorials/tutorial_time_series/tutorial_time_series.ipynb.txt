@@ -24,10 +24,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-24T03:46:34.992476Z",
-     "iopub.status.busy": "2023-06-24T03:46:34.991973Z",
-     "iopub.status.idle": "2023-06-24T03:46:35.332438Z",
-     "shell.execute_reply": "2023-06-24T03:46:35.331832Z"
+     "iopub.execute_input": "2023-06-24T06:23:04.148273Z",
+     "iopub.status.busy": "2023-06-24T06:23:04.147885Z",
+     "iopub.status.idle": "2023-06-24T06:23:04.516088Z",
+     "shell.execute_reply": "2023-06-24T06:23:04.515533Z"
     }
    },
    "outputs": [
@@ -162,10 +162,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-24T03:46:35.377178Z",
-     "iopub.status.busy": "2023-06-24T03:46:35.376577Z",
-     "iopub.status.idle": "2023-06-24T03:46:38.620995Z",
-     "shell.execute_reply": "2023-06-24T03:46:38.620252Z"
+     "iopub.execute_input": "2023-06-24T06:23:04.557006Z",
+     "iopub.status.busy": "2023-06-24T06:23:04.556354Z",
+     "iopub.status.idle": "2023-06-24T06:23:07.532094Z",
+     "shell.execute_reply": "2023-06-24T06:23:07.531392Z"
     }
    },
    "outputs": [
@@ -173,8 +173,8 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2425:No torchvision detected, image helpers not supported.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2385:No torchvision detected, image helpers not supported.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
      ]
     }
    ],
@@ -187,10 +187,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-24T03:46:38.625182Z",
-     "iopub.status.busy": "2023-06-24T03:46:38.624646Z",
-     "iopub.status.idle": "2023-06-24T03:46:38.632537Z",
-     "shell.execute_reply": "2023-06-24T03:46:38.631838Z"
+     "iopub.execute_input": "2023-06-24T06:23:07.536058Z",
+     "iopub.status.busy": "2023-06-24T06:23:07.535584Z",
+     "iopub.status.idle": "2023-06-24T06:23:07.544424Z",
+     "shell.execute_reply": "2023-06-24T06:23:07.543838Z"
     }
    },
    "outputs": [],
@@ -217,10 +217,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-24T03:46:38.635738Z",
-     "iopub.status.busy": "2023-06-24T03:46:38.635304Z",
-     "iopub.status.idle": "2023-06-24T03:46:38.639660Z",
-     "shell.execute_reply": "2023-06-24T03:46:38.638950Z"
+     "iopub.execute_input": "2023-06-24T06:23:07.547239Z",
+     "iopub.status.busy": "2023-06-24T06:23:07.546885Z",
+     "iopub.status.idle": "2023-06-24T06:23:07.552386Z",
+     "shell.execute_reply": "2023-06-24T06:23:07.551729Z"
     }
    },
    "outputs": [
@@ -255,10 +255,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-24T03:46:38.643642Z",
-     "iopub.status.busy": "2023-06-24T03:46:38.643417Z",
-     "iopub.status.idle": "2023-06-24T03:46:39.358510Z",
-     "shell.execute_reply": "2023-06-24T03:46:39.357757Z"
+     "iopub.execute_input": "2023-06-24T06:23:07.555402Z",
+     "iopub.status.busy": "2023-06-24T06:23:07.554890Z",
+     "iopub.status.idle": "2023-06-24T06:23:08.244471Z",
+     "shell.execute_reply": "2023-06-24T06:23:08.243807Z"
     }
    },
    "outputs": [
@@ -266,18 +266,18 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2425:Analyzing a sample of 2467\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2425:from a total population of 2820, this is equivalent to 87.5% of your data.\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2425:Infering type for: Month\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2385:Analyzing a sample of 2467\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2385:from a total population of 2820, this is equivalent to 87.5% of your data.\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2385:Infering type for: Month\u001b[0m\n",
       "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.\n",
       "  return _methods._mean(a, axis=axis, dtype=dtype,\n",
       "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars\n",
       "  ret = ret.dtype.type(ret / rcount)\n",
-      "\u001b[32mINFO:type_infer-2425:Column Month has data type date\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2425:Infering type for: Sunspots\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2425:Column Sunspots has data type float\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2385:Column Month has data type date\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2385:Infering type for: Sunspots\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2385:Column Sunspots has data type float\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Finished statistical analysis\u001b[0m\n"
      ]
     }
    ],
@@ -314,10 +314,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-24T03:46:39.362374Z",
-     "iopub.status.busy": "2023-06-24T03:46:39.361982Z",
-     "iopub.status.idle": "2023-06-24T03:47:02.319076Z",
-     "shell.execute_reply": "2023-06-24T03:47:02.318321Z"
+     "iopub.execute_input": "2023-06-24T06:23:08.247749Z",
+     "iopub.status.busy": "2023-06-24T06:23:08.247365Z",
+     "iopub.status.idle": "2023-06-24T06:23:24.942871Z",
+     "shell.execute_reply": "2023-06-24T06:23:24.942256Z"
     }
    },
    "outputs": [
@@ -325,29 +325,26 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2425:[Learn phase 1/8] - Statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Finished statistical analysis\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `analyze_data` runtime: 0.05 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:[Learn phase 2/8] - Data preprocessing\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Cleaning the data\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Transforming timeseries data\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Using 1 processes to reshape.\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `preprocess` runtime: 0.66 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:[Learn phase 3/8] - Data splitting\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Splitting the data into train/test\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `split` runtime: 0.0 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:[Learn phase 4/8] - Preparing encoders\u001b[0m\n",
-      "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/pandas/core/arrays/datetimes.py:1162: UserWarning: Converting to PeriodArray/Index representation will drop timezone information.\n",
-      "  warnings.warn(\n",
-      "\u001b[32mINFO:lightwood-2425:Best STL decomposition params for group __default are: {'trend_degree': 1, 'ds_sp': 12, 'decomp_type': 'additive'}\u001b[0m\n",
-      "\u001b[37mDEBUG:dataprep_ml-2425:Preparing sequentially...\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `prepare` runtime: 3.34 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:[Learn phase 5/8] - Feature generation\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Featurizing the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `featurize` runtime: 1.11 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:[Learn phase 6/8] - Mixer training\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Training the mixers\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Learn phase 1/8] - Statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Finished statistical analysis\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `analyze_data` runtime: 0.05 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Learn phase 2/8] - Data preprocessing\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Cleaning the data\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Transforming timeseries data\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Using 1 processes to reshape.\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `preprocess` runtime: 0.59 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Learn phase 3/8] - Data splitting\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Splitting the data into train/test\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `split` runtime: 0.0 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Learn phase 4/8] - Preparing encoders\u001b[0m\n",
+      "\u001b[37mDEBUG:dataprep_ml-2385:Preparing sequentially...\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `prepare` runtime: 0.07 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Learn phase 5/8] - Feature generation\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Featurizing the data\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `featurize` runtime: 0.07 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Learn phase 6/8] - Mixer training\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Training the mixers\u001b[0m\n",
       "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:120: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.\n",
       "  warnings.warn(\"torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.\")\n",
       "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/pytorch_ranger/ranger.py:172: UserWarning: This overload of addcmul_ is deprecated:\n",
@@ -355,46 +352,46 @@
       "Consider using one of the following signatures instead:\n",
       "\taddcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1485.)\n",
       "  exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)\n",
-      "\u001b[32mINFO:lightwood-2425:Loss of 9.051180988550186 with learning rate 0.0001\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss of 9.014871507883072 with learning rate 0.0005\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss of 8.969509452581406 with learning rate 0.001\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss of 8.879051893949509 with learning rate 0.002\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss of 8.7889504134655 with learning rate 0.003\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss of 8.611965090036392 with learning rate 0.005\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss of 8.195776104927063 with learning rate 0.01\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss of 6.255893111228943 with learning rate 0.05\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Found learning rate of: 0.05\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 1: 0.5818348526954651\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 2: 0.4797109067440033\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 3: 0.48386093974113464\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 4: 0.49511992931365967\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 5: 0.39475566148757935\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 6: 0.39592696726322174\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 7: 0.3622782230377197\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 8: 0.3817047029733658\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 9: 0.5138542950153351\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 10: 0.6360724717378616\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 1: 0.2986880974336104\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 2: 0.303189678625627\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `fit_mixer` runtime: 0.65 seconds\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Started fitting AutoSKTime forecaster for array prediction\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Starting trial with hyperparameters: {'class': 'trend.STLForecaster'}\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-2425:This mixer does not output probability estimates\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Trial got error: 0.5245438066022906\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Starting trial with hyperparameters: {'class': 'croston.Croston'}\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-2425:This mixer does not output probability estimates\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Trial got error: 0.19796658477664864\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Starting trial with hyperparameters: {'class': 'theta.ThetaForecaster'}\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425:Multiplicative seasonality is not appropriate for zero and negative values\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Trial got error: inf\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Starting trial with hyperparameters: {'class': 'trend.PolynomialTrendForecaster'}\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-2425:This mixer does not output probability estimates\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Trial got error: 0.683102101870188\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Selected best model: croston.Croston\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `fit_mixer` runtime: 0.19 seconds\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Started fitting AutoETS forecaster for array prediction\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `fit_mixer` runtime: 0.04 seconds\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Started fitting AutoARIMA forecaster for array prediction\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss of 9.051180988550186 with learning rate 0.0001\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss of 9.014871507883072 with learning rate 0.0005\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss of 8.969509452581406 with learning rate 0.001\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss of 8.879051893949509 with learning rate 0.002\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss of 8.7889504134655 with learning rate 0.003\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss of 8.611965090036392 with learning rate 0.005\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss of 8.195776104927063 with learning rate 0.01\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss of 6.255893111228943 with learning rate 0.05\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Found learning rate of: 0.05\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 1: 0.5818348526954651\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 2: 0.4797109067440033\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 3: 0.48386093974113464\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 4: 0.49511992931365967\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 5: 0.39475566148757935\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 6: 0.39592696726322174\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 7: 0.3622782230377197\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 8: 0.3817047029733658\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 9: 0.5138542950153351\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 10: 0.6360724717378616\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 1: 0.2986880974336104\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 2: 0.303189678625627\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `fit_mixer` runtime: 0.63 seconds\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Started fitting AutoSKTime forecaster for array prediction\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Starting trial with hyperparameters: {'class': 'croston.Croston'}\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2385:This mixer does not output probability estimates\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Trial got error: 0.19796658477664864\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Starting trial with hyperparameters: {'class': 'trend.STLForecaster'}\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2385:This mixer does not output probability estimates\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Trial got error: 0.5245438066022906\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Starting trial with hyperparameters: {'class': 'trend.PolynomialTrendForecaster'}\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2385:This mixer does not output probability estimates\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Trial got error: 0.683102101870188\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Starting trial with hyperparameters: {'class': 'theta.ThetaForecaster'}\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385:Multiplicative seasonality is not appropriate for zero and negative values\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Trial got error: inf\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Selected best model: croston.Croston\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `fit_mixer` runtime: 0.24 seconds\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Started fitting AutoETS forecaster for array prediction\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `fit_mixer` runtime: 0.05 seconds\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Started fitting AutoARIMA forecaster for array prediction\u001b[0m\n",
       "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/scipy/optimize/_numdiff.py:576: RuntimeWarning: invalid value encountered in subtract\n",
       "  df = fun(x) - f0\n",
       "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]\n",
@@ -427,36 +424,36 @@
       "  warnings.warn(\n",
       "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]\n",
       "  warnings.warn(\n",
-      "\u001b[37mDEBUG:lightwood-2425: `fit_mixer` runtime: 13.87 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Ensembling the mixer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Mixer: NeuralTs got accuracy: 0.875\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-2425:This mixer does not output probability estimates\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Mixer: SkTime got accuracy: 0.956\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-2425:This mixer does not output probability estimates\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Mixer: ETSMixer got accuracy: 0.934\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-2425:This mixer does not output probability estimates\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Mixer: ARIMAMixer got accuracy: 0.951\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Picked best mixer: SkTime\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `fit` runtime: 16.24 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:[Learn phase 7/8] - Ensemble analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Analyzing the ensemble of mixers\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-2425:This mixer does not output probability estimates\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:The block ICP is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:The block ConfStats is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:The block AccStats is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:The block PermutationFeatureImportance is now running its analyze() method\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-2425:Block 'PermutationFeatureImportance' does not support time series nor text encoding, skipping...\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `analyze_ensemble` runtime: 0.13 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:[Learn phase 8/8] - Adjustment on validation requested\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Updating the mixers\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `fit_mixer` runtime: 13.33 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Ensembling the mixer\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Mixer: NeuralTs got accuracy: 0.875\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2385:This mixer does not output probability estimates\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Mixer: SkTime got accuracy: 0.956\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2385:This mixer does not output probability estimates\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Mixer: ETSMixer got accuracy: 0.934\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2385:This mixer does not output probability estimates\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Mixer: ARIMAMixer got accuracy: 0.951\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Picked best mixer: SkTime\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `fit` runtime: 15.41 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Learn phase 7/8] - Ensemble analysis\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Analyzing the ensemble of mixers\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2385:This mixer does not output probability estimates\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:The block ICP is now running its analyze() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:The block ConfStats is now running its analyze() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:The block AccStats is now running its analyze() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:The block PermutationFeatureImportance is now running its analyze() method\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2385:Block 'PermutationFeatureImportance' does not support time series nor text encoding, skipping...\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `analyze_ensemble` runtime: 0.11 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Learn phase 8/8] - Adjustment on validation requested\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Updating the mixers\u001b[0m\n",
       "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:120: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.\n",
       "  warnings.warn(\"torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.\")\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 1: 0.2962628627816836\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Loss @ epoch 2: 0.2954987585544586\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Started fitting AutoSKTime forecaster for array prediction\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Selected best model: croston.Croston\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Started fitting AutoETS forecaster for array prediction\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:Started fitting AutoARIMA forecaster for array prediction\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 1: 0.2962628627816836\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Loss @ epoch 2: 0.2954987585544586\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Started fitting AutoSKTime forecaster for array prediction\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Selected best model: croston.Croston\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Started fitting AutoETS forecaster for array prediction\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:Started fitting AutoARIMA forecaster for array prediction\u001b[0m\n",
       "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]\n",
       "  warnings.warn(\n",
       "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]\n",
@@ -475,8 +472,8 @@
       "  warnings.warn(\n",
       "/opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]\n",
       "  warnings.warn(\n",
-      "\u001b[37mDEBUG:lightwood-2425: `adjust` runtime: 1.41 seconds\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `learn` runtime: 22.95 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2385: `adjust` runtime: 0.36 seconds\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `learn` runtime: 16.69 seconds\u001b[0m\n"
      ]
     }
    ],
@@ -498,10 +495,10 @@
    "execution_count": 7,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-24T03:47:02.323015Z",
-     "iopub.status.busy": "2023-06-24T03:47:02.322513Z",
-     "iopub.status.idle": "2023-06-24T03:47:02.827335Z",
-     "shell.execute_reply": "2023-06-24T03:47:02.826676Z"
+     "iopub.execute_input": "2023-06-24T06:23:24.946125Z",
+     "iopub.status.busy": "2023-06-24T06:23:24.945576Z",
+     "iopub.status.idle": "2023-06-24T06:23:25.286555Z",
+     "shell.execute_reply": "2023-06-24T06:23:25.285912Z"
     }
    },
    "outputs": [
@@ -509,35 +506,35 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2425:[Predict phase 1/4] - Data preprocessing\u001b[0m\n",
-      "/tmp/876f49079f39c6f85f551c31dc666ae9e2b691b45aeed5191687578399351793.py:583: SettingWithCopyWarning: \n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Predict phase 1/4] - Data preprocessing\u001b[0m\n",
+      "/tmp/f553c40cc16005381e640c8750a5540c094515892dc056da1687587788238004.py:583: SettingWithCopyWarning: \n",
       "A value is trying to be set on a copy of a slice from a DataFrame.\n",
       "Try using .loc[row_indexer,col_indexer] = value instead\n",
       "\n",
       "See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n",
       "  data[col] = [None] * len(data)\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Cleaning the data\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Transforming timeseries data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `preprocess` runtime: 0.07 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:[Predict phase 2/4] - Feature generation\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:Featurizing the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `featurize` runtime: 0.13 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:[Predict phase 3/4] - Calling ensemble\u001b[0m\n",
-      "\u001b[33mWARNING:lightwood-2425:This mixer does not output probability estimates\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2425:[Predict phase 4/4] - Analyzing output\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Cleaning the data\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Transforming timeseries data\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `preprocess` runtime: 0.07 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Predict phase 2/4] - Feature generation\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:Featurizing the data\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `featurize` runtime: 0.01 seconds\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Predict phase 3/4] - Calling ensemble\u001b[0m\n",
+      "\u001b[33mWARNING:lightwood-2385:This mixer does not output probability estimates\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2385:[Predict phase 4/4] - Analyzing output\u001b[0m\n",
       "/home/runner/work/lightwood/lightwood/lightwood/helpers/ts.py:82: SettingWithCopyWarning: \n",
       "A value is trying to be set on a copy of a slice from a DataFrame\n",
       "\n",
       "See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n",
       "  df[f'order_{col}'].iloc[idx] = timestamps\n",
-      "\u001b[32mINFO:lightwood-2425:The block ICP is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:The block ConfStats is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:The block AccStats is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2425:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2425: `predict` runtime: 0.5 seconds\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2385:The block ICP is now running its explain() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:The block ConfStats is now running its explain() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:The block AccStats is now running its explain() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2385:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2385: `predict` runtime: 0.34 seconds\u001b[0m\n"
      ]
     }
    ],
@@ -557,10 +554,10 @@
    "execution_count": 8,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-24T03:47:02.830510Z",
-     "iopub.status.busy": "2023-06-24T03:47:02.830119Z",
-     "iopub.status.idle": "2023-06-24T03:47:02.846235Z",
-     "shell.execute_reply": "2023-06-24T03:47:02.845621Z"
+     "iopub.execute_input": "2023-06-24T06:23:25.289887Z",
+     "iopub.status.busy": "2023-06-24T06:23:25.289290Z",
+     "iopub.status.idle": "2023-06-24T06:23:25.304274Z",
+     "shell.execute_reply": "2023-06-24T06:23:25.303295Z"
     }
    },
    "outputs": [
@@ -665,10 +662,10 @@
    "execution_count": 9,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-24T03:47:02.849462Z",
-     "iopub.status.busy": "2023-06-24T03:47:02.849022Z",
-     "iopub.status.idle": "2023-06-24T03:47:02.853559Z",
-     "shell.execute_reply": "2023-06-24T03:47:02.852922Z"
+     "iopub.execute_input": "2023-06-24T06:23:25.307076Z",
+     "iopub.status.busy": "2023-06-24T06:23:25.306728Z",
+     "iopub.status.idle": "2023-06-24T06:23:25.309767Z",
+     "shell.execute_reply": "2023-06-24T06:23:25.309169Z"
     }
    },
    "outputs": [],
@@ -681,10 +678,10 @@
    "execution_count": 10,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-24T03:47:02.856815Z",
-     "iopub.status.busy": "2023-06-24T03:47:02.856210Z",
-     "iopub.status.idle": "2023-06-24T03:47:03.092201Z",
-     "shell.execute_reply": "2023-06-24T03:47:03.091235Z"
+     "iopub.execute_input": "2023-06-24T06:23:25.312732Z",
+     "iopub.status.busy": "2023-06-24T06:23:25.312241Z",
+     "iopub.status.idle": "2023-06-24T06:23:25.531342Z",
+     "shell.execute_reply": "2023-06-24T06:23:25.530682Z"
     }
    },
    "outputs": [

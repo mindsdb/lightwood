@@ -171,7 +171,10 @@
            <div itemprop="articleBody">
             
   <h1>Source code for lightwood.helpers.general</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">type_infer.helpers</span> <span class="kn">import</span> <span class="n">is_nan_numeric</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">type_infer.helpers</span> <span class="kn">import</span> <span class="n">is_nan_numeric</span>
 
 
 <div class="viewcode-block" id="is_none"><a class="viewcode-back" href="../../../helpers.html#helpers.is_none">[docs]</a><span class="k">def</span> <span class="nf">is_none</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
@@ -184,6 +187,17 @@
 
 <span class="sd">    It also checks some extra values (like ``&#39;&#39;``) that pandas never converts ``None`` to (hopefully). But lightwood would still consider those values &quot;None values&quot;, and this will allow for more generic use later.</span>
 <span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+    <span class="c1"># TODO: consider removing this helper entirely, arguably should move into dataprep_ml</span>
+
+    <span class="c1"># start dispatch with types that are expensive to e.g. cast into strings</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span>
 
@@ -193,7 +207,7 @@
     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;nan&#39;</span><span class="p">,</span> <span class="s1">&#39;NaN&#39;</span><span class="p">,</span> <span class="s1">&#39;np.nan&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;nan&#39;</span><span class="p">,</span> <span class="s1">&#39;NaN&#39;</span><span class="p">,</span> <span class="s1">&#39;np.nan&#39;</span><span class="p">,</span> <span class="s1">&#39;NAN&#39;</span><span class="p">,</span> <span class="s1">&#39;NONE&#39;</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">return</span> <span class="kc">False</span></div>
