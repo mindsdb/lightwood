@@ -1,5 +1,5 @@
-type_infer >=0.0.10
-dataprep_ml >=0.0.9
+type_infer >=0.0.11
+dataprep_ml >=0.0.12
 mindsdb-evaluator >=0.0.9
 numpy
 nltk >=3,<3.6
