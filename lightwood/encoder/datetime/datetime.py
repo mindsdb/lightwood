@@ -42,9 +42,7 @@ class DatetimeEncoder(BaseEncoder):
         data = data.fillna(pd.Timestamp.max.timestamp())  # TODO: replace with mean?
         ret = [pd.to_datetime(data, unit='s', origin=-1, utc=True)]
         for i, attr in enumerate(self.constant_keys):
-            def _get_ts_attr(ts):
-                return getattr(ts, attr)
-            component = ret[0].apply(_get_ts_attr)
+            component = getattr(ret[0], attr)
             component = component / self.constant_vals[i].item()
             ret.append(component)
 
