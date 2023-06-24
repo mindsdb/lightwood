@@ -50,13 +50,14 @@ def transform_timeseries(
         if hcol not in data.columns or data[hcol].isna().any():
             raise Exception(f"Cannot transform. Missing values in historical column {hcol}.")
 
-    # initial stable sort and per-partition deduplication TODO: slow, add a top-level param to disable if needed
+    # initial stable sort and per-partition deduplication TODO: slowish, add a top-level param to disable if needed
     data = data.sort_values(by=oby_col, kind='mergesort')
     data = data.drop_duplicates(subset=[oby_col, *gb_arr], keep='first')
 
     # pass seconds to timestamps according to each group's inferred freq, and force this freq on index
     grouped = data.groupby(by=tss.group_by) if tss.group_by else data.groupby(lambda x: True)
     reindexed = []
+    # TODO: introduce MP here
     for name, group in grouped:
         name = name if tss.group_by and len(tss.group_by) > 1 else (name, )  # guaranteed tuple type
         if group.shape[0] > 0:
@@ -96,18 +97,12 @@ def transform_timeseries(
         offset = 0
         cutoff_mode = False
 
-    original_index_list = []
-    idx = 0
-    for row in original_df.itertuples():
-        if _make_pred(row) or cutoff_mode:
-            original_df.at[row.Index, '__make_predictions'] = True
-            original_index_list.append(idx)
-            idx += 1
-        else:
-            original_df.at[row.Index, '__make_predictions'] = False
-            original_index_list.append(None)
-
-    original_df['original_index'] = original_index_list
+    if '__mdb_forecast_offset' in original_df.columns or cutoff_mode:
+        original_df['__make_predictions'] = True
+        original_df['original_index'] = np.arange(len(original_df))
+    else:
+        original_df['__make_predictions'] = False
+        original_df['original_index'] = None
 
     secondary_type_dict = {}
     if dtype_dict[oby] in (dtype.date, dtype.integer, dtype.float):
@@ -194,6 +189,7 @@ def transform_timeseries(
     timeseries_row_mapping = {}
     idx = 0
 
+    # TODO: vectorize
     if df_gb_map is None:
         for i in range(len(combined_df)):
             row = combined_df.iloc[i]
@@ -247,13 +243,6 @@ def _ts_infer_next_row(df: pd.DataFrame, ob: str) -> pd.DataFrame:
     new_df = df.append(last_row)
     new_df.index = pd.DatetimeIndex(new_index)
     return new_df
-
-
-def _make_pred(row) -> bool:
-    """
-    Indicates whether a prediction should be made for `row` or not.
-    """
-    return not hasattr(row, '__mdb_forecast_offset') or row.make_predictions
 
 
 def _ts_to_obj(df: pd.DataFrame, historical_columns: list) -> pd.DataFrame:
