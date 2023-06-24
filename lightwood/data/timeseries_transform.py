@@ -50,13 +50,14 @@ def transform_timeseries(
         if hcol not in data.columns or data[hcol].isna().any():
             raise Exception(f"Cannot transform. Missing values in historical column {hcol}.")
 
-    # initial stable sort and per-partition deduplication TODO: slow, add a top-level param to disable if needed
+    # initial stable sort and per-partition deduplication TODO: slowish, add a top-level param to disable if needed
     data = data.sort_values(by=oby_col, kind='mergesort')
     data = data.drop_duplicates(subset=[oby_col, *gb_arr], keep='first')
 
     # pass seconds to timestamps according to each group's inferred freq, and force this freq on index
     grouped = data.groupby(by=tss.group_by) if tss.group_by else data.groupby(lambda x: True)
     reindexed = []
+    # TODO: introduce MP here
     for name, group in grouped:
         name = name if tss.group_by and len(tss.group_by) > 1 else (name, )  # guaranteed tuple type
         if group.shape[0] > 0:
@@ -96,18 +97,12 @@ def transform_timeseries(
         offset = 0
         cutoff_mode = False
 
-    original_index_list = []
-    idx = 0
-    for row in original_df.itertuples():
-        if _make_pred(row) or cutoff_mode:
-            original_df.at[row.Index, '__make_predictions'] = True
-            original_index_list.append(idx)
-            idx += 1
-        else:
-            original_df.at[row.Index, '__make_predictions'] = False
-            original_index_list.append(None)
-
-    original_df['original_index'] = original_index_list
+    if '__mdb_forecast_offset' in original_df.columns or cutoff_mode:
+        original_df['__make_predictions'] = True
+        original_df['original_index'] = np.arange(len(original_df))
+    else:
+        original_df['__make_predictions'] = False
+        original_df['original_index'] = None
 
     secondary_type_dict = {}
     if dtype_dict[oby] in (dtype.date, dtype.integer, dtype.float):
@@ -184,38 +179,11 @@ def transform_timeseries(
         else:
             raise Exception(f'Not enough historical context to make a timeseries prediction (`allow_incomplete_history` is set to False). Please provide a number of rows greater or equal to the window size - currently (number_rows, window_size) = ({min(group_lengths)}, {tss.window}). If you can\'t get enough rows, consider lowering your window size. If you want to force timeseries predictions lacking historical context please set the `allow_incomplete_history` timeseries setting to `True`, but this might lead to subpar predictions depending on the mixer.') # noqa
 
-    df_gb_map = None
     if n_groups > 1:
         df_gb_list = list(combined_df.groupby(tss.group_by))
         df_gb_map = {}
         for gb, df in df_gb_list:
             df_gb_map['_' + '_'.join(str(gb))] = df
-
-    timeseries_row_mapping = {}
-    idx = 0
-
-    if df_gb_map is None:
-        for i in range(len(combined_df)):
-            row = combined_df.iloc[i]
-            if not cutoff_mode:
-                timeseries_row_mapping[idx] = int(
-                    row['original_index']) if row['original_index'] is not None and not np.isnan(
-                    row['original_index']) else None
-            else:
-                timeseries_row_mapping[idx] = idx
-            idx += 1
-    else:
-        for gb in df_gb_map:
-            for i in range(len(df_gb_map[gb])):
-                row = df_gb_map[gb].iloc[i]
-                if not cutoff_mode:
-                    timeseries_row_mapping[idx] = int(
-                        row['original_index']) if row['original_index'] is not None and not np.isnan(
-                        row['original_index']) else None
-                else:
-                    timeseries_row_mapping[idx] = idx
-
-                idx += 1
 
     del combined_df['original_index']
 
@@ -247,13 +215,6 @@ def _ts_infer_next_row(df: pd.DataFrame, ob: str) -> pd.DataFrame:
     new_df = df.append(last_row)
     new_df.index = pd.DatetimeIndex(new_index)
     return new_df
-
-
-def _make_pred(row) -> bool:
-    """
-    Indicates whether a prediction should be made for `row` or not.
-    """
-    return not hasattr(row, '__mdb_forecast_offset') or row.make_predictions
 
 
 def _ts_to_obj(df: pd.DataFrame, historical_columns: list) -> pd.DataFrame:
