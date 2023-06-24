@@ -1,6 +1,6 @@
 import importlib
 from copy import deepcopy
-from typing import Dict, Union, Optional
+from typing import Dict, Union, Optional, List
 
 import numpy as np
 import pandas as pd
@@ -36,8 +36,8 @@ class GluonTSMixer(BaseMixer):
             early_stop_patience: int = 3,
             distribution_output: str = '',
             seed: int = 0,
-            static_features_cat: Optional[list[str]] = None,
-            static_features_real: Optional[list[str]] = None,
+            static_features_cat: Optional[List[str]] = None,
+            static_features_real: Optional[List[str]] = None,
     ):
         """
         Wrapper around GluonTS probabilistic deep learning models. For now, only DeepAR is supported.
