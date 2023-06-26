@@ -185,6 +185,7 @@ class ProblemDefinition:
     timeseries_settings: TimeseriesSettings
     anomaly_detection: bool
     use_default_analysis: bool
+    embedding_only: bool
     dtype_dict: Optional[dict]
     ignore_features: List[str]
     fit_on_all: bool
@@ -220,6 +221,7 @@ class ProblemDefinition:
         ignore_features = obj.get('ignore_features', [])
         fit_on_all = obj.get('fit_on_all', True)
         use_default_analysis = obj.get('use_default_analysis', True)
+        embedding_only = obj.get('embedding_only', False)
         strict_mode = obj.get('strict_mode', True)
         seed_nr = obj.get('seed_nr', 1)
         problem_definition = ProblemDefinition(
@@ -237,6 +239,7 @@ class ProblemDefinition:
             dtype_dict=dtype_dict,
             ignore_features=ignore_features,
             use_default_analysis=use_default_analysis,
+            embedding_only=embedding_only,
             fit_on_all=fit_on_all,
             strict_mode=strict_mode,
             seed_nr=seed_nr
@@ -453,6 +456,7 @@ class PredictionArguments:
     simple_ts_bounds: bool = False
     time_format: str = ''
     force_ts_infer: bool = False
+    return_embedding: bool = False
 
     @staticmethod
     def from_dict(obj: Dict):
@@ -474,6 +478,7 @@ class PredictionArguments:
         simple_ts_bounds = obj.get('simple_ts_bounds', PredictionArguments.simple_ts_bounds)
         time_format = obj.get('time_format', PredictionArguments.time_format)
         force_ts_infer = obj.get('force_ts_infer', PredictionArguments.force_ts_infer)
+        return_embedding = obj.get('return_embedding', PredictionArguments.return_embedding)
 
         pred_args = PredictionArguments(
             predict_proba=predict_proba,
@@ -485,6 +490,7 @@ class PredictionArguments:
             simple_ts_bounds=simple_ts_bounds,
             time_format=time_format,
             force_ts_infer=force_ts_infer,
+            return_embedding=return_embedding,
         )
 
         return pred_args

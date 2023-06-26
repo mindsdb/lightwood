@@ -685,7 +685,7 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             "module": "model_analyzer",
             "args": {
                 "stats_info": "$statistical_analysis",
-                "tss": "$problem_definition.timeseries_settings",
+                "pdef": "$problem_definition",
                 "accuracy_functions": "$accuracy_functions",
                 "predictor": "$ensemble",
                 "data": "encoded_test_data",
@@ -1170,7 +1170,12 @@ enc_train_test = self.featurize(train_dev_test)
 
 # Prepare mixers
 log.info(f'[Learn phase 6/{n_phases}] - Mixer training')
-self.fit(enc_train_test)
+if not self.problem_definition.embedding_only:
+    self.fit(enc_train_test)
+else:
+    self.mixers = []
+    self.ensemble = Embedder(self.target, mixers=list(), data=enc_train_test['train'])
+    self.supports_proba = self.ensemble.supports_proba
 
 # Analyze the ensemble
 log.info(f'[Learn phase 7/{n_phases}] - Ensemble analysis')
@@ -1221,9 +1226,17 @@ encoded_ds = self.featurize({{"predict_data": data}})["predict_data"]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
 log.info(f'[Predict phase 3/{{n_phases}}] - Calling ensemble')
-df = self.ensemble(encoded_ds, args=self.pred_args)
+if self.pred_args.return_embedding:
+    embedder = Embedder(self.target, mixers=list(), data=encoded_ds)
+    df = embedder(encoded_ds, args=self.pred_args)
+else:
+    df = self.ensemble(encoded_ds, args=self.pred_args)
 
-if not self.pred_args.all_mixers:
+if not(any(
+            [self.pred_args.all_mixers, 
+             self.pred_args.return_embedding, 
+             self.problem_definition.embedding_only]
+        )):
     log.info(f'[Predict phase 4/{{n_phases}}] - Analyzing output')
     df, global_insights = {call(json_ai.explainer)}
     self.global_insights = {{**self.global_insights, **global_insights}}
