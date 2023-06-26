@@ -1,6 +1,6 @@
 import importlib
 from copy import deepcopy
-from typing import Dict, Union, Optional
+from typing import Dict, Union, Optional, List
 
 import numpy as np
 import pandas as pd
@@ -14,7 +14,6 @@ from gluonts.mx.trainer.callback import TrainingHistory
 from gluonts.mx.distribution.student_t import StudentTOutput
 
 from lightwood.helpers.log import log
-from lightwood.helpers.ts import get_group_matches
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
@@ -37,8 +36,8 @@ class GluonTSMixer(BaseMixer):
             early_stop_patience: int = 3,
             distribution_output: str = '',
             seed: int = 0,
-            static_features_cat: Optional[list[str]] = None,
-            static_features_real: Optional[list[str]] = None,
+            static_features_cat: Optional[List[str]] = None,
+            static_features_real: Optional[List[str]] = None,
     ):
         """
         Wrapper around GluonTS probabilistic deep learning models. For now, only DeepAR is supported.
@@ -169,8 +168,8 @@ class GluonTSMixer(BaseMixer):
         ydf['__original_index'] = df['__mdb_original_index'].values
         input_ds = self._make_initial_ds(df, groups=groups)  # TODO test with novel group
         forecasts = list(self.model.predict(input_ds))
-        for group, group_forecast in zip(groups, forecasts):
-            _, subdf = get_group_matches(df, (group, ), gby)
+        grouped = df.groupby(by=gby) if gby else df.groupby(lambda x: '__default')
+        for (group, subdf), group_forecast in zip(grouped, forecasts):
             idx = ydf[ydf['__original_index'] == max(subdf['__mdb_original_index'])].index.values[0]
             ydf.at[idx, 'prediction'] = [entry for entry in group_forecast.quantile(0.5)]
             ydf.at[idx, 'lower'] = [entry for entry in group_forecast.quantile(1 - conf)]

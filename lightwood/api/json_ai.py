@@ -741,7 +741,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "dtype_dict": "$dtype_dict",
                 "target": "$target",
                 "mode": "$mode",
-                "ts_analysis": "$ts_analysis",
                 "pred_args": "$pred_args",
             },
         },
@@ -1336,8 +1335,18 @@ class Predictor(PredictorInterface):
         black = None
 
     if black is not None:
+        try:
+            formatted_predictor_code = black.format_str(predictor_code, mode=black.FileMode())
+
+            if type(predictor_from_code(formatted_predictor_code)).__name__ == 'Predictor':
+                predictor_code = formatted_predictor_code
+            else:
+                log.info('Black formatter output is invalid, predictor code might be a bit ugly')
+
+        except Exception:
+            log.info('Black formatter failed to run, predictor code might be a bit ugly')
+    else:
         log.info('Unable to import black formatter, predictor code might be a bit ugly.')
-        predictor_code = black.format_str(predictor_code, mode=black.FileMode())
 
     return predictor_code
 

@@ -1,5 +1,5 @@
-type_infer >=0.0.10
-dataprep_ml >=0.0.9
+type_infer >=0.0.13
+dataprep_ml >=0.0.13
 mindsdb-evaluator >=0.0.9
 numpy
 nltk >=3,<3.6
@@ -20,7 +20,7 @@ dill ==0.3.6
 sktime >=0.14.0,<0.15.0
 statsforecast ==1.4.0
 torch_optimizer ==0.1.0
-black >=21.9b0
+black ==23.3.0
 typing_extensions
 colorlog ==6.5.0
 statsmodels >=0.12.0
