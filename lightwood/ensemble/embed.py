@@ -1,9 +1,9 @@
-from typing import List  # , Optional
+from typing import List
 import pandas as pd
 
 from lightwood.mixer.base import BaseMixer
 from lightwood.ensemble.base import BaseEnsemble
-from lightwood.api.types import PredictionArguments  # , SubmodelData
+from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs
 
 

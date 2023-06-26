@@ -1233,8 +1233,8 @@ else:
     df = self.ensemble(encoded_ds, args=self.pred_args)
 
 if not(any(
-            [self.pred_args.all_mixers, 
-             self.pred_args.return_embedding, 
+            [self.pred_args.all_mixers,
+             self.pred_args.return_embedding,
              self.problem_definition.embedding_only]
         )):
     log.info(f'[Predict phase 4/{{n_phases}}] - Analyzing output')

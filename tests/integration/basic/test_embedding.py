@@ -13,7 +13,6 @@ class TestEmbeddingPredictor(unittest.TestCase):
         train_and_check_time_aim(predictor, df, ignore_time_aim=True)
         predictions = predictor.predict(df, args={'return_embedding': True})
 
-        # sanity checks
         self.assertTrue(predictions.shape[0] == len(df))
         self.assertTrue(predictions.shape[1] != 1)  # embedding dimension
 
@@ -25,7 +24,6 @@ class TestEmbeddingPredictor(unittest.TestCase):
         train_and_check_time_aim(predictor, df, ignore_time_aim=True)
         predictions = predictor.predict(df)
 
-        # sanity checks
         self.assertTrue(predictions.shape[0] == len(df))
-        self.assertTrue(predictions.shape[1] != 1)  # embedding dimension
-        self.assertTrue(len(predictor.mixers) == 0)  # embedding dimension
+        self.assertTrue(predictions.shape[1] == predictor.ensemble.embedding_size)
+        self.assertTrue(len(predictor.mixers) == 0)
