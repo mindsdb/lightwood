@@ -109,7 +109,7 @@ def transform_timeseries(
         secondary_type_dict[oby] = dtype_dict[oby]
 
     original_df[f'__mdb_original_{oby}'] = original_df[oby]
-    original_df = _ts_to_obj(original_df, [oby])
+    original_df = _ts_to_obj(original_df, [oby] + tss.historical_columns)
     group_lengths = []
     if len(gb_arr) > 0:
         df_arr = []
