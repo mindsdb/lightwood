@@ -5,12 +5,14 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 from lightwood.helpers.parallelism import get_nr_procs
+import mindsdb.utilities.profiler as profiler
 
 from type_infer.dtype import dtype
 from lightwood.api.types import TimeseriesSettings, PredictionArguments
 from lightwood.helpers.log import log
 
 
+@profiler.profile()
 def transform_timeseries(
         data: pd.DataFrame, dtype_dict: Dict[str, str],
         timeseries_settings: TimeseriesSettings, target: str, mode: str,
@@ -109,6 +111,7 @@ def transform_timeseries(
         secondary_type_dict[oby] = dtype_dict[oby]
 
     original_df[f'__mdb_original_{oby}'] = original_df[oby]
+    original_df = _ts_to_obj(original_df, [oby])
     group_lengths = []
     if len(gb_arr) > 0:
         df_arr = []
@@ -136,36 +139,37 @@ def transform_timeseries(
                 make_preds = [True for _ in range(len(df_arr[i]))]
             df_arr[i]['__make_predictions'] = make_preds
 
-    if len(original_df) > 500:
+    if len(df_arr) > 4 and len(original_df) > 5000:
         # @TODO: restore possibility to override this with args
         nr_procs = get_nr_procs(original_df)
         log.info(f'Using {nr_procs} processes to reshape.')
-        pool = mp.Pool(processes=nr_procs)
-        # Make type `object` so that dataframe cells can be python lists
-        df_arr = pool.map(partial(_ts_to_obj, historical_columns=[oby] + tss.historical_columns), df_arr)
-        df_arr = pool.map(
-            partial(
-                _ts_add_previous_rows, order_cols=[oby] + tss.historical_columns, window=window),
-            df_arr)
-        df_arr = pool.map(partial(_ts_add_future_target, target=target, horizon=tss.horizon,
-                                  data_dtype=tss.target_type, mode=mode),
-                          df_arr)
+        with mp.Pool(processes=nr_procs) as pool:
+            with profiler.Context('_ts_add_previous_rows'):
+                df_arr = pool.map(
+                    partial(
+                        _ts_add_previous_rows, order_cols=[oby] + tss.historical_columns, window=window),
+                    df_arr)
+            with profiler.Context('_ts_add_future_target'):
+                df_arr = pool.map(partial(_ts_add_future_target, target=target, horizon=tss.horizon,
+                                        data_dtype=tss.target_type, mode=mode),
+                                df_arr)
 
-        if tss.use_previous_target:
-            df_arr = pool.map(
-                partial(_ts_add_previous_target, target=target, window=tss.window),
-                df_arr)
-        pool.close()
-        pool.join()
+            if tss.use_previous_target:
+                with profiler.Context('_ts_add_previous_target'):
+                    df_arr = pool.map(
+                        partial(_ts_add_previous_target, target=target, window=tss.window),
+                        df_arr)
     else:
         for i in range(n_groups):
-            df_arr[i] = _ts_to_obj(df_arr[i], historical_columns=[oby] + tss.historical_columns)
-            df_arr[i] = _ts_add_previous_rows(df_arr[i],
-                                              order_cols=[oby] + tss.historical_columns, window=window)
-            df_arr[i] = _ts_add_future_target(df_arr[i], target=target, horizon=tss.horizon,
-                                              data_dtype=tss.target_type, mode=mode)
-            if tss.use_previous_target:
-                df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, window=tss.window)
+            with profiler.Context('_ts_add_previous_rows'):
+                df_arr[i] = _ts_add_previous_rows(df_arr[i],
+                                                  order_cols=[oby] + tss.historical_columns, window=window)
+            with profiler.Context('_ts_add_future_target'):
+                df_arr[i] = _ts_add_future_target(df_arr[i], target=target, horizon=tss.horizon,
+                                                  data_dtype=tss.target_type, mode=mode)
+            with profiler.Context('_ts_add_previous_target'):
+                if tss.use_previous_target:
+                    df_arr[i] = _ts_add_previous_target(df_arr[i], target=target, window=tss.window)
 
     combined_df = pd.concat(df_arr)
 
@@ -190,6 +194,7 @@ def transform_timeseries(
     return combined_df
 
 
+@profiler.profile()
 def _ts_infer_next_row(df: pd.DataFrame, ob: str) -> pd.DataFrame:
     """
     Adds an inferred next row for streaming mode purposes.
@@ -217,6 +222,7 @@ def _ts_infer_next_row(df: pd.DataFrame, ob: str) -> pd.DataFrame:
     return new_df
 
 
+@profiler.profile()
 def _ts_to_obj(df: pd.DataFrame, historical_columns: list) -> pd.DataFrame:
     """
     Casts all historical columns in a dataframe to `object` type.
@@ -231,6 +237,7 @@ def _ts_to_obj(df: pd.DataFrame, historical_columns: list) -> pd.DataFrame:
     return df
 
 
+@profiler.profile()
 def _ts_add_previous_rows(df: pd.DataFrame, order_cols: list, window: int) -> pd.DataFrame:
     """
     Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of the `order_by` column.
@@ -253,6 +260,7 @@ def _ts_add_previous_rows(df: pd.DataFrame, order_cols: list, window: int) -> pd
     return df
 
 
+@profiler.profile()
 def _ts_add_previous_target(df: pd.DataFrame, target: str, window: int) -> pd.DataFrame:
     """
     Adds previous rows (as determined by `TimeseriesSettings.window`) into the cells of the target column.
@@ -280,6 +288,7 @@ def _ts_add_previous_target(df: pd.DataFrame, target: str, window: int) -> pd.Da
     return df
 
 
+@profiler.profile()
 def _ts_add_future_target(df, target, horizon, data_dtype, mode):
     """
     Adds as many columns to the input dataframe as the forecasting horizon asks for (as determined by `TimeseriesSettings.horizon`).
