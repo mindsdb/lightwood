@@ -43,10 +43,10 @@
    "id": "raising-adventure",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-26T06:19:14.283653Z",
-     "iopub.status.busy": "2023-06-26T06:19:14.283191Z",
-     "iopub.status.idle": "2023-06-26T06:19:17.996958Z",
-     "shell.execute_reply": "2023-06-26T06:19:17.995744Z"
+     "iopub.execute_input": "2023-06-27T17:30:07.977807Z",
+     "iopub.status.busy": "2023-06-27T17:30:07.977005Z",
+     "iopub.status.idle": "2023-06-27T17:30:12.000153Z",
+     "shell.execute_reply": "2023-06-27T17:30:11.999055Z"
     }
    },
    "outputs": [
@@ -87,10 +87,10 @@
    "id": "technical-government",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-26T06:19:18.001322Z",
-     "iopub.status.busy": "2023-06-26T06:19:18.000785Z",
-     "iopub.status.idle": "2023-06-26T06:19:18.320055Z",
-     "shell.execute_reply": "2023-06-26T06:19:18.318956Z"
+     "iopub.execute_input": "2023-06-27T17:30:12.006201Z",
+     "iopub.status.busy": "2023-06-27T17:30:12.005621Z",
+     "iopub.status.idle": "2023-06-27T17:30:12.397355Z",
+     "shell.execute_reply": "2023-06-27T17:30:12.395850Z"
     }
    },
    "outputs": [
@@ -237,10 +237,10 @@
    "id": "absent-maker",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-26T06:19:18.323187Z",
-     "iopub.status.busy": "2023-06-26T06:19:18.322725Z",
-     "iopub.status.idle": "2023-06-26T06:19:22.998820Z",
-     "shell.execute_reply": "2023-06-26T06:19:22.998098Z"
+     "iopub.execute_input": "2023-06-27T17:30:12.401588Z",
+     "iopub.status.busy": "2023-06-27T17:30:12.401028Z",
+     "iopub.status.idle": "2023-06-27T17:30:17.615595Z",
+     "shell.execute_reply": "2023-06-27T17:30:17.614452Z"
     }
    },
    "outputs": [
@@ -302,10 +302,10 @@
    "id": "coastal-paragraph",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-26T06:19:23.002930Z",
-     "iopub.status.busy": "2023-06-26T06:19:23.002381Z",
-     "iopub.status.idle": "2023-06-26T06:19:23.008095Z",
-     "shell.execute_reply": "2023-06-26T06:19:23.007348Z"
+     "iopub.execute_input": "2023-06-27T17:30:17.619556Z",
+     "iopub.status.busy": "2023-06-27T17:30:17.619006Z",
+     "iopub.status.idle": "2023-06-27T17:30:17.625233Z",
+     "shell.execute_reply": "2023-06-27T17:30:17.624421Z"
     }
    },
    "outputs": [
@@ -410,7 +410,7 @@
       "        \"unbias_target\": true,\n",
       "        \"seconds_per_mixer\": 21384.0,\n",
       "        \"seconds_per_encoder\": 85536.0,\n",
-      "        \"expected_additional_time\": 4.662126302719116,\n",
+      "        \"expected_additional_time\": 5.198611736297607,\n",
       "        \"time_aim\": 259200,\n",
       "        \"target_weights\": null,\n",
       "        \"positive_domain\": false,\n",
@@ -507,10 +507,10 @@
    "id": "e03db1b0",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-26T06:19:23.013101Z",
-     "iopub.status.busy": "2023-06-26T06:19:23.012849Z",
-     "iopub.status.idle": "2023-06-26T06:19:23.019116Z",
-     "shell.execute_reply": "2023-06-26T06:19:23.018290Z"
+     "iopub.execute_input": "2023-06-27T17:30:17.630276Z",
+     "iopub.status.busy": "2023-06-27T17:30:17.630006Z",
+     "iopub.status.idle": "2023-06-27T17:30:17.637123Z",
+     "shell.execute_reply": "2023-06-27T17:30:17.636181Z"
     }
    },
    "outputs": [
@@ -630,10 +630,10 @@
    "id": "e30866c1",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-26T06:19:23.023002Z",
-     "iopub.status.busy": "2023-06-26T06:19:23.022580Z",
-     "iopub.status.idle": "2023-06-26T06:19:23.026512Z",
-     "shell.execute_reply": "2023-06-26T06:19:23.025781Z"
+     "iopub.execute_input": "2023-06-27T17:30:17.640898Z",
+     "iopub.status.busy": "2023-06-27T17:30:17.640401Z",
+     "iopub.status.idle": "2023-06-27T17:30:17.644463Z",
+     "shell.execute_reply": "2023-06-27T17:30:17.643674Z"
     }
    },
    "outputs": [],
@@ -692,10 +692,10 @@
    "id": "elementary-fusion",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-26T06:19:23.029754Z",
-     "iopub.status.busy": "2023-06-26T06:19:23.029292Z",
-     "iopub.status.idle": "2023-06-26T06:19:23.033100Z",
-     "shell.execute_reply": "2023-06-26T06:19:23.032423Z"
+     "iopub.execute_input": "2023-06-27T17:30:17.648267Z",
+     "iopub.status.busy": "2023-06-27T17:30:17.647774Z",
+     "iopub.status.idle": "2023-06-27T17:30:17.651600Z",
+     "shell.execute_reply": "2023-06-27T17:30:17.650973Z"
     }
    },
    "outputs": [],
@@ -721,10 +721,10 @@
    "id": "inappropriate-james",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-26T06:19:23.036709Z",
-     "iopub.status.busy": "2023-06-26T06:19:23.036289Z",
-     "iopub.status.idle": "2023-06-26T06:19:23.481820Z",
-     "shell.execute_reply": "2023-06-26T06:19:23.480696Z"
+     "iopub.execute_input": "2023-06-27T17:30:17.655261Z",
+     "iopub.status.busy": "2023-06-27T17:30:17.654767Z",
+     "iopub.status.idle": "2023-06-27T17:30:18.126545Z",
+     "shell.execute_reply": "2023-06-27T17:30:18.125231Z"
     }
    },
    "outputs": [],
@@ -755,10 +755,10 @@
    "id": "palestinian-harvey",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-26T06:19:23.486244Z",
-     "iopub.status.busy": "2023-06-26T06:19:23.485840Z",
-     "iopub.status.idle": "2023-06-26T06:19:25.091512Z",
-     "shell.execute_reply": "2023-06-26T06:19:25.090400Z"
+     "iopub.execute_input": "2023-06-27T17:30:18.130938Z",
+     "iopub.status.busy": "2023-06-27T17:30:18.130389Z",
+     "iopub.status.idle": "2023-06-27T17:30:19.989417Z",
+     "shell.execute_reply": "2023-06-27T17:30:19.988519Z"
     }
    },
    "outputs": [
@@ -768,11 +768,11 @@
      "text": [
       "\u001b[32mINFO:dataprep_ml-2316:Starting statistical analysis\u001b[0m\n",
       "\u001b[32mINFO:dataprep_ml-2316:Finished statistical analysis\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2316: `analyze_data` runtime: 0.58 seconds\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2316: `analyze_data` runtime: 0.67 seconds\u001b[0m\n",
       "\u001b[32mINFO:dataprep_ml-2316:Cleaning the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2316: `preprocess` runtime: 0.17 seconds\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2316: `preprocess` runtime: 0.21 seconds\u001b[0m\n",
       "\u001b[32mINFO:dataprep_ml-2316:Splitting the data into train/test\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2316: `split` runtime: 0.0 seconds\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2316: `split` runtime: 0.01 seconds\u001b[0m\n",
       "\u001b[37mDEBUG:dataprep_ml-2316:Preparing sequentially...\u001b[0m\n",
       "\u001b[37mDEBUG:dataprep_ml-2316:Preparing encoder for year...\u001b[0m\n",
       "\u001b[37mDEBUG:dataprep_ml-2316:Preparing encoder for mileage...\u001b[0m\n",
@@ -782,9 +782,9 @@
       "\u001b[32mINFO:lightwood-2316:Categories Detected = 1\u001b[0m\n",
       "\u001b[32mINFO:lightwood-2316:Categories Detected = 1\u001b[0m\n",
       "\u001b[32mINFO:lightwood-2316:Categories Detected = 1\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2316: `prepare` runtime: 0.02 seconds\u001b[0m\n",
+      "\u001b[37mDEBUG:lightwood-2316: `prepare` runtime: 0.03 seconds\u001b[0m\n",
       "\u001b[32mINFO:dataprep_ml-2316:Featurizing the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2316: `featurize` runtime: 0.81 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2316: `featurize` runtime: 0.93 seconds\u001b[0m\n"
      ]
     }
    ],
@@ -819,10 +819,10 @@
    "id": "silent-dealing",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-26T06:19:25.097017Z",
-     "iopub.status.busy": "2023-06-26T06:19:25.096107Z",
-     "iopub.status.idle": "2023-06-26T06:19:25.108513Z",
-     "shell.execute_reply": "2023-06-26T06:19:25.107856Z"
+     "iopub.execute_input": "2023-06-27T17:30:19.994114Z",
+     "iopub.status.busy": "2023-06-27T17:30:19.993615Z",
+     "iopub.status.idle": "2023-06-27T17:30:20.005361Z",
+     "shell.execute_reply": "2023-06-27T17:30:20.004549Z"
     }
    },
    "outputs": [
@@ -924,10 +924,10 @@
    "id": "superior-mobility",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-06-26T06:19:25.111909Z",
-     "iopub.status.busy": "2023-06-26T06:19:25.111477Z",
-     "iopub.status.idle": "2023-06-26T06:19:25.115273Z",
-     "shell.execute_reply": "2023-06-26T06:19:25.114477Z"
+     "iopub.execute_input": "2023-06-27T17:30:20.009170Z",
+     "iopub.status.busy": "2023-06-27T17:30:20.008721Z",
+     "iopub.status.idle": "2023-06-27T17:30:20.012599Z",
+     "shell.execute_reply": "2023-06-27T17:30:20.011955Z"
     }
    },
    "outputs": [

@@ -501,7 +501,7 @@
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 4.662126302719116,
+        &#34;expected_additional_time&#34;: 5.198611736297607,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -774,11 +774,11 @@ assignments for a data type</p>
 <div class="highlight"><pre>
 <span class="ansi-green-fg">INFO:dataprep_ml-2316:Starting statistical analysis</span>
 <span class="ansi-green-fg">INFO:dataprep_ml-2316:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2316: `analyze_data` runtime: 0.58 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2316: `analyze_data` runtime: 0.67 seconds</span>
 <span class="ansi-green-fg">INFO:dataprep_ml-2316:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2316: `preprocess` runtime: 0.17 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2316: `preprocess` runtime: 0.21 seconds</span>
 <span class="ansi-green-fg">INFO:dataprep_ml-2316:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2316: `split` runtime: 0.0 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2316: `split` runtime: 0.01 seconds</span>
 <span class="ansi-white-fg">DEBUG:dataprep_ml-2316:Preparing sequentially...</span>
 <span class="ansi-white-fg">DEBUG:dataprep_ml-2316:Preparing encoder for year...</span>
 <span class="ansi-white-fg">DEBUG:dataprep_ml-2316:Preparing encoder for mileage...</span>
@@ -788,9 +788,9 @@ assignments for a data type</p>
 <span class="ansi-green-fg">INFO:lightwood-2316:Categories Detected = 1</span>
 <span class="ansi-green-fg">INFO:lightwood-2316:Categories Detected = 1</span>
 <span class="ansi-green-fg">INFO:lightwood-2316:Categories Detected = 1</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2316: `prepare` runtime: 0.02 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2316: `prepare` runtime: 0.03 seconds</span>
 <span class="ansi-green-fg">INFO:dataprep_ml-2316:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2316: `featurize` runtime: 0.81 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2316: `featurize` runtime: 0.93 seconds</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>
