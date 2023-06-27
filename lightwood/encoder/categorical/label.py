@@ -37,20 +37,26 @@ class LabelEncoder(BaseEncoder):
             self.inv_label_map[v] = k
         self.is_prepared = True
 
-    def encode(self, data: Union[tuple, np.ndarray, pd.Series]) -> torch.Tensor:
+    def encode(self, data: Union[tuple, np.ndarray, pd.Series], normalize=True) -> torch.Tensor:
+        """
+        :param normalize: can be used to temporarily return unnormalized values
+        """
         # specific to the Gym class - remove once deprecated!
-        if isinstance(data, tuple):
+        if not isinstance(data, pd.Series):
             data = pd.Series(data)
         if isinstance(data, np.ndarray):
             data = pd.Series(data)
         encoded = torch.Tensor(data.map(self.label_map))
-        if self.normalize:
+        if normalize and self.normalize:
             encoded /= self.n_labels
         return encoded
 
-    def decode(self, encoded_values: torch.Tensor) -> List[object]:
-        if self.normalize:
+    def decode(self, encoded_values: torch.Tensor, normalize=True) -> List[object]:
+        """
+        :param normalize: can be used to temporarily return unnormalized values
+        """
+        if normalize and self.normalize:
             encoded_values *= self.n_labels
-        values = encoded_values.long().tolist()
+        values = encoded_values.long().squeeze().tolist()
         values = [self.inv_label_map.get(v, _UNCOMMON_WORD) for v in values]
         return values

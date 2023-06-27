@@ -46,13 +46,20 @@ class Gym:
                     with LightwoodAutocast():
                         if self.input_encoder is not None:
                             input = self.input_encoder(input)
+                            if len(input.shape) < 2:
+                                input = input.unsqueeze(-1)
                         if self.output_encoder is not None:
                             real = self.output_encoder(real)
+                            if len(real.shape) < 2:
+                                real = real.unsqueeze(-1)
 
                         input = input.to(self.device)
                         real = real.to(self.device)
 
-                        predicted = self.model(input)
+                        try:
+                            predicted = self.model(input)
+                        except Exception:
+                            print('!')
                         loss = self.loss_criterion(predicted, real)
                     loss.backward()
                     self.optimizer.step()

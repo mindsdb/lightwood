@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from lightwood.mixer.helpers.ranger import Ranger
-from lightwood.encoder.categorical.onehot import OneHotEncoder
+from lightwood.encoder.categorical.label import LabelEncoder
 from lightwood.encoder.categorical.gym import Gym
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
@@ -24,13 +24,13 @@ class CategoricalAutoEncoder(BaseEncoder):
     is_trainable_encoder: bool = True
 
     def __init__(
-        self,
-        stop_after: float = 3600,
-        is_target: bool = False,
-        max_encoded_length: int = 100,
-        desired_error: float = 0.01,
-        batch_size: int = 200,
-        device: str = '',
+            self,
+            stop_after: float = 3600,
+            is_target: bool = False,
+            max_encoded_length: int = 100,
+            desired_error: float = 0.01,
+            batch_size: int = 200,
+            device: str = '',
     ):
         """
         :param stop_after: Stops training with provided time limit (sec)
@@ -49,7 +49,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.net = None
         self.encoder = None
         self.decoder = None
-        self.onehot_encoder = OneHotEncoder(is_target=self.is_target)
+        self.input_encoder = LabelEncoder(is_target=self.is_target)
         self.device_type = device
 
         # Training details
@@ -64,6 +64,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         :param train_priming_data: Input training data
         :param dev_priming_data: Input dev data (Not supported currently)
         """  # noqa
+
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
@@ -106,11 +107,13 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         :returns: An embedding for each sample in original input
         """  # noqa
-        oh_encoded_tensor = self.onehot_encoder.encode(column_data)
+        encoded_tensor = self.input_encoder.encode(column_data)
 
         with torch.no_grad():
-            oh_encoded_tensor = oh_encoded_tensor.to(self.net.device)
-            embeddings = self.encoder(oh_encoded_tensor)
+            encoded_tensor = encoded_tensor.to(self.net.device)
+            if len(encoded_tensor.shape) < 2:
+                encoded_tensor = encoded_tensor.unsqueeze(-1)
+            embeddings = self.encoder(encoded_tensor)
             return embeddings.to('cpu')
 
     def decode(self, encoded_data: torch.Tensor) -> List[str]:
@@ -125,12 +128,14 @@ class CategoricalAutoEncoder(BaseEncoder):
         """  # noqa
         with torch.no_grad():
             encoded_data = encoded_data.to(self.net.device)
-            oh_encoded_tensor = self.decoder(encoded_data)
-            oh_encoded_tensor = oh_encoded_tensor.to('cpu')
-            return self.onehot_encoder.decode(oh_encoded_tensor)
+            encoded_tensor = self.decoder(encoded_data)
+            # if len(encoded_tensor.shape) < 2:
+            #     encoded_tensor = encoded_tensor.unsqueeze(-1)
+            encoded_tensor = encoded_tensor.to('cpu')
+            return self.input_encoder.decode(encoded_tensor, normalize=False)
 
     def _prepare_AE_input(
-        self, train_priming_data: pd.Series, dev_priming_data: pd.Series
+            self, train_priming_data: pd.Series, dev_priming_data: pd.Series
     ) -> Tuple[DataLoader, DataLoader]:
         """
         Creates the data loaders for the CatAE model inputs. Expected inputs are generally of form `pd.Series`
@@ -150,7 +155,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         random.seed(len(priming_data))
 
         # Prepare a one-hot encoder for CatAE inputs
-        self.onehot_encoder.prepare(priming_data)
+        self.input_encoder.prepare(priming_data)
         self.batch_size = max(min(self.batch_size, int(len(priming_data) / 50)), 1)
 
         train_loader = DataLoader(
@@ -171,12 +176,17 @@ class CategoricalAutoEncoder(BaseEncoder):
         :param train_loader: Training dataset Loader
         :param dev_loader: Validation set DataLoader
         """  # noqa
-        input_len = self.onehot_encoder.output_size
+        input_len = self.input_encoder.output_size
 
         self.net = DefaultNet(shape=[input_len, self.output_size, input_len], device=self.device_type)
 
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = Ranger(self.net.parameters())
+
+        if isinstance(self.input_encoder, CategoricalAutoEncoder):
+            output_encoder = self._encoder_targets
+        else:
+            output_encoder = self._label_targets
 
         gym = Gym(
             model=self.net,
@@ -185,8 +195,8 @@ class CategoricalAutoEncoder(BaseEncoder):
             loss_criterion=criterion,
             device=self.net.device,
             name=self.name,
-            input_encoder=self.onehot_encoder.encode,
-            output_encoder=self._encoder_targets,
+            input_encoder=self.input_encoder.encode,
+            output_encoder=output_encoder,
         )
 
         best_model, _, _ = gym.fit(
@@ -201,10 +211,15 @@ class CategoricalAutoEncoder(BaseEncoder):
         return best_model
 
     def _encoder_targets(self, data):
-        """"""
-        oh_encoded_categories = self.onehot_encoder.encode(data)
-        target = oh_encoded_categories.cpu().numpy()
+        """ Encodes target data with a OHE encoder """
+        encoded_categories = self.input_encoder.encode(data)
+        target = encoded_categories.cpu().numpy()
         target_indexes = np.where(target > 0)[1]
         targets_c = torch.LongTensor(target_indexes)
         labels = targets_c.to(self.net.device)
         return labels
+
+    def _label_targets(self, data):
+        """ Encodes target data with a label encoder """
+        data = pd.Series(data)
+        return self.input_encoder.encode(data, normalize=False)
