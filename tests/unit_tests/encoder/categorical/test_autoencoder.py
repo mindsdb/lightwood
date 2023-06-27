@@ -22,10 +22,10 @@ class TestAutoencoder(unittest.TestCase):
                          test_data_rel_size=0.33):
         random.seed(2)
         np_random = np.random.default_rng(seed=2)
-        int_categories = np_random.integers(low=1, high=20, size=nb_int_categories)
+        int_categories = np_random.integers(low=1, high=nb_int_categories, size=nb_int_categories)
         str_categories = [
             ''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(7, 8)))
-            for category_i in range(nb_categories - nb_int_categories)
+            for _ in range(nb_categories - nb_int_categories)
         ]
         categories = list(int_categories) + str_categories
         category_sizes = np_random.integers(low=1, high=max_category_size, size=nb_categories)
@@ -41,28 +41,7 @@ class TestAutoencoder(unittest.TestCase):
             test_data = priming_data[:test_data_size]
         return priming_data, test_data
 
-    def create_test_data_old(self):
-        random.seed(2)
-        cateogries = [''.join(random.choices(string.ascii_uppercase + string.digits,
-                              k=random.randint(7, 8))) for x in range(500)]
-        for i in range(len(cateogries)):
-            if i % 10 == 0:
-                cateogries[i] = random.randint(1, 20)
-
-        priming_data = []
-        test_data = []
-        for category in cateogries:
-            times = random.randint(1, 50)
-            for i in range(times):
-                priming_data.append(category)
-                if i % 3 == 0 or i == 1:
-                    test_data.append(category)
-
-        random.shuffle(priming_data)
-        random.shuffle(test_data)
-        return priming_data, test_data
-
-    def test_autoencoder(self):
+    def test_autoencoder_ohe(self):
         """
         Checks reconstruction accuracy above 70% for a set of categories, length 8, for up to 500 unique categories (actual around 468).
         """  # noqa
@@ -82,6 +61,25 @@ class TestAutoencoder(unittest.TestCase):
         encoder_accuracy = accuracy_score(list(map(str, test_data)), list(map(str, decoded_data)))
         print(f'Categorical encoder accuracy for: {encoder_accuracy} on testing dataset')
         self.assertTrue(encoder_accuracy > 0.70)
+
+    def test_autoencoder_label(self):
+        """
+        Checks reconstruction accuracy above 60%, less strict than OHE, because it is over a larger number of categories (1000).
+        """  # noqa
+        log.setLevel(logging.DEBUG)
+        torch.manual_seed(2)
+
+        priming_data, test_data = self.create_test_data(nb_categories=1000, nb_int_categories=1000)
+
+        enc = CategoricalAutoEncoder(stop_after=20)
+
+        enc.prepare(pd.Series(priming_data), pd.Series(priming_data))
+        encoded_data = enc.encode(test_data)
+        decoded_data = enc.decode(encoded_data)
+
+        encoder_accuracy = accuracy_score(list(map(str, test_data)), list(map(str, decoded_data)))
+        print(f'Categorical encoder accuracy for: {encoder_accuracy} on testing dataset')
+        self.assertTrue(encoder_accuracy > 0.60)
 
     def check_encoder_on_device(self, device):
         priming_data, _ = self.create_test_data(nb_categories=8,

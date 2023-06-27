@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import DataLoader
 from lightwood.mixer.helpers.ranger import Ranger
 from lightwood.encoder.categorical.label import LabelEncoder
+from lightwood.encoder.categorical.onehot import OneHotEncoder
 from lightwood.encoder.categorical.gym import Gym
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.log import log
@@ -49,7 +50,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.net = None
         self.encoder = None
         self.decoder = None
-        self.input_encoder = LabelEncoder(is_target=self.is_target)
+        self.input_encoder = None  # TBD at prepare()
         self.device_type = device
 
         # Training details
@@ -80,11 +81,21 @@ class CategoricalAutoEncoder(BaseEncoder):
             + " seconds."
         )
 
+        if train_priming_data.nunique() > 500:
+            log.info('Deploying LabelEncoder for CategoricalAutoEncoder input.')
+            self.input_encoder = LabelEncoder(is_target=self.is_target)
+            input_len = self.input_encoder.output_size
+            net_shape = [input_len, 128, 64, 32, input_len]
+        else:
+            log.info('Deploying OneHotEncoder for CategoricalAutoEncoder input.')
+            self.input_encoder = OneHotEncoder(is_target=self.is_target)
+            net_shape = None   # defined at prepare() due to the OHE output size being determined then
+
         train_loader, dev_loader = self._prepare_AE_input(
             train_priming_data, dev_priming_data
         )
 
-        best_model = self._prepare_catae(train_loader, dev_loader)
+        best_model = self._prepare_catae(train_loader, dev_loader, net_shape=net_shape)
         self.net = best_model.to(self.net.device)
 
         modules = [
@@ -93,8 +104,8 @@ class CategoricalAutoEncoder(BaseEncoder):
             if type(module) != torch.nn.Sequential and type(module) != DefaultNet
         ]
 
-        self.encoder = torch.nn.Sequential(*modules[0:2]).eval()
-        self.decoder = torch.nn.Sequential(*modules[2:3]).eval()
+        self.encoder = torch.nn.Sequential(*modules[0:-1]).eval()
+        self.decoder = torch.nn.Sequential(*modules[-1:]).eval()
         log.info('Categorical autoencoder ready')
 
         self.is_prepared = True
@@ -129,10 +140,8 @@ class CategoricalAutoEncoder(BaseEncoder):
         with torch.no_grad():
             encoded_data = encoded_data.to(self.net.device)
             encoded_tensor = self.decoder(encoded_data)
-            # if len(encoded_tensor.shape) < 2:
-            #     encoded_tensor = encoded_tensor.unsqueeze(-1)
             encoded_tensor = encoded_tensor.to('cpu')
-            return self.input_encoder.decode(encoded_tensor, normalize=False)
+            return self.input_encoder.decode(encoded_tensor)
 
     def _prepare_AE_input(
             self, train_priming_data: pd.Series, dev_priming_data: pd.Series
@@ -169,23 +178,33 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         return train_loader, dev_loader
 
-    def _prepare_catae(self, train_loader: DataLoader, dev_loader: DataLoader):
+    def _prepare_catae(self, train_loader: DataLoader, dev_loader: DataLoader, net_shape=None):
         """
         Trains the CatAE using Lightwood's `Gym` class.
 
         :param train_loader: Training dataset Loader
         :param dev_loader: Validation set DataLoader
         """  # noqa
-        input_len = self.input_encoder.output_size
+        if net_shape is None:
+            input_len = self.input_encoder.output_size
+            net_shape = [input_len, self.output_size, input_len]
 
-        self.net = DefaultNet(shape=[input_len, self.output_size, input_len], device=self.device_type)
+        self.net = DefaultNet(shape=net_shape, device=self.device_type)
 
-        criterion = torch.nn.CrossEntropyLoss()
-        optimizer = Ranger(self.net.parameters())
+        if isinstance(self.input_encoder, OneHotEncoder):
+            criterion = torch.nn.CrossEntropyLoss()
+            desired_error = self.desired_error
+        elif isinstance(self.input_encoder, LabelEncoder):
+            criterion = torch.nn.MSELoss()
+            desired_error = 1e-9
+        else:
+            raise Exception(f'[CatAutoEncoder] Input encoder of type {type(self.input_encoder)} is not supported!')
 
-        if isinstance(self.input_encoder, CategoricalAutoEncoder):
+        if isinstance(self.input_encoder, OneHotEncoder):
+            optimizer = Ranger(self.net.parameters())
             output_encoder = self._encoder_targets
         else:
+            optimizer = Ranger(self.net.parameters(), weight_decay=1e-2)
             output_encoder = self._label_targets
 
         gym = Gym(
@@ -202,7 +221,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         best_model, _, _ = gym.fit(
             train_loader,
             dev_loader,
-            desired_error=self.desired_error,
+            desired_error=desired_error,
             max_time=self.stop_after,
             eval_every_x_epochs=1,
             max_unimproving_models=5,
@@ -222,4 +241,7 @@ class CategoricalAutoEncoder(BaseEncoder):
     def _label_targets(self, data):
         """ Encodes target data with a label encoder """
         data = pd.Series(data)
-        return self.input_encoder.encode(data, normalize=False)
+        enc = self.input_encoder.encode(data)
+        if len(enc.shape) < 2:
+            enc = enc.unsqueeze(-1)
+        return enc

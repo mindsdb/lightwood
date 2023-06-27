@@ -31,7 +31,7 @@ class LabelEncoder(BaseEncoder):
 
         for i, v in enumerate(priming_data.unique()):
             if v is not None:
-                self.label_map[v] = int(i + 1)  # leave 0 for UNK
+                self.label_map[str(v)] = int(i + 1)  # leave 0 for UNK
         self.n_labels = len(self.label_map)
         for k, v in self.label_map.items():
             self.inv_label_map[v] = k
@@ -46,6 +46,7 @@ class LabelEncoder(BaseEncoder):
             data = pd.Series(data)
         if isinstance(data, np.ndarray):
             data = pd.Series(data)
+        data = data.astype(str)
         encoded = torch.Tensor(data.map(self.label_map))
         if normalize and self.normalize:
             encoded /= self.n_labels
@@ -57,6 +58,6 @@ class LabelEncoder(BaseEncoder):
         """
         if normalize and self.normalize:
             encoded_values *= self.n_labels
-        values = encoded_values.long().squeeze().tolist()
+        values = encoded_values.long().squeeze().tolist()  # long() as inv_label_map expects an int key
         values = [self.inv_label_map.get(v, _UNCOMMON_WORD) for v in values]
         return values

@@ -4,6 +4,7 @@ import torch
 
 import numpy as np
 from lightwood.helpers.torch import LightwoodAutocast
+from lightwood.helpers.log import log
 
 
 class Gym:
@@ -50,16 +51,11 @@ class Gym:
                                 input = input.unsqueeze(-1)
                         if self.output_encoder is not None:
                             real = self.output_encoder(real)
-                            if len(real.shape) < 2:
-                                real = real.unsqueeze(-1)
 
                         input = input.to(self.device)
                         real = real.to(self.device)
 
-                        try:
-                            predicted = self.model(input)
-                        except Exception:
-                            print('!')
+                        predicted = self.model(input)
                         loss = self.loss_criterion(predicted, real)
                     loss.backward()
                     self.optimizer.step()
@@ -74,6 +70,8 @@ class Gym:
                 running_loss += loss.item()
                 error = running_loss / (i + 1)
 
+            # end of epoch checks
+            log.debug(f'Categorical AutoEncoder train loss at epoch {epoch}: {round(error, 9)}')
             if epoch % eval_every_x_epochs == 0:
                 if test_data_loader is not None:
                     test_running_loss = 0.0
@@ -105,6 +103,7 @@ class Gym:
                             with torch.no_grad():
                                 loss = custom_test_func(self.model, data, self)
 
+                        log.debug(f'Categorical AutoEncoder val loss at epoch {epoch}: {round(loss, 9)}')
                         test_running_loss += loss.item()
                         test_error = test_running_loss / (i + 1)
                 else:
