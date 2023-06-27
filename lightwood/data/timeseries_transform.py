@@ -141,7 +141,7 @@ def transform_timeseries(
 
     if len(df_arr) > 4 and len(original_df) > 5000:
         # @TODO: restore possibility to override this with args
-        nr_procs = get_nr_procs(original_df)
+        nr_procs = min(get_nr_procs(original_df), len(original_df))
         log.info(f'Using {nr_procs} processes to reshape.')
         with mp.Pool(processes=nr_procs) as pool:
             with profiler.Context('_ts_add_previous_rows'):
