@@ -173,6 +173,7 @@
   <h1>Source code for lightwood.analysis.analyze</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">dataprep_ml</span> <span class="kn">import</span> <span class="n">StatisticalAnalysis</span>
 
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
@@ -230,10 +231,18 @@
 
         <span class="c1"># raw predictions for validation dataset</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">is_classification</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;predict_proba&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
-        <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">encoded_val_data</span><span class="o">.</span><span class="n">data_frame</span>
         <span class="n">normal_predictions</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">analysis_blocks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span><span class="p">:</span>
+                <span class="c1"># we retrieve the first entry per group (closest to supervision cutoff)</span>
+                <span class="k">if</span> <span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
+                    <span class="n">encoded_val_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="s1">&#39;__mdb_val_idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">encoded_val_data</span><span class="p">))</span>
+                    <span class="n">idxs</span> <span class="o">=</span> <span class="n">encoded_val_data</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">tss</span><span class="o">.</span><span class="n">group_by</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()[</span><span class="s1">&#39;__mdb_val_idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                    <span class="n">encoded_val_data</span><span class="o">.</span><span class="n">data_frame</span> <span class="o">=</span> <span class="n">encoded_val_data</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idxs</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="k">if</span> <span class="n">encoded_val_data</span><span class="o">.</span><span class="n">cache_built</span><span class="p">:</span>
+                        <span class="n">encoded_val_data</span><span class="o">.</span><span class="n">X_cache</span> <span class="o">=</span> <span class="n">encoded_val_data</span><span class="o">.</span><span class="n">X_cache</span><span class="p">[</span><span class="n">idxs</span><span class="p">,</span> <span class="p">:]</span>
+                        <span class="n">encoded_val_data</span><span class="o">.</span><span class="n">Y_cache</span> <span class="o">=</span> <span class="n">encoded_val_data</span><span class="o">.</span><span class="n">Y_cache</span><span class="p">[</span><span class="n">idxs</span><span class="p">,</span> <span class="p">:]</span>
             <span class="n">normal_predictions</span> <span class="o">=</span> <span class="n">predictor</span><span class="p">(</span><span class="n">encoded_val_data</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">PredictionArguments</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
             <span class="n">normal_predictions</span> <span class="o">=</span> <span class="n">normal_predictions</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">encoded_val_data</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
@@ -246,7 +255,7 @@
             <span class="s1">&#39;input_cols&#39;</span><span class="p">:</span> <span class="n">input_cols</span><span class="p">,</span>
             <span class="s1">&#39;dtype_dict&#39;</span><span class="p">:</span> <span class="n">dtype_dict</span><span class="p">,</span>
             <span class="s1">&#39;normal_predictions&#39;</span><span class="p">:</span> <span class="n">normal_predictions</span><span class="p">,</span>
-            <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">filtered_df</span><span class="p">,</span>
+            <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">encoded_val_data</span><span class="o">.</span><span class="n">data_frame</span><span class="p">,</span>
             <span class="s1">&#39;train_data&#39;</span><span class="p">:</span> <span class="n">train_data</span><span class="p">,</span>
             <span class="s1">&#39;encoded_val_data&#39;</span><span class="p">:</span> <span class="n">encoded_val_data</span><span class="p">,</span>
             <span class="s1">&#39;is_classification&#39;</span><span class="p">:</span> <span class="n">is_classification</span><span class="p">,</span>

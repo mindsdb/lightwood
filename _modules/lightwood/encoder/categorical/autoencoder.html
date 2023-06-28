@@ -176,6 +176,7 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">lightwood.mixer.helpers.ranger</span> <span class="kn">import</span> <span class="n">Ranger</span>
+<span class="kn">from</span> <span class="nn">lightwood.encoder.categorical.simple_label</span> <span class="kn">import</span> <span class="n">SimpleLabelEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.categorical.onehot</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.categorical.gym</span> <span class="kn">import</span> <span class="n">Gym</span>
 <span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
@@ -197,13 +198,14 @@
     <span class="n">is_trainable_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">,</span>
-        <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">max_encoded_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
-        <span class="n">desired_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
-        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3600</span><span class="p">,</span>
+            <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">max_encoded_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="n">desired_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+            <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">input_encoder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param stop_after: Stops training with provided time limit (sec)</span>
@@ -212,6 +214,7 @@
 <span class="sd">        :param desired_error: Threshold for reconstruction accuracy error</span>
 <span class="sd">        :param batch_size: Minimum batch size while training</span>
 <span class="sd">        :param device: Name of the device that get_device_from_name will attempt to use</span>
+<span class="sd">        :param input_encoder: one of `OneHotEncoder` or `SimpleLabelEncoder` to force usage of the underlying input encoder. Note that OHE does not scale for categorical features with high cardinality, while SLE can but is less accurate overall.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">is_target</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">False</span>
@@ -222,8 +225,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">is_target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># TBD at prepare()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">device_type</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span> <span class="o">=</span> <span class="n">input_encoder</span>
 
         <span class="c1"># Training details</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
@@ -237,26 +241,36 @@
 <span class="sd">        :param train_priming_data: Input training data</span>
 <span class="sd">        :param dev_priming_data: Input dev data (Not supported currently)</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You can only call &quot;prepare&quot; once for a given encoder.&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s1">&#39;You are trying to use an autoencoder for the target value! </span><span class="se">\</span>
-<span class="s1">            This is very likely a bad idea&#39;</span>
-            <span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;You are trying to use an autoencoder for the target value! This is very likely a bad idea.&#39;</span><span class="p">)</span>
 
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s1">&#39;Preparing a categorical autoencoder, this may take up to &#39;</span>
-            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span><span class="p">)</span>
-            <span class="o">+</span> <span class="s2">&quot; seconds.&quot;</span>
-        <span class="p">)</span>
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Provided an invalid input encoder (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="si">}</span><span class="s1">), please use either `OneHotEncoder` or `SimpleLabelEncoder`.&#39;</span>  <span class="c1"># noqa</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;OneHotEncoder&#39;</span><span class="p">,</span> <span class="s1">&#39;SimpleLabelEncoder&#39;</span><span class="p">),</span> <span class="n">error_msg</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Preparing a categorical autoencoder.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span> <span class="o">==</span> <span class="s1">&#39;SimpleLabelEncoder&#39;</span> <span class="ow">or</span> \
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">train_priming_data</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">500</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Deploying SimpleLabelEncoder for CategoricalAutoEncoder input.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span> <span class="o">=</span> <span class="n">SimpleLabelEncoder</span><span class="p">(</span><span class="n">is_target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">)</span>
+            <span class="n">input_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="o">.</span><span class="n">output_size</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="mi">32</span>
+            <span class="n">net_shape</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_len</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span> <span class="n">input_len</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Deploying OneHotEncoder for CategoricalAutoEncoder input.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="n">is_target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_target</span><span class="p">)</span>
+            <span class="n">net_shape</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># defined at prepare() due to the OHE output size being determined then</span>
 
         <span class="n">train_loader</span><span class="p">,</span> <span class="n">dev_loader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_AE_input</span><span class="p">(</span>
             <span class="n">train_priming_data</span><span class="p">,</span> <span class="n">dev_priming_data</span>
         <span class="p">)</span>
 
-        <span class="n">best_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_catae</span><span class="p">(</span><span class="n">train_loader</span><span class="p">,</span> <span class="n">dev_loader</span><span class="p">)</span>
+        <span class="n">best_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_catae</span><span class="p">(</span><span class="n">train_loader</span><span class="p">,</span> <span class="n">dev_loader</span><span class="p">,</span> <span class="n">net_shape</span><span class="o">=</span><span class="n">net_shape</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">best_model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
         <span class="n">modules</span> <span class="o">=</span> <span class="p">[</span>
@@ -265,9 +279,9 @@
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">)</span> <span class="o">!=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">)</span> <span class="o">!=</span> <span class="n">DefaultNet</span>
         <span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">modules</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">modules</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Categorical autoencoder ready&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">modules</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">modules</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:])</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Categorical autoencoder ready.&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
@@ -279,11 +293,13 @@
 
 <span class="sd">        :returns: An embedding for each sample in original input</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
-        <span class="n">oh_encoded_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">column_data</span><span class="p">)</span>
+        <span class="n">encoded_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">column_data</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-            <span class="n">oh_encoded_tensor</span> <span class="o">=</span> <span class="n">oh_encoded_tensor</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-            <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">oh_encoded_tensor</span><span class="p">)</span>
+            <span class="n">encoded_tensor</span> <span class="o">=</span> <span class="n">encoded_tensor</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">encoded_tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">encoded_tensor</span> <span class="o">=</span> <span class="n">encoded_tensor</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">encoded_tensor</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CategoricalAutoEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.CategoricalAutoEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -298,12 +314,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
             <span class="n">encoded_data</span> <span class="o">=</span> <span class="n">encoded_data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-            <span class="n">oh_encoded_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoded_data</span><span class="p">)</span>
-            <span class="n">oh_encoded_tensor</span> <span class="o">=</span> <span class="n">oh_encoded_tensor</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">oh_encoded_tensor</span><span class="p">)</span></div>
+            <span class="n">encoded_tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoded_data</span><span class="p">)</span>
+            <span class="n">encoded_tensor</span> <span class="o">=</span> <span class="n">encoded_tensor</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoded_tensor</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_prepare_AE_input</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">train_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">train_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">dev_priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">DataLoader</span><span class="p">,</span> <span class="n">DataLoader</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the data loaders for the CatAE model inputs. Expected inputs are generally of form `pd.Series`</span>
@@ -323,7 +339,7 @@
         <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">priming_data</span><span class="p">))</span>
 
         <span class="c1"># Prepare a one-hot encoder for CatAE inputs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">priming_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">priming_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">priming_data</span><span class="p">)</span> <span class="o">/</span> <span class="mi">50</span><span class="p">)),</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="n">train_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
@@ -337,19 +353,36 @@
 
         <span class="k">return</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">dev_loader</span>
 
-    <span class="k">def</span> <span class="nf">_prepare_catae</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">dev_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_prepare_catae</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">dev_loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">net_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trains the CatAE using Lightwood&#39;s `Gym` class.</span>
 
 <span class="sd">        :param train_loader: Training dataset Loader</span>
 <span class="sd">        :param dev_loader: Validation set DataLoader</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
-        <span class="n">input_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">output_size</span>
+        <span class="k">if</span> <span class="n">net_shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="o">.</span><span class="n">output_size</span>
+            <span class="n">net_shape</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span> <span class="n">input_len</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">DefaultNet</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">input_len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span> <span class="n">input_len</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">DefaultNet</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">net_shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device_type</span><span class="p">)</span>
 
-        <span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
-        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Ranger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">):</span>
+            <span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+            <span class="n">desired_error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_error</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="p">,</span> <span class="n">SimpleLabelEncoder</span><span class="p">):</span>
+            <span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+            <span class="n">desired_error</span> <span class="o">=</span> <span class="mf">1e-9</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[CatAutoEncoder] Input encoder of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="p">)</span><span class="si">}</span><span class="s1"> is not supported!&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">):</span>
+            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Ranger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+            <span class="n">output_encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoder_targets</span>
+            <span class="n">max_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Ranger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">)</span>
+            <span class="n">output_encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_label_targets</span>
+            <span class="n">max_time</span> <span class="o">=</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">2</span>
 
         <span class="n">gym</span> <span class="o">=</span> <span class="n">Gym</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="p">,</span>
@@ -358,15 +391,15 @@
             <span class="n">loss_criterion</span><span class="o">=</span><span class="n">criterion</span><span class="p">,</span>
             <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">input_encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">,</span>
-            <span class="n">output_encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoder_targets</span><span class="p">,</span>
+            <span class="n">input_encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">,</span>
+            <span class="n">output_encoder</span><span class="o">=</span><span class="n">output_encoder</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">best_model</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
             <span class="n">train_loader</span><span class="p">,</span>
             <span class="n">dev_loader</span><span class="p">,</span>
-            <span class="n">desired_error</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_error</span><span class="p">,</span>
-            <span class="n">max_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_after</span><span class="p">,</span>
+            <span class="n">desired_error</span><span class="o">=</span><span class="n">desired_error</span><span class="p">,</span>
+            <span class="n">max_time</span><span class="o">=</span><span class="n">max_time</span><span class="p">,</span>
             <span class="n">eval_every_x_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">max_unimproving_models</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
         <span class="p">)</span>
@@ -374,13 +407,21 @@
         <span class="k">return</span> <span class="n">best_model</span>
 
     <span class="k">def</span> <span class="nf">_encoder_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
-        <span class="n">oh_encoded_categories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">onehot_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="n">oh_encoded_categories</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Encodes target data with a OHE encoder &quot;&quot;&quot;</span>
+        <span class="n">encoded_categories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">encoded_categories</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="n">target_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">target</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">targets_c</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">LongTensor</span><span class="p">(</span><span class="n">target_indexes</span><span class="p">)</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="n">targets_c</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">labels</span></div>
+        <span class="k">return</span> <span class="n">labels</span>
+
+    <span class="k">def</span> <span class="nf">_label_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Encodes target data with a label encoder &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">enc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">enc</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">enc</span> <span class="o">=</span> <span class="n">enc</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">enc</span></div>
 </pre></div>
 
            </div>

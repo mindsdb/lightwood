@@ -188,6 +188,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#encoder.ShortTextEncoder.prepare">prepare</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#encoder.SimpleLabelEncoder">SimpleLabelEncoder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#encoder.SimpleLabelEncoder.decode">decode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#encoder.SimpleLabelEncoder.encode">encode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#encoder.SimpleLabelEncoder.prepare">prepare</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#encoder.TextRnnEncoder">TextRnnEncoder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#encoder.TimeSeriesEncoder">TimeSeriesEncoder</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#encoder.TimeSeriesEncoder.decode">decode</a></li>
@@ -554,7 +560,7 @@ The input to <cite>decode</cite> makes no presumption on whether the data is alr
 
 <dl class="py class">
 <dt class="sig sig-object py" id="encoder.CategoricalAutoEncoder">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">CategoricalAutoEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_encoded_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desired_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">CategoricalAutoEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_encoded_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desired_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_encoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/autoencoder.html#CategoricalAutoEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.CategoricalAutoEncoder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trains an autoencoder (AE) to represent categorical information with over 100 categories. This is used to ensure that feature vectors for categorical data with many categories are not excessively large.</p>
 <p>The AE defaults to a vector sized 100 but can be adjusted to user preference. It is highly advised NOT to use this encoder to feature engineer your target, as reconstruction accuracy will determine your AE’s ability to decode properly.</p>
 <dl class="field-list simple">
@@ -566,6 +572,7 @@ The input to <cite>decode</cite> makes no presumption on whether the data is alr
 <li><p><strong>desired_error</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Threshold for reconstruction accuracy error</p></li>
 <li><p><strong>batch_size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Minimum batch size while training</p></li>
 <li><p><strong>device</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the device that get_device_from_name will attempt to use</p></li>
+<li><p><strong>input_encoder</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – one of <cite>OneHotEncoder</cite> or <cite>SimpleLabelEncoder</cite> to force usage of the underlying input encoder. Note that OHE does not scale for categorical features with high cardinality, while SLE can but is less accurate overall.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1129,6 +1136,54 @@ When None, it will be set automatically based on is_target:
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>priming_data</strong> – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="encoder.SimpleLabelEncoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">encoder.</span></span><span class="sig-name descname"><span class="pre">SimpleLabelEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/simple_label.html#SimpleLabelEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.SimpleLabelEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple encoder that assigns a unique integer to every observed label.</p>
+<p>Allocates an <cite>unknown</cite> label by default to index 0.</p>
+<p>Labels must be exact matches between inference and training (e.g. no .lower() on strings is performed here).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.SimpleLabelEncoder.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/simple_label.html#SimpleLabelEncoder.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.SimpleLabelEncoder.decode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>normalize</strong> – can be used to temporarily return unnormalized values</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.SimpleLabelEncoder.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/simple_label.html#SimpleLabelEncoder.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.SimpleLabelEncoder.encode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>normalize</strong> – can be used to temporarily return unnormalized values</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="encoder.SimpleLabelEncoder.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">priming_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/encoder/categorical/simple_label.html#SimpleLabelEncoder.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#encoder.SimpleLabelEncoder.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given ‘priming_data’ (i.e. training data), prepares encoders either through a rule-based (ex: one-hot encoding) or learned (ex: DistilBERT for text) model. This works explicitly on only training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>priming_data</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code>]) – An iterable data structure where all the elements have type that is compatible with the encoder processing type; this may differ per encoder.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
