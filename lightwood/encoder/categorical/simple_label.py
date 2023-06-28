@@ -8,7 +8,7 @@ from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.constants import _UNCOMMON_WORD
 
 
-class LabelEncoder(BaseEncoder):
+class SimpleLabelEncoder(BaseEncoder):
     """
     Simple encoder that assigns a unique integer to every observed label.
     
@@ -41,15 +41,19 @@ class LabelEncoder(BaseEncoder):
         """
         :param normalize: can be used to temporarily return unnormalized values
         """
-        # specific to the Gym class - remove once deprecated!
         if not isinstance(data, pd.Series):
-            data = pd.Series(data)
+            data = pd.Series(data)  # specific to the Gym class - remove once deprecated!
         if isinstance(data, np.ndarray):
             data = pd.Series(data)
+
         data = data.astype(str)
         encoded = torch.Tensor(data.map(self.label_map))
+
         if normalize and self.normalize:
             encoded /= self.n_labels
+        if len(encoded.shape) < 2:
+            encoded = encoded.unsqueeze(-1)
+
         return encoded
 
     def decode(self, encoded_values: torch.Tensor, normalize=True) -> List[object]:

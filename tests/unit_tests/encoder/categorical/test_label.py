@@ -1,7 +1,7 @@
 import unittest
 from torch import Tensor
 import pandas as pd
-from lightwood.encoder.categorical.label import (
+from lightwood.encoder.categorical.simple_label import (
     LabelEncoder,
 )
 from lightwood.helpers.constants import _UNCOMMON_WORD

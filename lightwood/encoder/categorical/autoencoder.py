@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from lightwood.mixer.helpers.ranger import Ranger
-from lightwood.encoder.categorical.label import LabelEncoder
+from lightwood.encoder.categorical.simple_label import SimpleLabelEncoder
 from lightwood.encoder.categorical.onehot import OneHotEncoder
 from lightwood.encoder.categorical.gym import Gym
 from lightwood.encoder.base import BaseEncoder
@@ -70,22 +70,16 @@ class CategoricalAutoEncoder(BaseEncoder):
             raise Exception('You can only call "prepare" once for a given encoder.')
 
         if self.is_target:
-            log.warning(
-                'You are trying to use an autoencoder for the target value! \
-            This is very likely a bad idea'
-            )
+            log.warning('You are trying to use an autoencoder for the target value! This is very likely a bad idea.')
 
-        log.info(
-            'Preparing a categorical autoencoder, this may take up to '
-            + str(self.stop_after)
-            + " seconds."
-        )
+        log.info('Preparing a categorical autoencoder.')
 
         if train_priming_data.nunique() > 500:
-            log.info('Deploying LabelEncoder for CategoricalAutoEncoder input.')
-            self.input_encoder = LabelEncoder(is_target=self.is_target)
+            log.info('Deploying SimpleLabelEncoder for CategoricalAutoEncoder input.')
+            self.input_encoder = SimpleLabelEncoder(is_target=self.is_target)
             input_len = self.input_encoder.output_size
-            net_shape = [input_len, 128, 64, 32, input_len]
+            self.output_size = 32
+            net_shape = [input_len, 128, 64, self.output_size, input_len]
         else:
             log.info('Deploying OneHotEncoder for CategoricalAutoEncoder input.')
             self.input_encoder = OneHotEncoder(is_target=self.is_target)
@@ -106,7 +100,7 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         self.encoder = torch.nn.Sequential(*modules[0:-1]).eval()
         self.decoder = torch.nn.Sequential(*modules[-1:]).eval()
-        log.info('Categorical autoencoder ready')
+        log.info('Categorical autoencoder ready.')
 
         self.is_prepared = True
 
@@ -194,7 +188,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         if isinstance(self.input_encoder, OneHotEncoder):
             criterion = torch.nn.CrossEntropyLoss()
             desired_error = self.desired_error
-        elif isinstance(self.input_encoder, LabelEncoder):
+        elif isinstance(self.input_encoder, SimpleLabelEncoder):
             criterion = torch.nn.MSELoss()
             desired_error = 1e-9
         else:
@@ -203,9 +197,11 @@ class CategoricalAutoEncoder(BaseEncoder):
         if isinstance(self.input_encoder, OneHotEncoder):
             optimizer = Ranger(self.net.parameters())
             output_encoder = self._encoder_targets
+            max_time = self.stop_after
         else:
             optimizer = Ranger(self.net.parameters(), weight_decay=1e-2)
             output_encoder = self._label_targets
+            max_time = 60 * 2
 
         gym = Gym(
             model=self.net,
@@ -222,7 +218,7 @@ class CategoricalAutoEncoder(BaseEncoder):
             train_loader,
             dev_loader,
             desired_error=desired_error,
-            max_time=self.stop_after,
+            max_time=max_time,
             eval_every_x_epochs=1,
             max_unimproving_models=5,
         )
