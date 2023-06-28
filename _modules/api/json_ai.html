@@ -858,7 +858,7 @@
             <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;model_analyzer&quot;</span><span class="p">,</span>
             <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;stats_info&quot;</span><span class="p">:</span> <span class="s2">&quot;$statistical_analysis&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;tss&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition.timeseries_settings&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;pdef&quot;</span><span class="p">:</span> <span class="s2">&quot;$problem_definition&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;accuracy_functions&quot;</span><span class="p">:</span> <span class="s2">&quot;$accuracy_functions&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;predictor&quot;</span><span class="p">:</span> <span class="s2">&quot;$ensemble&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;encoded_test_data&quot;</span><span class="p">,</span>
@@ -1343,7 +1343,12 @@
 
 <span class="s2"># Prepare mixers</span>
 <span class="s2">log.info(f&#39;[Learn phase 6/</span><span class="si">{n_phases}</span><span class="s2">] - Mixer training&#39;)</span>
-<span class="s2">self.fit(enc_train_test)</span>
+<span class="s2">if not self.problem_definition.embedding_only:</span>
+<span class="s2">    self.fit(enc_train_test)</span>
+<span class="s2">else:</span>
+<span class="s2">    self.mixers = []</span>
+<span class="s2">    self.ensemble = Embedder(self.target, mixers=list(), data=enc_train_test[&#39;train&#39;])</span>
+<span class="s2">    self.supports_proba = self.ensemble.supports_proba</span>
 
 <span class="s2"># Analyze the ensemble</span>
 <span class="s2">log.info(f&#39;[Learn phase 7/</span><span class="si">{n_phases}</span><span class="s2">] - Ensemble analysis&#39;)</span>
@@ -1394,9 +1399,17 @@
 <span class="s2">encoded_data = encoded_ds.get_encoded_data(include_target=False)</span>
 
 <span class="s2">log.info(f&#39;[Predict phase 3/</span><span class="se">{{</span><span class="s2">n_phases</span><span class="se">}}</span><span class="s2">] - Calling ensemble&#39;)</span>
-<span class="s2">df = self.ensemble(encoded_ds, args=self.pred_args)</span>
+<span class="s2">if self.pred_args.return_embedding:</span>
+<span class="s2">    embedder = Embedder(self.target, mixers=list(), data=encoded_ds)</span>
+<span class="s2">    df = embedder(encoded_ds, args=self.pred_args)</span>
+<span class="s2">else:</span>
+<span class="s2">    df = self.ensemble(encoded_ds, args=self.pred_args)</span>
 
-<span class="s2">if not self.pred_args.all_mixers:</span>
+<span class="s2">if not(any(</span>
+<span class="s2">            [self.pred_args.all_mixers,</span>
+<span class="s2">             self.pred_args.return_embedding,</span>
+<span class="s2">             self.problem_definition.embedding_only]</span>
+<span class="s2">        )):</span>
 <span class="s2">    log.info(f&#39;[Predict phase 4/</span><span class="se">{{</span><span class="s2">n_phases</span><span class="se">}}</span><span class="s2">] - Analyzing output&#39;)</span>
 <span class="s2">    df, global_insights = </span><span class="si">{</span><span class="n">call</span><span class="p">(</span><span class="n">json_ai</span><span class="o">.</span><span class="n">explainer</span><span class="p">)</span><span class="si">}</span>
 <span class="s2">    self.global_insights = </span><span class="se">{{</span><span class="s2">**self.global_insights, **global_insights</span><span class="se">}}</span>
