@@ -4,6 +4,9 @@ from typing import Dict, Optional
 import pandas as pd
 from lightwood.api.types import ModelAnalysis
 
+# these imports need special handling in this class
+from lightwood.mixer.nhits import NHitsMixer
+
 
 # Interface that must be respected by predictor objects generated from JSON ML and/or compatible with Mindsdb
 class PredictorInterface:
@@ -144,6 +147,22 @@ class PredictorInterface:
         """
         with open(file_path, "wb") as fp:
             dill.dump(self, fp)
+
+    def __getstate2__(self):
+        """Used for serializing instances"""
+        state = self.__dict__.copy()  # start w/copy to not accidentally modify object state or cause other conflicts
+        # remove unpicklable entries
+        for mixer in self.mixers:
+            if isinstance(mixer, NHitsMixer):
+                del state['mixer']['model']['trainer']
+                # del state['mixer']['model']['callbacks']
+        return state
+
+    def __setstate2__(self, state):
+        """Used for deserializing"""
+        self.__dict__.update(state)  # restore the state which was picklable
+        # f = open(self.filename)  # restore unpicklable entries
+        # self.f = f
 
     def export(self, file_path: str, json_ai_code: str) -> None:
         """
