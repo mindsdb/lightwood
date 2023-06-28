@@ -32,6 +32,7 @@ class CategoricalAutoEncoder(BaseEncoder):
             desired_error: float = 0.01,
             batch_size: int = 200,
             device: str = '',
+            input_encoder: str = None
     ):
         """
         :param stop_after: Stops training with provided time limit (sec)
@@ -40,6 +41,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         :param desired_error: Threshold for reconstruction accuracy error
         :param batch_size: Minimum batch size while training
         :param device: Name of the device that get_device_from_name will attempt to use
+        :param input_encoder: one of `OneHotEncoder` or `SimpleLabelEncoder` to force usage of the underlying input encoder. Note that OHE does not scale for categorical features with high cardinality, while SLE can but is less accurate overall.
         """  # noqa
         super().__init__(is_target)
         self.is_prepared = False
@@ -52,6 +54,7 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.decoder = None
         self.input_encoder = None  # TBD at prepare()
         self.device_type = device
+        self.input_encoder = input_encoder
 
         # Training details
         self.batch_size = batch_size
@@ -74,7 +77,7 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         log.info('Preparing a categorical autoencoder.')
 
-        if train_priming_data.nunique() > 500:
+        if self.input_encoder == 'SimpleLabelEncoder' or train_priming_data.nunique() > 500:
             log.info('Deploying SimpleLabelEncoder for CategoricalAutoEncoder input.')
             self.input_encoder = SimpleLabelEncoder(is_target=self.is_target)
             input_len = self.input_encoder.output_size

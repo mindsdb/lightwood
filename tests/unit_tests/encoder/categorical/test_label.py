@@ -2,7 +2,7 @@ import unittest
 from torch import Tensor
 import pandas as pd
 from lightwood.encoder.categorical.simple_label import (
-    LabelEncoder,
+    SimpleLabelEncoder,
 )
 from lightwood.helpers.constants import _UNCOMMON_WORD
 
@@ -31,7 +31,7 @@ class TestLabel(unittest.TestCase):
             _UNCOMMON_WORD,
         ]
 
-        enc = LabelEncoder()
+        enc = SimpleLabelEncoder()
         enc.prepare(data)
 
         # Check the encoded patterns correct
@@ -48,7 +48,7 @@ class TestLabel(unittest.TestCase):
                         0 / n_points,  # None
                         2 / n_points,  # category 3
                     ]
-                )
+                ).reshape(-1, 1)
             ).all()
         )
 

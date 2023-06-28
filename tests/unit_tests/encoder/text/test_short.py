@@ -104,6 +104,7 @@ class TestShortTextEncoder(unittest.TestCase):
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=True)
+        enc.cae.input_encoder = 'OneHotEncoder'
         enc.prepare(priming_data)
 
         assert enc.is_target is True

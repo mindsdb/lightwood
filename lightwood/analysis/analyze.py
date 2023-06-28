@@ -63,12 +63,13 @@ def model_analyzer(
         if len(analysis_blocks) > 0:
             if tss.is_timeseries:
                 # we retrieve the first entry per group (closest to supervision cutoff)
-                encoded_val_data.data_frame['__mdb_val_idx'] = np.arange(len(encoded_val_data))
-                idxs = encoded_val_data.data_frame.groupby(by=tss.group_by).first()['__mdb_val_idx'].values
-                encoded_val_data.data_frame = encoded_val_data.data_frame.iloc[idxs, :]
-                if encoded_val_data.cache_built:
-                    encoded_val_data.X_cache = encoded_val_data.X_cache[idxs, :]
-                    encoded_val_data.Y_cache = encoded_val_data.Y_cache[idxs, :]
+                if tss.group_by:
+                    encoded_val_data.data_frame['__mdb_val_idx'] = np.arange(len(encoded_val_data))
+                    idxs = encoded_val_data.data_frame.groupby(by=tss.group_by).first()['__mdb_val_idx'].values
+                    encoded_val_data.data_frame = encoded_val_data.data_frame.iloc[idxs, :]
+                    if encoded_val_data.cache_built:
+                        encoded_val_data.X_cache = encoded_val_data.X_cache[idxs, :]
+                        encoded_val_data.Y_cache = encoded_val_data.Y_cache[idxs, :]
             normal_predictions = predictor(encoded_val_data, args=PredictionArguments.from_dict(args))
             normal_predictions = normal_predictions.set_index(encoded_val_data.data_frame.index)
 
