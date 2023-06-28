@@ -106,7 +106,7 @@ class TestShortTextEncoder(unittest.TestCase):
         enc = ShortTextEncoder(is_target=True)
 
         enc.cae.input_encoder = 'OneHotEncoder!'  # check that invalid input encoder triggers exception
-        self.assertRaises(AssertionError, enc.prepare(priming_data))
+        self.assertRaises(AssertionError, enc.prepare, priming_data)
 
         # train as usual (note, for this test we pick OHE to focus on the CAE's accuracy)
         enc.cae.input_encoder = 'OneHotEncoder'
