@@ -81,7 +81,8 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         log.info('Preparing a categorical autoencoder.')
 
-        if self.input_encoder == 'SimpleLabelEncoder' and train_priming_data.nunique() > 500:
+        if self.input_encoder == 'SimpleLabelEncoder' or \
+                (self.input_encoder is None and train_priming_data.nunique() > 500):
             log.info('Deploying SimpleLabelEncoder for CategoricalAutoEncoder input.')
             self.input_encoder = SimpleLabelEncoder(is_target=self.is_target)
             input_len = self.input_encoder.output_size
