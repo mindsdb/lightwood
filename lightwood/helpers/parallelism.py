@@ -19,11 +19,11 @@ def get_nr_procs(df=None):
         return 1
     else:
         available_mem = psutil.virtual_memory().available
-        max_per_proc_usage = 0.2 * pow(10, 9)
+        max_per_proc_usage = 2 * pow(10, 8)
 
         if df is not None:
             max_per_proc_usage += df.memory_usage(index=True, deep=True).sum()
-        proc_count = int(min(mp.cpu_count(), available_mem // max_per_proc_usage)) - 1
+        proc_count = min(mp.cpu_count(), available_mem // max_per_proc_usage) - 1
 
         return max(proc_count, 1)
 
