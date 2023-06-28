@@ -137,9 +137,10 @@ def transform_timeseries(
                 make_preds = [True for _ in range(len(df_arr[i]))]
             df_arr[i]['__make_predictions'] = make_preds
 
-    if len(df_arr) > 4 and len(original_df) > 5000:
+    if len(df_arr) > 1 and len(original_df) > 5000:
         # @TODO: restore possibility to override this with args
-        nr_procs = min(get_nr_procs(original_df), len(original_df))
+        biggest_sub_df = df_arr[np.argmax(group_lengths)]
+        nr_procs = min(get_nr_procs(biggest_sub_df), len(df_arr))
         log.info(f'Using {nr_procs} processes to reshape.')
         with mp.Pool(processes=nr_procs) as pool:
             df_arr = pool.map(
