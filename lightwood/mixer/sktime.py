@@ -1,4 +1,3 @@
-import inspect
 import importlib
 from copy import deepcopy
 from datetime import datetime
@@ -13,6 +12,7 @@ from sktime.performance_metrics.forecasting import MeanAbsolutePercentageError
 from sktime.forecasting.statsforecast import StatsForecastAutoARIMA as AutoARIMA
 
 from lightwood.helpers.log import log
+from lightwood.helpers.templating import _add_cls_kwarg
 from lightwood.mixer.base import BaseMixer
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
@@ -164,7 +164,7 @@ class SkTime(BaseMixer):
                 options['freq'] = self.freq
 
             for k, v in options.items():
-                kwargs = self._add_forecaster_kwarg(model_class, kwargs, k, v)
+                kwargs = _add_cls_kwarg(model_class, kwargs, k, v)
 
             model_pipeline = []
 
@@ -336,15 +336,6 @@ class SkTime(BaseMixer):
 
         log.info(f'Trial got error: {error}')
         return error
-
-    def _add_forecaster_kwarg(self, forecaster: BaseForecaster, kwargs: dict, key: str, value):
-        """
-        Adds arguments to the `kwargs` dictionary if the key-value pair is valid for the `forecaster` class signature.
-        """
-        if key in [p.name for p in inspect.signature(forecaster).parameters.values()]:
-            kwargs[key] = value
-
-        return kwargs
 
     def _transform_index_to_datetime(self, series, series_oby, freq):
         series_oby = np.array([np.array(lst) for lst in series_oby])

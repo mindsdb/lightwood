@@ -104,8 +104,13 @@ class TestShortTextEncoder(unittest.TestCase):
         test_data = random.sample(priming_data, len(priming_data) // 5)
 
         enc = ShortTextEncoder(is_target=True)
-        enc.prepare(priming_data)
 
+        enc.cae.input_encoder = 'OneHotEncoder!'  # check that invalid input encoder triggers exception
+        self.assertRaises(AssertionError, enc.prepare, priming_data)
+
+        # train as usual (note, for this test we pick OHE to focus on the CAE's accuracy)
+        enc.cae.input_encoder = 'OneHotEncoder'
+        enc.prepare(priming_data)
         assert enc.is_target is True
 
         # _combine is expected to be 'concat' when is_target is True

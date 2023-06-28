@@ -9,6 +9,7 @@ from lightwood.encoder.array.ts_num_array import TsArrayNumericEncoder
 from lightwood.encoder.text.short import ShortTextEncoder
 from lightwood.encoder.text.vocab import VocabularyEncoder
 from lightwood.encoder.text.rnn import RnnEncoder as TextRnnEncoder
+from lightwood.encoder.categorical.simple_label import SimpleLabelEncoder
 from lightwood.encoder.categorical.onehot import OneHotEncoder
 from lightwood.encoder.categorical.binary import BinaryEncoder
 from lightwood.encoder.categorical.autoencoder import CategoricalAutoEncoder
@@ -23,5 +24,5 @@ from lightwood.encoder.audio import MFCCEncoder
 __all__ = ['BaseEncoder', 'DatetimeEncoder', 'Img2VecEncoder', 'NumericEncoder', 'TsNumericEncoder',
            'TsArrayNumericEncoder', 'ShortTextEncoder', 'VocabularyEncoder', 'TextRnnEncoder', 'OneHotEncoder',
            'CategoricalAutoEncoder', 'TimeSeriesEncoder', 'ArrayEncoder', 'MultiHotEncoder', 'TsCatArrayEncoder',
-           'NumArrayEncoder', 'CatArrayEncoder',
+           'NumArrayEncoder', 'CatArrayEncoder', 'SimpleLabelEncoder',
            'PretrainedLangEncoder', 'BinaryEncoder', 'DatetimeNormalizerEncoder', 'MFCCEncoder']

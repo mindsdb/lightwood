@@ -1,19 +1,20 @@
 # TODO: _add_implicit_values unit test ensures NO changes for a fully specified file.
+import inspect
 from copy import deepcopy
+
+from type_infer.dtype import dtype
 from type_infer.base import TypeInformation
 from dataprep_ml import StatisticalAnalysis
 
+from lightwood.helpers.log import log
 from lightwood.helpers.templating import call, inline_dict, align
-from lightwood.helpers.templating import _consolidate_analysis_blocks
-from type_infer.dtype import dtype
+from lightwood.helpers.templating import _consolidate_analysis_blocks, _add_cls_kwarg
 from lightwood.api.types import (
     JsonAI,
     ProblemDefinition,
 )
-import inspect
-from lightwood.helpers.log import log
 from lightwood.__about__ import __version__ as lightwood_version
-
+import lightwood.ensemble
 
 # For custom modules, we create a module loader with necessary imports below
 IMPORT_EXTERNAL_DIRS = """
@@ -535,29 +536,29 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     problem_definition = json_ai.problem_definition
     tss = problem_definition.timeseries_settings
     is_ts = tss.is_timeseries
+    # tsa_val = "self.ts_analysis" if is_ts else None  # TODO: remove
+    mixers = json_ai.model['args']['submodels']
 
     # Add implicit ensemble arguments
-    json_ai.model["args"]["target"] = json_ai.model["args"].get("target", "$target")
-    json_ai.model["args"]["data"] = json_ai.model["args"].get("data", "encoded_test_data")
-    json_ai.model["args"]["mixers"] = json_ai.model["args"].get("mixers", "$mixers")
-    json_ai.model["args"]["fit"] = json_ai.model["args"].get("fit", True)
-    json_ai.model["args"]["args"] = json_ai.model["args"].get("args", "$pred_args")  # TODO correct?
+    param_pairs = {
+        'target': json_ai.model["args"].get("target", "$target"),
+        'data': json_ai.model["args"].get("data", "encoded_test_data"),
+        'mixers': json_ai.model["args"].get("mixers", "$mixers"),
+        'fit': json_ai.model["args"].get("fit", True),
+        'args': json_ai.model["args"].get("args", "$pred_args"),
+        'accuracy_functions': json_ai.model["args"].get("accuracy_functions", "$accuracy_functions"),
+        'ts_analysis': json_ai.model["args"].get("ts_analysis", "self.ts_analysis" if is_ts else None),
+        'dtype_dict': json_ai.model["args"].get("dtype_dict", "$dtype_dict"),
+    }
+    ensemble_cls = getattr(lightwood.ensemble, json_ai.model["module"])
+    filtered_params = {}
+    for p_name, p_value in param_pairs.items():
+        _add_cls_kwarg(ensemble_cls, filtered_params, p_name, p_value)
 
-    # @TODO: change this to per-parameter basis and signature inspection
-    if json_ai.model["module"] in ("BestOf", "ModeEnsemble", "WeightedMeanEnsemble"):
-        json_ai.model["args"]["accuracy_functions"] = json_ai.model["args"].get("accuracy_functions",
-                                                                                "$accuracy_functions")
-
-    if json_ai.model["module"] in ("BestOf", "TsStackedEnsemble", "WeightedMeanEnsemble"):
-        tsa_val = "self.ts_analysis" if is_ts else None
-        json_ai.model["args"]["ts_analysis"] = json_ai.model["args"].get("ts_analysis", tsa_val)
-
-    if json_ai.model["module"] in ("MeanEnsemble", "ModeEnsemble", "StackedEnsemble", "TsStackedEnsemble",
-                                   "WeightedMeanEnsemble"):
-        json_ai.model["args"]["dtype_dict"] = json_ai.model["args"].get("dtype_dict", "$dtype_dict")
+    json_ai.model["args"] = filtered_params
+    json_ai.model["args"]['submodels'] = mixers  # add mixers back in
 
     # Add implicit mixer arguments
-    mixers = json_ai.model['args']['submodels']
     for i in range(len(mixers)):
         if not mixers[i].get("args", False):
             mixers[i]["args"] = {}

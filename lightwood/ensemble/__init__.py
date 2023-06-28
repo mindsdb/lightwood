@@ -1,4 +1,5 @@
 from lightwood.ensemble.base import BaseEnsemble
+from lightwood.ensemble.identity import IdentityEnsemble
 from lightwood.ensemble.embed import Embedder
 from lightwood.ensemble.best_of import BestOf
 from lightwood.ensemble.mean_ensemble import MeanEnsemble
@@ -8,4 +9,4 @@ from lightwood.ensemble.ts_stacked_ensemble import TsStackedEnsemble
 from lightwood.ensemble.weighted_mean_ensemble import WeightedMeanEnsemble
 
 __all__ = ['BaseEnsemble', 'BestOf', 'MeanEnsemble', 'ModeEnsemble', 'WeightedMeanEnsemble', 'StackedEnsemble',
-           'TsStackedEnsemble', 'Embedder']
+           'TsStackedEnsemble', 'Embedder', 'IdentityEnsemble']

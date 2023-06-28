@@ -1,5 +1,6 @@
 from typing import Dict, List, Tuple, Optional
 
+import numpy as np
 from dataprep_ml import StatisticalAnalysis
 
 from lightwood.helpers.log import log
@@ -57,10 +58,18 @@ def model_analyzer(
 
         # raw predictions for validation dataset
         args = {} if not is_classification else {"predict_proba": True}
-        filtered_df = encoded_val_data.data_frame
         normal_predictions = None
 
         if len(analysis_blocks) > 0:
+            if tss.is_timeseries:
+                # we retrieve the first entry per group (closest to supervision cutoff)
+                if tss.group_by:
+                    encoded_val_data.data_frame['__mdb_val_idx'] = np.arange(len(encoded_val_data))
+                    idxs = encoded_val_data.data_frame.groupby(by=tss.group_by).first()['__mdb_val_idx'].values
+                    encoded_val_data.data_frame = encoded_val_data.data_frame.iloc[idxs, :]
+                    if encoded_val_data.cache_built:
+                        encoded_val_data.X_cache = encoded_val_data.X_cache[idxs, :]
+                        encoded_val_data.Y_cache = encoded_val_data.Y_cache[idxs, :]
             normal_predictions = predictor(encoded_val_data, args=PredictionArguments.from_dict(args))
             normal_predictions = normal_predictions.set_index(encoded_val_data.data_frame.index)
 
@@ -73,7 +82,7 @@ def model_analyzer(
             'input_cols': input_cols,
             'dtype_dict': dtype_dict,
             'normal_predictions': normal_predictions,
-            'data': filtered_df,
+            'data': encoded_val_data.data_frame,
             'train_data': train_data,
             'encoded_val_data': encoded_val_data,
             'is_classification': is_classification,
