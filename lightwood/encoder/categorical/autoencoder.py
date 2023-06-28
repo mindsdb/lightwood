@@ -54,10 +54,6 @@ class CategoricalAutoEncoder(BaseEncoder):
         self.decoder = None
         self.input_encoder = None  # TBD at prepare()
         self.device_type = device
-
-        error_msg = f'Provided an invalid input encoder ({input_encoder}), please use either `OneHotEncoder` or `SimpleLabelEncoder`.'  # noqa
-        if input_encoder is not None:
-            assert input_encoder in ('OneHotEncoder', 'SimpleLabelEncoder'), error_msg
         self.input_encoder = input_encoder
 
         # Training details
@@ -78,6 +74,10 @@ class CategoricalAutoEncoder(BaseEncoder):
 
         if self.is_target:
             log.warning('You are trying to use an autoencoder for the target value! This is very likely a bad idea.')
+
+        error_msg = f'Provided an invalid input encoder ({self.input_encoder}), please use either `OneHotEncoder` or `SimpleLabelEncoder`.'  # noqa
+        if self.input_encoder is not None:
+            assert self.input_encoder in ('OneHotEncoder', 'SimpleLabelEncoder'), error_msg
 
         log.info('Preparing a categorical autoencoder.')
 
