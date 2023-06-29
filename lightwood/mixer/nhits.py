@@ -54,6 +54,7 @@ class NHitsMixer(BaseMixer):
         self.dtype_dict = dtype_dict
         self.ts_analysis = ts_analysis
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
+        self.group_boundaries = {}  # stores last observed timestamp per series
         self.train_args = train_args.get('trainer_args', {}) if train_args else {}
         self.train_args['early_stop_patience_steps'] = self.train_args.get('early_stop_patience_steps', 10)
         self.conf_level = self.train_args.pop('conf_level', [90])
@@ -93,7 +94,8 @@ class NHitsMixer(BaseMixer):
         oby_col = self.ts_analysis["tss"].order_by
         gby = self.ts_analysis["tss"].group_by if self.ts_analysis["tss"].group_by else []
         df = deepcopy(cat_ds.data_frame)
-        Y_df = self._make_initial_df(df)
+        Y_df = self._make_initial_df(df, mode='train')
+        self.group_boundaries = self._set_boundary(Y_df, gby)
         if gby:
             n_time = df[gby].value_counts().min()
         else:
@@ -130,9 +132,8 @@ class NHitsMixer(BaseMixer):
             log.info('Successfully trained N-HITS forecasting model.')
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
-        # TODO: reimplement this with automatic novel-row differential
         self.hyperparam_search = False
-        self.fit(dev_data, train_data)  # TODO: add support for passing args (e.g. n_epochs)
+        self.fit(train_data, dev_data)  # TODO: add support for passing args (e.g. n_epochs)
         self.prepared = True
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
@@ -183,7 +184,13 @@ class NHitsMixer(BaseMixer):
         ydf['confidence'] = level / 100
         return ydf
 
-    def _make_initial_df(self, df):
+    def _make_initial_df(self, df, mode='inference'):
+        """
+        Prepares a dataframe for the NHITS model according to what neuralforecast expects.
+
+        If a per-group boundary exists, this method additionally drops out all observations prior to the cutoff.
+        """  # noqa
+
         oby_col = self.ts_analysis["tss"].order_by
         df = df.sort_values(by=f'__mdb_original_{oby_col}')
         df[f'__mdb_parsed_{oby_col}'] = df.index
@@ -198,4 +205,31 @@ class NHitsMixer(BaseMixer):
         else:
             Y_df['unique_id'] = '__default'
 
-        return Y_df.reset_index()
+        Y_df = Y_df.reset_index()
+
+        # filter if boundary exists
+        if mode == 'train' and self.group_boundaries:
+            filtered = []
+            grouped = Y_df.groupby(by='unique_id')
+            for group, sdf in grouped:
+                if group in self.group_boundaries:
+                    sdf = sdf[sdf['ds'].gt(self.group_boundaries[group])]
+                    if sdf.shape[0] > 0:
+                        filtered.append(sdf)
+            Y_df = pd.concat(filtered)
+
+        return Y_df
+
+    @staticmethod
+    def _set_boundary(df: pd.DataFrame, gby: list) -> Dict[str, object]:
+        """
+        Finds last observation for every series in a pre-sorted `df` given a `gby` list of columns to group by.
+        """
+        if not gby:
+            group_boundaries = {'__default': df.iloc[-1]['ds']}
+        else:
+            # could use groupby().transform('max'), but we leverage pre-sorting instead
+            grouped_df = df.groupby(by='unique_id', as_index=False).last()
+            group_boundaries = grouped_df[['unique_id', 'ds']].set_index('unique_id').to_dict()['ds']
+
+        return group_boundaries
