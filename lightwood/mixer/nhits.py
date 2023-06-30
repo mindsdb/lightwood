@@ -216,7 +216,8 @@ class NHitsMixer(BaseMixer):
                     sdf = sdf[sdf['ds'].gt(self.group_boundaries[group])]
                     if sdf.shape[0] > 0:
                         filtered.append(sdf)
-            Y_df = pd.concat(filtered)
+            if filtered:
+                Y_df = pd.concat(filtered)
 
         return Y_df
 
