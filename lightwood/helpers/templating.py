@@ -1,5 +1,7 @@
+from typing import Callable
 from collections import deque
 
+import inspect
 import numpy as np
 
 from type_infer.dtype import dtype
@@ -131,3 +133,13 @@ def _consolidate_analysis_blocks(jsonai, key):
         sorted_blocks.append(block_objs[idx2block[idx]])
 
     return sorted_blocks
+
+
+def _add_cls_kwarg(cls: Callable, kwargs: dict, key: str, value):
+    """
+    Adds arguments to the `kwargs` dictionary if the key-value pair is valid for the `cls` class signature.
+    """
+    if key in [p.name for p in inspect.signature(cls).parameters.values()]:
+        kwargs[key] = value
+
+    return kwargs
