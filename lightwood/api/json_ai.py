@@ -145,6 +145,10 @@ def lookup_encoder(
     # Time-series representations require more advanced flags
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
+
+        if tss.order_by in gby:
+            raise Exception('The `order_by` column cannot be used to `group_by` simultaneously!')
+
         if col_name == tss.order_by:
             encoder_dict["module"] = "ArrayEncoder"
             encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
