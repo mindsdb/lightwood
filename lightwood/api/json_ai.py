@@ -835,6 +835,8 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
 
     input_cols = [x.replace("'", "\\'").replace('"', '\\"') for x in json_ai.encoders
                   if x != json_ai.problem_definition.target]
+    if len(input_cols) < 1:
+        raise Exception('There are no valid input features. Please check your data before trying again.')
     input_cols = ",".join([f"""'{name}'""" for name in input_cols])
 
     # ----------------- #
