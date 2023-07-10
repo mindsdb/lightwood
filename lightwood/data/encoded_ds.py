@@ -1,3 +1,5 @@
+import os
+import h5py
 import inspect
 from typing import List, Tuple, Dict
 import torch
@@ -186,6 +188,38 @@ class EncodedDs(Dataset):
         self.Y_cache = torch.full((len(self.data_frame),), fill_value=torch.nan)
         self.cache_built = False
 
+    def to_hdf(self, path: str, mode: str = 'a', key: str = None) -> None:
+        """
+        Stores the `EncodedDs` in a hdf5 file. This can only be done for EncodedDS with a populated cache.
+
+        :param path: The path to the hdf file.
+        :param mode: The mode to open the hdf file in.
+        :param key: The group to store the `EncodedDs` under.
+        """
+        assert self.use_cache and self.cache_built, "Cannot store an EncodedDS as HDF without a populated cache."
+        key = '' if key is None else key
+        # self.data_frame.to_hdf(path, key=f'{key}_df')
+        # for col, encoder in self.encoders.items():
+        #     encoder.to_hdf(path, mode=mode, key=f'{key}_encoder_{col}')
+        torch.save(self.X_cache, path, f'{key}_X')
+
+    def from_hdf(self):
+        """ Loads an `EncodedDs` from an hdf5 file. """
+
+        # set path from config variable LIGHTWOOD_DATA_PATH
+        path = os.getenv('LIGHTWOOD_DATA_PATH', './data')
+
+        # load data from path
+        hdf5_file = h5py.File(path, 'r')
+
+        # load encoders from hdf5_file
+        encoders = hdf5_file.get('encoders', {})
+
+        # load data frame from hdf5_file
+        df = hdf5_file.get('df', pd.DataFrame())
+
+        return encoders, df
+
 
 class ConcatedEncodedDs(EncodedDs):
     """
@@ -240,3 +274,13 @@ class ConcatedEncodedDs(EncodedDs):
         """
         for ds in self.encoded_ds_arr:
             ds.clear_cache()
+
+    def to_hdf(self, path: str, mode: str = 'a') -> None:
+        """
+        See `lightwood.data.encoded_ds.EncodedDs.to_hdf()`.
+
+        :param path: The path to the hdf file.
+        :param mode: The mode to open the hdf file in.
+        """
+        for i, ds in enumerate(self.encoded_ds_arr):
+            ds.to_hdf(path, key=str(i), mode=mode)

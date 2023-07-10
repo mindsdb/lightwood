@@ -73,11 +73,12 @@ class PredictorInterface:
         :returns: Nothing; prepares the encoders for learned representations.
         """  # noqa
 
-    def featurize(self, split_data: Dict[str, pd.DataFrame]):
+    def featurize(self, split_data: Dict[str, pd.DataFrame], write: bool = False):
         """
         Provides an encoded representation for each dataset in ``split_data``. Requires `self.encoders` to be prepared.
 
         :param split_data: Pre-processed data from the dataset, split into train/test (or any other keys relevant)
+        :param write: when True, the featurized dataset is written to disk as an HDF5 file (path: ``LIGHTWOOD_DEV_SAVE_TO``)
 
         :returns: For each dataset provided in ``split_data``, the encoded representations of the data.
         """ # noqa

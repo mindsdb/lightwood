@@ -1016,6 +1016,13 @@ for key, data in split_data.items():
         for k in (key, f'{{key}}_filtered'):
             feature_data[k] = self.feature_cache[k]
 
+if write:
+    if 'LIGHTWOOD_DEV_SAVE_TO' in os.environ:
+        path = os.path.join(os.environ['LIGHTWOOD_DEV_SAVE_TO'], 'lightwood_features.h5')
+    else:
+        path = os.path.join(os.getcwd(), 'lightwood_features.h5')
+    feature_data.to_hdf(path)
+
 return feature_data
 
 """  # noqa
