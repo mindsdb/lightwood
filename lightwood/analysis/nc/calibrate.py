@@ -200,10 +200,11 @@ class ICP(BaseAnalysisBlock):
                     # save relevant predictions in the caches, then calibrate the ICP
                     pred_cache = icp_df.pop(f'__predicted_{ns.target}').values
                     if ns.is_multi_ts and ns.is_classification:
-                        # output['label_encoders'].transform(preds.reshape(-1, 1))
                         pred_cache = output['label_encoders'].transform([[p[0] for p in pred_cache]])
                     elif ns.is_multi_ts:
                         pred_cache = np.array([np.array(p) for p in pred_cache])
+                    elif ns.is_classification:
+                        pred_cache = output['label_encoders'].transform(pred_cache.reshape(-1, 1))
 
                     icps[tuple(group)].nc_function.model.prediction_cache = pred_cache
                     icp_df, y = clean_df(icp_df, ns, output.get('label_encoders', None))
