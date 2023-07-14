@@ -658,13 +658,14 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
         if name not in json_ai.dependency_dict:
             json_ai.dependency_dict[name] = []
 
-    # filter encoder arguments
+    # filter arguments for included encoders (custom encoders will skip the check)
     for col, enc_dict in json_ai.encoders.items():
         filtered_kwargs = {}
-        encoder_cls = getattr(lightwood.encoder, enc_dict['module'])
-        for k, v in enc_dict['args'].items():
-            _add_cls_kwarg(encoder_cls, filtered_kwargs, k, v)
-        json_ai.encoders[col]['args'] = filtered_kwargs
+        if hasattr(lightwood.encoder, enc_dict['module']):
+            encoder_cls = getattr(lightwood.encoder, enc_dict['module'])
+            for k, v in enc_dict['args'].items():
+                _add_cls_kwarg(encoder_cls, filtered_kwargs, k, v)
+            json_ai.encoders[col]['args'] = filtered_kwargs
 
     # Add "hidden" fields
     hidden_fields = {
