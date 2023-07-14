@@ -20,7 +20,7 @@ def is_none(value):
     if type(value) in (np.ndarray,) and value.size == 0:
         return True
 
-    if type(value) != str and isinstance(value, Iterable) and value == []:
+    if type(value) != str and isinstance(value, Iterable) and len(value) == 0:
         return True
     elif type(value) != str and isinstance(value, Iterable):
         return False

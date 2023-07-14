@@ -15,6 +15,7 @@ from lightwood.api.types import (
 )
 from lightwood.__about__ import __version__ as lightwood_version
 import lightwood.ensemble
+import lightwood.encoder
 
 # For custom modules, we create a module loader with necessary imports below
 IMPORT_EXTERNAL_DIRS = """
@@ -145,6 +146,10 @@ def lookup_encoder(
     # Time-series representations require more advanced flags
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
+
+        if tss.order_by in gby:
+            raise Exception('The `order_by` column cannot be used to `group_by` simultaneously!')
+
         if col_name == tss.order_by:
             encoder_dict["module"] = "ArrayEncoder"
             encoder_dict["args"]["original_type"] = f'"{tss.target_type}"'
@@ -536,7 +541,6 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
     problem_definition = json_ai.problem_definition
     tss = problem_definition.timeseries_settings
     is_ts = tss.is_timeseries
-    # tsa_val = "self.ts_analysis" if is_ts else None  # TODO: remove
     mixers = json_ai.model['args']['submodels']
 
     # Add implicit ensemble arguments
@@ -649,9 +653,18 @@ def _add_implicit_values(json_ai: JsonAI) -> JsonAI:
             # enforce fit_on_all if this mixer is specified
             problem_definition.fit_on_all = True
 
+    # encoder checks
     for name in json_ai.encoders:
         if name not in json_ai.dependency_dict:
             json_ai.dependency_dict[name] = []
+
+    # filter encoder arguments
+    for col, enc_dict in json_ai.encoders.items():
+        filtered_kwargs = {}
+        encoder_cls = getattr(lightwood.encoder, enc_dict['module'])
+        for k, v in enc_dict['args'].items():
+            _add_cls_kwarg(encoder_cls, filtered_kwargs, k, v)
+        json_ai.encoders[col]['args'] = filtered_kwargs
 
     # Add "hidden" fields
     hidden_fields = {
@@ -835,6 +848,8 @@ def code_from_json_ai(json_ai: JsonAI) -> str:
 
     input_cols = [x.replace("'", "\\'").replace('"', '\\"') for x in json_ai.encoders
                   if x != json_ai.problem_definition.target]
+    if len(input_cols) < 1:
+        raise Exception('There are no valid input features. Please check your data before trying again.')
     input_cols = ",".join([f"""'{name}'""" for name in input_cols])
 
     # ----------------- #
