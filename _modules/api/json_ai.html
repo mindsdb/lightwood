@@ -188,6 +188,7 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">lightwood.__about__</span> <span class="kn">import</span> <span class="n">__version__</span> <span class="k">as</span> <span class="n">lightwood_version</span>
 <span class="kn">import</span> <span class="nn">lightwood.ensemble</span>
+<span class="kn">import</span> <span class="nn">lightwood.encoder</span>
 
 <span class="c1"># For custom modules, we create a module loader with necessary imports below</span>
 <span class="n">IMPORT_EXTERNAL_DIRS</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
@@ -713,7 +714,6 @@
     <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">problem_definition</span>
     <span class="n">tss</span> <span class="o">=</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">timeseries_settings</span>
     <span class="n">is_ts</span> <span class="o">=</span> <span class="n">tss</span><span class="o">.</span><span class="n">is_timeseries</span>
-    <span class="c1"># tsa_val = &quot;self.ts_analysis&quot; if is_ts else None  # TODO: remove</span>
     <span class="n">mixers</span> <span class="o">=</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;submodels&#39;</span><span class="p">]</span>
 
     <span class="c1"># Add implicit ensemble arguments</span>
@@ -826,9 +826,19 @@
             <span class="c1"># enforce fit_on_all if this mixer is specified</span>
             <span class="n">problem_definition</span><span class="o">.</span><span class="n">fit_on_all</span> <span class="o">=</span> <span class="kc">True</span>
 
+    <span class="c1"># encoder checks</span>
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">encoders</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">dependency_dict</span><span class="p">:</span>
             <span class="n">json_ai</span><span class="o">.</span><span class="n">dependency_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># filter arguments for included encoders (custom encoders will skip the check)</span>
+    <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">enc_dict</span> <span class="ow">in</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">encoders</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">filtered_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">lightwood</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span> <span class="n">enc_dict</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">]):</span>
+            <span class="n">encoder_cls</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">lightwood</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span> <span class="n">enc_dict</span><span class="p">[</span><span class="s1">&#39;module&#39;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">enc_dict</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">_add_cls_kwarg</span><span class="p">(</span><span class="n">encoder_cls</span><span class="p">,</span> <span class="n">filtered_kwargs</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="n">json_ai</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered_kwargs</span>
 
     <span class="c1"># Add &quot;hidden&quot; fields</span>
     <span class="n">hidden_fields</span> <span class="o">=</span> <span class="p">{</span>
