@@ -33,4 +33,4 @@ typing-inspect
 six
 regex
 h5py
-
+tables

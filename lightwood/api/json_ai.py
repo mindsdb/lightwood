@@ -1013,11 +1013,29 @@ for col_name, encoder in self.encoders.items():
     # ----------------- #
 
     feature_body = f"""
+feature_data = dict()
+
+if 'LIGHTWOOD_DEV_SAVE_TO' in os.environ:
+    feature_path = os.path.join(os.path.split(os.environ['LIGHTWOOD_DEV_SAVE_TO'])[0], 'lightwood_features.h5')
+else:
+    feature_path = os.path.join(os.path.split(os.getcwd())[0], 'lightwood_features.h5')
+
+if mode == 'train' and os.path.exists(feature_path):
+    log.info('Loading cached features from HDF5 file...')
+    try:
+        for split in ['train', 'dev', 'test'] + ['train_filtered', 'dev_filtered', 'test_filtered']:
+            ds = EncodedDs.from_hdf(self.encoders, self.target, feature_path, f'{{split}}_df')
+            feature_data[split] = self.feature_cache[split] = ds
+        return feature_data
+    except Exception as e:
+        log.info(f'Error while loading cached features, starting from scratch: {{str(e)}}')
+        os.remove(feature_path)
+
+# else, data is featurized on demand 
 log.info('Featurizing the data')
 
 tss = self.problem_definition.timeseries_settings
 
-feature_data = dict()
 for key, data in split_data.items():
     if key != 'stratified_on':
 
@@ -1032,12 +1050,10 @@ for key, data in split_data.items():
         for k in (key, f'{{key}}_filtered'):
             feature_data[k] = self.feature_cache[k]
 
-if write:
-    if 'LIGHTWOOD_DEV_SAVE_TO' in os.environ:
-        path = os.path.join(os.environ['LIGHTWOOD_DEV_SAVE_TO'], 'lightwood_features.h5')
-    else:
-        path = os.path.join(os.getcwd(), 'lightwood_features.h5')
-    feature_data.to_hdf(path)
+# write to hdf5
+if mode == 'train' and persist_features:
+    for key, split in feature_data.items():
+        split.to_hdf(feature_path, key=f'{{key}}_df', mode='w')
 
 return feature_data
 
@@ -1246,7 +1262,7 @@ data = self.preprocess(data)
 
 # Featurize the data
 log.info(f'[Predict phase 2/{{n_phases}}] - Feature generation')
-encoded_ds = self.featurize({{"predict_data": data}})["predict_data"]
+encoded_ds = self.featurize({{"predict_data": data}}, mode = 'predict')["predict_data"]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
 log.info(f'[Predict phase 3/{{n_phases}}] - Calling ensemble')
@@ -1329,7 +1345,7 @@ class Predictor(PredictorInterface):
 {prepare_body}
 
     @timed
-    def featurize(self, split_data: Dict[str, pd.DataFrame]):
+    def featurize(self, split_data: Dict[str, pd.DataFrame], mode: str = 'train', persist_features: bool = True):
         # Featurize data into numerical representations for models
 {feature_body}
 

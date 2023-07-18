@@ -134,7 +134,7 @@ class Neural(BaseMixer):
         while stop is False:
             # overfit learning on first n_steps samples (biased, but we only want an intuition on what LR is decent)
             dl = DataLoader(train_data,
-                            batch_size=min(len(train_data.data_frame), 32, self.batch_size),
+                            batch_size=min(len(train_data), 32, self.batch_size),
                             shuffle=False)
             dl_iter = iter(dl)
             self.model = deepcopy(starting_model)
