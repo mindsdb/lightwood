@@ -19,7 +19,7 @@ def initialize_log():
     return log
 
 
-def timed(f):
+def ptimed(f):
     """
     Intended to be called from within lightwood predictor methods.
     We use `wraps` to pass metadata into debuggers (as in stackoverflow.com/a/27737385)
@@ -30,7 +30,22 @@ def timed(f):
         result = f(predictor, *args, **kw)
         te = time()
         log.debug(f' `{f.__name__}` runtime: {round(te - ts, 2)} seconds')
-        predictor.runtime_log[(f.__name__, datetime.fromtimestamp(ts))] = round(te - ts, 2)
+        if hasattr(predictor, 'runtime_log'):
+            predictor.runtime_log[(f.__name__, datetime.fromtimestamp(ts))] = round(te - ts, 2)
+        return result
+    return wrap
+
+
+def timed(f):
+    """
+    Intended to be called from within any lightwood method to log the runtime.
+    """
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        log.debug(f' `{f.__name__}` runtime: {round(te - ts, 2)} seconds')
         return result
     return wrap
 

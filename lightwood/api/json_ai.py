@@ -1243,11 +1243,17 @@ encoded_ds = self.featurize({{"predict_data": data}})["predict_data"]
 encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
 log.info(f'[Predict phase 3/{{n_phases}}] - Calling ensemble')
-if self.pred_args.return_embedding:
-    embedder = Embedder(self.target, mixers=list(), data=encoded_ds)
-    df = embedder(encoded_ds, args=self.pred_args)
-else:
-    df = self.ensemble(encoded_ds, args=self.pred_args)
+
+@timed
+def _timed_call(encoded_ds):
+    if self.pred_args.return_embedding:
+        embedder = Embedder(self.target, mixers=list(), data=encoded_ds)
+        df = embedder(encoded_ds, args=self.pred_args)
+    else:
+        df = self.ensemble(encoded_ds, args=self.pred_args)
+    return df
+
+df = _timed_call(encoded_ds)
 
 if not(any(
             [self.pred_args.all_mixers,
@@ -1301,60 +1307,60 @@ class Predictor(PredictorInterface):
         # Feature cache
         self.feature_cache = dict()
 
-    @timed
+    @ptimed
     def analyze_data(self, data: pd.DataFrame) -> None:
         # Perform a statistical analysis on the unprocessed data
 {analyze_data_body}
 
-    @timed
+    @ptimed
     def preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
         # Preprocess and clean data
 {clean_body}
 
-    @timed
+    @ptimed
     def split(self, data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
         # Split the data into training/testing splits
 {split_body}
 
-    @timed
+    @ptimed
     def prepare(self, data: Dict[str, pd.DataFrame]) -> None:
         # Prepare encoders to featurize data
 {prepare_body}
 
-    @timed
+    @ptimed
     def featurize(self, split_data: Dict[str, pd.DataFrame]):
         # Featurize data into numerical representations for models
 {feature_body}
 
-    @timed
+    @ptimed
     def fit(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         # Fit predictors to estimate target
 {fit_body}
 
-    @timed
+    @ptimed
     def fit_mixer(self, mixer, encoded_train_data, encoded_dev_data) -> None:
         mixer.fit(encoded_train_data, encoded_dev_data)
 
-    @timed
+    @ptimed
     def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         # Evaluate quality of fit for the ensemble of mixers
 {analyze_ensemble}
 
-    @timed
+    @ptimed
     def learn(self, data: pd.DataFrame) -> None:
         if self.problem_definition.ignore_features:
             log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
             data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 {learn_body}
 
-    @timed
+    @ptimed
     def adjust(self, train_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],
         dev_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None,
         adjust_args: Optional[dict] = None) -> None:
         # Update mixers with new information
 {adjust_body}
 
-    @timed
+    @ptimed
     def predict(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
 {predict_body}
 """
