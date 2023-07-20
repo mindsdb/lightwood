@@ -19,7 +19,7 @@ def initialize_log():
     return log
 
 
-def ptimed(f):
+def timed_predictor(f):
     """
     Intended to be called from within lightwood predictor methods.
     We use `wraps` to pass metadata into debuggers (as in stackoverflow.com/a/27737385)

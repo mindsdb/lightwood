@@ -1307,60 +1307,60 @@ class Predictor(PredictorInterface):
         # Feature cache
         self.feature_cache = dict()
 
-    @ptimed
+    @timed_predictor
     def analyze_data(self, data: pd.DataFrame) -> None:
         # Perform a statistical analysis on the unprocessed data
 {analyze_data_body}
 
-    @ptimed
+    @timed_predictor
     def preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
         # Preprocess and clean data
 {clean_body}
 
-    @ptimed
+    @timed_predictor
     def split(self, data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
         # Split the data into training/testing splits
 {split_body}
 
-    @ptimed
+    @timed_predictor
     def prepare(self, data: Dict[str, pd.DataFrame]) -> None:
         # Prepare encoders to featurize data
 {prepare_body}
 
-    @ptimed
+    @timed_predictor
     def featurize(self, split_data: Dict[str, pd.DataFrame]):
         # Featurize data into numerical representations for models
 {feature_body}
 
-    @ptimed
+    @timed_predictor
     def fit(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         # Fit predictors to estimate target
 {fit_body}
 
-    @ptimed
+    @timed_predictor
     def fit_mixer(self, mixer, encoded_train_data, encoded_dev_data) -> None:
         mixer.fit(encoded_train_data, encoded_dev_data)
 
-    @ptimed
+    @timed_predictor
     def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -> None:
         # Evaluate quality of fit for the ensemble of mixers
 {analyze_ensemble}
 
-    @ptimed
+    @timed_predictor
     def learn(self, data: pd.DataFrame) -> None:
         if self.problem_definition.ignore_features:
             log.info(f'Dropping features: {{self.problem_definition.ignore_features}}')
             data = data.drop(columns=self.problem_definition.ignore_features, errors='ignore')
 {learn_body}
 
-    @ptimed
+    @timed_predictor
     def adjust(self, train_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],
         dev_data: Optional[Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame]] = None,
         adjust_args: Optional[dict] = None) -> None:
         # Update mixers with new information
 {adjust_body}
 
-    @ptimed
+    @timed_predictor
     def predict(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
 {predict_body}
 """
