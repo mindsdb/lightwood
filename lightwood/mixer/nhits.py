@@ -133,7 +133,8 @@ class NHitsMixer(BaseMixer):
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         self.hyperparam_search = False
-        self.fit(train_data, dev_data)  # TODO: add support for passing args (e.g. n_epochs)
+        self.train_args = args.get('trainer_args', {}) if args else {}  # NOTE: this replaces the original config
+        self.fit(train_data, dev_data)
         self.prepared = True
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
