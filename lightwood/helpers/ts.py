@@ -55,11 +55,10 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss, stat_
     last = np.vstack(df[f'order_{col}'].dropna().values)[:, -1]
 
     if tss.group_by:
-        def _get_deltas(elt):
-            return deltas.get(elt, deltas['__default'])
-
         gby = [f'group_{g}' for g in tss.group_by]
-        series_delta = np.vectorize(_get_deltas)(df[gby].values)
+        series_delta = df[gby].apply(lambda x: deltas.get(tuple(x.values.tolist()),
+                                                          deltas['__default']), axis=1).values
+        series_delta = series_delta.reshape(-1, 1)
     else:
         series_delta = np.full_like(df.values[:, 0:1], deltas['__default'])
 
@@ -78,6 +77,9 @@ def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss, stat_
             def _strfts(elt):
                 return datetime.utcfromtimestamp(elt).strftime(tformat)
             timestamps = np.vectorize(_strfts)(timestamps)
+
+    # truncate to horizon
+    timestamps = timestamps[:, :horizon]
 
     # preserves original input format if horizon == 1
     if tss.horizon == 1:
