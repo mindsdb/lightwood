@@ -51,35 +51,39 @@ def get_delta(df: pd.DataFrame, tss) -> Tuple[Dict, Dict, Dict]:
 def get_inferred_timestamps(df: pd.DataFrame, col: str, deltas: dict, tss, stat_analysis,
                             time_format='') -> pd.DataFrame:
     horizon = tss.horizon
+
+    last = np.vstack(df[f'order_{col}'].dropna().values)[:, -1]
+
     if tss.group_by:
+        def _get_deltas(elt):
+            return deltas.get(elt, deltas['__default'])
+
         gby = [f'group_{g}' for g in tss.group_by]
+        series_delta = np.vectorize(_get_deltas)(df[gby].values)
+    else:
+        series_delta = np.full_like(df.values[:, 0:1], deltas['__default'])
 
-    for (idx, row) in df.iterrows():
-        last = [r for r in row[f'order_{col}'] if r == r][-1]  # filter out nans (safeguard; it shouldn't happen anyway)
+    last = np.repeat(np.expand_dims(last, axis=1), horizon, axis=1)
+    lins = np.linspace(0, horizon - 1, num=horizon)
+    series_delta = np.repeat(series_delta, horizon, axis=1)
+    timestamps = last + series_delta * lins
 
-        if tss.group_by:
-            try:
-                series_delta = deltas[tuple(row[gby].tolist())]
-            except KeyError:
-                series_delta = deltas['__default']
+    if time_format:
+        if time_format.lower() == 'infer':
+            tformat = stat_analysis.ts_stats['order_format']
         else:
-            series_delta = deltas['__default']
-        timestamps = [last + t * series_delta for t in range(horizon)]
+            tformat = time_format
 
-        if tss.horizon == 1:
-            timestamps = timestamps[0]  # preserves original input format if horizon == 1
+        if tformat:
+            def _strfts(elt):
+                return datetime.utcfromtimestamp(elt).strftime(tformat)
+            timestamps = np.vectorize(_strfts)(timestamps)
 
-        if time_format:
-            if time_format.lower() == 'infer':
-                tformat = stat_analysis.ts_stats['order_format']
-            else:
-                tformat = time_format
+    # preserves original input format if horizon == 1
+    if tss.horizon == 1:
+        timestamps = timestamps.squeeze()
 
-            if tformat:
-                for i, ts in enumerate(timestamps):
-                    timestamps[i] = datetime.utcfromtimestamp(ts).strftime(tformat)
-
-        df[f'order_{col}'].iloc[idx] = timestamps
+    df[f'order_{col}'] = timestamps.tolist()
     return df[f'order_{col}']
 
 
