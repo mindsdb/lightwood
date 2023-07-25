@@ -212,8 +212,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2412:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2412:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2507:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2507:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <div class="section" id="1)-Load-your-data">
@@ -337,24 +337,24 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2412:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-<span class="ansi-green-fg">INFO:type_infer-2412:Analyzing a sample of 2478</span>
-<span class="ansi-green-fg">INFO:type_infer-2412:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2412:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:lightwood-2507:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:type_infer-2507:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:type_infer-2507:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2507:Infering type for: id</span>
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
   return _methods._mean(a, axis=axis, dtype=dtype,
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
   ret = ret.dtype.type(ret / rcount)
-<span class="ansi-green-fg">INFO:type_infer-2412:Doing text detection for column: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2412:Column id has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2412:Infering type for: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2412:Doing text detection for column: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2412:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:type_infer-2412:Column target has data type float</span>
-<span class="ansi-yellow-fg">WARNING:type_infer-2412:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2412:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2412:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2412:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2507:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2507:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2507:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2507:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2507:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:type_infer-2507:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:type_infer-2507:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2507:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2507:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2507:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -442,7 +442,7 @@
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 19.21436047554016,
+        &#34;expected_additional_time&#34;: 18.608503341674805,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -752,7 +752,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 21384.0,
                 &#34;seconds_per_encoder&#34;: 85536.0,
-                &#34;expected_additional_time&#34;: 19.21436047554016,
+                &#34;expected_additional_time&#34;: 18.608503341674805,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -799,7 +799,7 @@ class Predictor(PredictorInterface):
         # Feature cache
         self.feature_cache = dict()
 
-    @timed
+    @timed_predictor
     def analyze_data(self, data: pd.DataFrame) -&gt; None:
         # Perform a statistical analysis on the unprocessed data
 
@@ -818,7 +818,7 @@ class Predictor(PredictorInterface):
             PermutationFeatureImportance(deps=[&#34;AccStats&#34;]),
         ]
 
-    @timed
+    @timed_predictor
     def preprocess(self, data: pd.DataFrame) -&gt; pd.DataFrame:
         # Preprocess and clean data
 
@@ -838,7 +838,7 @@ class Predictor(PredictorInterface):
 
         return data
 
-    @timed
+    @timed_predictor
     def split(self, data: pd.DataFrame) -&gt; Dict[str, pd.DataFrame]:
         # Split the data into training/testing splits
 
@@ -856,7 +856,7 @@ class Predictor(PredictorInterface):
 
         return train_test_data
 
-    @timed
+    @timed_predictor
     def prepare(self, data: Dict[str, pd.DataFrame]) -&gt; None:
         # Prepare encoders to featurize data
 
@@ -942,7 +942,7 @@ class Predictor(PredictorInterface):
                     data[&#34;train&#34;][col_name], data[&#34;dev&#34;][col_name], **kwargs
                 )
 
-    @timed
+    @timed_predictor
     def featurize(self, split_data: Dict[str, pd.DataFrame]):
         # Featurize data into numerical representations for models
 
@@ -970,7 +970,7 @@ class Predictor(PredictorInterface):
 
         return feature_data
 
-    @timed
+    @timed_predictor
     def fit(self, enc_data: Dict[str, pd.DataFrame]) -&gt; None:
         # Fit predictors to estimate target
 
@@ -1066,11 +1066,11 @@ class Predictor(PredictorInterface):
         )
         self.supports_proba = self.ensemble.supports_proba
 
-    @timed
+    @timed_predictor
     def fit_mixer(self, mixer, encoded_train_data, encoded_dev_data) -&gt; None:
         mixer.fit(encoded_train_data, encoded_dev_data)
 
-    @timed
+    @timed_predictor
     def analyze_ensemble(self, enc_data: Dict[str, pd.DataFrame]) -&gt; None:
         # Evaluate quality of fit for the ensemble of mixers
 
@@ -1099,7 +1099,7 @@ class Predictor(PredictorInterface):
             analysis_blocks=self.analysis_blocks,
         )
 
-    @timed
+    @timed_predictor
     def learn(self, data: pd.DataFrame) -&gt; None:
         if self.problem_definition.ignore_features:
             log.info(f&#34;Dropping features: {self.problem_definition.ignore_features}&#34;)
@@ -1167,7 +1167,7 @@ class Predictor(PredictorInterface):
             dict()
         )  # empty feature cache to avoid large predictor objects
 
-    @timed
+    @timed_predictor
     def adjust(
         self,
         train_data: Union[EncodedDs, ConcatedEncodedDs, pd.DataFrame],
@@ -1211,7 +1211,7 @@ class Predictor(PredictorInterface):
         for mixer in self.mixers:
             mixer.partial_fit(train_data, dev_data, adjust_args)
 
-    @timed
+    @timed_predictor
     def predict(self, data: pd.DataFrame, args: Dict = {}) -&gt; pd.DataFrame:
         self.mode = &#34;predict&#34;
         n_phases = 3 if self.pred_args.all_mixers else 4
@@ -1242,11 +1242,17 @@ class Predictor(PredictorInterface):
         encoded_data = encoded_ds.get_encoded_data(include_target=False)
 
         log.info(f&#34;[Predict phase 3/{n_phases}] - Calling ensemble&#34;)
-        if self.pred_args.return_embedding:
-            embedder = Embedder(self.target, mixers=list(), data=encoded_ds)
-            df = embedder(encoded_ds, args=self.pred_args)
-        else:
-            df = self.ensemble(encoded_ds, args=self.pred_args)
+
+        @timed
+        def _timed_call(encoded_ds):
+            if self.pred_args.return_embedding:
+                embedder = Embedder(self.target, mixers=list(), data=encoded_ds)
+                df = embedder(encoded_ds, args=self.pred_args)
+            else:
+                df = self.ensemble(encoded_ds, args=self.pred_args)
+            return df
+
+        df = _timed_call(encoded_ds)
 
         if not (
             any(
@@ -1329,16 +1335,16 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2412:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2412:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2412:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2412: `analyze_data` runtime: 0.07 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2412:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2412:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2412:Cleaning column =excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2412:Cleaning column =target</span>
-<span class="ansi-green-fg">INFO:lightwood-2412:Converted target into strictly non-negative</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2412: `preprocess` runtime: 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2507:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2507:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2507:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2507: `analyze_data` runtime: 0.07 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2507:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2507:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2507:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2507:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2507:Converted target into strictly non-negative</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2507: `preprocess` runtime: 0.1 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

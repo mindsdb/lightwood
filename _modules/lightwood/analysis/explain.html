@@ -177,13 +177,14 @@
 
 <span class="kn">from</span> <span class="nn">dataprep_ml</span> <span class="kn">import</span> <span class="n">StatisticalAnalysis</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">timed</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> <span class="n">PredictionArguments</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">get_inferred_timestamps</span>
 <span class="kn">from</span> <span class="nn">lightwood.analysis.base</span> <span class="kn">import</span> <span class="n">BaseAnalysisBlock</span>
 
 
-<div class="viewcode-block" id="explain"><a class="viewcode-back" href="../../../analysis.html#analysis.explain">[docs]</a><span class="k">def</span> <span class="nf">explain</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+<div class="viewcode-block" id="explain"><a class="viewcode-back" href="../../../analysis.html#analysis.explain">[docs]</a><span class="nd">@timed</span>
+<span class="k">def</span> <span class="nf">explain</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
             <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
             <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
             <span class="n">target_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
