@@ -1,6 +1,6 @@
-type_infer >=0.0.13
-dataprep_ml >=0.0.13
-mindsdb-evaluator >=0.0.9
+type_infer >=0.0.14
+dataprep_ml >=0.0.16
+mindsdb-evaluator >=0.0.10
 numpy
 nltk >=3,<3.6
 python-dateutil >=2.8.1
