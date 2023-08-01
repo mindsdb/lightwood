@@ -13,7 +13,6 @@ from type_infer.dtype import dtype
 
 from lightwood.helpers.log import log
 from lightwood.api.types import JsonAI
-from lightwood.api.high_level import predictor_from_code
 from lightwood.api.json_ai import add_implicit_values, lookup_encoder
 from lightwood.helpers.constants import IMPORTS, IMPORT_EXTERNAL_DIRS
 from lightwood.helpers.templating import call, inline_dict, align
@@ -609,7 +608,7 @@ class Predictor(PredictorInterface):
         try:
             formatted_predictor_code = black.format_str(predictor_code, mode=black.FileMode())
 
-            if type(predictor_from_code(formatted_predictor_code)).__name__ == 'Predictor':
+            if type(_predictor_from_code(formatted_predictor_code)).__name__ == 'Predictor':
                 predictor_code = formatted_predictor_code
             else:
                 log.info('Black formatter output is invalid, predictor code might be a bit ugly')
