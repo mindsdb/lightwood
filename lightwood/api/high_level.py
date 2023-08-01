@@ -9,7 +9,7 @@ from type_infer.infer import infer_types
 from lightwood.api.predictor import PredictorInterface
 from lightwood.api.json_ai import generate_json_ai
 import tempfile
-from lightwood.api.json_ai import code_from_json_ai as _code_from_json_ai
+from lightwood.helpers.codegen import code_from_json_ai as _code_from_json_ai
 import importlib.util
 import sys
 import random
