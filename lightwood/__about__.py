@@ -1,6 +1,6 @@
 __title__ = 'lightwood'
 __package_name__ = 'lightwood'
-__version__ = '23.7.1.0'
+__version__ = '23.8.1.0'
 __description__ = "Lightwood is a toolkit for automatic machine learning model building"
 __email__ = "community@mindsdb.com"
 __author__ = 'MindsDB Inc'
