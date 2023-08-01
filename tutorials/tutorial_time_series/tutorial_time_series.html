@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Tutorial - Time series forecasting &mdash; lightwood 23.7.1.0 documentation</title>
+  <title>Tutorial - Time series forecasting &mdash; lightwood 23.8.1.0 documentation</title>
   
 
   
@@ -73,7 +73,7 @@
             
             
               <div class="version">
-                23.7.1.0
+                23.8.1.0
               </div>
             
           
@@ -303,8 +303,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2522:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -372,16 +372,16 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2522:Analyzing a sample of 2467</span>
-<span class="ansi-green-fg">INFO:type_infer-2522:from a total population of 2820, this is equivalent to 87.5% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2522:Infering type for: Month</span>
-<span class="ansi-green-fg">INFO:type_infer-2522:Column Month has data type date</span>
-<span class="ansi-green-fg">INFO:type_infer-2522:Infering type for: Sunspots</span>
-<span class="ansi-green-fg">INFO:type_infer-2522:Column Sunspots has data type float</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2544:Analyzing a sample of 2467</span>
+<span class="ansi-green-fg">INFO:type_infer-2544:from a total population of 2820, this is equivalent to 87.5% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2544:Infering type for: Month</span>
+<span class="ansi-green-fg">INFO:type_infer-2544:Column Month has data type date</span>
+<span class="ansi-green-fg">INFO:type_infer-2544:Infering type for: Sunspots</span>
+<span class="ansi-green-fg">INFO:type_infer-2544:Column Sunspots has data type float</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Starting statistical analysis</span>
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/dataprep_ml/cleaners.py:152: UserWarning: The argument &#39;infer_datetime_format&#39; is deprecated and will be removed in a future version. A strict version of it is now the default, see https://pandas.pydata.org/pdeps/0004-consistent-to-datetime-parsing.html. You can safely remove this argument.
   return pd.to_datetime(element, infer_datetime_format=True).apply(lambda x: x.timestamp())
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </div>
@@ -403,29 +403,29 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Learn phase 1/8] - Statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Learn phase 1/8] - Statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Starting statistical analysis</span>
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/dataprep_ml/cleaners.py:152: UserWarning: The argument &#39;infer_datetime_format&#39; is deprecated and will be removed in a future version. A strict version of it is now the default, see https://pandas.pydata.org/pdeps/0004-consistent-to-datetime-parsing.html. You can safely remove this argument.
   return pd.to_datetime(element, infer_datetime_format=True).apply(lambda x: x.timestamp())
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `analyze_data` runtime: 0.08 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Learn phase 2/8] - Data preprocessing</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `analyze_data` runtime: 0.09 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Learn phase 2/8] - Data preprocessing</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Cleaning the data</span>
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/dataprep_ml/cleaners.py:152: UserWarning: The argument &#39;infer_datetime_format&#39; is deprecated and will be removed in a future version. A strict version of it is now the default, see https://pandas.pydata.org/pdeps/0004-consistent-to-datetime-parsing.html. You can safely remove this argument.
   return pd.to_datetime(element, infer_datetime_format=True).apply(lambda x: x.timestamp())
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Transforming timeseries data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `preprocess` runtime: 0.12 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Learn phase 3/8] - Data splitting</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `split` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Learn phase 4/8] - Preparing encoders</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2522:Preparing sequentially...</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `prepare` runtime: 0.07 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Learn phase 5/8] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `featurize` runtime: 0.07 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Learn phase 6/8] - Mixer training</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Training the mixers</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Transforming timeseries data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `preprocess` runtime: 0.14 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Learn phase 3/8] - Data splitting</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `split` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Learn phase 4/8] - Preparing encoders</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2544:Preparing sequentially...</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `prepare` runtime: 0.09 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Learn phase 5/8] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `featurize` runtime: 0.07 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Learn phase 6/8] - Mixer training</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Training the mixers</span>
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:120: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/pytorch_ranger/ranger.py:172: UserWarning: This overload of addcmul_ is deprecated:
@@ -433,46 +433,46 @@
 Consider using one of the following signatures instead:
         addcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1485.)
   exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss of 9.051180988550186 with learning rate 0.0001</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss of 9.014871507883072 with learning rate 0.0005</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss of 8.969509452581406 with learning rate 0.001</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss of 8.879051893949509 with learning rate 0.002</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss of 8.7889504134655 with learning rate 0.003</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss of 8.611965090036392 with learning rate 0.005</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss of 8.195776104927063 with learning rate 0.01</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss of 6.255893111228943 with learning rate 0.05</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Found learning rate of: 0.05</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 1: 0.5818348526954651</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 2: 0.4797109067440033</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 3: 0.48386093974113464</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 4: 0.49511992931365967</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 5: 0.39475566148757935</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 6: 0.39592696726322174</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 7: 0.3622782230377197</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 8: 0.3817047029733658</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 9: 0.5138542950153351</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 10: 0.6360724717378616</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 1: 0.2986880974336104</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 2: 0.303189678625627</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `fit_mixer` runtime: 0.7 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Started fitting AutoSKTime forecaster for array prediction</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Starting trial with hyperparameters: {&#39;class&#39;: &#39;croston.Croston&#39;}</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2522:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Trial got error: 0.19796658477664864</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Starting trial with hyperparameters: {&#39;class&#39;: &#39;trend.STLForecaster&#39;}</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2522:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Trial got error: 0.5245438066022906</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Starting trial with hyperparameters: {&#39;class&#39;: &#39;trend.PolynomialTrendForecaster&#39;}</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2522:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Trial got error: 0.6831021018701887</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Starting trial with hyperparameters: {&#39;class&#39;: &#39;theta.ThetaForecaster&#39;}</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522:Multiplicative seasonality is not appropriate for zero and negative values</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Trial got error: inf</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Selected best model: croston.Croston</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `fit_mixer` runtime: 0.3 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Started fitting AutoETS forecaster for array prediction</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `fit_mixer` runtime: 0.05 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Started fitting AutoARIMA forecaster for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss of 9.051180988550186 with learning rate 0.0001</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss of 9.014871507883072 with learning rate 0.0005</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss of 8.969509452581406 with learning rate 0.001</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss of 8.879051893949509 with learning rate 0.002</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss of 8.7889504134655 with learning rate 0.003</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss of 8.611965090036392 with learning rate 0.005</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss of 8.195776104927063 with learning rate 0.01</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss of 6.255893111228943 with learning rate 0.05</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Found learning rate of: 0.05</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 1: 0.5818348526954651</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 2: 0.4797109067440033</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 3: 0.48386093974113464</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 4: 0.49511992931365967</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 5: 0.39475566148757935</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 6: 0.39592696726322174</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 7: 0.3622782230377197</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 8: 0.3817047029733658</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 9: 0.5138542950153351</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 10: 0.6360724717378616</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 1: 0.2986880974336104</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 2: 0.303189678625627</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `fit_mixer` runtime: 0.75 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Started fitting AutoSKTime forecaster for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Starting trial with hyperparameters: {&#39;class&#39;: &#39;croston.Croston&#39;}</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2544:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Trial got error: 0.19796658477664864</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Starting trial with hyperparameters: {&#39;class&#39;: &#39;trend.STLForecaster&#39;}</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2544:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Trial got error: 0.5245438066022906</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Starting trial with hyperparameters: {&#39;class&#39;: &#39;trend.PolynomialTrendForecaster&#39;}</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2544:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Trial got error: 0.6831021018701887</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Starting trial with hyperparameters: {&#39;class&#39;: &#39;theta.ThetaForecaster&#39;}</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544:Multiplicative seasonality is not appropriate for zero and negative values</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Trial got error: inf</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Selected best model: croston.Croston</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `fit_mixer` runtime: 0.35 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Started fitting AutoETS forecaster for array prediction</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `fit_mixer` runtime: 0.06 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Started fitting AutoARIMA forecaster for array prediction</span>
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]
@@ -503,36 +503,36 @@ Consider using one of the following signatures instead:
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]
   warnings.warn(
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `fit_mixer` runtime: 15.11 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Ensembling the mixer</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Mixer: NeuralTs got accuracy: 0.875</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2522:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Mixer: SkTime got accuracy: 0.956</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2522:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Mixer: ETSMixer got accuracy: 0.934</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2522:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Mixer: ARIMAMixer got accuracy: 0.951</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Picked best mixer: SkTime</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `fit` runtime: 17.47 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Learn phase 7/8] - Ensemble analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Analyzing the ensemble of mixers</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2522:This mixer does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:The block ICP is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:The block ConfStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:The block AccStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:The block PermutationFeatureImportance is now running its analyze() method</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2522:Block &#39;PermutationFeatureImportance&#39; does not support time series nor text encoding, skipping...</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `analyze_ensemble` runtime: 0.12 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Learn phase 8/8] - Adjustment on validation requested</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Updating the mixers</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `fit_mixer` runtime: 16.87 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Ensembling the mixer</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Mixer: NeuralTs got accuracy: 0.875</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2544:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Mixer: SkTime got accuracy: 0.956</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2544:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Mixer: ETSMixer got accuracy: 0.934</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2544:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Mixer: ARIMAMixer got accuracy: 0.951</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Picked best mixer: SkTime</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `fit` runtime: 19.44 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Learn phase 7/8] - Ensemble analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Analyzing the ensemble of mixers</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2544:This mixer does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:The block ICP is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:The block ConfStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:The block AccStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:The block PermutationFeatureImportance is now running its analyze() method</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2544:Block &#39;PermutationFeatureImportance&#39; does not support time series nor text encoding, skipping...</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `analyze_ensemble` runtime: 0.14 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Learn phase 8/8] - Adjustment on validation requested</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Updating the mixers</span>
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:120: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 1: 0.2962628627816836</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Loss @ epoch 2: 0.2954987585544586</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Started fitting AutoSKTime forecaster for array prediction</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Selected best model: croston.Croston</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Started fitting AutoETS forecaster for array prediction</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:Started fitting AutoARIMA forecaster for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 1: 0.2962628627816836</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Loss @ epoch 2: 0.2954987585544586</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Started fitting AutoSKTime forecaster for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Selected best model: croston.Croston</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Started fitting AutoETS forecaster for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:Started fitting AutoARIMA forecaster for array prediction</span>
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]
@@ -555,8 +555,8 @@ Consider using one of the following signatures instead:
   warnings.warn(
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/statsforecast/arima.py:884: UserWarning: possible convergence problem: minimize gave code 2]
   warnings.warn(
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `adjust` runtime: 0.41 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `learn` runtime: 18.36 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `adjust` runtime: 0.45 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `learn` runtime: 20.44 seconds</span>
 </pre></div></div>
 </div>
 </div>
@@ -576,34 +576,34 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Predict phase 1/4] - Data preprocessing</span>
-/tmp/ffbbb8b1c7f0f3fe37d36779904cdcbb216a3c3f32de1e6c16909194664755712.py:591: SettingWithCopyWarning:
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Predict phase 1/4] - Data preprocessing</span>
+/tmp/2386e63927c716973166698f6fb38c3247b4c63d953aea601690920209368024.py:591: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
   data[col] = [None] * len(data)
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Cleaning the data</span>
 /opt/hostedtoolcache/Python/3.9.17/x64/lib/python3.9/site-packages/dataprep_ml/cleaners.py:152: UserWarning: The argument &#39;infer_datetime_format&#39; is deprecated and will be removed in a future version. A strict version of it is now the default, see https://pandas.pydata.org/pdeps/0004-consistent-to-datetime-parsing.html. You can safely remove this argument.
   return pd.to_datetime(element, infer_datetime_format=True).apply(lambda x: x.timestamp())
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Transforming timeseries data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `preprocess` runtime: 0.03 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Predict phase 2/4] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `featurize` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Predict phase 3/4] - Calling ensemble</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2522:This mixer does not output probability estimates</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `_timed_call` runtime: 0.03 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2522:[Predict phase 4/4] - Analyzing output</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:The block ICP is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:The block ConfStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:The block AccStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:The block PermutationFeatureImportance is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2522:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `explain` runtime: 0.16 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2522: `predict` runtime: 0.24 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Transforming timeseries data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `preprocess` runtime: 0.03 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Predict phase 2/4] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `featurize` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Predict phase 3/4] - Calling ensemble</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2544:This mixer does not output probability estimates</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `_timed_call` runtime: 0.04 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2544:[Predict phase 4/4] - Analyzing output</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:The block ConfStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:The block PermutationFeatureImportance is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2544:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `explain` runtime: 0.19 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2544: `predict` runtime: 0.3 seconds</span>
 </pre></div></div>
 </div>
 <p>Let’s check how a single row might look:</p>
