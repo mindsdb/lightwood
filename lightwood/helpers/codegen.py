@@ -1,4 +1,13 @@
+import os
+import sys
+import time
+import string
+import random
+import tempfile
+import importlib
+
 from copy import deepcopy
+from types import ModuleType
 
 from type_infer.dtype import dtype
 
@@ -612,3 +621,39 @@ class Predictor(PredictorInterface):
 
     return predictor_code
 
+
+def _module_from_code(code: str, module_name: str) -> ModuleType:
+    """
+    Create a python module (containing the generated ``Predictor`` class) from the code. This is both a python object and an associated temporary file on your filesystem
+
+    :param code: The ``Predictor``'s code in text form
+    :param module_name: The name of the newly created module
+
+    :returns: A python module object
+    """ # noqa
+    dirname = tempfile.gettempdir()
+    filename = os.urandom(24).hex() + str(time.time()).replace('.', '') + '.py'
+    path = os.path.join(dirname, filename)
+    if 'LIGHTWOOD_DEV_SAVE_TO' in os.environ:
+        path = os.environ['LIGHTWOOD_DEV_SAVE_TO']
+
+    with open(path, 'wb') as fp:
+        fp.write(code.encode('utf-8'))
+        spec = importlib.util.spec_from_file_location(module_name, fp.name)
+        temp_module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = temp_module
+        spec.loader.exec_module(temp_module)
+
+    return temp_module
+
+
+def _predictor_from_code(code: str):
+    """
+    :param code: The ``Predictor``'s code in text form
+
+    :returns: A lightwood ``Predictor`` object
+    """
+    module_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
+    module_name += str(time.time()).replace('.', '')
+    predictor = _module_from_code(code, module_name).Predictor()
+    return predictor
