@@ -172,7 +172,6 @@
             
   <h1>Source code for api.high_level</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">ModuleType</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">dill</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -181,12 +180,8 @@
 <span class="kn">from</span> <span class="nn">type_infer.infer</span> <span class="kn">import</span> <span class="n">infer_types</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.predictor</span> <span class="kn">import</span> <span class="n">PredictorInterface</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.json_ai</span> <span class="kn">import</span> <span class="n">generate_json_ai</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.json_ai</span> <span class="kn">import</span> <span class="n">code_from_json_ai</span> <span class="k">as</span> <span class="n">_code_from_json_ai</span>
-<span class="kn">import</span> <span class="nn">importlib.util</span>
+<span class="kn">from</span> <span class="nn">lightwood.helpers.codegen</span> <span class="kn">import</span> <span class="n">code_from_json_ai</span> <span class="k">as</span> <span class="n">_code_from_json_ai</span><span class="p">,</span> <span class="n">_module_from_code</span><span class="p">,</span> <span class="n">_predictor_from_code</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">random</span>
-<span class="kn">import</span> <span class="nn">string</span>
 <span class="kn">import</span> <span class="nn">gc</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
@@ -280,10 +275,7 @@
 
 <span class="sd">    :returns: A lightwood ``Predictor`` object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">module_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">12</span><span class="p">))</span>
-    <span class="n">module_name</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="n">predictor</span> <span class="o">=</span> <span class="n">_module_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module_name</span><span class="p">)</span><span class="o">.</span><span class="n">Predictor</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">predictor</span></div>
+    <span class="k">return</span> <span class="n">_predictor_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="code_from_problem"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.code_from_problem">[docs]</a><span class="k">def</span> <span class="nf">code_from_problem</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">problem_definition</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProblemDefinition</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -333,31 +325,6 @@
             <span class="n">predictor</span> <span class="o">=</span> <span class="n">dill</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">predictor</span></div>
-
-
-<span class="k">def</span> <span class="nf">_module_from_code</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModuleType</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a python module (containing the generated ``Predictor`` class) from the code. This is both a python object and an associated temporary file on your filesystem</span>
-
-<span class="sd">    :param code: The ``Predictor``&#39;s code in text form</span>
-<span class="sd">    :param module_name: The name of the newly created module</span>
-
-<span class="sd">    :returns: A python module object</span>
-<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
-    <span class="n">dirname</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">()</span>
-    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.py&#39;</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-    <span class="k">if</span> <span class="s1">&#39;LIGHTWOOD_DEV_SAVE_TO&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LIGHTWOOD_DEV_SAVE_TO&#39;</span><span class="p">]</span>
-
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
-        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
-        <span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">spec_from_file_location</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">fp</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">temp_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">module_from_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_module</span>
-        <span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">exec_module</span><span class="p">(</span><span class="n">temp_module</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">temp_module</span>
 
 
 <div class="viewcode-block" id="predictor_from_json_ai"><a class="viewcode-back" href="../../api/high_level.html#api.high_level.predictor_from_json_ai">[docs]</a><span class="k">def</span> <span class="nf">predictor_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">:</span> <span class="n">JsonAI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PredictorInterface</span><span class="p">:</span>
