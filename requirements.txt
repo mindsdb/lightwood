@@ -14,7 +14,7 @@ scipy >=1.5.4
 psutil >=5.7.0
 setuptools >=21.2.1
 wheel >=0.32.2
-scikit-learn >=1.0.0, <=1.0.2
+scikit-learn >=1.0.0
 dataclasses_json >=0.5.4
 dill ==0.3.6
 sktime >=0.14.0,<0.15.0
