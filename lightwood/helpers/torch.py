@@ -13,7 +13,7 @@ def concat_vectors_and_pad(vec_list, max_):
 
     pad_size = max_ - len(vec_list)
     padding = (0, pad_size * vec_list[0].size(0))
-    padded = pad(cat_vec[None], padding, 'constant', 0)[0]
+    padded = pad(cat_vec[None], xpadding, 'constant', 0)[0]
 
     return padded
 
@@ -27,6 +27,25 @@ class LightwoodAutocast:
     """
     Equivalent to torch.cuda.amp.autocast, but checks device compute capability
     to activate the feature only when the GPU has tensor cores to leverage AMP.
+
+    **Attributes:**
+
+    * `active` (bool): Whether AMP is currently active.
+
+    **Methods:**
+
+    * `__init__(self, enabled=True)`: Initializes the class and sets the initial value of `active`.
+    * `__enter__()`: Enters the context manager and enables AMP if it is not already enabled.
+    * `__exit__()`: Exits the context manager and disables AMP.
+    * `__call__(self, func)`: Returns a decorated function that enables AMP when it is called.
+
+    **Usage:**
+
+    ```python
+    >>> import lightwood.helpers.torch as lt
+    >>> with lt.LightwoodAutocast():
+    ...     # This code will be executed in AMP mode.
+    ...     pass
     """
     active = False
 
