@@ -94,7 +94,7 @@ class NHitsMixer(BaseMixer):
         oby_col = self.ts_analysis["tss"].order_by
         gby = self.ts_analysis["tss"].group_by if self.ts_analysis["tss"].group_by else []
         df = deepcopy(cat_ds.data_frame)
-        Y_df = self._make_initial_df(df, mode='train')
+        Y_df, _ = self._make_initial_df(df, mode='train')
         self.group_boundaries = self._set_boundary(Y_df, gby)
         if gby:
             n_time = df[gby].value_counts().min()
@@ -133,7 +133,8 @@ class NHitsMixer(BaseMixer):
 
     def partial_fit(self, train_data: EncodedDs, dev_data: EncodedDs, args: Optional[dict] = None) -> None:
         self.hyperparam_search = False
-        self.fit(train_data, dev_data)  # TODO: add support for passing args (e.g. n_epochs)
+        self.train_args = args.get('trainer_args', {}) if args else {}  # NOTE: this replaces the original config
+        self.fit(train_data, dev_data)
         self.prepared = True
 
     def __call__(self, ds: Union[EncodedDs, ConcatedEncodedDs],
@@ -148,38 +149,40 @@ class NHitsMixer(BaseMixer):
         if args.predict_proba:
             log.warning('This mixer does not output probability estimates')
 
-        length = sum(ds.encoded_ds_lengths) if isinstance(ds, ConcatedEncodedDs) else len(ds)
-        ydf = pd.DataFrame(0,  # zero-filled
-                           index=np.arange(length),
-                           columns=['prediction', 'lower', 'upper'],
-                           dtype=object)
-
-        input_df = self._make_initial_df(deepcopy(ds.data_frame))
-        ydf['index'] = input_df['index']
-
-        pred_cols = ['NHITS-median']
-
         # provided quantile must match one of the training levels, else we default to the largest one of these
         if args.fixed_confidence is not None and int(args.fixed_confidence * 100) in self.conf_level:
             level = int(args.fixed_confidence * 100)
         else:
             level = max(self.conf_level)
-        pred_cols.extend([f'NHITS-lo-{level}', f'NHITS-hi-{level}'])
 
         target_cols = ['prediction', 'lower', 'upper']
+        pred_cols = ['NHITS-median', f'NHITS-lo-{level}', f'NHITS-hi-{level}']
+
+        input_df, idxs = self._make_initial_df(deepcopy(ds.data_frame))
+        length = sum(ds.encoded_ds_lengths) if isinstance(ds, ConcatedEncodedDs) else len(ds)
+        ydf = pd.DataFrame(0, index=range(length), columns=target_cols, dtype=object)
+
+        # fill with zeroed arrays
+        zero_array = [0 for _ in range(self.horizon)]
         for target_col in target_cols:
-            ydf[target_col] = [[0 for _ in range(self.horizon)] for _ in range(len(ydf))]  # zero-filled arrays
+            ydf[target_col] = [zero_array] * len(ydf)
 
-        group_ends = []
-        for group in input_df['unique_id'].unique():
-            group_ends.append(input_df[input_df['unique_id'] == group]['index'].iloc[-1])
+        grouper = input_df.groupby('unique_id')
+        group_ends = grouper.last()['index'].values
         fcst = self.model.predict(input_df).reset_index()
+        fcst['ds'] = fcst.groupby('unique_id').cumcount()
+        horizons = pd.pivot_table(fcst, values=pred_cols, index='unique_id', columns='ds')
 
-        for gidx, group in zip(group_ends, input_df['unique_id'].unique()):
-            for pred_col, target_col in zip(pred_cols, target_cols):
-                group_preds = fcst[fcst['unique_id'] == group][pred_col].tolist()[:self.horizon]
-                idx = ydf[ydf['index'] == gidx].index[0]
-                ydf.at[idx, target_col] = group_preds
+        temp_df = pd.DataFrame(0,  # zero-filled
+                               index=range(len(horizons)),
+                               columns=target_cols,
+                               dtype=object)
+
+        for pcol, tcol in zip(pred_cols, target_cols):
+            temp_df[tcol] = horizons[pcol].values.tolist()
+
+        for tcol in target_cols:
+            ydf[tcol].iloc[group_ends] = temp_df[tcol]
 
         ydf['confidence'] = level / 100
         return ydf
@@ -192,11 +195,12 @@ class NHitsMixer(BaseMixer):
         """  # noqa
 
         oby_col = self.ts_analysis["tss"].order_by
-        df = df.sort_values(by=f'__mdb_original_{oby_col}')
+        # df = df.sort_values(by=f'__mdb_original_{oby_col}')  # TODO rm
         df[f'__mdb_parsed_{oby_col}'] = df.index
         df = df.reset_index(drop=True)
 
         Y_df = pd.DataFrame()
+        Y_df['_index'] = np.arange(len(df))
         Y_df['y'] = df[self.target]
         Y_df['ds'] = df[f'__mdb_parsed_{oby_col}']
 
@@ -219,7 +223,8 @@ class NHitsMixer(BaseMixer):
             if filtered:
                 Y_df = pd.concat(filtered)
 
-        return Y_df
+        filtered_idxs = Y_df.pop('_index').values
+        return Y_df, filtered_idxs
 
     @staticmethod
     def _set_boundary(df: pd.DataFrame, gby: list) -> Dict[str, object]:

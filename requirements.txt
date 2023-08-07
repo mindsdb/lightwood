@@ -1,23 +1,23 @@
-type_infer >=0.0.13
-dataprep_ml >=0.0.13
-mindsdb-evaluator >=0.0.9
+type_infer >=0.0.15
+dataprep_ml >=0.0.18
+mindsdb-evaluator >=0.0.11
 numpy
-nltk >=3,<3.6
-python-dateutil >=2.8.1
-pandas >=1.1.5, <1.5.0
+nltk >=3.8, <3.9
+python-dateutil >=2.8.2
+pandas >=2.0.0, <2.1.0
 schema >=0.6.8
 torch >=2.0.0, <2.1
 requests >=2.0.0
 transformers
-optuna >=2.8.0,<2.10.0
+optuna >=3.1.0,<4.0.0
 scipy >=1.5.4
 psutil >=5.7.0
 setuptools >=21.2.1
 wheel >=0.32.2
-scikit-learn >=1.0.0, <=1.0.2
+scikit-learn >=1.0.0
 dataclasses_json >=0.5.4
 dill ==0.3.6
-sktime >=0.14.0,<0.15.0
+sktime >=0.21.0,<0.22.0
 statsforecast ==1.4.0
 torch_optimizer ==0.1.0
 black ==23.3.0

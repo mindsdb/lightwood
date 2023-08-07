@@ -46,8 +46,8 @@ class TestTimeseries(unittest.TestCase):
             for g in data[group].unique():
                 subframe = data[data[group] == g]
                 length = subframe.shape[0]
-                train = train.append(subframe[:int(length * train_ratio)])
-                test = test.append(subframe[int(length * train_ratio):])
+                train = pd.concat([train, subframe[:int(length * train_ratio)]], ignore_index=True)
+                test = pd.concat([test, subframe[int(length * train_ratio):]], ignore_index=True)
         else:
             train = data[:int(data.shape[0] * train_ratio)]
             test = data[int(data.shape[0] * train_ratio):]
@@ -506,7 +506,7 @@ class TestTimeseries(unittest.TestCase):
         data = pd.read_csv('tests/data/arrivals.csv')
         data = data[data['Country'].isin(['US', 'Japan'])]
         target_len = len(data)
-        data = data.append(data[data['Country'] == 'Japan']).reset_index(drop=True)  # force duplication of one series
+        data = pd.concat([data, data[data['Country'] == 'Japan']], ignore_index=True)  # force duplication of one series
         jai = json_ai_from_problem(data, ProblemDefinition.from_dict({'target': 'Traffic',
                                                                       'time_aim': 30,
                                                                       'timeseries_settings': {

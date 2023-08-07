@@ -4,12 +4,13 @@ import pandas as pd
 
 from dataprep_ml import StatisticalAnalysis
 
-from lightwood.helpers.log import log
+from lightwood.helpers.log import log, timed
 from lightwood.api.types import ProblemDefinition, PredictionArguments
 from lightwood.helpers.ts import get_inferred_timestamps
 from lightwood.analysis.base import BaseAnalysisBlock
 
 
+@timed
 def explain(data: pd.DataFrame,
             encoded_data: torch.Tensor,
             predictions: pd.DataFrame,

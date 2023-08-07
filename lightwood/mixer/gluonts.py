@@ -234,14 +234,20 @@ class GluonTSMixer(BaseMixer):
         for col in self.static_features_cat:
             df[col] = self.static_features_cat_encoders[col].transform(df[col].values.reshape(-1, 1))
 
+        static_features = []
+        if self.static_features_real:
+            static_features.extend(self.static_features_real)
+        if self.static_features_cat:
+            static_features.extend(self.static_features_cat)
+        static_features_df = df[static_features]
+
         ds = PandasDataset.from_long_dataframe(
             df,
             target=self.target,
-            item_id=gby,
+            item_id=gby[0],
             freq=freq,
             timestamp=oby_col_name,
-            feat_static_real=self.static_features_real if self.static_features_real else [],
-            feat_static_cat=self.static_features_cat if self.static_features_cat else [],
+            static_features=static_features_df
         )
         return ds
 

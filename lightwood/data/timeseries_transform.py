@@ -213,7 +213,7 @@ def _ts_infer_next_row(df: pd.DataFrame, ob: str) -> pd.DataFrame:
         delta = 1
 
     last_row[ob] += delta
-    new_df = df.append(last_row)
+    new_df = pd.concat([df, last_row], ignore_index=True)
     new_df.index = pd.DatetimeIndex(new_index)
     return new_df
 
