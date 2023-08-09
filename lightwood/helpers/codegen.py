@@ -385,7 +385,17 @@ train_data = EncodedDs(self.encoders, train_data, self.target)
 # --------------- #
 log.info('Updating the mixers')
 
+mixers_args = adjust_args.get('using', {{}}).get('model.args', {{}}).get('submodels', [])
+mixers_args = {{
+    x['module']: x['args']
+    for x in mixers_args
+}}
+
 for mixer in self.mixers:
+        mixer_name = mixer.__class__.__name__
+        mixer_args = mixers_args.get(mixer_name)
+        if mixer_args is not None and isinstance(mixer_args.get('train_args'), dict):
+            adjust_args.update(mixer_args['train_args'])
         mixer.partial_fit(train_data, dev_data, adjust_args)
 """  # noqa
 
