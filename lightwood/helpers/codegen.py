@@ -385,11 +385,13 @@ train_data = EncodedDs(self.encoders, train_data, self.target)
 # --------------- #
 log.info('Updating the mixers')
 
-mixers_args = adjust_args.get('using', {{}}).get('model.args', {{}}).get('submodels', [])
-mixers_args = {{
-    x['module']: x['args']
-    for x in mixers_args
-}}
+mixers_args = {{}}
+if isinstance(adjust_args, dict):
+    mixers_args = adjust_args.get('using', {{}}).get('model.args', {{}}).get('submodels', [])
+    mixers_args = {{
+        x['module']: x['args']
+        for x in mixers_args
+    }}
 
 for mixer in self.mixers:
         mixer_name = mixer.__class__.__name__
