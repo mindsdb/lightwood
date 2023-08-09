@@ -13,7 +13,7 @@ def concat_vectors_and_pad(vec_list, max_):
 
     pad_size = max_ - len(vec_list)
     padding = (0, pad_size * vec_list[0].size(0))
-    padded = pad(cat_vec[None], xpadding, 'constant', 0)[0]
+    padded = pad(cat_vec[None], padding, 'constant', 0)[0]
 
     return padded
 
@@ -50,6 +50,9 @@ class LightwoodAutocast:
     active = False
 
     def __init__(self, enabled=True):
+        """
+        Enters the context manager and enables AMP if it is not already enabled.
+        """
         self.major = 0  # GPU major version
         torch_version = [int(i) for i in torch.__version__.split('.')[:-1]]
 
@@ -69,12 +72,18 @@ class LightwoodAutocast:
         LightwoodAutocast.active = self._enabled
 
     def __enter__(self):
+        """
+        * `__enter__()`: Enters the context manager and enables AMP if it is not already enabled.
+        """
         if self._enabled:
             self.prev = torch.is_autocast_enabled()
             torch.set_autocast_enabled(self._enabled)
             torch.autocast_increment_nesting()
 
     def __exit__(self, *args):
+        """
+        * `__exit__()`: Exits the context manager and disables AMP.
+        """
         if self._enabled:
             # Drop the cache when we exit to a nesting level that's outside any instance of autocast
             if torch.autocast_decrement_nesting() == 0:
@@ -83,6 +92,9 @@ class LightwoodAutocast:
         return False
 
     def __call__(self, func):
+        """
+        * `__call__(self, func)`: Returns a decorated function that enables AMP when it is called.
+        """
         @functools.wraps(func)
         def decorate_autocast(*args, **kwargs):
             with self:
