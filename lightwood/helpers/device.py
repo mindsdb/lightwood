@@ -6,12 +6,12 @@ from torch.cuda import device_count, get_device_capability
 
 def is_cuda_compatible():
     """
-    Check if the system has CUDA-compatible devices with the required architecture and 
+    Check if the system has CUDA-compatible devices with the required architecture and
     compiled CUDA version.
 
-    This function checks the compatibility of CUDA devices available on the system by 
-    comparing their architectures and the compiled CUDA version. It iterates through 
-    the available devices and verifies if their architectures meet the minimum 
+    This function checks the compatibility of CUDA devices available on the system by
+    comparing their architectures and the compiled CUDA version. It iterates through
+    the available devices and verifies if their architectures meet the minimum
     requirement specified by the function, and also checks if the compiled CUDA version 
     is greater than a specific version.
 
@@ -44,12 +44,12 @@ def get_devices():
     """
     Get the appropriate Torch device(s) based on CUDA availability and compatibility.
 
-    This function determines the appropriate Torch device(s) to be used for computations
-    based on the availability of CUDA and compatible devices. It checks if CUDA is 
-    available and if the available CUDA devices are compatible according to the 
-    'is_cuda_compatible()' function. If compatible devices are found, the function 
+    This function determines the appropriate Torch device(s) to be used for
+    computations based on the availability of CUDA and compatible devices. It checks
+    if CUDA is available and if the available CUDA devices are compatible according to
+    the 'is_cuda_compatible()' function. If compatible devices are found, the function
     selects either the first available CUDA device or a randomly selected one based on 
-    the 'RANDOM_GPU' environment variable. If CUDA is not available or no compatible 
+    the 'RANDOM_GPU' environment variable. If CUDA is not available or no compatible
     devices are found, the function returns the CPU device.
 
     Returns:
@@ -82,11 +82,11 @@ def get_device_from_name(device_name=''):
     """
     Get a Torch device based on the specified device name or default behavior.
 
-    This function returns a Torch device based on the specified device name or the 
+    This function returns a Torch device based on the specified device name or the
     default behavior, which is to return the output of the 'get_devices()' function.
 
     Args:
-        device_name (str, optional): Name of the device to use. Default is an empty 
+        device_name (str, optional): Name of the device to use. Default is an empty
         string.
         
     Returns:
