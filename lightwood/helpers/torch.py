@@ -6,11 +6,11 @@ from lightwood.helpers.device import get_devices
 
 def concat_vectors_and_pad(vec_list, max_):
     """
-    Concatenates a list of input vectors and pads them to match a specified maximum 
+    Concatenates a list of input vectors and pads them to match a specified maximum
     length.
 
-    This function takes a list of input vectors, concatenates them along a specified 
-    dimension (dim=0), and then pads the concatenated vector to achieve a specified 
+    This function takes a list of input vectors, concatenates them along a specified
+    dimension (dim=0), and then pads the concatenated vector to achieve a specified
     maximum length. The padding is done with zeros.
 
     Args:
@@ -21,7 +21,7 @@ def concat_vectors_and_pad(vec_list, max_):
         torch.Tensor: The concatenated and padded vector.
 
     Raises:
-        AssertionError: If the length of 'vec_list' is not greater than 0, or if it 
+        AssertionError: If the length of 'vec_list' is not greater than 0, or if it
                         exceeds 'max_len', or if 'max_len' is not greater than 0.
 
     Example:
@@ -56,7 +56,7 @@ class LightwoodAutocast:
 
     **Attributes:**
 
-    * `active` (bool): Whether AMP is currently active. This attribute is at the class 
+    * `active` (bool): Whether AMP is currently active. This attribute is at the class
     level
 
     **Usage:**

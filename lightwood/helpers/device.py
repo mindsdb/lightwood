@@ -12,8 +12,8 @@ def is_cuda_compatible():
     This function checks the compatibility of CUDA devices available on the system by
     comparing their architectures and the compiled CUDA version. It iterates through
     the available devices and verifies if their architectures meet the minimum
-    requirement specified by the function, and also checks if the compiled CUDA version 
-    is greater than a specific version.
+    requirement specified by the function, and also checks if the compiled CUDA
+    version is greater than a specific version.
 
     Returns:
         bool: True if there are compatible CUDA devices, otherwise False.
@@ -48,14 +48,13 @@ def get_devices():
     computations based on the availability of CUDA and compatible devices. It checks
     if CUDA is available and if the available CUDA devices are compatible according to
     the 'is_cuda_compatible()' function. If compatible devices are found, the function
-    selects either the first available CUDA device or a randomly selected one based on 
+    selects either the first available CUDA device or a randomly selected one based on
     the 'RANDOM_GPU' environment variable. If CUDA is not available or no compatible
     devices are found, the function returns the CPU device.
 
     Returns:
-        Tuple: A tuple containing the selected Torch device and the number of available 
+        Tuple: A tuple containing the selected Torch device and the number of available
         devices.
-        
     Example:
         >>> device, num_devices = get_devices()
         >>> print(device)
