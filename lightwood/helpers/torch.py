@@ -5,6 +5,32 @@ from lightwood.helpers.device import get_devices
 
 
 def concat_vectors_and_pad(vec_list, max_):
+    """
+    Concatenates a list of input vectors and pads them to match a specified maximum 
+    length.
+
+    This function takes a list of input vectors, concatenates them along a specified 
+    dimension (dim=0), and then pads the concatenated vector to achieve a specified 
+    maximum length. The padding is done with zeros.
+
+    Args:
+        vec_list (list of torch.Tensor): List of input vectors to concatenate and pad.
+        max_len (int): The maximum length of the concatenated and padded vector.
+
+    Returns:
+        torch.Tensor: The concatenated and padded vector.
+
+    Raises:
+        AssertionError: If the length of 'vec_list' is not greater than 0, or if it 
+                        exceeds 'max_len', or if 'max_len' is not greater than 0.
+
+    Example:
+        >>> input_tensors = [torch.tensor([1, 2]), torch.tensor([3, 4, 5])]
+        >>> max_length = 5
+        >>> concatenated_padded = concat_vectors_and_pad(input_tensors, max_length)
+        >>> print(concatenated_padded)
+        tensor([1, 2, 3, 4, 5])
+    """
     assert len(vec_list) > 0
     assert len(vec_list) <= max_
     assert max_ > 0
@@ -30,14 +56,8 @@ class LightwoodAutocast:
 
     **Attributes:**
 
-    * `active` (bool): Whether AMP is currently active.
-
-    **Methods:**
-
-    * `__init__(self, enabled=True)`: Initializes the class and sets the initial value of `active`.
-    * `__enter__()`: Enters the context manager and enables AMP if it is not already enabled.
-    * `__exit__()`: Exits the context manager and disables AMP.
-    * `__call__(self, func)`: Returns a decorated function that enables AMP when it is called.
+    * `active` (bool): Whether AMP is currently active. This attribute is at the class 
+    level
 
     **Usage:**
 
