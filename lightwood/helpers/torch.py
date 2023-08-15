@@ -15,7 +15,7 @@ def concat_vectors_and_pad(vec_list, max_):
 
     Args:
         vec_list (list of torch.Tensor): List of input vectors to concatenate and pad.
-        max_len (int): The maximum length of the concatenated and padded vector.
+        max_ (int): The maximum length of the concatenated and padded vector.
 
     Returns:
         torch.Tensor: The concatenated and padded vector.
@@ -71,7 +71,10 @@ class LightwoodAutocast:
 
     def __init__(self, enabled=True):
         """
-        Enters the context manager and enables AMP if it is not already enabled.
+        Initializes the context manager for Automatic Mixed Precision (AMP) functionality.
+
+        Args:
+            enabled (bool, optional): Whether to enable AMP. Defaults to True.
         """
         self.major = 0  # GPU major version
         torch_version = [int(i) for i in torch.__version__.split('.')[:-1]]
