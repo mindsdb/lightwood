@@ -108,6 +108,9 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.LightwoodAutocast">LightwoodAutocast</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.add_tn_num_conf_bounds">add_tn_num_conf_bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#helpers.concat_vectors_and_pad">concat_vectors_and_pad</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#helpers.get_devices">get_devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#helpers.is_cuda_compatible">is_cuda_compatible</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpers.is_none">is_none</a></li>
 </ul>
 </li>
@@ -187,6 +190,23 @@
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">LightwoodAutocast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/torch.html#LightwoodAutocast"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.LightwoodAutocast" title="Permalink to this definition">¶</a></dt>
 <dd><p>Equivalent to torch.cuda.amp.autocast, but checks device compute capability
 to activate the feature only when the GPU has tensor cores to leverage AMP.</p>
+<p><strong>Attributes:</strong></p>
+<ul class="simple">
+<li><p><cite>active</cite> (bool): Whether AMP is currently active. This attribute is at the class</p></li>
+</ul>
+<p>level</p>
+<p><strong>Usage:</strong></p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
+&gt;&gt;&gt; import lightwood.helpers.torch as lt
+&gt;&gt;&gt; with lt.LightwoodAutocast():
+…     # This code will be executed in AMP mode.
+…     pass</p>
+<p>Initializes the context manager for Automatic Mixed Precision (AMP) functionality.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>enabled</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to enable AMP. Defaults to True.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -196,6 +216,98 @@ to activate the feature only when the GPU has tensor cores to leverage AMP.</p>
 <p>Add confidence (and bounds if applicable) to t+n predictions, for n&gt;1
 TODO: active research question: how to guarantee 1-e coverage for t+n, n&gt;1
 For now, (conservatively) increases width by the confidence times the log of the time step (and a scaling factor).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="helpers.concat_vectors_and_pad">
+<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">concat_vectors_and_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/torch.html#concat_vectors_and_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.concat_vectors_and_pad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenates a list of input vectors and pads them to match a specified maximum
+length.</p>
+<p>This function takes a list of input vectors, concatenates them along a specified
+dimension (dim=0), and then pads the concatenated vector to achieve a specified
+maximum length. The padding is done with zeros.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vec_list</strong> (<em>list of torch.Tensor</em>) – List of input vectors to concatenate and pad.</p></li>
+<li><p><strong>max</strong> (<em>int</em>) – The maximum length of the concatenated and padded vector.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The concatenated and padded vector.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If the length of ‘vec_list’ is not greater than 0, or if it
+    exceeds ‘max_len’, or if ‘max_len’ is not greater than 0.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">input_tensors</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">max_length</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">concatenated_padded</span> <span class="o">=</span> <span class="n">concat_vectors_and_pad</span><span class="p">(</span><span class="n">input_tensors</span><span class="p">,</span> <span class="n">max_length</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">concatenated_padded</span><span class="p">)</span>
+<span class="go">tensor([1, 2, 3, 4, 5])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="helpers.get_devices">
+<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">get_devices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/device.html#get_devices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.get_devices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the appropriate Torch device(s) based on CUDA availability and compatibility.</p>
+<p>This function determines the appropriate Torch device(s) to be used for
+computations based on the availability of CUDA and compatible devices. It checks
+if CUDA is available and if the available CUDA devices are compatible according to
+the ‘is_cuda_compatible()’ function. If compatible devices are found, the function
+selects either the first available CUDA device or a randomly selected one based on
+the ‘RANDOM_GPU’ environment variable. If CUDA is not available or no compatible
+devices are found, the function returns the CPU device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A tuple containing the selected Torch device and the number of available
+devices.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Tuple</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">device</span><span class="p">,</span> <span class="n">num_devices</span> <span class="o">=</span> <span class="n">get_devices</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+<span class="go">cuda:0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">num_devices</span><span class="p">)</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="helpers.is_cuda_compatible">
+<span class="sig-prename descclassname"><span class="pre">helpers.</span></span><span class="sig-name descname"><span class="pre">is_cuda_compatible</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/helpers/device.html#is_cuda_compatible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#helpers.is_cuda_compatible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the system has CUDA-compatible devices with the required architecture and
+compiled CUDA version.</p>
+<p>This function checks the compatibility of CUDA devices available on the system by
+comparing their architectures and the compiled CUDA version. It iterates through
+the available devices and verifies if their architectures meet the minimum
+requirement specified by the function, and also checks if the compiled CUDA
+version is greater than a specific version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if there are compatible CUDA devices, otherwise False.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_compatible</span> <span class="o">=</span> <span class="n">is_cuda_compatible</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">is_compatible</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
