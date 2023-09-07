@@ -257,32 +257,7 @@ def generate_json_ai(
             )
         elif tss.is_timeseries and tss.horizon > 1 and tss.use_previous_target and \
                 dtype_dict[target] in (dtype.integer, dtype.float, dtype.quantity):
-
-            submodels.extend(
-                [
-                    {
-                        "module": "SkTime",
-                        "args": {
-                            "stop_after": "$problem_definition.seconds_per_mixer",
-                            "horizon": "$problem_definition.timeseries_settings.horizon",
-                        },
-                    },
-                    {
-                        "module": "ETSMixer",
-                        "args": {
-                            "stop_after": "$problem_definition.seconds_per_mixer",
-                            "horizon": "$problem_definition.timeseries_settings.horizon",
-                        },
-                    },
-                    {
-                        "module": "ARIMAMixer",
-                        "args": {
-                            "stop_after": "$problem_definition.seconds_per_mixer",
-                            "horizon": "$problem_definition.timeseries_settings.horizon",
-                        },
-                    }
-                ]
-            )
+            pass  # TODO: XGBoostArrayMixer
 
     model = {
         "module": "BestOf",
