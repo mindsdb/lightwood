@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from neuralforecast import NeuralForecast
 from neuralforecast.models.nhits import NHITS
+from neuralforecast.models.nbeats import NBEATS
 from neuralforecast.losses.pytorch import MQLoss
 
 from lightwood.helpers.log import log
@@ -20,6 +21,7 @@ class NHitsMixer(BaseMixer):
     model_path: str
     hyperparam_search: bool
     default_config: dict
+    SUPPORTED_MODELS = ('nhits', 'nbeats')
 
     def __init__(
             self,
@@ -56,7 +58,14 @@ class NHitsMixer(BaseMixer):
         self.grouped_by = ['__default'] if not ts_analysis['tss'].group_by else ts_analysis['tss'].group_by
         self.group_boundaries = {}  # stores last observed timestamp per series
         self.train_args = train_args.get('trainer_args', {}) if train_args else {}
-        self.train_args['early_stop_patience_steps'] = self.train_args.get('early_stop_patience_steps', 10)
+
+        # we set a fairly aggressive training schedule by default
+        self.train_args['early_stop_patience_steps'] = self.train_args.get('early_stop_patience_steps', 1)
+        self.train_args['val_check_steps'] = self.train_args.get('val_check_steps', 10)
+        self.train_args['learning_rate'] = self.train_args.get('learning_rate', 3e-3)
+        self.train_args['mlp_units'] = self.train_args.get('mlp_units', [[128, 128], [128, 128]])
+        self.train_args['random_seed'] = self.train_args.get('random_seed', 1)
+
         self.conf_level = self.train_args.pop('conf_level', [90])
         for level in self.conf_level:
             assert 0 <= level <= 100, f'A provided level is not in the [0, 100] range (found: {level})'
@@ -74,18 +83,24 @@ class NHitsMixer(BaseMixer):
             'T': 'hourly',  # NOTE: use another pre-trained model once available
             'S': 'hourly'  # NOTE: use another pre-trained model once available
         }
-        self.model_names = {
-            'hourly': 'nhits_m4_hourly.ckpt',  # hourly (non-tiny)
-            'daily': 'nhits_m4_daily.ckpt',   # daily
-            'monthly': 'nhits_m4_monthly.ckpt',  # monthly
-            'yearly': 'nhits_m4_yearly.ckpt',  # yearly
-        }
-        self.model_name = None
         self.model = None
+        self.model_class_str = self.train_args.get('model_class', 'nhits').lower()
+        assert self.model_class_str in NHitsMixer.SUPPORTED_MODELS, f'Provided model class ({self.model_class_str}) is not supported. Supported models are: {NHitsMixer.SUPPORTED_MODELS}'  # noqa
+        self.model_class = NBEATS if self.model_class_str == 'nbeats' else NHITS
+        self.model_name = None
+        self.model_names = {
+            'nhits': {
+                'hourly': 'nhits_m4_hourly.ckpt',  # hourly (non-tiny)
+                'daily': 'nhits_m4_daily.ckpt',   # daily
+                'monthly': 'nhits_m4_monthly.ckpt',  # monthly
+                'yearly': 'nhits_m4_yearly.ckpt',  # yearly
+            },
+            'nbeats': {}  # TODO: complete
+        }
 
     def fit(self, train_data: EncodedDs, dev_data: EncodedDs) -> None:
         """
-        Fits the N-HITS model.
+        Fits the NeuralForecast model.
         """  # noqa
         log.info('Started fitting N-HITS forecasting model')
 
@@ -110,7 +125,7 @@ class NHitsMixer(BaseMixer):
                                                    None)
             self.model_name = self.model_names['hourly'] if self.model_name is None else self.model_name
             ckpt_url = self.base_url + self.model_name
-            self.model = NHITS.load_from_checkpoint(ckpt_url)
+            self.model = self.model_class.load_from_checkpoint(ckpt_url)
 
             if not self.window < self.model.hparams.n_time_in:
                 log.info(f'NOTE: Provided window ({self.window}) is smaller than specified model input length ({self.model.hparams.n_time_in}). Will train a new model from scratch.')  # noqa
@@ -126,8 +141,8 @@ class NHitsMixer(BaseMixer):
                 new_window = max(1, n_time - self.horizon - 1)
                 self.window = new_window
                 log.info(f'Window {self.window} is too long for data provided (group: {df[gby].value_counts()[::-1].index[0]}), reducing window to {new_window}.')  # noqa
-            model = NHITS(h=n_time_out, input_size=self.window, **self.train_args, loss=MQLoss(level=self.conf_level))
-            self.model = NeuralForecast(models=[model], freq=self.ts_analysis['sample_freqs']['__default'])
+            model = self.model_class(h=n_time_out, input_size=self.window, **self.train_args, loss=MQLoss(level=self.conf_level))  # noqa
+            self.model = NeuralForecast(models=[model], freq=self.ts_analysis['sample_freqs']['__default'],)
             self.model.fit(df=Y_df, val_size=n_ts_val)
             log.info('Successfully trained N-HITS forecasting model.')
 
@@ -156,7 +171,11 @@ class NHitsMixer(BaseMixer):
             level = max(self.conf_level)
 
         target_cols = ['prediction', 'lower', 'upper']
-        pred_cols = ['NHITS-median', f'NHITS-lo-{level}', f'NHITS-hi-{level}']
+        pred_cols = [
+            f'{self.model_class_str.upper()}-median',
+            f'{self.model_class_str.upper()}-lo-{level}',
+            f'{self.model_class_str.upper()}-hi-{level}'
+        ]
 
         input_df, idxs = self._make_initial_df(deepcopy(ds.data_frame))
         length = sum(ds.encoded_ds_lengths) if isinstance(ds, ConcatedEncodedDs) else len(ds)
@@ -189,7 +208,7 @@ class NHitsMixer(BaseMixer):
 
     def _make_initial_df(self, df, mode='inference'):
         """
-        Prepares a dataframe for the NHITS model according to what neuralforecast expects.
+        Prepares a dataframe for the model according to what neuralforecast expects.
 
         If a per-group boundary exists, this method additionally drops out all observations prior to the cutoff.
         """  # noqa

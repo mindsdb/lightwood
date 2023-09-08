@@ -226,6 +226,10 @@ def generate_json_ai(
                             "stop_after": "$problem_definition.seconds_per_mixer",
                             "search_hyperparameters": True,
                         },
+                    },
+                    {
+                        "module": "NHitsMixer",
+                        "args": {},
                     }
                 ]
             )
