@@ -144,6 +144,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#mixer.Unit.partial_fit">partial_fit</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.XGBoostArrayMixer">XGBoostArrayMixer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostArrayMixer.fit">fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostArrayMixer.partial_fit">partial_fit</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#mixer.XGBoostMixer">XGBoostMixer</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostMixer.fit">fit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostMixer.partial_fit">partial_fit</a></li>
@@ -660,6 +665,52 @@ based on the global SMAPE error across all groups.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.Unit.partial_fit">
 <span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/unit.html#Unit.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit.partial_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the new training data subset.</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of new the “dev” data subset. As in <cite>fit()</cite>, this can be used as an internal validation subset.</p></li>
+<li><p><strong>adjust_args</strong> – optional arguments to customize the finetuning process.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mixer.XGBoostArrayMixer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">XGBoostArrayMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost_array.html#XGBoostArrayMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostArrayMixer" title="Permalink to this definition">¶</a></dt>
+<dd><p>XGBoost-based model, intended for usage in forecasting tasks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.XGBoostArrayMixer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost_array.html#XGBoostArrayMixer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostArrayMixer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits/trains a mixer with training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
+<li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mixer.XGBoostArrayMixer.partial_fit">
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost_array.html#XGBoostArrayMixer.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostArrayMixer.partial_fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
