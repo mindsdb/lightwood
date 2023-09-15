@@ -475,7 +475,7 @@ class TestTimeseries(unittest.TestCase):
         target = 'MA'
         order_by = 'saledate'
         window = 8
-        for horizon in [4]:
+        for horizon in [1, 4]:
             train, _, test = stratify(data, pct_train=0.8, pct_dev=0, pct_test=0.2, stratify_on=gby, seed=1,
                                       reshuffle=False)
             jai = json_ai_from_problem(train,

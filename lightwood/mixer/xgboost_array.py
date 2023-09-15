@@ -55,7 +55,7 @@ class XGBoostArrayMixer(BaseMixer):
         self.ts_analysis = ts_analysis
         self.supports_proba = False
         self.use_stl = False
-        self.stable = True
+        self.stable = False
 
     def _fit(self, train_data: EncodedDs, dev_data: EncodedDs, submodel_method='fit') -> None:
         original_train = deepcopy(train_data.data_frame)

@@ -53,7 +53,7 @@ class TestMixerSelection(unittest.TestCase):
                 'window': 5
             }
         }
-        expected_mixers = ['NeuralTs', 'Regression', 'RandomForest', 'XGBoostMixer', 'NHitsMixer']
+        expected_mixers = ['NeuralTs', 'Regression', 'RandomForest', 'XGBoostMixer']
         mixers = self.get_mixers(df, target, prob_kwargs=prob_kwargs)
         self.assertEqual(set(mixers), set(expected_mixers))
 
@@ -69,6 +69,6 @@ class TestMixerSelection(unittest.TestCase):
                 'window': 5
             }
         }
-        expected_mixers = ['NeuralTs', 'NHitsMixer']
+        expected_mixers = ['NeuralTs', 'XGBoostArrayMixer']
         mixers = self.get_mixers(df, target, prob_kwargs=prob_kwargs)
         self.assertEqual(set(mixers), set(expected_mixers))
