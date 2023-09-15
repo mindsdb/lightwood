@@ -4,11 +4,10 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 
-from type_infer.dtype import dtype
 from lightwood.helpers.log import log
 from lightwood.encoder.base import BaseEncoder
 from lightwood.mixer.base import BaseMixer
-from lightwood.mixer.xgboost import XGBoostMixer, check_gpu_support
+from lightwood.mixer.xgboost import XGBoostMixer
 from lightwood.api.types import PredictionArguments, TimeseriesSettings
 from lightwood.data.encoded_ds import EncodedDs, ConcatedEncodedDs
 
