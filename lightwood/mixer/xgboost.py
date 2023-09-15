@@ -83,8 +83,8 @@ class XGBoostMixer(BaseMixer):
         self.use_optuna = use_optuna
         self.params = {}
         self.fit_on_dev = fit_on_dev
-        self.cls_dtypes = [dtype.categorical, dtype.binary]  # , dtype.cat_tsarray]  # TODO
-        self.float_dtypes = [dtype.float, dtype.quantity]  # , dtype.num_tsarray]  # TODO
+        self.cls_dtypes = [dtype.categorical, dtype.binary, dtype.cat_tsarray]
+        self.float_dtypes = [dtype.float, dtype.quantity, dtype.num_tsarray]
         self.num_dtypes = [dtype.integer] + self.float_dtypes
         self.supports_proba = dtype_dict[target] in self.cls_dtypes
         self.stable = True

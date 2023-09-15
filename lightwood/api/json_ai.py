@@ -203,6 +203,8 @@ def generate_json_ai(
             ]
         )
     else:
+
+        # add neural model
         if not tss.is_timeseries:
             submodels.extend(
                 [
@@ -227,13 +229,10 @@ def generate_json_ai(
                             "search_hyperparameters": True,
                         },
                     },
-                    {
-                        "module": "NHitsMixer",
-                        "args": {},
-                    }
                 ]
             )
 
+        # add other models
         if (not tss.is_timeseries or tss.horizon == 1) and dtype_dict[target] not in (dtype.num_array, dtype.cat_array):
             submodels.extend(
                 [
@@ -259,9 +258,15 @@ def generate_json_ai(
                     },
                 ]
             )
-        elif tss.is_timeseries and tss.horizon > 1 and tss.use_previous_target and \
-                dtype_dict[target] in (dtype.integer, dtype.float, dtype.quantity):
-            pass  # TODO: XGBoostArrayMixer
+
+        # special forecasting dispatch
+        elif tss.is_timeseries:
+            submodels.extend([
+                {
+                    "module": "XGBoostArrayMixer",
+                    "args": {},
+                },
+            ])
 
     model = {
         "module": "BestOf",
@@ -550,7 +555,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
                 "target_encoder", "$encoders[self.target]"
             )
 
-        elif mixers[i]["module"] == "LightGBMArray":
+        elif mixers[i]["module"] in ("LightGBMArray", "XGBoostArrayMixer"):
             mixers[i]["args"]["input_cols"] = mixers[i]["args"].get(
                 "input_cols", "$input_cols"
             )
