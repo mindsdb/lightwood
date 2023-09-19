@@ -23,7 +23,7 @@ class BestOf(BaseEnsemble):
     indexes_by_accuracy: List[float]
 
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, accuracy_functions,
-                 args: PredictionArguments, ts_analysis: Optional[dict] = None, fit: bool = True) -> None:
+                 args: PredictionArguments,runtime_log: Optional[dict] = None, ts_analysis: Optional[dict] = None, fit: bool = True) -> None:
         super().__init__(target, mixers, data, fit=False)
         self.special_dispatch_list = [GluonTSMixer]
 
@@ -55,9 +55,15 @@ class BestOf(BaseEnsemble):
                     is_best=False
                 ))
 
-                score_list.append(avg_score)
+                if runtime_log is not None:
+                    score_list.append((avg_score, -1 * runtime_log[type(mixer).__name__ + '.fit_mixer'][0][0]))
+                else:
+                    score_list.append(avg_score)
 
-            self.indexes_by_accuracy = list(reversed(np.array(score_list).argsort()))
+            if runtime_log is not None:
+                self.indexes_by_accuracy = list(reversed(np.array(score_list, dtype=[('x', np.float32),('y', np.float32)]).argsort(order=('x', 'y'))))
+            else:
+                self.indexes_by_accuracy = list(reversed(np.array(score_list).argsort()))
             self.supports_proba = self.mixers[self.indexes_by_accuracy[0]].supports_proba
             log.info(f'Picked best mixer: {type(self.mixers[self.indexes_by_accuracy[0]]).__name__}')
             self.prepared = True

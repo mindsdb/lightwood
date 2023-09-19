@@ -30,8 +30,12 @@ def timed_predictor(f):
         result = f(predictor, *args, **kw)
         te = time()
         log.debug(f' `{f.__name__}` runtime: {round(te - ts, 2)} seconds')
+        name_ = f.__name__ if f.__name__ != 'fit_mixer' else type(args[0]).__name__ + '.fit_mixer'
         if hasattr(predictor, 'runtime_log'):
-            predictor.runtime_log[(f.__name__, datetime.fromtimestamp(ts))] = round(te - ts, 2)
+            if name_ not in predictor.runtime_log:
+                predictor.runtime_log[name_] = [(round(te - ts, 2), datetime.fromtimestamp(ts))]
+            else:
+                predictor.runtime_log[name_].append((round(te - ts, 2), datetime.fromtimestamp(ts)))
         return result
     return wrap
 

@@ -483,6 +483,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
         'fit': json_ai.model["args"].get("fit", True),
         'args': json_ai.model["args"].get("args", "$pred_args"),
         'accuracy_functions': json_ai.model["args"].get("accuracy_functions", "$accuracy_functions"),
+        'runtime_log': json_ai.model["args"].get("runtime_log", "$runtime_log"),
         'ts_analysis': json_ai.model["args"].get("ts_analysis", "self.ts_analysis" if is_ts else None),
         'dtype_dict': json_ai.model["args"].get("dtype_dict", "$dtype_dict"),
     }
