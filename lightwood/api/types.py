@@ -313,7 +313,7 @@ class JsonAI:
     analysis_blocks: Optional[List[Module]] = None
     timeseries_transformer: Optional[Module] = None
     timeseries_analyzer: Optional[Module] = None
-    accuracy_functions: Optional[List[str]] = None
+    accuracy_functions: Optional[List[Union[str, Module]]] = None
 
     @staticmethod
     def from_dict(obj: Dict):
