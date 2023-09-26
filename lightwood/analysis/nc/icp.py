@@ -11,6 +11,10 @@ from lightwood.analysis.nc.base import RegressorMixin, ClassifierMixin, TSMixin
 from types import FunctionType
 
 
+def zerof(x):
+    return 0
+
+
 # -----------------------------------------------------------------------------
 # Base inductive conformal predictor
 # -----------------------------------------------------------------------------
@@ -39,7 +43,7 @@ class BaseIcp(BaseEstimator):
             self.condition = condition
             self.conditional = True
         else:
-            self.condition = lambda x: 0
+            self.condition = zerof
             self.conditional = False
 
     def fit(self, x: np.array, y: np.array) -> None:

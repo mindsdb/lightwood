@@ -1,4 +1,4 @@
-import dill
+import pickle
 from typing import Dict, Optional
 
 import pandas as pd
@@ -143,7 +143,7 @@ class PredictorInterface:
         :returns: Saves Predictor instance.
         """
         with open(file_path, "wb") as fp:
-            dill.dump(self, fp)
+            pickle.dump(self, fp, protocol=5)
 
     def export(self, file_path: str, json_ai_code: str) -> None:
         """
@@ -160,4 +160,4 @@ class PredictorInterface:
         predictor_dict['code'] = json_ai_code
 
         with open(file_path, "wb") as fp:
-            dill.dump(predictor_dict, fp)
+            pickle.dump(predictor_dict, fp, protocol=5)
