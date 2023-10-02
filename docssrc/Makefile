@@ -26,4 +26,4 @@ github:
 	@cp -a build/html/. ../docs
 	@rm -r build
 	@touch ../docs/.nojekyll
-	@echo mindsdb.github.com/lightwood > ../docs/CNAME
+#        @echo lightwood.io > ../docs/CNAME  # deactivated until domain is renewed
