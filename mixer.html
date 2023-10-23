@@ -1,158 +1,110 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Mixers &mdash; lightwood 23.8.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Ensemble" href="ensemble.html" />
     <link rel="prev" title="Encoders" href="encoder.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search"  style="background: white" >
-          
 
           
-            <a href="index.html">
           
-
-          
+          <a href="index.html">
             
-            <img src="_static/mindsdblogo.png" class="logo" alt="Logo"/>
-          
+              <img src="_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
                 23.8.1.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="data.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.ARIMAMixer">ARIMAMixer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.BaseMixer">BaseMixer</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.BaseMixer.fit">fit</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.BaseMixer.partial_fit">partial_fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.ARIMAMixer"><code class="docutils literal notranslate"><span class="pre">ARIMAMixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.BaseMixer"><code class="docutils literal notranslate"><span class="pre">BaseMixer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.BaseMixer.fit"><code class="docutils literal notranslate"><span class="pre">BaseMixer.fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.BaseMixer.partial_fit"><code class="docutils literal notranslate"><span class="pre">BaseMixer.partial_fit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.ETSMixer">ETSMixer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.Neural">Neural</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.Neural.fit">fit</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.Neural.partial_fit">partial_fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.ETSMixer"><code class="docutils literal notranslate"><span class="pre">ETSMixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.Neural"><code class="docutils literal notranslate"><span class="pre">Neural</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.Neural.fit"><code class="docutils literal notranslate"><span class="pre">Neural.fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.Neural.partial_fit"><code class="docutils literal notranslate"><span class="pre">Neural.partial_fit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.NeuralTs">NeuralTs</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.NeuralTs.fit">fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.NeuralTs"><code class="docutils literal notranslate"><span class="pre">NeuralTs</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.NeuralTs.fit"><code class="docutils literal notranslate"><span class="pre">NeuralTs.fit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.ProphetMixer">ProphetMixer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.RandomForest">RandomForest</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.RandomForest.fit">fit</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.RandomForest.partial_fit">partial_fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.ProphetMixer"><code class="docutils literal notranslate"><span class="pre">ProphetMixer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.RandomForest"><code class="docutils literal notranslate"><span class="pre">RandomForest</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.RandomForest.fit"><code class="docutils literal notranslate"><span class="pre">RandomForest.fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.RandomForest.partial_fit"><code class="docutils literal notranslate"><span class="pre">RandomForest.partial_fit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.Regression">Regression</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.Regression.fit">fit</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.Regression.partial_fit">partial_fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.Regression"><code class="docutils literal notranslate"><span class="pre">Regression</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.Regression.fit"><code class="docutils literal notranslate"><span class="pre">Regression.fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.Regression.partial_fit"><code class="docutils literal notranslate"><span class="pre">Regression.partial_fit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.SkTime">SkTime</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.SkTime.fit">fit</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.SkTime.partial_fit">partial_fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.SkTime"><code class="docutils literal notranslate"><span class="pre">SkTime</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.SkTime.fit"><code class="docutils literal notranslate"><span class="pre">SkTime.fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.SkTime.partial_fit"><code class="docutils literal notranslate"><span class="pre">SkTime.partial_fit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.TabTransformerMixer">TabTransformerMixer</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.TabTransformerMixer.fit">fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.TabTransformerMixer"><code class="docutils literal notranslate"><span class="pre">TabTransformerMixer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.TabTransformerMixer.fit"><code class="docutils literal notranslate"><span class="pre">TabTransformerMixer.fit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.Unit">Unit</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.Unit.fit">fit</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.Unit.partial_fit">partial_fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.Unit"><code class="docutils literal notranslate"><span class="pre">Unit</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.Unit.fit"><code class="docutils literal notranslate"><span class="pre">Unit.fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.Unit.partial_fit"><code class="docutils literal notranslate"><span class="pre">Unit.partial_fit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.XGBoostArrayMixer">XGBoostArrayMixer</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostArrayMixer.fit">fit</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostArrayMixer.partial_fit">partial_fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.XGBoostArrayMixer"><code class="docutils literal notranslate"><span class="pre">XGBoostArrayMixer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostArrayMixer.fit"><code class="docutils literal notranslate"><span class="pre">XGBoostArrayMixer.fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostArrayMixer.partial_fit"><code class="docutils literal notranslate"><span class="pre">XGBoostArrayMixer.partial_fit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#mixer.XGBoostMixer">XGBoostMixer</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostMixer.fit">fit</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostMixer.partial_fit">partial_fit</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostMixer.supports_proba">supports_proba</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixer.XGBoostMixer"><code class="docutils literal notranslate"><span class="pre">XGBoostMixer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostMixer.fit"><code class="docutils literal notranslate"><span class="pre">XGBoostMixer.fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostMixer.partial_fit"><code class="docutils literal notranslate"><span class="pre">XGBoostMixer.partial_fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixer.XGBoostMixer.supports_proba"><code class="docutils literal notranslate"><span class="pre">XGBoostMixer.supports_proba</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -163,80 +115,39 @@
 <li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">lightwood</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/mixer.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="mixers">
-<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code><a class="headerlink" href="#mixers" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="mixers">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code><a class="headerlink" href="#mixers" title="Permalink to this heading"></a></h1>
 <p>Mixers learn to map encoded representation, they are the core of lightwood’s automl.</p>
 <span class="target" id="module-mixer"></span><dl class="py class">
 <dt class="sig sig-object py" id="mixer.ARIMAMixer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">ARIMAMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'statsforecast.StatsForecastAutoARIMA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_Q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_D</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_Q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stationary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">information_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kpss'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonal_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepwise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_test_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonal_test_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_warnings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'warn'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_fits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_of_sample_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mse'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_intercept</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_pdq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_varying_regression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_stationarity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_invertibility</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simple_differencing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mle_regression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hamilton_representation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concentrate_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/arima.html#ARIMAMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.ARIMAMixer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">ARIMAMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'statsforecast.StatsForecastAutoARIMA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_Q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_D</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_Q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stationary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">information_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kpss'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonal_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepwise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset_test_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonal_test_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_warnings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'warn'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_fits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_of_sample_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mse'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_intercept</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_pdq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_varying_regression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_stationarity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_invertibility</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simple_differencing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mle_regression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hamilton_representation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concentrate_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/arima.html#ARIMAMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.ARIMAMixer" title="Permalink to this definition"></a></dt>
 <dd><p>Wrapper for SkTime’s AutoARIMA interface.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – column containing target time series</p></li>
@@ -253,7 +164,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.BaseMixer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">BaseMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/base.html#BaseMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.BaseMixer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">BaseMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/base.html#BaseMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.BaseMixer" title="Permalink to this definition"></a></dt>
 <dd><p>Base class for all mixers.</p>
 <p>Mixers are the backbone of all Lightwood machine learning models. They intake encoded feature representations for every column, and are tasked with learning to fulfill the predictive requirements stated in a problem definition.</p>
 <dl class="simple">
@@ -270,22 +181,22 @@
 - supports_proba: For classification tasks, whether the mixer supports yielding per-class scores rather than only returning the predicted label.
 - trains_once: If True, the mixer is trained once during learn, using all available input data (<cite>train</cite> and <cite>dev</cite> splits for training, <cite>test</cite> for validation). Otherwise, it trains once with the <cite>train`</cite> split &amp; <cite>dev</cite> for validation, and optionally (depending on the problem definition <cite>fit_on_all</cite> and mixer-wise <cite>fit_on_dev</cite> arguments) a second time after post-training analysis via partial_fit, with <cite>train</cite> and <cite>dev</cite> splits as training subset, and <cite>test</cite> split as validation. Should only be set to True for mixers that don’t require post-training analysis, as otherwise actual validation data would be treated as a held-out portion, which is a mistake.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.BaseMixer.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/base.html#BaseMixer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.BaseMixer.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/base.html#BaseMixer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.BaseMixer.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits/trains a mixer with training data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -293,17 +204,17 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.BaseMixer.partial_fit">
-<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjust_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/base.html#BaseMixer.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.BaseMixer.partial_fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjust_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/base.html#BaseMixer.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.BaseMixer.partial_fit" title="Permalink to this definition"></a></dt>
 <dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the new training data subset.</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of new the “dev” data subset. As in <cite>fit()</cite>, this can be used as an internal validation subset.</p></li>
 <li><p><strong>adjust_args</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – optional arguments to customize the finetuning process.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -313,10 +224,10 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.ETSMixer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">ETSMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ets.AutoETS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'add'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">damped_trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initialization_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'estimated'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_seasonal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">information_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_multiplicative_trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restrict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additive_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_inf_ic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/ets.html#ETSMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.ETSMixer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">ETSMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ets.AutoETS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'add'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">damped_trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initialization_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'estimated'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_seasonal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">information_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_multiplicative_trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restrict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additive_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_inf_ic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/ets.html#ETSMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.ETSMixer" title="Permalink to this definition"></a></dt>
 <dd><p>Wrapper for SkTime’s AutoETS interface.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – column containing target time series</p></li>
@@ -333,10 +244,10 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.Neural">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">Neural</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/neural.html#Neural"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Neural" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">Neural</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/neural.html#Neural"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Neural" title="Permalink to this definition"></a></dt>
 <dd><p>The Neural mixer trains a fully connected dense network from concatenated encoded outputs of each of the features in the dataset to predicted the encoded output.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – How long the total fitting process should take</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the target column</p></li>
@@ -352,16 +263,16 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.Neural.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/neural.html#Neural.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Neural.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/neural.html#Neural.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Neural.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits/trains a mixer with training data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -369,16 +280,16 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.Neural.partial_fit">
-<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/neural.html#Neural.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Neural.partial_fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/neural.html#Neural.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Neural.partial_fit" title="Permalink to this definition"></a></dt>
 <dd><p>Augments the mixer’s fit with new data, nr of epochs is based on the amount of epochs the original fitting took</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – The network is fit/trained on this</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – Data used for early stopping and hyperparameter determination</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -388,10 +299,10 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.NeuralTs">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">NeuralTs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/neural_ts.html#NeuralTs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.NeuralTs" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">NeuralTs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/neural_ts.html#NeuralTs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.NeuralTs" title="Permalink to this definition"></a></dt>
 <dd><p>Subclassed Neural mixer used for time series forecasting scenarios.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – How long the total fitting process should take</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the target column</p></li>
@@ -407,16 +318,16 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.NeuralTs.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/neural_ts.html#NeuralTs.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.NeuralTs.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/neural_ts.html#NeuralTs.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.NeuralTs.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits/trains a mixer with training data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -426,10 +337,10 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.ProphetMixer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">ProphetMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_seasonality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_country_holidays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">growth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">growth_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">growth_cap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">changepoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_changepoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">changepoint_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yearly_seasonality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weekly_seasonality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daily_seasonality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holidays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonality_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'additive'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonality_prior_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holidays_prior_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">changepoint_prior_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcmc_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainty_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/prophet.html#ProphetMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.ProphetMixer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">ProphetMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_seasonality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_country_holidays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">growth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">growth_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">growth_cap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">changepoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_changepoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">changepoint_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yearly_seasonality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weekly_seasonality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daily_seasonality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holidays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonality_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'additive'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seasonality_prior_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holidays_prior_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">changepoint_prior_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcmc_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainty_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/prophet.html#ProphetMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.ProphetMixer" title="Permalink to this definition"></a></dt>
 <dd><p>Wrapper for SkTime’s Prophet interface.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – column containing target time series</p></li>
@@ -446,13 +357,13 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.RandomForest">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">RandomForest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_optuna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/random_forest.html#RandomForest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.RandomForest" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">RandomForest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_optuna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/random_forest.html#RandomForest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.RandomForest" title="Permalink to this definition"></a></dt>
 <dd><p>The <cite>RandomForest</cite> mixer supports both regression and classification tasks.
 It inherits from sklearn.ensemble.RandomForestRegressor and sklearn.ensemble.RandomForestClassifier.
 (<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html">https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html</a>)
 (<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html">https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html</a>)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the target column that the mixer will learn to predict.</p></li>
@@ -464,16 +375,16 @@ It inherits from sklearn.ensemble.RandomForestRegressor and sklearn.ensemble.Ran
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.RandomForest.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/random_forest.html#RandomForest.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.RandomForest.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/random_forest.html#RandomForest.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.RandomForest.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits the RandomForest model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for training dataset</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for dev dataset</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -481,16 +392,16 @@ It inherits from sklearn.ensemble.RandomForestRegressor and sklearn.ensemble.Ran
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.RandomForest.partial_fit">
-<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/random_forest.html#RandomForest.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.RandomForest.partial_fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/random_forest.html#RandomForest.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.RandomForest.partial_fit" title="Permalink to this definition"></a></dt>
 <dd><p>The RandomForest mixer does not support updates. If the model does not exist, a new one will be created and fitted.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for (new) training dataset</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for (new) dev dataset</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -500,7 +411,7 @@ It inherits from sklearn.ensemble.RandomForestRegressor and sklearn.ensemble.Ran
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.Regression">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">Regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/regression.html#Regression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">Regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/regression.html#Regression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression" title="Permalink to this definition"></a></dt>
 <dd><p>The <cite>Regression</cite> mixer inherits from scikit-learn’s <cite>Ridge</cite> class
 (<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html">https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html</a>)</p>
 <p>This class performs Ordinary Least-squares Regression (OLS) under the hood;
@@ -508,7 +419,7 @@ this means it fits a set of coefficients (w_1, w_2, …, w_N) for an N-length fe
 between the predicted target value and the observed true value.</p>
 <p>This mixer intakes featurized (encoded) data to predict the target. It deploys if the target data-type is considered numerical/integer.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Maximum amount of seconds it should fit for, currently ignored</p></li>
 <li><p><strong>target_encoder</strong> (<a class="reference internal" href="encoder.html#encoder.BaseEncoder" title="lightwood.encoder.base.BaseEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEncoder</span></code></a>) – The encoder which will be used to decode the target</p></li>
@@ -519,16 +430,16 @@ between the predicted target value and the observed true value.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.Regression.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/regression.html#Regression.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/regression.html#Regression.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits <cite>Ridge</cite> model on input feature data to provide predictions.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – Regression if fit on this</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – This just gets concatenated to the <code class="docutils literal notranslate"><span class="pre">train_data</span></code></p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -536,16 +447,16 @@ between the predicted target value and the observed true value.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.Regression.partial_fit">
-<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/regression.html#Regression.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression.partial_fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/regression.html#Regression.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Regression.partial_fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits the linear regression on some data, this refits the model entirely rather than updating it</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – Regression is fit on this</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – This just gets concatenated to the <code class="docutils literal notranslate"><span class="pre">train_data</span></code></p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -555,7 +466,7 @@ between the predicted target value and the observed true value.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.SkTime">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">SkTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparam_search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/sktime.html#SkTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.SkTime" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">SkTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparam_search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/sktime.html#SkTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.SkTime" title="Permalink to this definition"></a></dt>
 <dd><p>This mixer is a wrapper around the popular time series library sktime. It exhibits different behavior compared
 to other forecasting mixers, as it predicts based on indices in a forecasting horizon that is defined with
 respect to the last seen data point at training time.</p>
@@ -570,7 +481,7 @@ object per each different group observed at training time, plus an additional de
 <p>There is an optuna-based automatic hyperparameter search. For now, it considers selecting the forecaster type
 based on the global SMAPE error across all groups.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – column to forecast.</p></li>
@@ -588,11 +499,11 @@ based on the global SMAPE error across all groups.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.SkTime.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/sktime.html#SkTime.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.SkTime.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/sktime.html#SkTime.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.SkTime.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits a set of sktime forecasters. The number of models depends on how many groups are observed at training time.</p>
 <p>Forecaster type can be specified by providing the <cite>model_class</cite> argument in <cite>__init__()</cite>. It can also be determined by hyperparameter optimization based on dev data validation error.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -600,18 +511,18 @@ based on the global SMAPE error across all groups.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.SkTime.partial_fit">
-<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/sktime.html#SkTime.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.SkTime.partial_fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/sktime.html#SkTime.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.SkTime.partial_fit" title="Permalink to this definition"></a></dt>
 <dd><p>Note: sktime asks for “specification of the time points for which forecasts are requested”, and this mixer complies by assuming forecasts will start immediately after the last observed value.</p>
 <p>Because of this, <cite>ProblemDefinition.fit_on_all</cite> is set to True so that <cite>partial_fit</cite> uses both <cite>dev</cite> and <cite>test</cite> splits to fit the models.</p>
 <p>Due to how lightwood implements the <cite>update</cite> procedure, expected inputs for this method are:</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – original <cite>test</cite> split (used to validate and select model if ensemble is <cite>BestOf</cite>).</p></li>
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – concatenated original <cite>train</cite> and <cite>dev</cite> splits.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -621,15 +532,15 @@ based on the global SMAPE error across all groups.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.TabTransformerMixer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">TabTransformerMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/tabtransformer.html#TabTransformerMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.TabTransformerMixer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">TabTransformerMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/tabtransformer.html#TabTransformerMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.TabTransformerMixer" title="Permalink to this definition"></a></dt>
 <dd><p>This mixer trains a TabTransformer network (FT variant), using concatenated encoder outputs for each dataset feature as input, to predict the encoded target column representation as output.</p>
 <p>Training logic is based on the Neural mixer, please refer to it for more details on each input parameter.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.TabTransformerMixer.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/tabtransformer.html#TabTransformerMixer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.TabTransformerMixer.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/tabtransformer.html#TabTransformerMixer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.TabTransformerMixer.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Skip the usual partial_fit call at the end.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -639,24 +550,24 @@ based on the global SMAPE error across all groups.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.Unit">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">Unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/unit.html#Unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">Unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/unit.html#Unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.Unit.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/unit.html#Unit.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/unit.html#Unit.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits/trains a mixer with training data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -664,17 +575,17 @@ based on the global SMAPE error across all groups.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.Unit.partial_fit">
-<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/unit.html#Unit.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit.partial_fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/unit.html#Unit.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit.partial_fit" title="Permalink to this definition"></a></dt>
 <dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the new training data subset.</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of new the “dev” data subset. As in <cite>fit()</cite>, this can be used as an internal validation subset.</p></li>
 <li><p><strong>adjust_args</strong> – optional arguments to customize the finetuning process.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -684,25 +595,25 @@ based on the global SMAPE error across all groups.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.XGBoostArrayMixer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">XGBoostArrayMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost_array.html#XGBoostArrayMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostArrayMixer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">XGBoostArrayMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost_array.html#XGBoostArrayMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostArrayMixer" title="Permalink to this definition"></a></dt>
 <dd><p>XGBoost-based model, intended for usage in forecasting tasks.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.XGBoostArrayMixer.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost_array.html#XGBoostArrayMixer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostArrayMixer.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost_array.html#XGBoostArrayMixer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostArrayMixer.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits/trains a mixer with training data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the training data subset.</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the “dev” data subset. This can be used as an internal validation subset (e.g. it is used for early stopping in the default <cite>Neural</cite> mixer).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -710,17 +621,17 @@ based on the global SMAPE error across all groups.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.XGBoostArrayMixer.partial_fit">
-<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost_array.html#XGBoostArrayMixer.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostArrayMixer.partial_fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost_array.html#XGBoostArrayMixer.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostArrayMixer.partial_fit" title="Permalink to this definition"></a></dt>
 <dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the new training data subset.</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of new the “dev” data subset. As in <cite>fit()</cite>, this can be used as an internal validation subset.</p></li>
 <li><p><strong>adjust_args</strong> – optional arguments to customize the finetuning process.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -730,9 +641,9 @@ based on the global SMAPE error across all groups.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.XGBoostMixer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">XGBoostMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_optuna</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost.html#XGBoostMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostMixer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">XGBoostMixer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_optuna</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost.html#XGBoostMixer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostMixer" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time budget in seconds.</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the target column that the mixer will learn to predict.</p></li>
@@ -745,16 +656,16 @@ based on the global SMAPE error across all groups.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.XGBoostMixer.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost.html#XGBoostMixer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostMixer.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost.html#XGBoostMixer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostMixer.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits the XGBoost model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for training dataset</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded features for dev dataset</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -762,17 +673,17 @@ based on the global SMAPE error across all groups.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.XGBoostMixer.partial_fit">
-<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost.html#XGBoostMixer.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostMixer.partial_fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">partial_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/xgboost.html#XGBoostMixer.partial_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.XGBoostMixer.partial_fit" title="Permalink to this definition"></a></dt>
 <dd><p>Partially fits/trains a mixer with new training data. This is a somewhat experimental method, and it aims at updating pre-existing Lightwood predictors.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>train_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of the new training data subset.</p></li>
 <li><p><strong>dev_data</strong> (<a class="reference internal" href="data.html#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a>) – encoded representations of new the “dev” data subset. As in <cite>fit()</cite>, this can be used as an internal validation subset.</p></li>
 <li><p><strong>adjust_args</strong> – optional arguments to customize the finetuning process.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -780,7 +691,7 @@ based on the global SMAPE error across all groups.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mixer.XGBoostMixer.supports_proba">
-<span class="sig-name descname"><span class="pre">supports_proba</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#mixer.XGBoostMixer.supports_proba" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">supports_proba</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#mixer.XGBoostMixer.supports_proba" title="Permalink to this definition"></a></dt>
 <dd><p>Gradient boosting mixer with an XGBoost backbone.</p>
 <p>This mixer is a good all-rounder, due to the generally great performance of tree-based ML algorithms for supervised learning tasks with tabular data.
 If you want more information regarding the techniques that set apart XGBoost from other gradient boosters, please refer to their technical paper: “XGBoost: A Scalable Tree Boosting System” (2016).</p>
@@ -801,54 +712,37 @@ If you want more information regarding the techniques that set apart XGBoost fro
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="ensemble.html" class="btn btn-neutral float-right" title="Ensemble" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="encoder.html" class="btn btn-neutral float-left" title="Encoders" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ensemble.html" class="btn btn-neutral float-right" title="Ensemble" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2017-2023, MindsDB.
-
-    </p>
+    <p>&#169; Copyright 2017-2023, MindsDB.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

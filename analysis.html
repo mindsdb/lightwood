@@ -1,102 +1,54 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Analysis &mdash; lightwood 23.8.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Helpers" href="helpers.html" />
     <link rel="prev" title="Ensemble" href="ensemble.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search"  style="background: white" >
-          
 
           
-            <a href="index.html">
           
-
-          
+          <a href="index.html">
             
-            <img src="_static/mindsdblogo.png" class="logo" alt="Logo"/>
-          
+              <img src="_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
                 23.8.1.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
@@ -105,180 +57,133 @@
 <li class="toctree-l1"><a class="reference internal" href="mixer.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Mixers</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="ensemble.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#analysis.AccStats">AccStats</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#analysis.AccStats.analyze">analyze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis.AccStats"><code class="docutils literal notranslate"><span class="pre">AccStats</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analysis.AccStats.analyze"><code class="docutils literal notranslate"><span class="pre">AccStats.analyze()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#analysis.BaseAnalysisBlock">BaseAnalysisBlock</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#analysis.BaseAnalysisBlock.analyze">analyze</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#analysis.BaseAnalysisBlock.explain">explain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis.BaseAnalysisBlock"><code class="docutils literal notranslate"><span class="pre">BaseAnalysisBlock</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analysis.BaseAnalysisBlock.analyze"><code class="docutils literal notranslate"><span class="pre">BaseAnalysisBlock.analyze()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis.BaseAnalysisBlock.explain"><code class="docutils literal notranslate"><span class="pre">BaseAnalysisBlock.explain()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#analysis.ConfStats">ConfStats</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#analysis.ConfStats.analyze">analyze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis.ConfStats"><code class="docutils literal notranslate"><span class="pre">ConfStats</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analysis.ConfStats.analyze"><code class="docutils literal notranslate"><span class="pre">ConfStats.analyze()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#analysis.ICP">ICP</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#analysis.ICP.analyze">analyze</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#analysis.ICP.explain">explain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis.ICP"><code class="docutils literal notranslate"><span class="pre">ICP</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analysis.ICP.analyze"><code class="docutils literal notranslate"><span class="pre">ICP.analyze()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis.ICP.explain"><code class="docutils literal notranslate"><span class="pre">ICP.explain()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#analysis.PermutationFeatureImportance">PermutationFeatureImportance</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#analysis.PermutationFeatureImportance.analyze">analyze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis.PermutationFeatureImportance"><code class="docutils literal notranslate"><span class="pre">PermutationFeatureImportance</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analysis.PermutationFeatureImportance.analyze"><code class="docutils literal notranslate"><span class="pre">PermutationFeatureImportance.analyze()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#analysis.TempScaler">TempScaler</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#analysis.TempScaler.analyze">analyze</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#analysis.TempScaler.explain">explain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis.TempScaler"><code class="docutils literal notranslate"><span class="pre">TempScaler</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analysis.TempScaler.analyze"><code class="docutils literal notranslate"><span class="pre">TempScaler.analyze()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis.TempScaler.explain"><code class="docutils literal notranslate"><span class="pre">TempScaler.explain()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#analysis.explain">explain</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#analysis.model_analyzer">model_analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis.explain"><code class="docutils literal notranslate"><span class="pre">explain()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis.model_analyzer"><code class="docutils literal notranslate"><span class="pre">model_analyzer()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="helpers.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Helpers</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">lightwood</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code></li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/analysis.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="analysis">
-<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code><a class="headerlink" href="#analysis" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="analysis">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Analysis</span></code><a class="headerlink" href="#analysis" title="Permalink to this heading"></a></h1>
 <p>Analyse mixer ensembles to extract static insights and train predict-time models for dynamic insights.</p>
 <span class="target" id="module-analysis"></span><dl class="py class">
 <dt class="sig sig-object py" id="analysis.AccStats">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">AccStats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('ICP',)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/acc_stats.html#AccStats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.AccStats" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">AccStats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('ICP',)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/acc_stats.html#AccStats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.AccStats" title="Permalink to this definition"></a></dt>
 <dd><p>Computes accuracy stats and a confusion matrix for the validation dataset</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="analysis.AccStats.analyze">
-<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/acc_stats.html#AccStats.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.AccStats.analyze" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/acc_stats.html#AccStats.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.AccStats.analyze" title="Permalink to this definition"></a></dt>
 <dd><p>This method should be called once during the analysis phase, or not called at all.
 It computes any information that the block may either output to the model analysis object,
 or use at inference time when <cite>.explain()</cite> is called (in this case, make sure all needed
-objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).</p>
+objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>info</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – Dictionary where any new information or objects are added. The next analysis block will use</p>
 </dd>
 </dl>
 <p>the output of the previous block as a starting point.
+:type kwargs:
 :param kwargs: Dictionary with named variables from either the core analysis or the rest of the prediction
 pipeline.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="analysis.BaseAnalysisBlock">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">BaseAnalysisBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/base.html#BaseAnalysisBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.BaseAnalysisBlock" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">BaseAnalysisBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/base.html#BaseAnalysisBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.BaseAnalysisBlock" title="Permalink to this definition"></a></dt>
 <dd><p>Class to be inherited by any analysis/explainer block.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="analysis.BaseAnalysisBlock.analyze">
-<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/base.html#BaseAnalysisBlock.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.BaseAnalysisBlock.analyze" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/base.html#BaseAnalysisBlock.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.BaseAnalysisBlock.analyze" title="Permalink to this definition"></a></dt>
 <dd><p>This method should be called once during the analysis phase, or not called at all.
 It computes any information that the block may either output to the model analysis object,
 or use at inference time when <cite>.explain()</cite> is called (in this case, make sure all needed
-objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).</p>
+objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>info</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – Dictionary where any new information or objects are added. The next analysis block will use</p>
 </dd>
 </dl>
 <p>the output of the previous block as a starting point.
+:type kwargs:
 :param kwargs: Dictionary with named variables from either the core analysis or the rest of the prediction
 pipeline.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="analysis.BaseAnalysisBlock.explain">
-<span class="sig-name descname"><span class="pre">explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_insights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_insights</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/base.html#BaseAnalysisBlock.explain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.BaseAnalysisBlock.explain" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_insights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_insights</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/base.html#BaseAnalysisBlock.explain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.BaseAnalysisBlock.explain" title="Permalink to this definition"></a></dt>
 <dd><p>This method should be called once during the explaining phase at inference time, or not called at all.
 Additional explanations can be at an instance level (row-wise) or global.
 For the former, return a data frame with any new insights. For the latter, a dictionary is required.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>row_insights</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – dataframe with previously computed row-level explanations.</p></li>
 <li><p><strong>global_insights</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – dict() with any explanations that concern all predicted instances or the model itself.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><ul class="simple">
 <li><p>row_insights: modified input dataframe with any new row insights added here.</p></li>
 <li><p>global_insights: dict() with any explanations that concern all predicted instances or the model itself.</p></li>
@@ -292,76 +197,70 @@ For the former, return a data frame with any new insights. For the latter, a dic
 
 <dl class="py class">
 <dt class="sig sig-object py" id="analysis.ConfStats">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">ConfStats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('ICP',)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ece_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/conf_stats.html#ConfStats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ConfStats" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">ConfStats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('ICP',)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ece_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/conf_stats.html#ConfStats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ConfStats" title="Permalink to this definition"></a></dt>
 <dd><p>Computes confidence-related statistics on the held-out validation dataset.</p>
 <p>TODO: regression &amp; forecasting tasks</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="analysis.ConfStats.analyze">
-<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/conf_stats.html#ConfStats.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ConfStats.analyze" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/conf_stats.html#ConfStats.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ConfStats.analyze" title="Permalink to this definition"></a></dt>
 <dd><p>This method should be called once during the analysis phase, or not called at all.
 It computes any information that the block may either output to the model analysis object,
 or use at inference time when <cite>.explain()</cite> is called (in this case, make sure all needed
-objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).</p>
+objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>info</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – Dictionary where any new information or objects are added. The next analysis block will use</p>
 </dd>
 </dl>
 <p>the output of the previous block as a starting point.
+:type kwargs:
 :param kwargs: Dictionary with named variables from either the core analysis or the rest of the prediction
 pipeline.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="analysis.ICP">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">ICP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">confidence_normalizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_significance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nc/calibrate.html#ICP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ICP" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">ICP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">confidence_normalizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_significance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nc/calibrate.html#ICP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ICP" title="Permalink to this definition"></a></dt>
 <dd><p>Confidence estimation block, uses inductive conformal predictors (ICPs) for model agnosticity</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="analysis.ICP.analyze">
-<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nc/calibrate.html#ICP.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ICP.analyze" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nc/calibrate.html#ICP.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ICP.analyze" title="Permalink to this definition"></a></dt>
 <dd><p>This method should be called once during the analysis phase, or not called at all.
 It computes any information that the block may either output to the model analysis object,
 or use at inference time when <cite>.explain()</cite> is called (in this case, make sure all needed
-objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).</p>
+objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>info</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – Dictionary where any new information or objects are added. The next analysis block will use</p>
 </dd>
 </dl>
 <p>the output of the previous block as a starting point.
+:type kwargs:
 :param kwargs: Dictionary with named variables from either the core analysis or the rest of the prediction
 pipeline.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="analysis.ICP.explain">
-<span class="sig-name descname"><span class="pre">explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_insights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_insights</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nc/calibrate.html#ICP.explain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ICP.explain" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_insights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_insights</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nc/calibrate.html#ICP.explain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.ICP.explain" title="Permalink to this definition"></a></dt>
 <dd><p>This method should be called once during the explaining phase at inference time, or not called at all.
 Additional explanations can be at an instance level (row-wise) or global.
 For the former, return a data frame with any new insights. For the latter, a dictionary is required.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>row_insights</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – dataframe with previously computed row-level explanations.</p></li>
 <li><p><strong>global_insights</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – dict() with any explanations that concern all predicted instances or the model itself.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><ul class="simple">
 <li><p>row_insights: modified input dataframe with any new row insights added here.</p></li>
 <li><p>global_insights: dict() with any explanations that concern all predicted instances or the model itself.</p></li>
@@ -375,7 +274,7 @@ For the former, return a data frame with any new insights. For the latter, a dic
 
 <dl class="py class">
 <dt class="sig sig-object py" id="analysis.PermutationFeatureImportance">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">PermutationFeatureImportance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">disable_column_importance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('A',</span> <span class="pre">'c',</span> <span class="pre">'c',</span> <span class="pre">'S',</span> <span class="pre">'t',</span> <span class="pre">'a',</span> <span class="pre">'t',</span> <span class="pre">'s')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/feature_importance.html#PermutationFeatureImportance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.PermutationFeatureImportance" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">PermutationFeatureImportance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">disable_column_importance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('A',</span> <span class="pre">'c',</span> <span class="pre">'c',</span> <span class="pre">'S',</span> <span class="pre">'t',</span> <span class="pre">'a',</span> <span class="pre">'t',</span> <span class="pre">'s')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/feature_importance.html#PermutationFeatureImportance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.PermutationFeatureImportance" title="Permalink to this definition"></a></dt>
 <dd><p>Analysis block that estimates column importances via permutation.</p>
 <dl class="simple">
 <dt>Roughly speaking, the procedure:</dt><dd><ul class="simple">
@@ -389,7 +288,7 @@ For the former, return a data frame with any new insights. For the latter, a dic
 </dl>
 <p>Note that, crucially, this method does not refit the predictor at any point.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>row_limit</strong> – Set to 0 to use the entire validation dataset.</p></li>
 <li><p><strong>col_limit</strong> – Set to 0 to consider all possible columns.</p></li>
@@ -403,39 +302,36 @@ For the former, return a data frame with any new insights. For the latter, a dic
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="analysis.PermutationFeatureImportance.analyze">
-<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/feature_importance.html#PermutationFeatureImportance.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.PermutationFeatureImportance.analyze" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/helpers/feature_importance.html#PermutationFeatureImportance.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.PermutationFeatureImportance.analyze" title="Permalink to this definition"></a></dt>
 <dd><p>This method should be called once during the analysis phase, or not called at all.
 It computes any information that the block may either output to the model analysis object,
 or use at inference time when <cite>.explain()</cite> is called (in this case, make sure all needed
-objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).</p>
+objects are added to the runtime analyzer so that <cite>.explain()</cite> can access them).
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>info</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – Dictionary where any new information or objects are added. The next analysis block will use</p>
 </dd>
 </dl>
 <p>the output of the previous block as a starting point.
+:type kwargs:
 :param kwargs: Dictionary with named variables from either the core analysis or the rest of the prediction
 pipeline.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="analysis.TempScaler">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">TempScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nn_conf/temp_scale.html#TempScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.TempScaler" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">TempScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nn_conf/temp_scale.html#TempScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.TempScaler" title="Permalink to this definition"></a></dt>
 <dd><p>Original reference (MIT Licensed): <a class="reference external" href="https://github.com/gpleiss/temperature_scaling">https://github.com/gpleiss/temperature_scaling</a>
 NB: Output of the neural network should be the classification logits, NOT the softmax (or log softmax)! TODO</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="analysis.TempScaler.analyze">
-<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nn_conf/temp_scale.html#TempScaler.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.TempScaler.analyze" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nn_conf/temp_scale.html#TempScaler.analyze"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.TempScaler.analyze" title="Permalink to this definition"></a></dt>
 <dd><p>Tune and set the temperature of a neural model optimizing NLL using validation set logits.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]</p>
 </dd>
 </dl>
@@ -443,10 +339,10 @@ NB: Output of the neural network should be the classification logits, NOT the so
 
 <dl class="py method">
 <dt class="sig sig-object py" id="analysis.TempScaler.explain">
-<span class="sig-name descname"><span class="pre">explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_insights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_insights</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nn_conf/temp_scale.html#TempScaler.explain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.TempScaler.explain" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_insights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_insights</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/nn_conf/temp_scale.html#TempScaler.explain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.TempScaler.explain" title="Permalink to this definition"></a></dt>
 <dd><p>Perform temperature scaling on logits</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]]</p>
 </dd>
 </dl>
@@ -456,12 +352,12 @@ NB: Output of the neural network should be the classification logits, NOT the so
 
 <dl class="py function">
 <dt class="sig sig-object py" id="analysis.explain">
-<span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stat_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explainer_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/explain.html#explain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.explain" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoded_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stat_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explainer_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/explain.html#explain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.explain" title="Permalink to this definition"></a></dt>
 <dd><p>This procedure runs at the end of every normal <cite>.predict()</cite> call. Its goal is to generate prediction insights,
 potentially using information generated at the model analysis stage (e.g. confidence estimation).</p>
 <p>As in <cite>analysis()</cite>, any user-specified analysis blocks (see class <cite>BaseAnalysisBlock</cite>) are also called here.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -470,15 +366,15 @@ potentially using information generated at the model analysis stage (e.g. confid
 
 <dl class="py function">
 <dt class="sig sig-object py" id="analysis.model_analyzer">
-<span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">model_analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stats_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/analyze.html#model_analyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.model_analyzer" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">analysis.</span></span><span class="sig-name descname"><span class="pre">model_analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stats_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/analysis/analyze.html#model_analyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.model_analyzer" title="Permalink to this definition"></a></dt>
 <dd><p>Analyses model on a validation subset to evaluate accuracy, estimate feature importance and generate a
 calibration model to estimating confidence in future predictions.</p>
 <p>Additionally, any user-specified analysis blocks (see class <cite>BaseAnalysisBlock</cite>) are also called here.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ModelAnalysis</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]]</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -488,54 +384,37 @@ calling the <cite>.explain()</cite> method of all analysis blocks when generatin
 <p>model_analysis: <cite>ModelAnalysis</cite> object that contains core analysis metrics, not necessarily needed when predicting.</p>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="helpers.html" class="btn btn-neutral float-right" title="Helpers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="ensemble.html" class="btn btn-neutral float-left" title="Ensemble" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="helpers.html" class="btn btn-neutral float-right" title="Helpers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2017-2023, MindsDB.
-
-    </p>
+    <p>&#169; Copyright 2017-2023, MindsDB.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

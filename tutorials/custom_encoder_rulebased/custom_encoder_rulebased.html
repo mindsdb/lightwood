@@ -1,103 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Custom Encoder: Rule-Based &mdash; lightwood 23.8.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search"  style="background: white" >
-          
 
           
-            <a href="../../index.html">
           
-
-          
+          <a href="../../index.html">
             
-            <img src="../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
-          
+              <img src="../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
                 23.8.1.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
@@ -110,73 +62,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">lightwood</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Custom Encoder: Rule-Based</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Custom Encoder: Rule-Based</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../../_sources/tutorials/custom_encoder_rulebased/custom_encoder_rulebased.ipynb.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="Custom-Encoder:-Rule-Based">
-<h1>Custom Encoder: Rule-Based<a class="headerlink" href="#Custom-Encoder:-Rule-Based" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="Custom-Encoder:-Rule-Based">
+<h1>Custom Encoder: Rule-Based<a class="headerlink" href="#Custom-Encoder:-Rule-Based" title="Permalink to this heading"></a></h1>
 <p>Lightwood uses “Encoders” to convert preprocessed (cleaned) data into <strong>features</strong>. Encoders represent the <strong>feature engineering</strong> step of the data science pipeline; they can either have a set of instructions (“rule-based”) or a learned representation (trained on data).</p>
 <p>In the following notebook, we will experiment with creating a custom encoder that creates <strong>Label Encoding</strong>.</p>
 <p>For example, imagine we have the following set of categories:</p>
@@ -213,13 +124,13 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2531:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2531:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2315:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2315:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="1)-Load-your-data">
-<h1>1) Load your data<a class="headerlink" href="#1)-Load-your-data" title="Permalink to this headline">¶</a></h1>
+</section>
+<section id="1)-Load-your-data">
+<h1>1) Load your data<a class="headerlink" href="#1)-Load-your-data" title="Permalink to this heading"></a></h1>
 <p>Lightwood works with <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>s; load data via pandas as follows:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -331,9 +242,9 @@
 </div></div>
 </div>
 <p>We can see a handful of columns above, such as <code class="docutils literal notranslate"><span class="pre">model,</span> <span class="pre">year,</span> <span class="pre">price,</span> <span class="pre">transmission,</span> <span class="pre">mileage,</span> <span class="pre">fuelType,</span> <span class="pre">tax,</span> <span class="pre">mpg,</span> <span class="pre">engineSize</span></code>. Some columns are numerical whereas others are categorical. We are going to specifically only focus on categorical columns.</p>
-</div>
-<div class="section" id="2)-Generate-JSON-AI-Syntax">
-<h1>2) Generate JSON-AI Syntax<a class="headerlink" href="#2)-Generate-JSON-AI-Syntax" title="Permalink to this headline">¶</a></h1>
+</section>
+<section id="2)-Generate-JSON-AI-Syntax">
+<h1>2) Generate JSON-AI Syntax<a class="headerlink" href="#2)-Generate-JSON-AI-Syntax" title="Permalink to this heading"></a></h1>
 <p>We will make a <code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code> as follows:</p>
 <ol class="arabic simple">
 <li><p>Find all unique examples within a column</p></li>
@@ -362,28 +273,28 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2531:Analyzing a sample of 6920</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Infering type for: model</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Column model has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Infering type for: year</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Column year has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Infering type for: price</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Column price has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Infering type for: transmission</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Column transmission has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Infering type for: mileage</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Column mileage has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Infering type for: fuelType</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Column fuelType has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Infering type for: tax</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Column tax has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Infering type for: mpg</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Column mpg has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Infering type for: engineSize</span>
-<span class="ansi-green-fg">INFO:type_infer-2531:Column engineSize has data type float</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2531:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2531:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Analyzing a sample of 6920</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Infering type for: model</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Column model has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Infering type for: year</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Column year has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Infering type for: price</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Column price has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Infering type for: transmission</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Column transmission has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Infering type for: mileage</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Column mileage has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Infering type for: fuelType</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Column fuelType has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Infering type for: tax</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Column tax has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Infering type for: mpg</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Column mpg has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Infering type for: engineSize</span>
+<span class="ansi-green-fg">INFO:type_infer-2315:Column engineSize has data type float</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2315:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2315:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Let’s take a look at our JSON-AI and print to file.</p>
@@ -497,7 +408,7 @@
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 3.8343522548675537,
+        &#34;expected_additional_time&#34;: 3.9420077800750732,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -531,9 +442,9 @@
 }
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="3)-Create-your-custom-encoder-(LabelEncoder).">
-<h1>3) Create your custom encoder (<code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code>).<a class="headerlink" href="#3)-Create-your-custom-encoder-(LabelEncoder)." title="Permalink to this headline">¶</a></h1>
+</section>
+<section id="3)-Create-your-custom-encoder-(LabelEncoder).">
+<h1>3) Create your custom encoder (<code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code>).<a class="headerlink" href="#3)-Create-your-custom-encoder-(LabelEncoder)." title="Permalink to this heading"></a></h1>
 <p>Once our JSON-AI is filled, let’s make our LabelEncoder. All Lightwood encoders inherit from the <code class="docutils literal notranslate"><span class="pre">BaseEncoder</span></code> class, found <a class="reference external" href="https://github.com/mindsdb/lightwood/blob/staging/lightwood/encoder/base.py">here</a>.</p>
 <p><img alt="BaseEncoder" src="../../_images/baseencoder.png" /></p>
 <p>The <code class="docutils literal notranslate"><span class="pre">BaseEncoder</span></code> has 5 expected calls:</p>
@@ -545,8 +456,8 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">to</span></code>: Use CPU/GPU (mostly important for learned representations)</p></li>
 </ul>
 <p>From above, we see that “model”, “transmission”, and “fuelType” are all categorical columns. These will be the ones we want to modify.</p>
-<div class="section" id="LabelEncoder">
-<h2><code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code><a class="headerlink" href="#LabelEncoder" title="Permalink to this headline">¶</a></h2>
+<section id="LabelEncoder">
+<h2><code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code><a class="headerlink" href="#LabelEncoder" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code> should satisfy a couple of rules</p>
 <ol class="arabic simple">
 <li><p>For the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> call:</p></li>
@@ -684,10 +595,10 @@ Writing LabelEncoder.py
 </pre></div>
 </div>
 </div>
-</div>
-</div>
-<div class="section" id="4)-Edit-JSON-AI">
-<h1>4) Edit JSON-AI<a class="headerlink" href="#4)-Edit-JSON-AI" title="Permalink to this headline">¶</a></h1>
+</section>
+</section>
+<section id="4)-Edit-JSON-AI">
+<h1>4) Edit JSON-AI<a class="headerlink" href="#4)-Edit-JSON-AI" title="Permalink to this heading"></a></h1>
 <p>Now that we have our <code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code> script, we have two ways of introducing this encoder:</p>
 <ol class="arabic simple">
 <li><p>Change all categorical columns to our encoder of choice</p></li>
@@ -720,9 +631,9 @@ assignments for a data type</p>
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="5)-Generate-code-and-your-predictor-from-JSON-AI">
-<h1>5) Generate code and your predictor from JSON-AI<a class="headerlink" href="#5)-Generate-code-and-your-predictor-from-JSON-AI" title="Permalink to this headline">¶</a></h1>
+</section>
+<section id="5)-Generate-code-and-your-predictor-from-JSON-AI">
+<h1>5) Generate code and your predictor from JSON-AI<a class="headerlink" href="#5)-Generate-code-and-your-predictor-from-JSON-AI" title="Permalink to this heading"></a></h1>
 <p>Now, let’s use this JSON-AI object to generate code and make a predictor. This can be done in 2 simple lines, below:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -769,25 +680,25 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2531:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2531:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2531: `analyze_data` runtime: 0.62 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2531:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2531: `preprocess` runtime: 0.2 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2531:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2531: `split` runtime: 0.01 seconds</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2531:Preparing sequentially...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2531:Preparing encoder for year...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2531:Preparing encoder for mileage...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2531:Preparing encoder for tax...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2531:Preparing encoder for mpg...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2531:Preparing encoder for engineSize...</span>
-<span class="ansi-green-fg">INFO:lightwood-2531:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2531:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2531:Categories Detected = 1</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2531: `prepare` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2531:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2531: `featurize` runtime: 0.82 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2315:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2315:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2315: `analyze_data` runtime: 0.6 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2315:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2315: `preprocess` runtime: 0.19 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2315:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2315: `split` runtime: 0.01 seconds</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2315:Preparing sequentially...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2315:Preparing encoder for year...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2315:Preparing encoder for mileage...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2315:Preparing encoder for tax...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2315:Preparing encoder for mpg...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2315:Preparing encoder for engineSize...</span>
+<span class="ansi-green-fg">INFO:lightwood-2315:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2315:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2315:Categories Detected = 1</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2315: `prepare` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2315:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2315: `featurize` runtime: 0.81 seconds</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>
@@ -887,50 +798,34 @@ assignments for a data type</p>
 </div>
 <p>For each category above, the number associated in the dictionary is the label for each category. This means “Diesel” is always represented by a 1, etc.</p>
 <p>With that, you’ve created your own custom Encoder that uses a rule-based approach! Please checkout more <a class="reference external" href="https://lightwood.io/tutorials.html">tutorials</a> for other custom approach guides.</p>
-</div>
+</section>
 
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2017-2023, MindsDB.
-
-    </p>
+    <p>&#169; Copyright 2017-2023, MindsDB.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

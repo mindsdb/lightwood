@@ -1,135 +1,87 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Lightwood API Types &mdash; lightwood 23.8.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Predictor Interface" href="predictor.html" />
     <link rel="prev" title="Data Types (dtypes)" href="dtype.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search"  style="background: white" >
-          
 
           
-            <a href="../index.html">
           
-
-          
+          <a href="../index.html">
             
-            <img src="../_static/mindsdblogo.png" class="logo" alt="Logo"/>
-          
+              <img src="../_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
                 23.8.1.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="high_level.html">JSON-AI Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Lightwood API Types</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#api.types.Module">Module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#api.types.TimeseriesSettings">TimeseriesSettings</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.from_dict">from_dict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.from_json">from_json</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.to_dict">to_dict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.to_json">to_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.Module"><code class="docutils literal notranslate"><span class="pre">Module</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.TimeseriesSettings"><code class="docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.from_dict"><code class="docutils literal notranslate"><span class="pre">TimeseriesSettings.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.from_json"><code class="docutils literal notranslate"><span class="pre">TimeseriesSettings.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.to_dict"><code class="docutils literal notranslate"><span class="pre">TimeseriesSettings.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.TimeseriesSettings.to_json"><code class="docutils literal notranslate"><span class="pre">TimeseriesSettings.to_json()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#api.types.ProblemDefinition">ProblemDefinition</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.from_dict">from_dict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.from_json">from_json</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.to_dict">to_dict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.to_json">to_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.ProblemDefinition"><code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.from_dict"><code class="docutils literal notranslate"><span class="pre">ProblemDefinition.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.from_json"><code class="docutils literal notranslate"><span class="pre">ProblemDefinition.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.to_dict"><code class="docutils literal notranslate"><span class="pre">ProblemDefinition.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.ProblemDefinition.to_json"><code class="docutils literal notranslate"><span class="pre">ProblemDefinition.to_json()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#api.types.JsonAI">JsonAI</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.from_dict">from_dict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.from_json">from_json</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.to_dict">to_dict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.to_json">to_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.JsonAI"><code class="docutils literal notranslate"><span class="pre">JsonAI</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.from_dict"><code class="docutils literal notranslate"><span class="pre">JsonAI.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.from_json"><code class="docutils literal notranslate"><span class="pre">JsonAI.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.to_dict"><code class="docutils literal notranslate"><span class="pre">JsonAI.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.JsonAI.to_json"><code class="docutils literal notranslate"><span class="pre">JsonAI.to_json()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#api.types.SubmodelData">SubmodelData</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#api.types.ModelAnalysis">ModelAnalysis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#api.types.PredictionArguments">PredictionArguments</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.PredictionArguments.from_dict">from_dict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.types.PredictionArguments.to_dict">to_dict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.SubmodelData"><code class="docutils literal notranslate"><span class="pre">SubmodelData</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.ModelAnalysis"><code class="docutils literal notranslate"><span class="pre">ModelAnalysis</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.types.PredictionArguments"><code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.PredictionArguments.from_dict"><code class="docutils literal notranslate"><span class="pre">PredictionArguments.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.types.PredictionArguments.to_dict"><code class="docutils literal notranslate"><span class="pre">PredictionArguments.to_dict()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -148,82 +100,40 @@
 <li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">lightwood</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a> &raquo;</li>
-        
-      <li>Lightwood API Types</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+      <li class="breadcrumb-item active">Lightwood API Types</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/api/types.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="lightwood-api-types">
-<h1>Lightwood API Types<a class="headerlink" href="#lightwood-api-types" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="lightwood-api-types">
+<h1>Lightwood API Types<a class="headerlink" href="#lightwood-api-types" title="Permalink to this heading"></a></h1>
 <p>Lightwood consists of several high level abstractions to enable the data science/machine learning (DS/ML) pipeline in a step-by-step procedure.</p>
 <span class="target" id="module-api.types"></span><dl class="py class">
 <dt class="sig sig-object py" id="api.types.Module">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">Module</span></span><a class="reference internal" href="../_modules/api/types.html#Module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.Module" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">Module</span></span><a class="reference internal" href="../_modules/api/types.html#Module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.Module" title="Permalink to this definition"></a></dt>
 <dd><p>Modules are the blocks of code that end up being called from the JSON AI, representing either object instantiations or function calls.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>module</strong> – Name of the module (function or class name)</p></li>
 <li><p><strong>args</strong> – Argument to pass to the function or constructor</p></li>
@@ -234,10 +144,10 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="api.types.TimeseriesSettings">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">TimeseriesSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_previous_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">historical_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_incomplete_history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_incomplete</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">TimeseriesSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_previous_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">historical_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_incomplete_history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_incomplete</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings" title="Permalink to this definition"></a></dt>
 <dd><p>For time-series specific problems, more specific treatment of the data is necessary. The following attributes         enable time-series tasks to be carried out properly.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>is_timeseries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether the input data should be treated as time series; if true, this flag is checked in         subsequent internal steps to ensure processing is appropriate for time-series data.</p></li>
 <li><p><strong>order_by</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Column by which the data should be ordered.</p></li>
@@ -255,13 +165,13 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.TimeseriesSettings.from_dict">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.from_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a TimeseriesSettings object from python dictionary specifications.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Param</dt>
+<dt class="field-odd">Param<span class="colon">:</span></dt>
 <dd class="field-odd"><p>obj: A python dictionary with the necessary representation for time-series. The only mandatory columns are <code class="docutils literal notranslate"><span class="pre">order_by</span></code> and <code class="docutils literal notranslate"><span class="pre">window</span></code>.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A populated <code class="docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code> object.</p>
 </dd>
 </dl>
@@ -269,13 +179,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.TimeseriesSettings.from_json">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.from_json" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.from_json" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a TimeseriesSettings object from JSON specifications via python dictionary.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Param</dt>
+<dt class="field-odd">Param<span class="colon">:</span></dt>
 <dd class="field-odd"><p>data: JSON-config file with necessary Time-series specifications</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A populated <code class="docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code> object.</p>
 </dd>
 </dl>
@@ -283,13 +193,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.TimeseriesSettings.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.to_dict" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.to_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a dictionary from <code class="docutils literal notranslate"><span class="pre">TimeseriesSettings</span></code> object</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A python dictionary containing the <code class="docutils literal notranslate"><span class="pre">TimeSeriesSettings</span></code> specifications.</p>
 </dd>
 </dl>
@@ -297,7 +207,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.TimeseriesSettings.to_json">
-<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.to_json" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#TimeseriesSettings.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.TimeseriesSettings.to_json" title="Permalink to this definition"></a></dt>
 <dd><p>Creates JSON config from TimeseriesSettings object
 :rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]
 :returns: The JSON config syntax containing the <code class="docutils literal notranslate"><span class="pre">TimeSeriesSettings</span></code> specifications.</p>
@@ -307,10 +217,10 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="api.types.ProblemDefinition">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">ProblemDefinition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_invalid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unbias_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds_per_mixer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds_per_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_additional_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_aim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_detection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_default_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding_only</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_all</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_nr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">ProblemDefinition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_invalid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unbias_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds_per_mixer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds_per_encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_additional_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_aim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_detection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_default_analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding_only</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_on_all</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed_nr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition" title="Permalink to this definition"></a></dt>
 <dd><p>The <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> object indicates details on how the models that predict the target are prepared.         The only required specification from a user is the <code class="docutils literal notranslate"><span class="pre">target</span></code>, which indicates the column within the input         data that the user is trying to predict. Within the <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>, the user can specify aspects         about how long the feature-engineering preparation may take, and nuances about training the models.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the target column; this is the column that will be used as the goal of the prediction.</p></li>
 <li><p><strong>pct_invalid</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Number of data points maximally tolerated as invalid/missing/unknown.         If the data cleaning process exceeds this number, no subsequent steps will be taken.</p></li>
@@ -334,16 +244,16 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.ProblemDefinition.from_dict">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.from_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a ProblemDefinition object from a python dictionary with necessary specifications.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>obj</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – A python dictionary with the necessary features for the <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> class.</p>
 </dd>
 </dl>
 <p>Only requires <code class="docutils literal notranslate"><span class="pre">target</span></code> to be specified.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A populated <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> object.</p>
 </dd>
 </dl>
@@ -351,13 +261,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.ProblemDefinition.from_json">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.from_json" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.from_json" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a ProblemDefinition Object from JSON config file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A populated ProblemDefinition object.</p>
 </dd>
 </dl>
@@ -365,13 +275,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.ProblemDefinition.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.to_dict" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.to_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a python dictionary from the ProblemDefinition object</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A python dictionary</p>
 </dd>
 </dl>
@@ -379,13 +289,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.ProblemDefinition.to_json">
-<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.to_json" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ProblemDefinition.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ProblemDefinition.to_json" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a JSON config from the ProblemDefinition object</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>TODO</p>
 </dd>
 </dl>
@@ -395,10 +305,10 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="api.types.JsonAI">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">JsonAI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifiers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleaner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splitter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyzer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explainer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imputers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_transformer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_analyzer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">JsonAI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependency_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problem_definition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifiers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleaner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splitter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyzer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explainer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imputers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_transformer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_analyzer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI" title="Permalink to this definition"></a></dt>
 <dd><p>The JsonAI Class allows users to construct flexible JSON config to specify their ML pipeline. JSON-AI follows a     recipe of how to pre-process data, construct features, and train on the target column. To do so, the following     specifications are required internally.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>encoders</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="#api.types.Module" title="api.types.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>]) – A dictionary of the form: <cite>column_name -&gt; encoder module</cite></p></li>
 <li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]) – A dictionary of the form: <cite>column_name -&gt; data type</cite></p></li>
@@ -420,25 +330,25 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.JsonAI.from_dict">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.from_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a JSON-AI object from dictionary specifications of the JSON-config.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.JsonAI.from_json">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.from_json" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.from_json" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a JSON-AI object from JSON config</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.JsonAI.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.to_dict" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.to_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a python dictionary with necessary modules within the ML pipeline specified from the JSON-AI object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A python dictionary that has the necessary components of the ML pipeline for a given dataset.</p>
 </dd>
 </dl>
@@ -446,13 +356,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.JsonAI.to_json">
-<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.to_json" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#JsonAI.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.JsonAI.to_json" title="Permalink to this definition"></a></dt>
 <dd><p>Creates JSON config to represent the necessary modules within the ML pipeline specified from the JSON-AI object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A JSON config that has the necessary components of the ML pipeline for a given dataset.</p>
 </dd>
 </dl>
@@ -462,16 +372,16 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="api.types.SubmodelData">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">SubmodelData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_best</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#SubmodelData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.SubmodelData" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">SubmodelData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_best</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#SubmodelData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.SubmodelData" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="api.types.ModelAnalysis">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">ModelAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">accuracies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_histogram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_sample_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_sample_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_importances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confusion_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">histograms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtypes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">submodel_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ModelAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ModelAnalysis" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">ModelAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">accuracies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_histogram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_sample_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_sample_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_importances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confusion_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">histograms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtypes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">submodel_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#ModelAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.ModelAnalysis" title="Permalink to this definition"></a></dt>
 <dd><p>The <code class="docutils literal notranslate"><span class="pre">ModelAnalysis</span></code> class stores useful information to describe a model and understand its predictive performance on a validation dataset.
 For each trained ML algorithm, we store:</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>accuracies</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Dictionary with obtained values for each accuracy function (specified in JsonAI)</p></li>
 <li><p><strong>accuracy_histogram</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>]) – Dictionary with histograms of reported accuracy by target value.</p></li>
@@ -489,12 +399,12 @@ For each trained ML algorithm, we store:</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="api.types.PredictionArguments">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">PredictionArguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predict_proba</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_mixers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixer_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_cooldown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forecast_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simple_ts_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_ts_infer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_embedding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#PredictionArguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.PredictionArguments" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.types.</span></span><span class="sig-name descname"><span class="pre">PredictionArguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predict_proba</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_mixers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixer_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_cooldown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forecast_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simple_ts_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_ts_infer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_embedding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#PredictionArguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.PredictionArguments" title="Permalink to this definition"></a></dt>
 <dd><p>This class contains all possible arguments that can be passed to a Lightwood predictor at inference time.
 On each predict call, all arguments included in a parameter dictionary will update the respective fields
 in the <cite>PredictionArguments</cite> instance that the predictor will have.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>predict_proba</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – triggers (where supported) predictions in raw probability output form. I.e. for classifiers,</p>
 </dd>
 </dl>
@@ -517,13 +427,13 @@ each class.
 :param force_ts_infer: For time series predictors. If set to <cite>true</cite>, an additional row will be produced per each group in the input DF, corresponding to an out-of-sample forecast w.r.t. to the input timestamps.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.PredictionArguments.from_dict">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#PredictionArguments.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.PredictionArguments.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#PredictionArguments.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.PredictionArguments.from_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> object from a python dictionary with necessary specifications.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>obj</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – A python dictionary with the necessary features for the <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> class.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A populated <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> object.</p>
 </dd>
 </dl>
@@ -531,13 +441,13 @@ each class.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.types.PredictionArguments.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#PredictionArguments.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.PredictionArguments.to_dict" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encode_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/types.html#PredictionArguments.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.types.PredictionArguments.to_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a python dictionary from the <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> object</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]]</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A python dictionary</p>
 </dd>
 </dl>
@@ -545,54 +455,37 @@ each class.
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="predictor.html" class="btn btn-neutral float-right" title="Predictor Interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="dtype.html" class="btn btn-neutral float-left" title="Data Types (dtypes)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="predictor.html" class="btn btn-neutral float-right" title="Predictor Interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2017-2023, MindsDB.
-
-    </p>
+    <p>&#169; Copyright 2017-2023, MindsDB.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

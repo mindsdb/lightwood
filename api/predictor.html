@@ -1,102 +1,54 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Predictor Interface &mdash; lightwood 23.8.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="JSON-AI Config" href="json_ai.html" />
     <link rel="prev" title="Lightwood API Types" href="types.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search"  style="background: white" >
-          
 
           
-            <a href="../index.html">
           
-
-          
+          <a href="../index.html">
             
-            <img src="../_static/mindsdblogo.png" class="logo" alt="Logo"/>
-          
+              <img src="../_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
                 23.8.1.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a><ul class="current">
@@ -104,19 +56,19 @@
 <li class="toctree-l2"><a class="reference internal" href="dtype.html">Data Types (dtypes)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="types.html">Lightwood API Types</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Predictor Interface</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#api.predictor.PredictorInterface">PredictorInterface</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.adjust">adjust</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.analyze_data">analyze_data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.analyze_ensemble">analyze_ensemble</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.export">export</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.featurize">featurize</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.fit">fit</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.learn">learn</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.predict">predict</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.prepare">prepare</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.preprocess">preprocess</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.save">save</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.split">split</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api.predictor.PredictorInterface"><code class="docutils literal notranslate"><span class="pre">PredictorInterface</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.adjust"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.adjust()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.analyze_data"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.analyze_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.analyze_ensemble"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.analyze_ensemble()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.export"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.export()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.featurize"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.featurize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.fit"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.learn"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.learn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.predict"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.prepare"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.prepare()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.preprocess"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.preprocess()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.save"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.split"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.split()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -134,79 +86,37 @@
 <li class="toctree-l1"><a class="reference internal" href="../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">lightwood</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a> &raquo;</li>
-        
-      <li>Predictor Interface</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
+      <li class="breadcrumb-item active">Predictor Interface</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/api/predictor.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="predictor-interface">
-<h1>Predictor Interface<a class="headerlink" href="#predictor-interface" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="predictor-interface">
+<h1>Predictor Interface<a class="headerlink" href="#predictor-interface" title="Permalink to this heading"></a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">PredictorInterface</span></code> creates the skeletal structure around basic functionality of Lightwood.</p>
 <span class="target" id="module-api.predictor"></span><dl class="py class">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">api.predictor.</span></span><span class="sig-name descname"><span class="pre">PredictorInterface</span></span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.predictor.</span></span><span class="sig-name descname"><span class="pre">PredictorInterface</span></span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface" title="Permalink to this definition"></a></dt>
 <dd><p>Abstraction of a Lightwood predictor. The <code class="docutils literal notranslate"><span class="pre">PredictorInterface</span></code> encompasses how Lightwood interacts with the full ML pipeline. Internally,</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">PredictorInterface</span></code> class must have several expected functions:</p>
 <ul class="simple">
@@ -233,24 +143,24 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">PredictorInterface</span></code> is created via J{ai}son’s custom code creation. A problem inherits from this class with pre-populated routines to fill out expected results, given the nature of each problem type.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.adjust">
-<span class="sig-name descname"><span class="pre">adjust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjust_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.adjust"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.adjust" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">adjust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjust_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.adjust"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.adjust" title="Permalink to this definition"></a></dt>
 <dd><p>Adjusts a previously trained model on new data. Adopts the same process as <code class="docutils literal notranslate"><span class="pre">learn</span></code> but with the exception that the <cite>adjust</cite> function expects the best model to have been already trained.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>This is experimental and subject to change.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>new_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – New data used to adjust a previously trained model.</p></li>
 <li><p><strong>old_data</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – In some situations, the old data is still required to train a model (i.e. Regression mixer) to ensure the new data doesn’t entirely override it.</p></li>
 <li><p><strong>adjust_args</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – Optional dictionary with parameters to customize the finetuning process.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Adjusts best-fit model in-place, doesn’t return anything.</p>
 </dd>
 </dl>
@@ -258,13 +168,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.analyze_data">
-<span class="sig-name descname"><span class="pre">analyze_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.analyze_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.analyze_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">analyze_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.analyze_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.analyze_data" title="Permalink to this definition"></a></dt>
 <dd><p>Performs a statistical analysis on the data to identify distributions, imbalanced classes, and other nuances within the data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Data used in training the model(s).</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -272,13 +182,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.analyze_ensemble">
-<span class="sig-name descname"><span class="pre">analyze_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enc_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.analyze_ensemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.analyze_ensemble" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">analyze_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enc_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.analyze_ensemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.analyze_ensemble" title="Permalink to this definition"></a></dt>
 <dd><p>Evaluate the quality of mixers within an ensemble of models.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>enc_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – Pre-processed and featurized data, split into the relevant train/test splits.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -286,19 +196,19 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.export">
-<span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_ai_code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.export" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_ai_code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.export" title="Permalink to this definition"></a></dt>
 <dd><p>Exports both the predictor object and its code to a single binary file for later usage.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>file_path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Location to store your Predictor Instance.</p></li>
 <li><p><strong>json_ai_code</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The code generated by the user’s specification.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Saves Predictor instance.</p>
 </dd>
 </dl>
@@ -306,13 +216,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.featurize">
-<span class="sig-name descname"><span class="pre">featurize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.featurize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.featurize" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">featurize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.featurize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.featurize" title="Permalink to this definition"></a></dt>
 <dd><p>Provides an encoded representation for each dataset in <code class="docutils literal notranslate"><span class="pre">split_data</span></code>. Requires <cite>self.encoders</cite> to be prepared.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>split_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – Pre-processed data from the dataset, split into train/test (or any other keys relevant)</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>For each dataset provided in <code class="docutils literal notranslate"><span class="pre">split_data</span></code>, the encoded representations of the data.</p>
 </dd>
 </dl>
@@ -320,13 +230,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enc_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enc_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits “mixer” models to train predictors on the featurized data. Instantiates a set of trained mixers and an ensemble of them.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>enc_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – Pre-processed and featurized data, split into the relevant train/test splits. Keys expected are “train”, “dev”, and “test”</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
@@ -334,17 +244,17 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.learn">
-<span class="sig-name descname"><span class="pre">learn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.learn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.learn" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">learn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.learn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.learn" title="Permalink to this definition"></a></dt>
 <dd><p>Trains the attribute model starting from raw data. Raw data is pre-processed and cleaned accordingly. As data is assigned a particular type (ex: numerical, categorical, etc.), the respective feature encoder will convert it into a representation useable for training ML models. Of all ML models requested, these models are compiled and fit on the training data.</p>
 <p>This step amalgates <code class="docutils literal notranslate"><span class="pre">preprocess</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">featurize</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">fit</span></code> with the necessary splitting + analyze_data that occurs.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – (Unprocessed) Data used in training the model(s).</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Nothing; instantiates with best fit model from ensemble.</p>
 </dd>
 </dl>
@@ -352,19 +262,19 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.predict" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.predict" title="Permalink to this definition"></a></dt>
 <dd><p>Intakes raw data to provide predicted values for your trained model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Data (n_samples, n_columns) that the model(s) will evaluate on and provide the target prediction.</p></li>
 <li><p><strong>args</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – parameters needed to update the predictor <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> object, which holds any parameters relevant for prediction.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A dataframe of predictions of the same length of input.</p>
 </dd>
 </dl>
@@ -372,16 +282,16 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.prepare" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.prepare" title="Permalink to this definition"></a></dt>
 <dd><p>Prepares the encoders for each column of data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – Pre-processed data that has been split into train/test. Explicitly uses “train” and/or “dev” in preparation of encoders.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Nothing; prepares the encoders for learned representations.</p>
 </dd>
 </dl>
@@ -389,16 +299,16 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.preprocess">
-<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.preprocess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.preprocess" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.preprocess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.preprocess" title="Permalink to this definition"></a></dt>
 <dd><p>Cleans the unprocessed dataset provided.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – (Unprocessed) Data used in training the model(s).</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The cleaned data frame</p>
 </dd>
 </dl>
@@ -406,7 +316,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.save" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.save" title="Permalink to this definition"></a></dt>
 <dd><p>With a provided file path, saves the Predictor instance for later use.
 :type file_path: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
 :param file_path: Location to store your Predictor Instance.
@@ -416,16 +326,16 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.split">
-<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.split" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.split" title="Permalink to this definition"></a></dt>
 <dd><p>Categorizes the data into a training/testing split; if data is a classification problem, will stratify the data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Pre-processed data, but generically any dataset to split into train/dev/test.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Dictionary containing training/testing fraction</p>
 </dd>
 </dl>
@@ -433,54 +343,37 @@
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="json_ai.html" class="btn btn-neutral float-right" title="JSON-AI Config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="types.html" class="btn btn-neutral float-left" title="Lightwood API Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="json_ai.html" class="btn btn-neutral float-right" title="JSON-AI Config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2017-2023, MindsDB.
-
-    </p>
+    <p>&#169; Copyright 2017-2023, MindsDB.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

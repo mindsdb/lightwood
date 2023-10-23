@@ -1,103 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Using your own pre-processing methods in Lightwood &mdash; lightwood 23.8.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search"  style="background: white" >
-          
 
           
-            <a href="../../index.html">
           
-
-          
+          <a href="../../index.html">
             
-            <img src="../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
-          
+              <img src="../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
                 23.8.1.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
@@ -110,75 +62,34 @@
 <li class="toctree-l1"><a class="reference internal" href="../../lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">lightwood</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Using your own pre-processing methods in Lightwood</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Using your own pre-processing methods in Lightwood</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../../_sources/tutorials/custom_cleaner/custom_cleaner.ipynb.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="Using-your-own-pre-processing-methods-in-Lightwood">
-<h1>Using your own pre-processing methods in Lightwood<a class="headerlink" href="#Using-your-own-pre-processing-methods-in-Lightwood" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="Date:-2021.10.07">
-<h2>Date: 2021.10.07<a class="headerlink" href="#Date:-2021.10.07" title="Permalink to this headline">¶</a></h2>
+             
+  <section id="Using-your-own-pre-processing-methods-in-Lightwood">
+<h1>Using your own pre-processing methods in Lightwood<a class="headerlink" href="#Using-your-own-pre-processing-methods-in-Lightwood" title="Permalink to this heading"></a></h1>
+<section id="Date:-2021.10.07">
+<h2>Date: 2021.10.07<a class="headerlink" href="#Date:-2021.10.07" title="Permalink to this heading"></a></h2>
 <p>For the notebook below, we’ll be exploring how to make <strong>custom pre-processing</strong> methods for our data. Lightwood has standard cleaning protocols to handle a variety of different data types, however, we want users to feel comfortable augmenting and addressing their own changes. To do so, we’ll highlight the approach we would take below:</p>
 <p>We will use data from <a class="reference external" href="https://www.kaggle.com/c/commonlitreadabilityprize/data?select=train.csv">Kaggle</a>.</p>
 <p>The data has several columns, but ultimately aims to use text to predict a <em>readability score</em>. There are also some columns that I do not want to use when making predictions, such as <code class="docutils literal notranslate"><span class="pre">url_legal</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>, among others.</p>
@@ -212,12 +123,12 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2505:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2343:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2343:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
-<div class="section" id="1)-Load-your-data">
-<h3>1) Load your data<a class="headerlink" href="#1)-Load-your-data" title="Permalink to this headline">¶</a></h3>
+<section id="1)-Load-your-data">
+<h3>1) Load your data<a class="headerlink" href="#1)-Load-your-data" title="Permalink to this heading"></a></h3>
 <p>Lightwood uses <code class="docutils literal notranslate"><span class="pre">pandas</span></code> in order to handle datasets, as this is a very standard package in datascience. We can load our dataset using pandas in the following manner (make sure your data is in the data folder!)</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -311,9 +222,9 @@
 </div></div>
 </div>
 <p>We see <strong>6 columns</strong>, a variety which are numerical, missing numbers, text, and identifiers or “ids”. For our predictive task, we are only interested in 2 such columns, the <strong>excerpt</strong> and <strong>target</strong> columns.</p>
-</div>
-<div class="section" id="2)-Create-a-JSON-AI-default-object">
-<h3>2) Create a JSON-AI default object<a class="headerlink" href="#2)-Create-a-JSON-AI-default-object" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="2)-Create-a-JSON-AI-default-object">
+<h3>2) Create a JSON-AI default object<a class="headerlink" href="#2)-Create-a-JSON-AI-default-object" title="Permalink to this heading"></a></h3>
 <p>Before we create a custom cleaner object, let’s first create JSON-AI syntax for our problem based on its specifications. We can do so by setting up a <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code>. The <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> allows us to specify the target, the column we intend to predict, along with other details.</p>
 <p>The end goal of JSON-AI is to provide <em>a set of instructions on how to compile a machine learning pipeline</em>.</p>
 <p>In this case, let’s specify our target, the aptly named <strong>target</strong> column. We will also tell JSON-AI to throw away features we never intend to use, such as “url_legal”, “license”, and “standard_error”. We can do so in the following lines:</p>
@@ -337,20 +248,20 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2505:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Analyzing a sample of 2478</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Doing text detection for column: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column id has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Doing text detection for column: excerpt</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column target has data type float</span>
-<span class="ansi-yellow-fg">WARNING:type_infer-2505:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2343:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:type_infer-2343:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:type_infer-2343:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2343:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2343:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2343:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2343:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2343:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2343:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:type_infer-2343:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:type_infer-2343:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2343:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2343:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2343:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -438,7 +349,7 @@
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 18.336150646209717,
+        &#34;expected_additional_time&#34;: 19.78501033782959,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -481,9 +392,9 @@
 <p>The above shows the minimal syntax required to create a functional JSON-AI object. For each feature you consider in the dataset, we specify the name of the feature, the type of encoder (feature-engineering method) to process the feature, and key word arguments to process the encoder. For the output, we perform a similar operation, but specify the types of mixers, or algorithms used in making a predictor that can estimate the target. Lastly, we populate the “problem_definition” key with the
 ingredients for our ML pipeline.</p>
 <p>These are the only elements required to get off the ground with JSON-AI. However, we’re interested in making a <em>custom</em> approach. So, let’s make this syntax a file, and introduce our own changes.</p>
-</div>
-<div class="section" id="3)-Build-your-own-cleaner-module">
-<h3>3) Build your own cleaner module<a class="headerlink" href="#3)-Build-your-own-cleaner-module" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="3)-Build-your-own-cleaner-module">
+<h3>3) Build your own cleaner module<a class="headerlink" href="#3)-Build-your-own-cleaner-module" title="Permalink to this heading"></a></h3>
 <p>Let’s make a file called <code class="docutils literal notranslate"><span class="pre">MyCustomCleaner.py</span></code>. To write this file, we will use <code class="docutils literal notranslate"><span class="pre">dataprep_ml.cleaners.cleaner</span></code> as inspiration. <code class="docutils literal notranslate"><span class="pre">dataprep_ml</span></code> is a companion library that is part of the broader MindsDB ecosystem, and specializes in data cleaning, data splitting and data analysis.</p>
 <p>The goal output of the cleaner is to provide pre-processing to your dataset - the output is only a pandas DataFrame. In theory, any pre-processing can be done here. However, data can be highly irregular - our default <code class="docutils literal notranslate"><span class="pre">Cleaner</span></code> function has several main goals:</p>
 <ol class="arabic simple">
@@ -603,10 +514,10 @@ ingredients for our ML pipeline.</p>
 Writing MyCustomCleaner.py
 </pre></div></div>
 </div>
-</div>
-</div>
-<div class="section" id="Place-your-custom-module-in-~/lightwood_modules-or-/etc/lightwood_modules">
-<h2>Place your custom module in <code class="docutils literal notranslate"><span class="pre">~/lightwood_modules</span></code> or <code class="docutils literal notranslate"><span class="pre">/etc/lightwood_modules</span></code><a class="headerlink" href="#Place-your-custom-module-in-~/lightwood_modules-or-/etc/lightwood_modules" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="Place-your-custom-module-in-~/lightwood_modules-or-/etc/lightwood_modules">
+<h2>Place your custom module in <code class="docutils literal notranslate"><span class="pre">~/lightwood_modules</span></code> or <code class="docutils literal notranslate"><span class="pre">/etc/lightwood_modules</span></code><a class="headerlink" href="#Place-your-custom-module-in-~/lightwood_modules-or-/etc/lightwood_modules" title="Permalink to this heading"></a></h2>
 <p>We automatically search for custom scripts in your <code class="docutils literal notranslate"><span class="pre">~/lightwood_modules</span></code> and <code class="docutils literal notranslate"><span class="pre">/etc/lightwood_modules</span></code> path. Place your file there. Later, you’ll see when we autogenerate code, that you can change your import location if you choose.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -619,8 +530,8 @@ Writing MyCustomCleaner.py
 </pre></div>
 </div>
 </div>
-<div class="section" id="4)-Introduce-your-custom-cleaner-in-JSON-AI">
-<h3>4) Introduce your custom cleaner in JSON-AI<a class="headerlink" href="#4)-Introduce-your-custom-cleaner-in-JSON-AI" title="Permalink to this headline">¶</a></h3>
+<section id="4)-Introduce-your-custom-cleaner-in-JSON-AI">
+<h3>4) Introduce your custom cleaner in JSON-AI<a class="headerlink" href="#4)-Introduce-your-custom-cleaner-in-JSON-AI" title="Permalink to this heading"></a></h3>
 <p>Now let’s introduce our custom cleaner. JSON-AI keeps a lightweight syntax but fills in many default modules (like splitting, cleaning). As you can see, it is also agnostic to the origin of the module, as long as it behaves as expected of the other modules that could be used in any given key.</p>
 <p>For the custom cleaner, we’ll work by editing the “cleaner” key. We will change properties within it as follows: (1) “module” - place the name of the function. In our case it will be “MyCustomCleaner.cleaner” (2) “args” - any keyword argument specific to your cleaner’s internals.</p>
 <p>This will look as follows:</p>
@@ -639,9 +550,9 @@ Writing MyCustomCleaner.py
 </div>
 <p>You may be wondering what the “$” variables reference. In certain cases, we’d like JSON-AI to auto-fill internal variables when automatically generating code, for example, we’ve already specified the “target” - it would be easier to simply refer in a modular sense what that term is. That is what these variables represent.</p>
 <p>As we borrowed most of the default <code class="docutils literal notranslate"><span class="pre">Cleaner</span></code>; we keep these arguments. In theory, if we were writing much of these details from scratch, we can customize these values as necessary.</p>
-</div>
-<div class="section" id="5)-Generate-Python-code-representing-your-ML-pipeline">
-<h3>5) Generate Python code representing your ML pipeline<a class="headerlink" href="#5)-Generate-Python-code-representing-your-ML-pipeline" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="5)-Generate-Python-code-representing-your-ML-pipeline">
+<h3>5) Generate Python code representing your ML pipeline<a class="headerlink" href="#5)-Generate-Python-code-representing-your-ML-pipeline" title="Permalink to this heading"></a></h3>
 <p>Now we’re ready to load up our custom JSON-AI and generate the predictor code!</p>
 <p>We can do this by first reading in our custom json-syntax, and then calling the function <code class="docutils literal notranslate"><span class="pre">code_from_json_ai</span></code>.</p>
 <div class="nbinput docutils container">
@@ -748,7 +659,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 21384.0,
                 &#34;seconds_per_encoder&#34;: 85536.0,
-                &#34;expected_additional_time&#34;: 18.336150646209717,
+                &#34;expected_additional_time&#34;: 19.78501033782959,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -1296,9 +1207,9 @@ class Predictor(PredictorInterface):
 <p>You can customize this further if necessary, but you have all the steps necessary to train a model!</p>
 <p>We recommend familiarizing with these steps by calling the above commands, ideally in order. Some commands (namely <code class="docutils literal notranslate"><span class="pre">prepare</span></code>, <code class="docutils literal notranslate"><span class="pre">featurize</span></code>, and <code class="docutils literal notranslate"><span class="pre">fit</span></code>) do depend on other steps.</p>
 <p>If you want to omit the individual steps, we recommend your simply call the <code class="docutils literal notranslate"><span class="pre">learn</span></code> method, which compiles all the necessary steps implemented to give your fully trained predictive models starting with unprocessed data!</p>
-</div>
-<div class="section" id="6)-Call-python-to-run-your-code-and-see-your-preprocessed-outputs">
-<h3>6) Call python to run your code and see your preprocessed outputs<a class="headerlink" href="#6)-Call-python-to-run-your-code-and-see-your-preprocessed-outputs" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="6)-Call-python-to-run-your-code-and-see-your-preprocessed-outputs">
+<h3>6) Call python to run your code and see your preprocessed outputs<a class="headerlink" href="#6)-Call-python-to-run-your-code-and-see-your-preprocessed-outputs" title="Permalink to this heading"></a></h3>
 <p>Once we have code, we can turn this into a python object by calling <code class="docutils literal notranslate"><span class="pre">predictor_from_code</span></code>. This instantiates the <code class="docutils literal notranslate"><span class="pre">PredictorInterface</span></code> object.</p>
 <p>This predictor object can be then used to run your pipeline.</p>
 <div class="nbinput nblast docutils container">
@@ -1331,16 +1242,16 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `analyze_data` runtime: 0.07 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Cleaning the data</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Dropping features: [&#39;id&#39;]</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:Cleaning column =excerpt</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:Cleaning column =target</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:Converted target into strictly non-negative</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `preprocess` runtime: 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2343:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2343:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2343:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2343: `analyze_data` runtime: 0.07 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2343:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2343:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2343:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2343:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2343:Converted target into strictly non-negative</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2343: `preprocess` runtime: 0.11 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1445,52 +1356,36 @@ Target:
 <p>As you can see, the cleaning-process we introduced cut out the stop-words from the Excerpt, and enforced the target data to stay positive.</p>
 <p>We hope this tutorial was informative on how to introduce a <strong>custom preprocessing method</strong> to your datasets! For more customization tutorials, please check our <a class="reference external" href="https://lightwood.io/tutorials.html">documentation</a>.</p>
 <p>If you want to download the Jupyter-notebook version of this tutorial, check out the source github location found here: <code class="docutils literal notranslate"><span class="pre">lightwood/docssrc/source/tutorials/custom_cleaner</span></code>.</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2017-2023, MindsDB.
-
-    </p>
+    <p>&#169; Copyright 2017-2023, MindsDB.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

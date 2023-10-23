@@ -1,122 +1,74 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Data &mdash; lightwood 23.8.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Encoders" href="encoder.html" />
     <link rel="prev" title="Encode your data" href="api/encode.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search"  style="background: white" >
-          
 
           
-            <a href="index.html">
           
-
-          
+          <a href="index.html">
             
-            <img src="_static/mindsdblogo.png" class="logo" alt="Logo"/>
-          
+              <img src="_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
                 23.8.1.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Tutorials</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">API</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#data.ConcatedEncodedDs">ConcatedEncodedDs</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#data.ConcatedEncodedDs.clear_cache">clear_cache</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#data.ConcatedEncodedDs.get_column_original_data">get_column_original_data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#data.ConcatedEncodedDs.get_encoded_column_data">get_encoded_column_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data.ConcatedEncodedDs"><code class="docutils literal notranslate"><span class="pre">ConcatedEncodedDs</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data.ConcatedEncodedDs.clear_cache"><code class="docutils literal notranslate"><span class="pre">ConcatedEncodedDs.clear_cache()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.ConcatedEncodedDs.get_column_original_data"><code class="docutils literal notranslate"><span class="pre">ConcatedEncodedDs.get_column_original_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.ConcatedEncodedDs.get_encoded_column_data"><code class="docutils literal notranslate"><span class="pre">ConcatedEncodedDs.get_encoded_column_data()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#data.EncodedDs">EncodedDs</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.build_cache">build_cache</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.clear_cache">clear_cache</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.get_column_original_data">get_column_original_data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.get_encoded_column_data">get_encoded_column_data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.get_encoded_data">get_encoded_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data.EncodedDs"><code class="docutils literal notranslate"><span class="pre">EncodedDs</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.build_cache"><code class="docutils literal notranslate"><span class="pre">EncodedDs.build_cache()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.clear_cache"><code class="docutils literal notranslate"><span class="pre">EncodedDs.clear_cache()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.get_column_original_data"><code class="docutils literal notranslate"><span class="pre">EncodedDs.get_column_original_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.get_encoded_column_data"><code class="docutils literal notranslate"><span class="pre">EncodedDs.get_encoded_column_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.EncodedDs.get_encoded_data"><code class="docutils literal notranslate"><span class="pre">EncodedDs.get_encoded_data()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#data.timeseries_analyzer">timeseries_analyzer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#data.transform_timeseries">transform_timeseries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data.timeseries_analyzer"><code class="docutils literal notranslate"><span class="pre">timeseries_analyzer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data.transform_timeseries"><code class="docutils literal notranslate"><span class="pre">transform_timeseries()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="encoder.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Encoders</span></code></a></li>
@@ -127,83 +79,42 @@
 <li class="toctree-l1"><a class="reference internal" href="lightwood_philosophy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Lightwood</span> <span class="pre">Philosophy</span></code></a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">lightwood</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code></li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/data.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="data">
-<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code><a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="data">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Data</span></code><a class="headerlink" href="#data" title="Permalink to this heading"></a></h1>
 <p>The focus of these modules is on storing, transforming, cleaning, splitting, merging, getting and removing data.</p>
 <span class="target" id="module-data"></span><dl class="py class">
 <dt class="sig sig-object py" id="data.ConcatedEncodedDs">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">ConcatedEncodedDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_ds_arr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">ConcatedEncodedDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded_ds_arr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#data.EncodedDs" title="lightwood.data.encoded_ds.EncodedDs"><code class="xref py py-class docutils literal notranslate"><span class="pre">EncodedDs</span></code></a></p>
 <p><cite>ConcatedEncodedDs</cite> abstracts over multiple encoded datasources (<cite>EncodedDs</cite>) as if they were a single entity.</p>
 <p>Create a Lightwood datasource from a data frame and some encoders. This class inherits from <cite>torch.utils.data.Dataset</cite>.</p>
 <p>Note: normal behavior is to cache encoded representations to avoid duplicated computations. If you want an option to disable, this please open an issue.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>encoders</strong> – list of Lightwood encoders used to encode the data per each column.</p></li>
 <li><p><strong>data_frame</strong> – original dataframe.</p></li>
@@ -213,16 +124,16 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="data.ConcatedEncodedDs.clear_cache">
-<span class="sig-name descname"><span class="pre">clear_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs.clear_cache" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">clear_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs.clear_cache" title="Permalink to this definition"></a></dt>
 <dd><p>See <cite>lightwood.data.encoded_ds.EncodedDs.clear_cache()</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="data.ConcatedEncodedDs.get_column_original_data">
-<span class="sig-name descname"><span class="pre">get_column_original_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs.get_column_original_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs.get_column_original_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_column_original_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs.get_column_original_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs.get_column_original_data" title="Permalink to this definition"></a></dt>
 <dd><p>See <cite>lightwood.data.encoded_ds.EncodedDs.get_column_original_data()</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></p>
 </dd>
 </dl>
@@ -230,10 +141,10 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="data.ConcatedEncodedDs.get_encoded_column_data">
-<span class="sig-name descname"><span class="pre">get_encoded_column_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs.get_encoded_column_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs.get_encoded_column_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_encoded_column_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#ConcatedEncodedDs.get_encoded_column_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.ConcatedEncodedDs.get_encoded_column_data" title="Permalink to this definition"></a></dt>
 <dd><p>See <cite>lightwood.data.encoded_ds.EncodedDs.get_encoded_column_data()</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
 </dd>
 </dl>
@@ -243,12 +154,12 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="data.EncodedDs">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">EncodedDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">EncodedDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
 <p>Create a Lightwood datasource from a data frame and some encoders. This class inherits from <cite>torch.utils.data.Dataset</cite>.</p>
 <p>Note: normal behavior is to cache encoded representations to avoid duplicated computations. If you want an option to disable, this please open an issue.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>encoders</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="encoder.html#encoder.BaseEncoder" title="lightwood.encoder.base.BaseEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEncoder</span></code></a>]) – list of Lightwood encoders used to encode the data per each column.</p></li>
 <li><p><strong>data_frame</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – original dataframe.</p></li>
@@ -258,28 +169,28 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="data.EncodedDs.build_cache">
-<span class="sig-name descname"><span class="pre">build_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.build_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.build_cache" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">build_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.build_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.build_cache" title="Permalink to this definition"></a></dt>
 <dd><p>This method builds a cache for the entire dataframe provided at initialization.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="data.EncodedDs.clear_cache">
-<span class="sig-name descname"><span class="pre">clear_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.clear_cache" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">clear_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.clear_cache" title="Permalink to this definition"></a></dt>
 <dd><p>Clears the <cite>EncodedDs</cite> cache.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="data.EncodedDs.get_column_original_data">
-<span class="sig-name descname"><span class="pre">get_column_original_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.get_column_original_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.get_column_original_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_column_original_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.get_column_original_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.get_column_original_data" title="Permalink to this definition"></a></dt>
 <dd><p>Gets the original data for any given column of the <cite>EncodedDs</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>column_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the column.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A <cite>pd.Series</cite> with the original data stored in the <cite>column_name</cite> column.</p>
 </dd>
 </dl>
@@ -287,16 +198,16 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="data.EncodedDs.get_encoded_column_data">
-<span class="sig-name descname"><span class="pre">get_encoded_column_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.get_encoded_column_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.get_encoded_column_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_encoded_column_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.get_encoded_column_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.get_encoded_column_data" title="Permalink to this definition"></a></dt>
 <dd><p>Gets the encoded data for any given column of the <cite>EncodedDs</cite>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>column_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the column.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A <cite>torch.Tensor</cite> with the encoded data of the <cite>column_name</cite> column.</p>
 </dd>
 </dl>
@@ -304,16 +215,16 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="data.EncodedDs.get_encoded_data">
-<span class="sig-name descname"><span class="pre">get_encoded_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">include_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.get_encoded_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.get_encoded_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_encoded_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">include_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/encoded_ds.html#EncodedDs.get_encoded_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.EncodedDs.get_encoded_data" title="Permalink to this definition"></a></dt>
 <dd><p>Gets all encoded data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>include_target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to include the target column in the output or not.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A <cite>torch.Tensor</cite> with the encoded dataframe.</p>
 </dd>
 </dl>
@@ -323,10 +234,10 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="data.timeseries_analyzer">
-<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">timeseries_analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/timeseries_analyzer.html#timeseries_analyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.timeseries_analyzer" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">timeseries_analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/timeseries_analyzer.html#timeseries_analyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.timeseries_analyzer" title="Permalink to this definition"></a></dt>
 <dd><p>This module analyzes (pre-processed) time series data and stores a few useful insights used in the rest of Lightwood’s pipeline.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>]) – dictionary with the dataset split into train, val, test subsets.</p></li>
 <li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – dictionary with inferred types for every column.</p></li>
@@ -346,10 +257,10 @@
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dictionary with the aforementioned insights and the <cite>TimeseriesSettings</cite> object for future references.</p>
 </dd>
 </dl>
@@ -357,7 +268,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="data.transform_timeseries">
-<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">transform_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/timeseries_transform.html#transform_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.transform_timeseries" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">transform_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/data/timeseries_transform.html#transform_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.transform_timeseries" title="Permalink to this definition"></a></dt>
 <dd><p>Block that transforms the dataframe of a time series task to a convenient format for use in posterior phases like model training.</p>
 <dl class="simple">
 <dt>The main transformations performed by this block are:</dt><dd><ul class="simple">
@@ -370,7 +281,7 @@
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Dataframe with data to transform.</p></li>
 <li><p><strong>dtype_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Dictionary with the types of each column.</p></li>
@@ -380,63 +291,46 @@
 <li><p><strong>pred_args</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionArguments</span></code>]) – Optional prediction arguments to control the transformation process.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A dataframe with all the transformations applied.</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="encoder.html" class="btn btn-neutral float-right" title="Encoders" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="api/encode.html" class="btn btn-neutral float-left" title="Encode your data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="encoder.html" class="btn btn-neutral float-right" title="Encoders" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2017-2023, MindsDB.
-
-    </p>
+    <p>&#169; Copyright 2017-2023, MindsDB.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
