@@ -35,10 +35,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:06.618519Z",
-     "iopub.status.busy": "2023-10-23T15:10:06.617992Z",
-     "iopub.status.idle": "2023-10-23T15:10:06.927920Z",
-     "shell.execute_reply": "2023-10-23T15:10:06.927276Z"
+     "iopub.execute_input": "2023-10-23T21:50:19.139544Z",
+     "iopub.status.busy": "2023-10-23T21:50:19.139031Z",
+     "iopub.status.idle": "2023-10-23T21:50:19.795144Z",
+     "shell.execute_reply": "2023-10-23T21:50:19.794415Z"
     }
    },
    "outputs": [
@@ -175,10 +175,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:06.972058Z",
-     "iopub.status.busy": "2023-10-23T15:10:06.971420Z",
-     "iopub.status.idle": "2023-10-23T15:10:09.922085Z",
-     "shell.execute_reply": "2023-10-23T15:10:09.921267Z"
+     "iopub.execute_input": "2023-10-23T21:50:19.846211Z",
+     "iopub.status.busy": "2023-10-23T21:50:19.845683Z",
+     "iopub.status.idle": "2023-10-23T21:50:23.212153Z",
+     "shell.execute_reply": "2023-10-23T21:50:23.211209Z"
     }
    },
    "outputs": [
@@ -186,8 +186,8 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2622:No torchvision detected, image helpers not supported.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2622:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2805:No torchvision detected, image helpers not supported.\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2805:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
      ]
     }
    ],
@@ -209,10 +209,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:09.926430Z",
-     "iopub.status.busy": "2023-10-23T15:10:09.925753Z",
-     "iopub.status.idle": "2023-10-23T15:10:09.932122Z",
-     "shell.execute_reply": "2023-10-23T15:10:09.931438Z"
+     "iopub.execute_input": "2023-10-23T21:50:23.216877Z",
+     "iopub.status.busy": "2023-10-23T21:50:23.215989Z",
+     "iopub.status.idle": "2023-10-23T21:50:23.223819Z",
+     "shell.execute_reply": "2023-10-23T21:50:23.222993Z"
     }
    },
    "outputs": [
@@ -264,10 +264,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:09.935789Z",
-     "iopub.status.busy": "2023-10-23T15:10:09.935087Z",
-     "iopub.status.idle": "2023-10-23T15:10:09.964205Z",
-     "shell.execute_reply": "2023-10-23T15:10:09.963618Z"
+     "iopub.execute_input": "2023-10-23T21:50:23.227651Z",
+     "iopub.status.busy": "2023-10-23T21:50:23.227120Z",
+     "iopub.status.idle": "2023-10-23T21:50:23.269808Z",
+     "shell.execute_reply": "2023-10-23T21:50:23.269008Z"
     }
    },
    "outputs": [
@@ -275,22 +275,22 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2622:Analyzing a sample of 222\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:from a total population of 225, this is equivalent to 98.7% of your data.\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Infering type for: Population\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Column Population has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Infering type for: Area (sq. mi.)\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Column Area (sq. mi.) has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Infering type for: Pop. Density \u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Column Pop. Density  has data type float\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Infering type for: GDP ($ per capita)\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Column GDP ($ per capita) has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Infering type for: Literacy (%)\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Column Literacy (%) has data type float\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Infering type for: Infant mortality \u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Column Infant mortality  has data type float\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Infering type for: Development Index\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2622:Column Development Index has data type categorical\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2805:Analyzing a sample of 222\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:from a total population of 225, this is equivalent to 98.7% of your data.\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Infering type for: Population\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Column Population has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Infering type for: Area (sq. mi.)\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Column Area (sq. mi.) has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Infering type for: Pop. Density \u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Column Pop. Density  has data type float\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Infering type for: GDP ($ per capita)\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Column GDP ($ per capita) has data type integer\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Infering type for: Literacy (%)\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Column Literacy (%) has data type float\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Infering type for: Infant mortality \u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Column Infant mortality  has data type float\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Infering type for: Development Index\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2805:Column Development Index has data type categorical\u001b[0m\n"
      ]
     },
     {
@@ -325,10 +325,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:09.968408Z",
-     "iopub.status.busy": "2023-10-23T15:10:09.967035Z",
-     "iopub.status.idle": "2023-10-23T15:10:09.974423Z",
-     "shell.execute_reply": "2023-10-23T15:10:09.973799Z"
+     "iopub.execute_input": "2023-10-23T21:50:23.274004Z",
+     "iopub.status.busy": "2023-10-23T21:50:23.273429Z",
+     "iopub.status.idle": "2023-10-23T21:50:23.279882Z",
+     "shell.execute_reply": "2023-10-23T21:50:23.279102Z"
     }
    },
    "outputs": [
@@ -378,10 +378,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:09.977771Z",
-     "iopub.status.busy": "2023-10-23T15:10:09.977303Z",
-     "iopub.status.idle": "2023-10-23T15:10:10.009147Z",
-     "shell.execute_reply": "2023-10-23T15:10:10.008553Z"
+     "iopub.execute_input": "2023-10-23T21:50:23.283853Z",
+     "iopub.status.busy": "2023-10-23T21:50:23.283576Z",
+     "iopub.status.idle": "2023-10-23T21:50:23.322387Z",
+     "shell.execute_reply": "2023-10-23T21:50:23.321193Z"
     }
    },
    "outputs": [
@@ -389,8 +389,8 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2622:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2622:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2805:Starting statistical analysis\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2805:Finished statistical analysis\u001b[0m\n"
      ]
     }
    ],
@@ -418,10 +418,10 @@
    "execution_count": 7,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:10.012664Z",
-     "iopub.status.busy": "2023-10-23T15:10:10.012161Z",
-     "iopub.status.idle": "2023-10-23T15:10:10.017261Z",
-     "shell.execute_reply": "2023-10-23T15:10:10.016699Z"
+     "iopub.execute_input": "2023-10-23T21:50:23.327279Z",
+     "iopub.status.busy": "2023-10-23T21:50:23.326562Z",
+     "iopub.status.idle": "2023-10-23T21:50:23.333945Z",
+     "shell.execute_reply": "2023-10-23T21:50:23.332899Z"
     }
    },
    "outputs": [
@@ -467,10 +467,10 @@
    "execution_count": 8,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:10.020595Z",
-     "iopub.status.busy": "2023-10-23T15:10:10.019895Z",
-     "iopub.status.idle": "2023-10-23T15:10:10.024403Z",
-     "shell.execute_reply": "2023-10-23T15:10:10.023855Z"
+     "iopub.execute_input": "2023-10-23T21:50:23.338429Z",
+     "iopub.status.busy": "2023-10-23T21:50:23.338125Z",
+     "iopub.status.idle": "2023-10-23T21:50:23.343054Z",
+     "shell.execute_reply": "2023-10-23T21:50:23.342415Z"
     }
    },
    "outputs": [
@@ -510,10 +510,10 @@
    "execution_count": 9,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:10.027706Z",
-     "iopub.status.busy": "2023-10-23T15:10:10.027011Z",
-     "iopub.status.idle": "2023-10-23T15:10:10.032047Z",
-     "shell.execute_reply": "2023-10-23T15:10:10.031508Z"
+     "iopub.execute_input": "2023-10-23T21:50:23.347069Z",
+     "iopub.status.busy": "2023-10-23T21:50:23.346584Z",
+     "iopub.status.idle": "2023-10-23T21:50:23.352238Z",
+     "shell.execute_reply": "2023-10-23T21:50:23.351600Z"
     },
     "scrolled": false
    },
@@ -571,10 +571,10 @@
    "execution_count": 10,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:10.035215Z",
-     "iopub.status.busy": "2023-10-23T15:10:10.034644Z",
-     "iopub.status.idle": "2023-10-23T15:10:10.039184Z",
-     "shell.execute_reply": "2023-10-23T15:10:10.038640Z"
+     "iopub.execute_input": "2023-10-23T21:50:23.356068Z",
+     "iopub.status.busy": "2023-10-23T21:50:23.355303Z",
+     "iopub.status.idle": "2023-10-23T21:50:23.360557Z",
+     "shell.execute_reply": "2023-10-23T21:50:23.359968Z"
     }
    },
    "outputs": [
@@ -598,10 +598,10 @@
    "execution_count": 11,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:10.042235Z",
-     "iopub.status.busy": "2023-10-23T15:10:10.041553Z",
-     "iopub.status.idle": "2023-10-23T15:10:10.046673Z",
-     "shell.execute_reply": "2023-10-23T15:10:10.046104Z"
+     "iopub.execute_input": "2023-10-23T21:50:23.364225Z",
+     "iopub.status.busy": "2023-10-23T21:50:23.363701Z",
+     "iopub.status.idle": "2023-10-23T21:50:23.369608Z",
+     "shell.execute_reply": "2023-10-23T21:50:23.368930Z"
     },
     "scrolled": false
    },
@@ -684,10 +684,10 @@
    "execution_count": 12,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:10.049819Z",
-     "iopub.status.busy": "2023-10-23T15:10:10.049146Z",
-     "iopub.status.idle": "2023-10-23T15:10:10.053661Z",
-     "shell.execute_reply": "2023-10-23T15:10:10.053112Z"
+     "iopub.execute_input": "2023-10-23T21:50:23.373388Z",
+     "iopub.status.busy": "2023-10-23T21:50:23.372579Z",
+     "iopub.status.idle": "2023-10-23T21:50:23.377831Z",
+     "shell.execute_reply": "2023-10-23T21:50:23.377175Z"
     }
    },
    "outputs": [
@@ -739,10 +739,10 @@
    "execution_count": 13,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-10-23T15:10:10.056909Z",
-     "iopub.status.busy": "2023-10-23T15:10:10.056221Z",
-     "iopub.status.idle": "2023-10-23T15:10:13.283962Z",
-     "shell.execute_reply": "2023-10-23T15:10:13.283153Z"
+     "iopub.execute_input": "2023-10-23T21:50:23.381424Z",
+     "iopub.status.busy": "2023-10-23T21:50:23.380883Z",
+     "iopub.status.idle": "2023-10-23T21:50:27.094128Z",
+     "shell.execute_reply": "2023-10-23T21:50:27.093286Z"
     },
     "scrolled": false
    },
