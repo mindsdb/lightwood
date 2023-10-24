@@ -17,7 +17,7 @@ wheel >=0.32.2
 scikit-learn >=1.0.0
 dataclasses_json >=0.5.4
 dill ==0.3.6
-sktime >=0.24.0,<0.25 .0
+sktime >=0.24.0,<0.25.0
 statsforecast ~=1.6.0
 torch_optimizer ==0.1.0
 black ==23.3.0
