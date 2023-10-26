@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tutorial - Introduction to Lightwood’s statistical analysis &mdash; lightwood 23.8.1.0 documentation</title>
+  <title>Tutorial - Introduction to Lightwood’s statistical analysis &mdash; lightwood 23.11.1.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -40,7 +40,7 @@
               <img src="../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                23.8.1.0
+                23.11.1.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -220,8 +220,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2733:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2733:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2581:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2581:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <p>Let’s see how this object has been populated. <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> is a Python <code class="docutils literal notranslate"><span class="pre">dataclass</span></code>, so it comes with some convenient tools to achieve this:</p>
@@ -281,22 +281,22 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2733:Analyzing a sample of 222</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:from a total population of 225, this is equivalent to 98.7% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Infering type for: Population</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Column Population has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Infering type for: Area (sq. mi.)</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Column Area (sq. mi.) has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Infering type for: Pop. Density </span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Column Pop. Density  has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Infering type for: GDP ($ per capita)</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Column GDP ($ per capita) has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Infering type for: Literacy (%)</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Column Literacy (%) has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Infering type for: Infant mortality </span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Column Infant mortality  has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Infering type for: Development Index</span>
-<span class="ansi-green-fg">INFO:type_infer-2733:Column Development Index has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Analyzing a sample of 222</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:from a total population of 225, this is equivalent to 98.7% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Infering type for: Population</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Column Population has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Infering type for: Area (sq. mi.)</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Column Area (sq. mi.) has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Infering type for: Pop. Density </span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Column Pop. Density  has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Infering type for: GDP ($ per capita)</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Column GDP ($ per capita) has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Infering type for: Literacy (%)</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Column Literacy (%) has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Infering type for: Infant mortality </span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Column Infant mortality  has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Infering type for: Development Index</span>
+<span class="ansi-green-fg">INFO:type_infer-2581:Column Development Index has data type categorical</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -358,8 +358,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2733:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2733:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2581:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2581:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </section>

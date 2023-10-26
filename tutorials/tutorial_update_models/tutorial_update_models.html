@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Introduction &mdash; lightwood 23.8.1.0 documentation</title>
+  <title>Introduction &mdash; lightwood 23.11.1.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -40,7 +40,7 @@
               <img src="../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                23.8.1.0
+                23.11.1.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -108,8 +108,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2706:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -179,57 +179,57 @@ Test dataframe shape: (206, 10)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2706:Analyzing a sample of 979</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:from a total population of 1030, this is equivalent to 95.0% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Infering type for: id</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Column id has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Infering type for: cement</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Column cement has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Infering type for: slag</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Column slag has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Infering type for: flyAsh</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Column flyAsh has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Infering type for: water</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Column water has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Infering type for: superPlasticizer</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Column superPlasticizer has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Infering type for: coarseAggregate</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Column coarseAggregate has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Infering type for: fineAggregate</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Column fineAggregate has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Infering type for: age</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Column age has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Infering type for: concrete_strength</span>
-<span class="ansi-green-fg">INFO:type_infer-2706:Column concrete_strength has data type float</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Finished statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Learn phase 1/8] - Statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `analyze_data` runtime: 0.03 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Learn phase 2/8] - Data preprocessing</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `preprocess` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Learn phase 3/8] - Data splitting</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `split` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Learn phase 4/8] - Preparing encoders</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2706:Preparing sequentially...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2706:Preparing encoder for id...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2706:Preparing encoder for cement...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2706:Preparing encoder for slag...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2706:Preparing encoder for flyAsh...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2706:Preparing encoder for water...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2706:Preparing encoder for superPlasticizer...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2706:Preparing encoder for coarseAggregate...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2706:Preparing encoder for fineAggregate...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2706:Preparing encoder for age...</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `prepare` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Learn phase 5/8] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `featurize` runtime: 0.08 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Learn phase 6/8] - Mixer training</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Training the mixers</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Analyzing a sample of 979</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:from a total population of 1030, this is equivalent to 95.0% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Column id has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Infering type for: cement</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Column cement has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Infering type for: slag</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Column slag has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Infering type for: flyAsh</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Column flyAsh has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Infering type for: water</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Column water has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Infering type for: superPlasticizer</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Column superPlasticizer has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Infering type for: coarseAggregate</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Column coarseAggregate has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Infering type for: fineAggregate</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Column fineAggregate has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Infering type for: age</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Column age has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Infering type for: concrete_strength</span>
+<span class="ansi-green-fg">INFO:type_infer-2554:Column concrete_strength has data type float</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Learn phase 1/8] - Statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `analyze_data` runtime: 0.03 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Learn phase 2/8] - Data preprocessing</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `preprocess` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Learn phase 3/8] - Data splitting</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `split` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Learn phase 4/8] - Preparing encoders</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2554:Preparing sequentially...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2554:Preparing encoder for id...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2554:Preparing encoder for cement...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2554:Preparing encoder for slag...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2554:Preparing encoder for flyAsh...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2554:Preparing encoder for water...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2554:Preparing encoder for superPlasticizer...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2554:Preparing encoder for coarseAggregate...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2554:Preparing encoder for fineAggregate...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2554:Preparing encoder for age...</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `prepare` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Learn phase 5/8] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `featurize` runtime: 0.07 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Learn phase 6/8] - Mixer training</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Training the mixers</span>
 /opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:120: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
 /opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/pytorch_ranger/ranger.py:172: UserWarning: This overload of addcmul_ is deprecated:
@@ -237,43 +237,43 @@ Test dataframe shape: (206, 10)
 Consider using one of the following signatures instead:
         addcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1485.)
   exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss of 39.99637413024902 with learning rate 0.0001</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss of 21.826460480690002 with learning rate 0.0005</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss of 15.12899625301361 with learning rate 0.001</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss of 15.062753677368164 with learning rate 0.002</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss of 26.490498542785645 with learning rate 0.003</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss of 33.65720558166504 with learning rate 0.005</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss of 303.607186794281 with learning rate 0.01</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss of nan with learning rate 0.05</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Found learning rate of: 0.002</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss @ epoch 1: 0.11838733404874802</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss @ epoch 2: 0.4641949534416199</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss @ epoch 3: 0.3976145088672638</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss @ epoch 4: 0.3706841766834259</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss @ epoch 5: 0.2367912083864212</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss @ epoch 6: 0.22560922801494598</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss @ epoch 7: 0.12089194357395172</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `fit_mixer` runtime: 0.21 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Ensembling the mixer</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Mixer: Neural got accuracy: 0.238</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:Picked best mixer: Neural</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `fit` runtime: 0.22 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Learn phase 7/8] - Ensemble analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Analyzing the ensemble of mixers</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block ICP is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block ConfStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block AccStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block PermutationFeatureImportance is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:[PFI] Using a random sample (1000 rows out of 10).</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:[PFI] Set to consider first 10 columns out of 9: [&#39;id&#39;, &#39;cement&#39;, &#39;slag&#39;, &#39;flyAsh&#39;, &#39;water&#39;, &#39;superPlasticizer&#39;, &#39;coarseAggregate&#39;, &#39;fineAggregate&#39;, &#39;age&#39;].</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `analyze_ensemble` runtime: 0.24 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Learn phase 8/8] - Adjustment on validation requested</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Updating the mixers</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss of 39.99637413024902 with learning rate 0.0001</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss of 21.826460480690002 with learning rate 0.0005</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss of 15.12899625301361 with learning rate 0.001</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss of 15.062753677368164 with learning rate 0.002</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss of 26.490498542785645 with learning rate 0.003</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss of 33.65720558166504 with learning rate 0.005</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss of 303.607186794281 with learning rate 0.01</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss of nan with learning rate 0.05</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Found learning rate of: 0.002</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss @ epoch 1: 0.11838733404874802</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss @ epoch 2: 0.4641949534416199</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss @ epoch 3: 0.3976145088672638</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss @ epoch 4: 0.3706841766834259</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss @ epoch 5: 0.2367912083864212</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss @ epoch 6: 0.22560922801494598</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss @ epoch 7: 0.12089194357395172</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `fit_mixer` runtime: 0.17 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Ensembling the mixer</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Mixer: Neural got accuracy: 0.238</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Picked best mixer: Neural</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `fit` runtime: 0.18 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Learn phase 7/8] - Ensemble analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Analyzing the ensemble of mixers</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block ICP is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block ConfStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block AccStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block PermutationFeatureImportance is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:[PFI] Using a random sample (1000 rows out of 10).</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:[PFI] Set to consider first 10 columns out of 9: [&#39;id&#39;, &#39;cement&#39;, &#39;slag&#39;, &#39;flyAsh&#39;, &#39;water&#39;, &#39;superPlasticizer&#39;, &#39;coarseAggregate&#39;, &#39;fineAggregate&#39;, &#39;age&#39;].</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `analyze_ensemble` runtime: 0.2 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Learn phase 8/8] - Adjustment on validation requested</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Updating the mixers</span>
 /opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:120: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss @ epoch 1: 0.1678172399600347</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `adjust` runtime: 0.04 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `learn` runtime: 0.66 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss @ epoch 1: 0.1678172399600347</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `adjust` runtime: 0.03 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `learn` runtime: 0.55 seconds</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -291,24 +291,24 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Predict phase 1/4] - Data preprocessing</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `preprocess` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Predict phase 2/4] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `featurize` runtime: 0.05 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Predict phase 3/4] - Calling ensemble</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `_timed_call` runtime: 0.04 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Predict phase 4/4] - Analyzing output</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block ICP is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block ConfStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block AccStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block PermutationFeatureImportance is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `explain` runtime: 0.08 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `predict` runtime: 0.2 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Predict phase 1/4] - Data preprocessing</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `preprocess` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Predict phase 2/4] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `featurize` runtime: 0.04 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Predict phase 3/4] - Calling ensemble</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `_timed_call` runtime: 0.03 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Predict phase 4/4] - Analyzing output</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block ConfStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block PermutationFeatureImportance is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `explain` runtime: 0.07 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `predict` runtime: 0.17 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -470,15 +470,15 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `preprocess` runtime: 0.03 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `preprocess` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Updating the mixers</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `preprocess` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `preprocess` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Updating the mixers</span>
 /opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:120: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(&#34;torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.&#34;)
-<span class="ansi-green-fg">INFO:lightwood-2706:Loss @ epoch 1: 0.10915954907735188</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `adjust` runtime: 0.17 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:Loss @ epoch 1: 0.10915954907735188</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `adjust` runtime: 0.13 seconds</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -495,24 +495,24 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Predict phase 1/4] - Data preprocessing</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `preprocess` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Predict phase 2/4] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `featurize` runtime: 0.05 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Predict phase 3/4] - Calling ensemble</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `_timed_call` runtime: 0.04 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2706:[Predict phase 4/4] - Analyzing output</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block ICP is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block ConfStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block AccStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:The block PermutationFeatureImportance is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2706:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `explain` runtime: 0.08 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2706: `predict` runtime: 0.2 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Predict phase 1/4] - Data preprocessing</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `preprocess` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Predict phase 2/4] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `featurize` runtime: 0.04 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Predict phase 3/4] - Calling ensemble</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `_timed_call` runtime: 0.04 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2554:[Predict phase 4/4] - Analyzing output</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block ConfStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:The block PermutationFeatureImportance is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2554:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `explain` runtime: 0.08 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2554: `predict` runtime: 0.18 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
