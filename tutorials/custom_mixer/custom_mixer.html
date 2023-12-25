@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tutorial - Implementing a custom mixer in Lightwood &mdash; lightwood 23.12.2.0 documentation</title>
+  <title>Tutorial - Implementing a custom mixer in Lightwood &mdash; lightwood 23.12.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -42,7 +42,7 @@
               <img src="../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                23.12.2.0
+                23.12.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -210,40 +210,40 @@ Writing random_forest_mixer.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2505:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:No torchvision/pillow detected, image encoder not supported</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Analyzing a sample of 298</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:from a total population of 303, this is equivalent to 98.3% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: age</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column age has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: sex</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column sex has data type binary</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: cp</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column cp has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: trestbps</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column trestbps has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: chol</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column chol has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: fbs</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column fbs has data type binary</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: restecg</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column restecg has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: thalach</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column thalach has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: exang</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column exang has data type binary</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: oldpeak</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column oldpeak has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: slope</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column slope has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: ca</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column ca has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: thal</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column thal has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Infering type for: target</span>
-<span class="ansi-green-fg">INFO:type_infer-2505:Column target has data type binary</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Analyzing a sample of 298</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:from a total population of 303, this is equivalent to 98.3% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: age</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column age has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: sex</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column sex has data type binary</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: cp</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column cp has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: trestbps</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column trestbps has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: chol</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column chol has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: fbs</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column fbs has data type binary</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: restecg</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column restecg has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: thalach</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column thalach has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: exang</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column exang has data type binary</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: oldpeak</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column oldpeak has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: slope</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column slope has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: ca</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column ca has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: thal</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column thal has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:type_infer-2457:Column target has data type binary</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -371,7 +371,7 @@ Writing random_forest_mixer.py
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 42768.0,
         &#34;seconds_per_encoder&#34;: null,
-        &#34;expected_additional_time&#34;: 0.07040691375732422,
+        &#34;expected_additional_time&#34;: 0.062191009521484375,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -448,66 +448,66 @@ Writing random_forest_mixer.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Learn phase 1/8] - Statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `analyze_data` runtime: 0.03 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Learn phase 2/8] - Data preprocessing</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `preprocess` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Learn phase 3/8] - Data splitting</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `split` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Learn phase 4/8] - Preparing encoders</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing sequentially...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for age...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for sex...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for cp...</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for trestbps...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for chol...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for fbs...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for restecg...</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for thalach...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for exang...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for oldpeak...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for slope...</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for ca...</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2505:Preparing encoder for thal...</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505:Encoding UNKNOWN categories as index 0</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `prepare` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Learn phase 5/8] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `featurize` runtime: 0.09 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Learn phase 6/8] - Mixer training</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Training the mixers</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `fit_mixer` runtime: 0.12 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Ensembling the mixer</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:Mixer: RandomForestMixer got accuracy: 0.798</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:Picked best mixer: RandomForestMixer</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `fit` runtime: 0.13 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Learn phase 7/8] - Ensemble analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Analyzing the ensemble of mixers</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:The block ICP is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Learn phase 1/8] - Statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `analyze_data` runtime: 0.03 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Learn phase 2/8] - Data preprocessing</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `preprocess` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Learn phase 3/8] - Data splitting</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `split` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Learn phase 4/8] - Preparing encoders</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing sequentially...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for age...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for sex...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for cp...</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for trestbps...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for chol...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for fbs...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for restecg...</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for thalach...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for exang...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for oldpeak...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for slope...</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for ca...</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2457:Preparing encoder for thal...</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457:Encoding UNKNOWN categories as index 0</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `prepare` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Learn phase 5/8] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `featurize` runtime: 0.09 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Learn phase 6/8] - Mixer training</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Training the mixers</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `fit_mixer` runtime: 0.12 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Ensembling the mixer</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:Mixer: RandomForestMixer got accuracy: 0.798</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:Picked best mixer: RandomForestMixer</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `fit` runtime: 0.13 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Learn phase 7/8] - Ensemble analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Analyzing the ensemble of mixers</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:The block ICP is now running its analyze() method</span>
 /opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/sklearn/preprocessing/_encoders.py:975: FutureWarning: `sparse` was renamed to `sparse_output` in version 1.2 and will be removed in 1.4. `sparse_output` is ignored unless you leave `sparse` to its default value.
   warnings.warn(
-<span class="ansi-green-fg">INFO:lightwood-2505:The block ConfStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:The block AccStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:The block PermutationFeatureImportance is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:[PFI] Using a random sample (1000 rows out of 31).</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:[PFI] Set to consider first 10 columns out of 10: [&#39;age&#39;, &#39;sex&#39;, &#39;cp&#39;, &#39;trestbps&#39;, &#39;chol&#39;, &#39;fbs&#39;, &#39;restecg&#39;, &#39;thalach&#39;, &#39;exang&#39;, &#39;oldpeak&#39;].</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:The block ConfStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:The block AccStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:The block PermutationFeatureImportance is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:[PFI] Using a random sample (1000 rows out of 31).</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:[PFI] Set to consider first 10 columns out of 10: [&#39;age&#39;, &#39;sex&#39;, &#39;cp&#39;, &#39;trestbps&#39;, &#39;chol&#39;, &#39;fbs&#39;, &#39;restecg&#39;, &#39;thalach&#39;, &#39;exang&#39;, &#39;oldpeak&#39;].</span>
 /opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/sklearn/metrics/_classification.py:2399: UserWarning: y_pred contains classes not in y_true
   warnings.warn(&#34;y_pred contains classes not in y_true&#34;)
 /opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/sklearn/metrics/_classification.py:2399: UserWarning: y_pred contains classes not in y_true
   warnings.warn(&#34;y_pred contains classes not in y_true&#34;)
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `analyze_ensemble` runtime: 0.28 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Learn phase 8/8] - Adjustment on validation requested</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Updating the mixers</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `adjust` runtime: 0.04 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `learn` runtime: 0.63 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `analyze_ensemble` runtime: 0.26 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Learn phase 8/8] - Adjustment on validation requested</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Updating the mixers</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `adjust` runtime: 0.04 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `learn` runtime: 0.6 seconds</span>
 </pre></div></div>
 </div>
 <p>Finally, we can use the trained predictor to make some predictions, or save it to a pickle for later use</p>
@@ -531,11 +531,11 @@ Writing random_forest_mixer.py
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Predict phase 1/4] - Data preprocessing</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `preprocess` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Predict phase 2/4] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:Featurizing the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Predict phase 1/4] - Data preprocessing</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `preprocess` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Predict phase 2/4] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:Featurizing the data</span>
 /opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/numpy/lib/function_base.py:2455: RuntimeWarning: invalid value encountered in _none_fn (vectorized)
   outputs = ufunc(*inputs)
 /opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/numpy/lib/function_base.py:2455: RuntimeWarning: invalid value encountered in _none_fn (vectorized)
@@ -552,19 +552,19 @@ Writing random_forest_mixer.py
   outputs = ufunc(*inputs)
 /opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/numpy/lib/function_base.py:2455: RuntimeWarning: invalid value encountered in _none_fn (vectorized)
   outputs = ufunc(*inputs)
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `featurize` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Predict phase 3/4] - Calling ensemble</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `_timed_call` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2505:[Predict phase 4/4] - Analyzing output</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:The block ICP is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:The block ConfStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:The block AccStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:The block PermutationFeatureImportance is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2505:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `explain` runtime: 0.01 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2505: `predict` runtime: 0.05 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `featurize` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Predict phase 3/4] - Calling ensemble</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `_timed_call` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2457:[Predict phase 4/4] - Analyzing output</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:The block ConfStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:The block PermutationFeatureImportance is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2457:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `explain` runtime: 0.01 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2457: `predict` runtime: 0.05 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

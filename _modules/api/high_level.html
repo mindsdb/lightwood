@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>api.high_level &mdash; lightwood 23.12.2.0 documentation</title>
+  <title>api.high_level &mdash; lightwood 23.12.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -38,7 +38,7 @@
               <img src="../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                23.12.2.0
+                23.12.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -91,7 +91,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">JsonAI</span><span class="p">,</span> <span class="n">ProblemDefinition</span>
 <span class="kn">from</span> <span class="nn">dataprep_ml.insights</span> <span class="kn">import</span> <span class="n">statistical_analysis</span>
-<span class="kn">from</span> <span class="nn">type_infer.infer</span> <span class="kn">import</span> <span class="n">infer_types</span>
+<span class="kn">from</span> <span class="nn">type_infer.api</span> <span class="kn">import</span> <span class="n">infer_types</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.predictor</span> <span class="kn">import</span> <span class="n">PredictorInterface</span>
 <span class="kn">from</span> <span class="nn">lightwood.api.json_ai</span> <span class="kn">import</span> <span class="n">generate_json_ai</span>
 <span class="kn">from</span> <span class="nn">lightwood.helpers.codegen</span> <span class="kn">import</span> <span class="n">code_from_json_ai</span> <span class="k">as</span> <span class="n">_code_from_json_ai</span><span class="p">,</span> <span class="n">_module_from_code</span><span class="p">,</span> <span class="n">_predictor_from_code</span>
@@ -152,7 +152,7 @@
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dropping features: </span><span class="si">{</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">problem_definition</span><span class="o">.</span><span class="n">ignore_features</span><span class="p">)</span>
 
-    <span class="n">type_information</span> <span class="o">=</span> <span class="n">infer_types</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">pct_invalid</span><span class="p">)</span>
+    <span class="n">type_information</span> <span class="o">=</span> <span class="n">infer_types</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;engine&#39;</span><span class="p">:</span> <span class="s1">&#39;rule_based&#39;</span><span class="p">,</span> <span class="s1">&#39;pct_invalid&#39;</span><span class="p">:</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">pct_invalid</span><span class="p">})</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="n">statistical_analysis</span><span class="p">(</span>
         <span class="n">df</span><span class="p">,</span> <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">type_information</span><span class="o">.</span><span class="n">identifiers</span><span class="p">)</span>
 
