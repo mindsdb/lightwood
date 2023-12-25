@@ -4,7 +4,7 @@ import dill
 import pandas as pd
 from lightwood.api.types import JsonAI, ProblemDefinition
 from dataprep_ml.insights import statistical_analysis
-from type_infer.infer import infer_types
+from type_infer.api import infer_types
 from lightwood.api.predictor import PredictorInterface
 from lightwood.api.json_ai import generate_json_ai
 from lightwood.helpers.codegen import code_from_json_ai as _code_from_json_ai, _module_from_code, _predictor_from_code
@@ -65,7 +65,7 @@ def json_ai_from_problem(df: pd.DataFrame, problem_definition: Union[ProblemDefi
         log.info(f'Dropping features: {problem_definition.ignore_features}')
         df = df.drop(columns=problem_definition.ignore_features)
 
-    type_information = infer_types(df, problem_definition.pct_invalid)
+    type_information = infer_types(df, config={'engine': 'rule_based', 'pct_invalid': problem_definition.pct_invalid})
     stats = statistical_analysis(
         df, type_information.dtypes, problem_definition.to_dict(), type_information.identifiers)
 
