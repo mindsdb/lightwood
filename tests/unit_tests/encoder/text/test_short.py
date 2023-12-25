@@ -1,7 +1,7 @@
 import random
 import unittest
 from lightwood.encoder.text.short import ShortTextEncoder
-from type_infer.helpers import tokenize_text
+from type_infer.rule_based.helpers import tokenize_text
 import torch
 
 VOCAB = [
