@@ -85,14 +85,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for lightwood.mixer.unit</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">2021.07.16</span>
-
-<span class="sd">For encoders that already fine-tune on the targets (namely text)</span>
-<span class="sd">the unity mixer just arg-maxes the output of the encoder.</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -106,19 +99,35 @@
 
 <div class="viewcode-block" id="Unit"><a class="viewcode-back" href="../../../mixer.html#mixer.Unit">[docs]</a><span class="k">class</span> <span class="nc">Unit</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">target_encoder</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The &quot;Unit&quot; mixer serves as a simple wrapper around a target encoder, essentially borrowing </span>
+<span class="sd">        the encoder&#39;s functionality for predictions. In other words, it simply arg-maxes the output of the encoder</span>
+
+<span class="sd">        Used with encoders that already fine-tune on the targets (namely, pre-trained text ML models).</span>
+<span class="sd">        </span>
+<span class="sd">        Attributes:</span>
+<span class="sd">            :param target_encoder: An instance of a Lightwood BaseEncoder. This encoder is used to decode predictions.</span>
+<span class="sd">            :param stop_after (float): Time budget (in seconds) to train this mixer. </span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stop_after</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_encoder</span> <span class="o">=</span> <span class="n">target_encoder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">supports_proba</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stable</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="Unit.fit"><a class="viewcode-back" href="../../../mixer.html#mixer.Unit.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Unit Mixer just borrows from encoder&quot;</span><span class="p">)</span></div>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Unit mixer does not require training, it passes through predictions from its encoders.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Unit.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.Unit.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span></div>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span>
                  <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes predictions using the provided EncodedDs dataset.</span>
+<span class="sd">        Mixer decodes predictions using the target encoder and returns them in a pandas DataFrame.</span>
+
+<span class="sd">        :returns ydf (pd.DataFrame): a data frame containing the decoded predictions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">:</span>
             <span class="c1"># @TODO: depending on the target encoder, this might be enabled</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;This model does not output probability estimates&#39;</span><span class="p">)</span>
@@ -140,7 +149,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2023, MindsDB.</p>
+    <p>&#169; Copyright 2017-2024, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

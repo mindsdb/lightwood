@@ -21,10 +21,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-12-25T11:44:00.937751Z",
-     "iopub.status.busy": "2023-12-25T11:44:00.937285Z",
-     "iopub.status.idle": "2023-12-25T11:44:03.571035Z",
-     "shell.execute_reply": "2023-12-25T11:44:03.570300Z"
+     "iopub.execute_input": "2024-01-23T19:56:16.447477Z",
+     "iopub.status.busy": "2024-01-23T19:56:16.447020Z",
+     "iopub.status.idle": "2024-01-23T19:56:19.165687Z",
+     "shell.execute_reply": "2024-01-23T19:56:19.164942Z"
     }
    },
    "outputs": [
@@ -32,8 +32,14 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2540:No torchvision detected, image helpers not supported.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2428:No torchvision detected, image helpers not supported.\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
      ]
     }
    ],
@@ -47,10 +53,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-12-25T11:44:03.574623Z",
-     "iopub.status.busy": "2023-12-25T11:44:03.573945Z",
-     "iopub.status.idle": "2023-12-25T11:44:03.839704Z",
-     "shell.execute_reply": "2023-12-25T11:44:03.839143Z"
+     "iopub.execute_input": "2024-01-23T19:56:19.169096Z",
+     "iopub.status.busy": "2024-01-23T19:56:19.168653Z",
+     "iopub.status.idle": "2024-01-23T19:56:19.442981Z",
+     "shell.execute_reply": "2024-01-23T19:56:19.442375Z"
     }
    },
    "outputs": [
@@ -92,10 +98,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-12-25T11:44:03.842146Z",
-     "iopub.status.busy": "2023-12-25T11:44:03.841950Z",
-     "iopub.status.idle": "2023-12-25T11:44:04.679668Z",
-     "shell.execute_reply": "2023-12-25T11:44:04.679037Z"
+     "iopub.execute_input": "2024-01-23T19:56:19.445640Z",
+     "iopub.status.busy": "2024-01-23T19:56:19.445252Z",
+     "iopub.status.idle": "2024-01-23T19:56:20.287749Z",
+     "shell.execute_reply": "2024-01-23T19:56:20.287089Z"
     },
     "scrolled": true
    },
@@ -104,58 +110,370 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2540:Analyzing a sample of 979\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:from a total population of 1030, this is equivalent to 95.0% of your data.\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Using 3 processes to deduct types.\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Infering type for: cement\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Infering type for: slag\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Column cement has data type float\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Column slag has data type float\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Infering type for: flyAsh\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Infering type for: water\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Column flyAsh has data type float\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Infering type for: superPlasticizer\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Column water has data type float\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Infering type for: coarseAggregate\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Column superPlasticizer has data type float\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Infering type for: fineAggregate\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Infering type for: id\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Column coarseAggregate has data type float\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Column fineAggregate has data type float\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Infering type for: age\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Infering type for: concrete_strength\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Column id has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Column age has data type integer\u001b[0m\n",
-      "\u001b[32mINFO:type_infer-2540:Column concrete_strength has data type float\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Finished statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Learn phase 1/8] - Statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Starting statistical analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Finished statistical analysis\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `analyze_data` runtime: 0.02 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Learn phase 2/8] - Data preprocessing\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Cleaning the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `preprocess` runtime: 0.01 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Learn phase 3/8] - Data splitting\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Splitting the data into train/test\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `split` runtime: 0.0 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Learn phase 4/8] - Preparing encoders\u001b[0m\n",
-      "\u001b[37mDEBUG:dataprep_ml-2540:Preparing sequentially...\u001b[0m\n",
-      "\u001b[37mDEBUG:dataprep_ml-2540:Preparing encoder for id...\u001b[0m\n",
-      "\u001b[37mDEBUG:dataprep_ml-2540:Preparing encoder for cement...\u001b[0m\n",
-      "\u001b[37mDEBUG:dataprep_ml-2540:Preparing encoder for slag...\u001b[0m\n",
-      "\u001b[37mDEBUG:dataprep_ml-2540:Preparing encoder for flyAsh...\u001b[0m\n",
-      "\u001b[37mDEBUG:dataprep_ml-2540:Preparing encoder for water...\u001b[0m\n",
-      "\u001b[37mDEBUG:dataprep_ml-2540:Preparing encoder for superPlasticizer...\u001b[0m\n",
-      "\u001b[37mDEBUG:dataprep_ml-2540:Preparing encoder for coarseAggregate...\u001b[0m\n",
-      "\u001b[37mDEBUG:dataprep_ml-2540:Preparing encoder for fineAggregate...\u001b[0m\n",
-      "\u001b[37mDEBUG:dataprep_ml-2540:Preparing encoder for age...\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `prepare` runtime: 0.01 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Learn phase 5/8] - Feature generation\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Featurizing the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `featurize` runtime: 0.06 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Learn phase 6/8] - Mixer training\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Training the mixers\u001b[0m\n",
+      "\u001b[32mINFO:type_infer-2428:Analyzing a sample of 979\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:from a total population of 1030, this is equivalent to 95.0% of your data.\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Using 3 processes to deduct types.\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Infering type for: slag\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Infering type for: cement\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Column cement has data type float\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Column slag has data type float\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Infering type for: flyAsh\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Infering type for: water\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Column flyAsh has data type float\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Column water has data type float\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Infering type for: superPlasticizer\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Infering type for: coarseAggregate\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Column coarseAggregate has data type float\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Infering type for: id\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Column superPlasticizer has data type float\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Infering type for: fineAggregate\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Infering type for: age\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Column id has data type integer\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Column fineAggregate has data type float\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Infering type for: concrete_strength\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Column age has data type integer\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:type_infer-2428:Column concrete_strength has data type float\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Starting statistical analysis\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Finished statistical analysis\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Learn phase 1/8] - Statistical analysis\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Starting statistical analysis\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Finished statistical analysis\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `analyze_data` runtime: 0.02 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Learn phase 2/8] - Data preprocessing\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Cleaning the data\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Learn phase 3/8] - Data splitting\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Splitting the data into train/test\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `split` runtime: 0.0 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Learn phase 4/8] - Preparing encoders\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:dataprep_ml-2428:Preparing sequentially...\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:dataprep_ml-2428:Preparing encoder for id...\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:dataprep_ml-2428:Preparing encoder for cement...\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:dataprep_ml-2428:Preparing encoder for slag...\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:dataprep_ml-2428:Preparing encoder for flyAsh...\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:dataprep_ml-2428:Preparing encoder for water...\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:dataprep_ml-2428:Preparing encoder for superPlasticizer...\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:dataprep_ml-2428:Preparing encoder for coarseAggregate...\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:dataprep_ml-2428:Preparing encoder for fineAggregate...\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:dataprep_ml-2428:Preparing encoder for age...\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `prepare` runtime: 0.01 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Learn phase 5/8] - Feature generation\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Featurizing the data\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `featurize` runtime: 0.06 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Learn phase 6/8] - Mixer training\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Training the mixers\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
       "/opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:120: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.\n",
       "  warnings.warn(\"torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.\")\n",
       "/opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/pytorch_ranger/ranger.py:172: UserWarning: This overload of addcmul_ is deprecated:\n",
@@ -163,43 +481,247 @@
       "Consider using one of the following signatures instead:\n",
       "\taddcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1485.)\n",
       "  exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)\n",
-      "\u001b[32mINFO:lightwood-2540:Loss of 39.99637508392334 with learning rate 0.0001\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss of 21.826460361480713 with learning rate 0.0005\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss of 15.12899512052536 with learning rate 0.001\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss of 15.062753021717072 with learning rate 0.002\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss of 26.490495562553406 with learning rate 0.003\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss of 33.6572003364563 with learning rate 0.005\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss of 303.60721158981323 with learning rate 0.01\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss of nan with learning rate 0.05\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Found learning rate of: 0.002\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss @ epoch 1: 0.11838734149932861\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss @ epoch 2: 0.4641949534416199\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss @ epoch 3: 0.3976145386695862\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss @ epoch 4: 0.3706841468811035\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss @ epoch 5: 0.2367912232875824\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss @ epoch 6: 0.22560915350914001\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Loss @ epoch 7: 0.12089195847511292\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `fit_mixer` runtime: 0.12 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Ensembling the mixer\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Mixer: Neural got accuracy: 0.238\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:Picked best mixer: Neural\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `fit` runtime: 0.13 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Learn phase 7/8] - Ensemble analysis\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Analyzing the ensemble of mixers\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block ICP is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block ConfStats is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block AccStats is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block PermutationFeatureImportance is now running its analyze() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:[PFI] Using a random sample (1000 rows out of 10).\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:[PFI] Set to consider first 10 columns out of 9: ['id', 'cement', 'slag', 'flyAsh', 'water', 'superPlasticizer', 'coarseAggregate', 'fineAggregate', 'age'].\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `analyze_ensemble` runtime: 0.14 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Learn phase 8/8] - Adjustment on validation requested\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Updating the mixers\u001b[0m\n",
+      "\u001b[32mINFO:lightwood-2428:Loss of 39.99637508392334 with learning rate 0.0001\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss of 21.826460361480713 with learning rate 0.0005\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss of 15.12899512052536 with learning rate 0.001\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss of 15.062753021717072 with learning rate 0.002\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss of 26.490495562553406 with learning rate 0.003\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss of 33.6572003364563 with learning rate 0.005\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss of 303.60721158981323 with learning rate 0.01\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss of nan with learning rate 0.05\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Found learning rate of: 0.002\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss @ epoch 1: 0.11838734149932861\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss @ epoch 2: 0.4641949534416199\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss @ epoch 3: 0.3976145386695862\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss @ epoch 4: 0.3706841468811035\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss @ epoch 5: 0.2367912232875824\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss @ epoch 6: 0.22560915350914001\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Loss @ epoch 7: 0.12089195847511292\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `fit_mixer` runtime: 0.12 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Ensembling the mixer\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Mixer: Neural got accuracy: 0.238\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:Picked best mixer: Neural\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `fit` runtime: 0.13 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Learn phase 7/8] - Ensemble analysis\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Analyzing the ensemble of mixers\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block ICP is now running its analyze() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block ConfStats is now running its analyze() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block AccStats is now running its analyze() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block PermutationFeatureImportance is now running its analyze() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:[PFI] Using a random sample (1000 rows out of 10).\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:[PFI] Set to consider first 10 columns out of 9: ['id', 'cement', 'slag', 'flyAsh', 'water', 'superPlasticizer', 'coarseAggregate', 'fineAggregate', 'age'].\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `analyze_ensemble` runtime: 0.15 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Learn phase 8/8] - Adjustment on validation requested\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Updating the mixers\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
       "/opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:120: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.\n",
       "  warnings.warn(\"torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.\")\n",
-      "\u001b[32mINFO:lightwood-2540:Loss @ epoch 1: 0.1678172747294108\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `adjust` runtime: 0.03 seconds\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `learn` runtime: 0.41 seconds\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2428:Loss @ epoch 1: 0.1678172747294108\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `adjust` runtime: 0.02 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `learn` runtime: 0.41 seconds\u001b[0m\n"
      ]
     }
    ],
@@ -236,10 +758,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-12-25T11:44:04.682609Z",
-     "iopub.status.busy": "2023-12-25T11:44:04.682180Z",
-     "iopub.status.idle": "2023-12-25T11:44:04.823888Z",
-     "shell.execute_reply": "2023-12-25T11:44:04.823271Z"
+     "iopub.execute_input": "2024-01-23T19:56:20.290590Z",
+     "iopub.status.busy": "2024-01-23T19:56:20.290378Z",
+     "iopub.status.idle": "2024-01-23T19:56:20.433795Z",
+     "shell.execute_reply": "2024-01-23T19:56:20.433266Z"
     }
    },
    "outputs": [
@@ -247,24 +769,126 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2540:[Predict phase 1/4] - Data preprocessing\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Cleaning the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `preprocess` runtime: 0.01 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Predict phase 2/4] - Feature generation\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Featurizing the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `featurize` runtime: 0.03 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Predict phase 3/4] - Calling ensemble\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `_timed_call` runtime: 0.03 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Predict phase 4/4] - Analyzing output\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block ICP is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block ConfStats is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block AccStats is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `explain` runtime: 0.05 seconds\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `predict` runtime: 0.13 seconds\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2428:[Predict phase 1/4] - Data preprocessing\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Cleaning the data\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Predict phase 2/4] - Feature generation\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Featurizing the data\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `featurize` runtime: 0.03 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Predict phase 3/4] - Calling ensemble\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `_timed_call` runtime: 0.03 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Predict phase 4/4] - Analyzing output\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block ICP is now running its explain() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block ConfStats is now running its explain() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block AccStats is now running its explain() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `explain` runtime: 0.05 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `predict` runtime: 0.13 seconds\u001b[0m\n"
      ]
     },
     {
@@ -458,10 +1082,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-12-25T11:44:04.826570Z",
-     "iopub.status.busy": "2023-12-25T11:44:04.826102Z",
-     "iopub.status.idle": "2023-12-25T11:44:04.937448Z",
-     "shell.execute_reply": "2023-12-25T11:44:04.936824Z"
+     "iopub.execute_input": "2024-01-23T19:56:20.436471Z",
+     "iopub.status.busy": "2024-01-23T19:56:20.436001Z",
+     "iopub.status.idle": "2024-01-23T19:56:20.540770Z",
+     "shell.execute_reply": "2024-01-23T19:56:20.540152Z"
     }
    },
    "outputs": [
@@ -469,15 +1093,51 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2540:Cleaning the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `preprocess` runtime: 0.02 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Cleaning the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `preprocess` runtime: 0.01 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Updating the mixers\u001b[0m\n",
+      "\u001b[32mINFO:dataprep_ml-2428:Cleaning the data\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `preprocess` runtime: 0.02 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Cleaning the data\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Updating the mixers\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
       "/opt/hostedtoolcache/Python/3.9.18/x64/lib/python3.9/site-packages/torch/cuda/amp/grad_scaler.py:120: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.\n",
       "  warnings.warn(\"torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.\")\n",
-      "\u001b[32mINFO:lightwood-2540:Loss @ epoch 1: 0.10915952424208324\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `adjust` runtime: 0.11 seconds\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2428:Loss @ epoch 1: 0.10915952424208324\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `adjust` runtime: 0.1 seconds\u001b[0m\n"
      ]
     }
    ],
@@ -490,10 +1150,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-12-25T11:44:04.940305Z",
-     "iopub.status.busy": "2023-12-25T11:44:04.939844Z",
-     "iopub.status.idle": "2023-12-25T11:44:05.076812Z",
-     "shell.execute_reply": "2023-12-25T11:44:05.076275Z"
+     "iopub.execute_input": "2024-01-23T19:56:20.543483Z",
+     "iopub.status.busy": "2024-01-23T19:56:20.543100Z",
+     "iopub.status.idle": "2024-01-23T19:56:20.678911Z",
+     "shell.execute_reply": "2024-01-23T19:56:20.678287Z"
     }
    },
    "outputs": [
@@ -501,24 +1161,126 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2540:[Predict phase 1/4] - Data preprocessing\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Cleaning the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `preprocess` runtime: 0.01 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Predict phase 2/4] - Feature generation\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:Featurizing the data\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `featurize` runtime: 0.03 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Predict phase 3/4] - Calling ensemble\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `_timed_call` runtime: 0.03 seconds\u001b[0m\n",
-      "\u001b[32mINFO:dataprep_ml-2540:[Predict phase 4/4] - Analyzing output\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block ICP is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block ConfStats is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block AccStats is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n",
-      "\u001b[32mINFO:lightwood-2540:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `explain` runtime: 0.05 seconds\u001b[0m\n",
-      "\u001b[37mDEBUG:lightwood-2540: `predict` runtime: 0.13 seconds\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2428:[Predict phase 1/4] - Data preprocessing\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Cleaning the data\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Predict phase 2/4] - Feature generation\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:Featurizing the data\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `featurize` runtime: 0.03 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Predict phase 3/4] - Calling ensemble\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `_timed_call` runtime: 0.03 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:dataprep_ml-2428:[Predict phase 4/4] - Analyzing output\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block ICP is now running its explain() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block ConfStats is now running its explain() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block AccStats is now running its explain() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[32mINFO:lightwood-2428:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `explain` runtime: 0.05 seconds\u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[37mDEBUG:lightwood-2428: `predict` runtime: 0.13 seconds\u001b[0m\n"
      ]
     },
     {
@@ -682,10 +1444,10 @@
    "execution_count": 7,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2023-12-25T11:44:05.079230Z",
-     "iopub.status.busy": "2023-12-25T11:44:05.079032Z",
-     "iopub.status.idle": "2023-12-25T11:44:05.084606Z",
-     "shell.execute_reply": "2023-12-25T11:44:05.083979Z"
+     "iopub.execute_input": "2024-01-23T19:56:20.681667Z",
+     "iopub.status.busy": "2024-01-23T19:56:20.681143Z",
+     "iopub.status.idle": "2024-01-23T19:56:20.686780Z",
+     "shell.execute_reply": "2024-01-23T19:56:20.686142Z"
     }
    },
    "outputs": [

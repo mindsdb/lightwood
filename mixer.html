@@ -184,7 +184,7 @@
 - trains_once: If True, the mixer is trained once during learn, using all available input data (<cite>train</cite> and <cite>dev</cite> splits for training, <cite>test</cite> for validation). Otherwise, it trains once with the <cite>train`</cite> split &amp; <cite>dev</cite> for validation, and optionally (depending on the problem definition <cite>fit_on_all</cite> and mixer-wise <cite>fit_on_dev</cite> arguments) a second time after post-training analysis via partial_fit, with <cite>train</cite> and <cite>dev</cite> splits as training subset, and <cite>test</cite> split as validation. Should only be set to True for mixers that don’t require post-training analysis, as otherwise actual validation data would be treated as a held-out portion, which is a mistake.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget (in seconds) to train this mixer.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -553,11 +553,21 @@ based on the global SMAPE error across all groups.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mixer.Unit">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mixer.</span></span><span class="sig-name descname"><span class="pre">Unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_encoder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/unit.html#Unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
+<dd><p>The “Unit” mixer serves as a simple wrapper around a target encoder, essentially borrowing
+the encoder’s functionality for predictions. In other words, it simply arg-maxes the output of the encoder</p>
+<p>Used with encoders that already fine-tune on the targets (namely, pre-trained text ML models).</p>
+<p>Attributes:
+:type target_encoder: <a class="reference internal" href="encoder.html#encoder.BaseEncoder" title="lightwood.encoder.base.BaseEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEncoder</span></code></a></p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param target_encoder<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An instance of a Lightwood BaseEncoder. This encoder is used to decode predictions.</p>
+</dd>
+<dt class="field-even">param stop_after (float)<span class="colon">:</span></dt>
+<dd class="field-even"><p>Time budget (in seconds) to train this mixer.</p>
 </dd>
 </dl>
+</div></blockquote>
 <dl class="py method">
 <dt class="sig sig-object py" id="mixer.Unit.fit">
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lightwood/mixer/unit.html#Unit.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mixer.Unit.fit" title="Permalink to this definition"></a></dt>
@@ -601,7 +611,7 @@ based on the global SMAPE error across all groups.</p>
 <dd><p>XGBoost-based model, intended for usage in forecasting tasks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget to train this mixer.</p>
+<dd class="field-odd"><p><strong>stop_after</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Time budget (in seconds) to train this mixer.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -727,7 +737,7 @@ If you want more information regarding the techniques that set apart XGBoost fro
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2023, MindsDB.</p>
+    <p>&#169; Copyright 2017-2024, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
