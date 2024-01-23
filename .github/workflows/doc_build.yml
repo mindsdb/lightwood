@@ -10,6 +10,8 @@ on:
 jobs:
   doc_build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: checkout and set up
@@ -42,5 +44,5 @@ jobs:
         REPO: self
         BRANCH: gh-pages # The branch name where you want to push the assets
         FOLDER: docs # The directory where your assets are generated
-        GITHUB_TOKEN: ${{ secrets.CLA_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub will automatically add this - you don't need to bother getting a token
         MESSAGE: "Rebuilt the docs" # The commit message
