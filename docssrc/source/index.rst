@@ -19,7 +19,7 @@ Lightwood works with a variety of data types such as numbers, dates, categories,
 
 Our JSON-AI syntax allows users to change any and all parts of the models Lightwood automatically generates. The syntax outlines the specifics details in each step of the modeling pipeline. Users may override default values (for example, changing the type of a column) or alternatively, entirely replace steps with their own methods (ex: use a random forest model for a predictor). Lightwood creates a "JSON-AI" object from this syntax which can then be used to automatically generate python code to represent your pipeline.
 
-For details as to how Lightwood works, check out the `Lightwood Philosophy <https://lightwood.io/lightwood_philosophy.html>`_ .
+For details as to how Lightwood works, check out the `Lightwood Philosophy <https://mindsdb.github.io/lightwood/lightwood_philosophy.html>`_ .
 
 Quick Guide
 =======================
@@ -124,7 +124,7 @@ BYOM: Bring your own models
 
 Lightwood supports user architectures/approaches so long as you follow the abstractions provided within each step. 
 
-Our `tutorials <https://lightwood.io/tutorials.html>`_ provide specific use cases for how to introduce customization into your pipeline. Check out "custom cleaner", "custom splitter", "custom explainer", and "custom mixer". Stay tuned for further updates.
+Our `tutorials <https://mindsdb.github.io/lightwood/tutorials.html>`_ provide specific use cases for how to introduce customization into your pipeline. Check out "custom cleaner", "custom splitter", "custom explainer", and "custom mixer". Stay tuned for further updates.
 
 
 Contribute to Lightwood
