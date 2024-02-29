@@ -69,3 +69,5 @@ class TestBasic(unittest.TestCase):
         self.assertTrue(balanced_accuracy_score(test['target'], predictions['prediction']) > 0.5)
         self.assertTrue('confidence' not in predictions.columns)
 
+        predictor.test(test, ['balanced_accuracy_score'])
+
