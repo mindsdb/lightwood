@@ -149,7 +149,7 @@ class PredictorInterface:
         :param strict: If True, the function will raise an error if the model does not support any of the requested metrics. Otherwise it skips them.
 
         :returns: A dataframe with `n_metrics` columns, each cell containing the respective score of each metric.
-        """
+        """  # noqa
         pass
 
     def save(self, file_path: str) -> None:

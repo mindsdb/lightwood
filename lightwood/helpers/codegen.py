@@ -509,35 +509,35 @@ return df
     # Test Body
     # ----------------- #
 
-    test_body = f"""
-    preds = self.predict(data, args)
-    preds = preds.rename(columns={{'prediction': self.target}})
-    filtered = []
-    
-    # filter metrics if not supported
-    for metric in metrics:
-        # metric should be one of: an actual function, registered in the model class, or supported by the evaluator
-        if not (callable(metric) or metric in self.accuracy_functions or metric in mdb_eval_accuracy_metrics):     
-            if strict:
-                raise Exception(f'Invalid metric: {{metric}}')
-            else:
-                log.warning(f'Invalid metric: {{metric}}. Skipping...')
+    test_body = """
+preds = self.predict(data, args)
+preds = preds.rename(columns={'prediction': self.target})
+filtered = []
+
+# filter metrics if not supported
+for metric in metrics:
+    # metric should be one of: an actual function, registered in the model class, or supported by the evaluator
+    if not (callable(metric) or metric in self.accuracy_functions or metric in mdb_eval_accuracy_metrics):
+        if strict:
+            raise Exception(f'Invalid metric: {metric}')
         else:
-            filtered.append(metric)
-            
-    metrics = filtered
-    scores = evaluate_accuracies(
-                    data,
-                    preds[self.target],
-                    self.target,
-                    metrics,
-                    ts_analysis=self.ts_analysis,
-                )
-                
-    # TODO: remove once mdb_eval returns an actual list
-    scores = {{k: [v] for k, v in scores.items() if not isinstance(v, list)}}
-        
-    return pd.DataFrame.from_records(scores)  # TODO: add logic to disaggregate per-mixer
+            log.warning(f'Invalid metric: {metric}. Skipping...')
+    else:
+        filtered.append(metric)
+
+metrics = filtered
+scores = evaluate_accuracies(
+                data,
+                preds[self.target],
+                self.target,
+                metrics,
+                ts_analysis=self.ts_analysis,
+            )
+
+# TODO: remove once mdb_eval returns an actual list
+scores = {k: [v] for k, v in scores.items() if not isinstance(v, list)}
+
+return pd.DataFrame.from_records(scores)  # TODO: add logic to disaggregate per-mixer
 """
 
     test_body = align(test_body, 2)
