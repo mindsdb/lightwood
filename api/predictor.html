@@ -71,6 +71,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.preprocess"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.preprocess()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.save"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.save()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.split"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.split()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api.predictor.PredictorInterface.test"><code class="docutils literal notranslate"><span class="pre">PredictorInterface.test()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -140,6 +141,7 @@
 <p>You can also use the predictor to now estimate new data:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">predict</span></code>: Deploys the chosen best model, and evaluates the given data to provide target estimates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test</span></code>: Similar to predict, but user also passes an accuracy function that will be used to compute a metric with the generated predictions.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">save</span></code>: Saves the Predictor object for further use.</p></li>
 </ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">PredictorInterface</span></code> is created via J{ai}son’s custom code creation. A problem inherits from this class with pre-populated routines to fill out expected results, given the nature of each problem type.</p>
@@ -265,19 +267,19 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="api.predictor.PredictorInterface.predict">
 <span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.predict" title="Permalink to this definition"></a></dt>
-<dd><p>Intakes raw data to provide predicted values for your trained model.</p>
+<dd><p>Intakes raw data to provide model predictions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Data (n_samples, n_columns) that the model(s) will evaluate on and provide the target prediction.</p></li>
-<li><p><strong>args</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – parameters needed to update the predictor <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> object, which holds any parameters relevant for prediction.</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Data (n_samples, n_columns) that the model will use as input to predict the corresponding target value for each sample.</p></li>
+<li><p><strong>args</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – any parameters used to customize inference behavior. Wrapped as a <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> object.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dataframe of predictions of the same length of input.</p>
+<dd class="field-odd"><p>A dataframe containing predictions and additional sample-wise information. <cite>n_samples</cite> rows.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -339,6 +341,28 @@
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Dictionary containing training/testing fraction</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.predictor.PredictorInterface.test">
+<span class="sig-name descname"><span class="pre">test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/api/predictor.html#PredictorInterface.test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.predictor.PredictorInterface.test" title="Permalink to this definition"></a></dt>
+<dd><p>Intakes raw data to compute values for a list of provided metrics using a Lightwood predictor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Data (n_samples, n_columns) that the model(s) will evaluate on and provide the target prediction.</p></li>
+<li><p><strong>metrics</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – A list of metrics to evaluate the model’s performance on.</p></li>
+<li><p><strong>args</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>]) – parameters needed to update the predictor <code class="docutils literal notranslate"><span class="pre">PredictionArguments</span></code> object, which holds any parameters relevant for prediction.</p></li>
+<li><p><strong>strict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If True, the function will raise an error if the model does not support any of the requested metrics. Otherwise it skips them.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dataframe with <cite>n_metrics</cite> columns, each cell containing the respective score of each metric.</p>
 </dd>
 </dl>
 </dd></dl>

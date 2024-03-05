@@ -115,6 +115,7 @@
 <span class="sd">    You can also use the predictor to now estimate new data:</span>
 
 <span class="sd">    - ``predict``: Deploys the chosen best model, and evaluates the given data to provide target estimates.</span>
+<span class="sd">    - ``test``: Similar to predict, but user also passes an accuracy function that will be used to compute a metric with the generated predictions.</span>
 <span class="sd">    - ``save``: Saves the Predictor object for further use.</span>
 
 <span class="sd">    The ``PredictorInterface`` is created via J{ai}son&#39;s custom code creation. A problem inherits from this class with pre-populated routines to fill out expected results, given the nature of each problem type.</span>
@@ -214,12 +215,27 @@
 
 <div class="viewcode-block" id="PredictorInterface.predict"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Intakes raw data to provide predicted values for your trained model.</span>
+<span class="sd">        Intakes raw data to provide model predictions.</span>
+
+<span class="sd">        :param data: Data (n_samples, n_columns) that the model will use as input to predict the corresponding target value for each sample.</span>
+<span class="sd">        :param args: any parameters used to customize inference behavior. Wrapped as a ``PredictionArguments`` object.</span>
+
+<span class="sd">        :returns: A dataframe containing predictions and additional sample-wise information. `n_samples` rows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="PredictorInterface.test"><a class="viewcode-back" href="../../api/predictor.html#api.predictor.PredictorInterface.test">[docs]</a>    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Intakes raw data to compute values for a list of provided metrics using a Lightwood predictor.</span>
 
 <span class="sd">        :param data: Data (n_samples, n_columns) that the model(s) will evaluate on and provide the target prediction.</span>
+<span class="sd">        :param metrics: A list of metrics to evaluate the model&#39;s performance on.</span>
 <span class="sd">        :param args: parameters needed to update the predictor ``PredictionArguments`` object, which holds any parameters relevant for prediction.</span>
+<span class="sd">        :param strict: If True, the function will raise an error if the model does not support any of the requested metrics. Otherwise it skips them.</span>
 
-<span class="sd">        :returns: A dataframe of predictions of the same length of input.</span>
+<span class="sd">        :returns: A dataframe with `n_metrics` columns, each cell containing the respective score of each metric.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">pass</span></div>
 
