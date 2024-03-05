@@ -69,5 +69,11 @@ class TestBasic(unittest.TestCase):
         self.assertTrue(balanced_accuracy_score(test['target'], predictions['prediction']) > 0.5)
         self.assertTrue('confidence' not in predictions.columns)
 
-        predictor.test(test, ['balanced_accuracy_score'])
+        metrics = ['balanced_accuracy_score', 'accuracy_score', 'precision_score']
+        results = predictor.test(test, metrics)
 
+        for metric in metrics:
+            assert metric in results.columns
+            assert 0.5 < results[metric].iloc[0] < 1.0
+
+        print(results)

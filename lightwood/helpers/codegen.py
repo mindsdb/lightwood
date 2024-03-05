@@ -508,7 +508,6 @@ return df
     # ----------------- #
     # Test Body
     # ----------------- #
-
     test_body = """
 preds = self.predict(data, args)
 preds = preds.rename(columns={'prediction': self.target})
@@ -526,12 +525,20 @@ for metric in metrics:
         filtered.append(metric)
 
 metrics = filtered
+try:
+    labels = self.model_analysis.histograms[self.target]['x']
+except:
+    if strict:
+        raise Exception('Label histogram not found')
+    else:
+        label_map = None  # some accuracy functions will crash without this, be mindful
 scores = evaluate_accuracies(
                 data,
                 preds[self.target],
                 self.target,
                 metrics,
                 ts_analysis=self.ts_analysis,
+                labels=labels
             )
 
 # TODO: remove once mdb_eval returns an actual list
@@ -635,7 +642,9 @@ class Predictor(PredictorInterface):
     def predict(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
 {predict_body}
 
-    def test(self, data: pd.DataFrame, metrics: list, args: Dict[str, object] = {{}}) -> pd.DataFrame:
+    def test(
+        self, data: pd.DataFrame, metrics: list, args: Dict[str, object] = {{}}, strict: bool = False
+        ) -> pd.DataFrame:
 {test_body}
 """
 
