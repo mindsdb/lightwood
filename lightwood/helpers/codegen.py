@@ -505,6 +505,50 @@ return df
 
     predict_body = align(predict_body, 2)
 
+    # ----------------- #
+    # Test Body
+    # ----------------- #
+    test_body = """
+preds = self.predict(data, args)
+preds = preds.rename(columns={'prediction': self.target})
+filtered = []
+
+# filter metrics if not supported
+for metric in metrics:
+    # metric should be one of: an actual function, registered in the model class, or supported by the evaluator
+    if not (callable(metric) or metric in self.accuracy_functions or metric in mdb_eval_accuracy_metrics):
+        if strict:
+            raise Exception(f'Invalid metric: {metric}')
+        else:
+            log.warning(f'Invalid metric: {metric}. Skipping...')
+    else:
+        filtered.append(metric)
+
+metrics = filtered
+try:
+    labels = self.model_analysis.histograms[self.target]['x']
+except:
+    if strict:
+        raise Exception('Label histogram not found')
+    else:
+        label_map = None  # some accuracy functions will crash without this, be mindful
+scores = evaluate_accuracies(
+                data,
+                preds[self.target],
+                self.target,
+                metrics,
+                ts_analysis=self.ts_analysis,
+                labels=labels
+            )
+
+# TODO: remove once mdb_eval returns an actual list
+scores = {k: [v] for k, v in scores.items() if not isinstance(v, list)}
+
+return pd.DataFrame.from_records(scores)  # TODO: add logic to disaggregate per-mixer
+"""
+
+    test_body = align(test_body, 2)
+
     predictor_code = f"""
 {IMPORTS}
 {IMPORT_EXTERNAL_DIRS}
@@ -597,6 +641,11 @@ class Predictor(PredictorInterface):
     @timed_predictor
     def predict(self, data: pd.DataFrame, args: Dict = {{}}) -> pd.DataFrame:
 {predict_body}
+
+    def test(
+        self, data: pd.DataFrame, metrics: list, args: Dict[str, object] = {{}}, strict: bool = False
+        ) -> pd.DataFrame:
+{test_body}
 """
 
     try:

@@ -45,6 +45,9 @@ from dataprep_ml.cleaners import cleaner
 from dataprep_ml.splitters import splitter
 from dataprep_ml.imputers import *
 
+from mindsdb_evaluator import evaluate_accuracies
+from mindsdb_evaluator.accuracy import __all__ as mdb_eval_accuracy_metrics
+
 import pandas as pd
 from typing import Dict, List, Union, Optional
 import os
