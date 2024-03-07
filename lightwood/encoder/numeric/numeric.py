@@ -21,7 +21,7 @@ class NumericEncoder(BaseEncoder):
     The ``absolute_mean`` is computed in the ``prepare`` method and is just the mean of the absolute values of all numbers feed to prepare (which are not none)
 
     ``none`` stands for any number that is an actual python ``None`` value or any sort of non-numeric value (a string, nan, inf)
-    """ # noqa
+    """  # noqa
 
     def __init__(self, data_type: dtype = None,
                  target_weights: Dict[str, float] = None,
@@ -44,13 +44,12 @@ class NumericEncoder(BaseEncoder):
         if self.is_target:
             self.target_weights = dc(target_weights)
 
-
     def prepare(self, priming_data: pd.Series):
         """
         "NumericalEncoder" uses a rule-based form to prepare results on training (priming) data. The averages etc. are taken from this distribution.
 
         :param priming_data: an iterable data structure containing numbers numbers which will be used to compute the values used for normalizing the encoded representations
-        """ # noqa
+        """  # noqa
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
@@ -68,7 +67,8 @@ class NumericEncoder(BaseEncoder):
         if isinstance(data, pd.Series):
             data = data.values
 
-        inp_data = np.nan_to_num(data.astype(float), nan=0, posinf=np.finfo(np.float32).max, neginf=np.finfo(np.float32).min)  # noqa
+        inp_data = np.nan_to_num(data.astype(float), nan=0, posinf=np.finfo(np.float32).max,
+                                 neginf=np.finfo(np.float32).min)  # noqa
         if not self.positive_domain:
             sign = np.vectorize(self._sign_fn, otypes=[float])(inp_data)
         else:
@@ -108,7 +108,7 @@ class NumericEncoder(BaseEncoder):
         :param decode_log: Whether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part
 
         :returns: The decoded array
-        """ # noqa
+        """  # noqa
 
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')

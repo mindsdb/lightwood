@@ -137,7 +137,7 @@ class LightGBM(BaseMixer):
                 if weight_map is not None:
                     data[subset_name]['weights'] = [weight_map[x] for x in label_data]
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
-            elif output_dtype == dtype.integer:
+            elif output_dtype in self.num_dtypes:
                 if weight_map is not None:
                     # get a sorted list of intervals to assign weights
                     weight_map_values = np.sort(list(weight_map.keys()))
@@ -150,9 +150,11 @@ class LightGBM(BaseMixer):
                             ]
                         ] for x in
                         label_data]
-                label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
-            elif output_dtype in self.float_dtypes:
-                label_data = label_data.astype(float)
+
+                if output_dtype in self.float_dtypes:
+                    label_data = label_data.astype(float)
+                elif output_dtype == dtype.integer:
+                    label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
 
             data[subset_name]['label_data'] = label_data
 
