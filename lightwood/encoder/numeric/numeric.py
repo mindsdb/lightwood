@@ -5,7 +5,7 @@ from copy import deepcopy as dc
 import torch
 import numpy as np
 import pandas as pd
-from type_infer.dtype import dtype
+from type_infer.dtype import dtype, Dict
 
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.general import is_none
@@ -29,6 +29,7 @@ class NumericEncoder(BaseEncoder):
                  positive_domain: bool = False):
         """
         :param data_type: The data type of the number (integer, float, quantity)
+        :param target_weights: a dictionary of weights to use on the examples.
         :param is_target: Indicates whether the encoder refers to a target column or feature column (True==target)
         :param positive_domain: Forces the encoder to always output positive values
         """
@@ -43,6 +44,7 @@ class NumericEncoder(BaseEncoder):
         self.index_weights = None
         if self.is_target:
             self.target_weights = dc(target_weights)
+            self.index_weights = torch.tensor(list(self.target_weights.values()))
 
     def prepare(self, priming_data: pd.Series):
         """
