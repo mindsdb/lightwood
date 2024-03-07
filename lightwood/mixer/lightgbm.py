@@ -16,7 +16,6 @@ from lightwood.helpers.device import get_devices
 from lightwood.api.types import PredictionArguments
 from lightwood.data.encoded_ds import EncodedDs
 
-
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
 
 
@@ -95,7 +94,8 @@ class LightGBM(BaseMixer):
         if not gpu_works:
             self.device = torch.device('cpu')
             self.device_str = 'cpu'
-            log.warning('LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead') # noqa
+            log.warning(
+                'LightGBM running on CPU, this somewhat slower than the GPU version, consider using a GPU instead')  # noqa
         else:
             self.device = torch.device('cuda')
             self.device_str = 'gpu'
@@ -138,6 +138,18 @@ class LightGBM(BaseMixer):
                     data[subset_name]['weights'] = [weight_map[x] for x in label_data]
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
             elif output_dtype == dtype.integer:
+                if weight_map is not None:
+                    # get a sorted list of intervals to assign weights
+                    weight_map_values = np.sort(list(weight_map.keys()))
+
+                    # search for the containing interval in the provided weight map, and assign that weight.
+                    data[subset_name]['weights'] = [
+                        weight_map[
+                            weight_map_values[
+                                np.min([np.searchsorted(weight_map_values, x), len(weight_map_values) - 1])
+                            ]
+                        ] for x in
+                        label_data]
                 label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
             elif output_dtype in self.float_dtypes:
                 label_data = label_data.astype(float)
@@ -206,12 +218,12 @@ class LightGBM(BaseMixer):
         Only happens sometimes and I can find no pattern as to when, happens for multiple input and target types.
 
         Why does the following crash happen and what does it mean? No idea, closest relationships I can find is /w optuna modifying parameters after the dataset is create: https://github.com/microsoft/LightGBM/issues/4019 | But why this would apply here makes no sense. Could have to do with the `train` process of lightgbm itself setting a "set only once" property on a dataset when it starts. Dunno, if you find out replace this comment with the real reason.
-        ''' # noqa
+        '''  # noqa
         kwargs = {}
         if 'verbose_eval' in inspect.getfullargspec(lightgbm.train).args:
             kwargs['verbose_eval'] = False
         self.model = lightgbm.train(self.params, lightgbm.Dataset(data['train']['data'], label=data['train']
-                                    ['label_data'], weight=data['train']['weights']), **kwargs)
+        ['label_data'], weight=data['train']['weights']), **kwargs)
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
 
@@ -232,7 +244,7 @@ class LightGBM(BaseMixer):
 
         # Train the models
         log.info(
-            f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint') # noqa
+            f'Training GBM ({model_generator}) with {self.num_iterations} iterations given {self.stop_after} seconds constraint')  # noqa
         if self.num_iterations < 1:
             self.num_iterations = 1
         self.params['num_iterations'] = int(self.num_iterations)
