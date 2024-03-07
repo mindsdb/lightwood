@@ -1,5 +1,6 @@
 import math
 from typing import Union
+from copy import deepcopy as dc
 
 import torch
 import numpy as np
@@ -22,7 +23,10 @@ class NumericEncoder(BaseEncoder):
     ``none`` stands for any number that is an actual python ``None`` value or any sort of non-numeric value (a string, nan, inf)
     """ # noqa
 
-    def __init__(self, data_type: dtype = None, is_target: bool = False, positive_domain: bool = False):
+    def __init__(self, data_type: dtype = None,
+                 target_weights: Dict[str, float] = None,
+                 is_target: bool = False,
+                 positive_domain: bool = False):
         """
         :param data_type: The data type of the number (integer, float, quantity)
         :param is_target: Indicates whether the encoder refers to a target column or feature column (True==target)
@@ -33,6 +37,13 @@ class NumericEncoder(BaseEncoder):
         self.positive_domain = positive_domain
         self.decode_log = False
         self.output_size = 4 if not self.is_target else 3
+
+        # Weight-balance info if encoder represents target
+        self.target_weights = None
+        self.index_weights = None
+        if self.is_target:
+            self.target_weights = dc(target_weights)
+
 
     def prepare(self, priming_data: pd.Series):
         """
