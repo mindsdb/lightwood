@@ -1,11 +1,11 @@
 import math
-from typing import Union
+from typing import Union, Dict
 from copy import deepcopy as dc
 
 import torch
 import numpy as np
 import pandas as pd
-from type_infer.dtype import dtype, Dict
+from type_infer.dtype import dtype
 
 from lightwood.encoder.base import BaseEncoder
 from lightwood.helpers.general import is_none
@@ -24,7 +24,7 @@ class NumericEncoder(BaseEncoder):
     """  # noqa
 
     def __init__(self, data_type: dtype = None,
-                 target_weights: Dict[str, float] = None,
+                 target_weights: Dict[float, float] = None,
                  is_target: bool = False,
                  positive_domain: bool = False):
         """
@@ -40,7 +40,7 @@ class NumericEncoder(BaseEncoder):
         self.output_size = 4 if not self.is_target else 3
 
         # Weight-balance info if encoder represents target
-        self.target_weights = None
+        self.target_weights = target_weights
         self.index_weights = None
         if self.is_target:
             self.target_weights = dc(target_weights)
@@ -158,3 +158,22 @@ class NumericEncoder(BaseEncoder):
             ret[mask_none] = None
 
         return ret.tolist()  # TODO: update signature on BaseEncoder and replace all encs to return ndarrays
+
+    def get_weights(self, label_data):
+        # get a sorted list of intervals to assign weights. Keys are the interval edges.
+        target_weight_keys = np.array(list(self.target_weights.keys()))
+        target_weight_values = np.array(list(self.target_weights.values()))
+        sorted_indices = np.argsort(target_weight_keys)
+
+        # get sorted arrays for vector numpy operations
+        target_weight_keys = target_weight_keys[sorted_indices]
+        target_weight_values = target_weight_values[sorted_indices]
+
+        # find the indices of the bins according to the keys. clip to the length of the weight values (search sorted
+        # returns indices from 0 to N with N = len(target_weight_keys).
+        assigned_target_weight_indices = np.clip(a=np.searchsorted(target_weight_keys, label_data),
+                                                 a_min=0,
+                                                 a_max=len(target_weight_keys) - 1).astype(np.int32)
+
+        return target_weight_values[assigned_target_weight_indices]
+
