@@ -6,6 +6,8 @@ on:
     branches:
       - stable
       - staging
+  release:
+    types: [ published ]
 
 
 jobs:
@@ -46,7 +48,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/stable'
+    if: github.ref == 'refs/heads/stable' || github.event_name == 'release'
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python

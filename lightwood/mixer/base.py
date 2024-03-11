@@ -30,7 +30,7 @@ class BaseMixer:
 
     def __init__(self, stop_after: float):
         """
-        :param stop_after: Time budget to train this mixer.
+        :param stop_after: Time budget (in seconds) to train this mixer.
         """
         self.stop_after = stop_after
         self.supports_proba = False

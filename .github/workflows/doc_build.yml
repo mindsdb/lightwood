@@ -10,6 +10,8 @@ on:
 jobs:
   doc_build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: checkout and set up
