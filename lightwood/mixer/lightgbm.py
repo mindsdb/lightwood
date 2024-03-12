@@ -139,17 +139,10 @@ class LightGBM(BaseMixer):
                 label_data = self.ordinal_encoder.transform(np.array(label_data).reshape(-1, 1)).flatten()
             elif output_dtype in self.num_dtypes:
                 if weight_map is not None:
-                    # get a sorted list of intervals to assign weights. Keys are interval edges.
-                    weight_map_values = np.sort(list(weight_map.keys()))
+                    target_encoder = data[subset_name]['ds'].encoders[self.target]
 
-                    # search for the containing interval in the provided weight map, and assign that weight.
-                    data[subset_name]['weights'] = [
-                        weight_map[
-                            weight_map_values[
-                                np.min([np.searchsorted(weight_map_values, x), len(weight_map_values) - 1])
-                            ]
-                        ] for x in
-                        label_data]
+                    # get the weights from the numeric target encoder
+                    data[subset_name]['weights'] = target_encoder.get_weights(label_data)
 
                 if output_dtype in self.float_dtypes:
                     label_data = label_data.astype(float)
