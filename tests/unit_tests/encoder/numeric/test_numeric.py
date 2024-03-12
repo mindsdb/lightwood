@@ -119,7 +119,7 @@ class TestNumericEncoder(unittest.TestCase):
 
         bin_edges = bin_edges[1:]
 
-        # construct target weight mapping
+        # construct target weight mapping. This mapping will round each entry to the lower bin edge.
         target_weights = {bin_edge: bin_edge for bin_edge in bin_edges}
         self.assertTrue(type(target_weights) is dict)
 

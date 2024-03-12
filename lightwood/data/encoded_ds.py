@@ -14,7 +14,7 @@ class EncodedDs(Dataset):
         
         Note: normal behavior is to cache encoded representations to avoid duplicated computations. If you want an option to disable, this please open an issue.
          
-        :param encoders: list of Lightwood encoders used to encode the data per each column.
+        :param encoders: dictionary of Lightwood encoders used to encode the data per each column.
         :param data_frame: original dataframe.
         :param target: name of the target column to predict.
         """  # noqa
