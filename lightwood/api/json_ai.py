@@ -91,6 +91,11 @@ def lookup_encoder(
                 "positive_domain"
             ] = "$statistical_analysis.positive_domain"
 
+            if problem_defintion.target_weights is not None:
+                encoder_dict["args"][
+                    "target_weights"
+                ] = problem_defintion.target_weights
+
     # Time-series representations require more advanced flags
     if tss.is_timeseries:
         gby = tss.group_by if tss.group_by is not None else []
