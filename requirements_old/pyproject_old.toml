@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lightwood"
+version = "23.12.4.0"
+description = "Lightwood is Legos for Machine Learning."
+# authors = [{ name = "MindsDB Inc.", email = "hello@mindsdb.com" }]
+readme = "README.md"
+requires-python = ">3.7"
+dynamic = [
+    "dependencies", "optional-dependencies",
+    "license", "classifiers"  # TODO: rm/make static
+]
+# license = [{ text = "GPL-3.0-only", file = "LICENSE" }]
+
+[tool.setuptools]
+py-modules = []
+
+[tool.setuptools.dynamic]
+# using pip-tools, we can freeze and pin based on these
+dependencies = { file = ["requirements.in"] }
+optional-dependencies.dev = { file = ["requirements_dev.txt"] }
+optional-dependencies.audio = { file = ["requirements_audio.txt"] }
+optional-dependencies.extra = { file = ["requirements_extra.txt"] }
+optional-dependencies.extra_ts = { file = ["requirements_extra_ts.txt"] }
+optional-dependencies.image = { file = ["requirements_image.txt"] }
+optional-dependencies.quantum = { file = ["requirements_quantum.txt"] }
+optional-dependencies.xai = { file = ["requirements_xai.txt"] }

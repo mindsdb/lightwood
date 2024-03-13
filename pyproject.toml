@@ -1,7 +1,77 @@
-[build-system]
+[tool.poetry]
+name = "lightwood"
+version = "24.3.3.0"
+description = "Lightwood is Legos for Machine Learning."
+authors = ["MindsDB Inc."]
+license = "GPL-3.0-only"
+readme = "README.md"
+# packages = [{include = "lightwood"}]
 
-# @TODO: We should figure out version limitations for these
-requires = [
-    "setuptools",
-    "wheel",
-]
+[tool.poetry.dependencies]
+python = ">3.7,<3.12"
+type_infer = ">=0.0.15"
+dataprep_ml = ">=0.0.18"
+mindsdb-evaluator = ">=0.0.12"
+numpy = ">1.23.0"
+nltk = ">=3.8, <3.9"  # TODO upper cap needed?
+python-dateutil = ">=2.8.2"
+pandas = ">=2.0.0, <2.1.0"  # TODO why the upper cap here?
+schema = ">=0.6.8"  # TODO needed?
+torch = ">=2.0.0, <2.1"  # TODO try to remove upper cap?
+requests = ">=2.0.0"  # TODO needed?
+transformers = ">=4.34.0"
+optuna = ">=3.1.0,<4.0.0"
+scipy = ">=1.5.4"
+# psutil = ">=5.7.0"
+setuptools = ">=21.2.1"  # TODO needed?
+wheel = ">=0.32.2"  # TODO needed?
+scikit-learn = ">=1.0.0"
+dataclasses_json = ">=0.5.4"
+dill = "==0.3.6"  # TODO widen
+sktime = ">=0.24.0,<0.25.0"  # TODO widen/rm?
+statsforecast = "~=1.6.0"
+torch_optimizer = "==0.1.0" # TODO why are we using this one?
+black = "==23.3.0"  # TODO: widen?
+typing_extensions = ">= 4.8.0"  # TODO needed?
+colorlog = "==6.5.0"  # TODO: widen?
+statsmodels = ">=0.12.0"
+langid = "==1.1.6"  # TODO: migrate to py3langid
+pydateinfer = "==0.3.0"  # TODO widen
+protobuf = "<3.21.0"  # TODO: this one is problematic I believe, pay attention in poetry lock outcome
+xgboost = ">=1.6.0, <=1.8.0"  # TODO: rm upper cap?
+tab-transformer-pytorch = ">= 0.2.1"
+typing-inspect = ">=0.9.0"    # TODO needed?
+six = ">= 1.16.0"   # TODO needed?
+regex = ">= 2023.10.3"  # TODO needed? should be built in!
+
+[tool.poetry.extras.dev]
+autopep8 = ">=1.5.7"
+
+[tool.poetry.extras.audio]
+librosa = "==0.8.1"
+
+[tool.poetry.extras.extra]
+lightgbm = ">=3.3.0,<=3.3.3"  # TODO: widen?
+
+[tool.poetry.extras.extra_ts]
+pystan = "==2.19.1.1"
+prophet = "==1.1"
+neuralforecast = ">=1.6.4,<1.7.0"
+mxnet = ">=1.6.0,<2.0.0"
+gluonts = ">=0.13.2,<0.14.0"
+
+[tool.poetry.extras.image]
+torchvision = ">=0.16.0"
+pillow = ">8.3.1"
+
+[tool.poetry.extras.quantum]
+qiskit = "==0.31.0"
+
+[tool.poetry.extras.xai]
+shap = ">=0.40.0"
+pyod = "==1.0.4"
+suod = "^0.1.3"  # TODO: remove?
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
