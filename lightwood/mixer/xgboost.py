@@ -206,7 +206,7 @@ class XGBoostMixer(BaseMixer):
             self.params["eval_metric"] = self.params.pop("ray_eval_metric")
 
             # evals_result = {}
-            self.params['n_jobs'] = 1  # TODO: this (proxy to `n_actors`) should be either automatically set, by cluster inspection, OR defined by the user via params
+            self.params['n_jobs'] = 1  # TODO: this (proxy to `n_actors`) should be either automatically set, by cluster inspection, OR defined by the user via params  # noqa
             self.model = model_class(**self.params)
             self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
             # TODO: reenable this?
