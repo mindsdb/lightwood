@@ -44,33 +44,35 @@ typing-inspect = ">=0.9.0"    # TODO needed?
 six = ">= 1.16.0"   # TODO needed?
 regex = ">= 2023.10.3"  # TODO needed? should be built in!
 
-[tool.poetry.extras.dev]
-autopep8 = ">=1.5.7"
-
-[tool.poetry.extras.audio]
-librosa = "==0.8.1"
-
-[tool.poetry.extras.extra]
-lightgbm = ">=3.3.0,<=3.3.3"  # TODO: widen?
-
-[tool.poetry.extras.extra_ts]
-pystan = "==2.19.1.1"
-prophet = "==1.1"
-neuralforecast = ">=1.6.4,<1.7.0"
-mxnet = ">=1.6.0,<2.0.0"
-gluonts = ">=0.13.2,<0.14.0"
-
-[tool.poetry.extras.image]
-torchvision = ">=0.16.0"
-pillow = ">8.3.1"
-
-[tool.poetry.extras.quantum]
-qiskit = "==0.31.0"
-
-[tool.poetry.extras.xai]
-shap = ">=0.40.0"
-pyod = "==1.0.4"
-suod = "^0.1.3"  # TODO: remove?
+[tool.poetry.extras]
+dev = [
+    "autopep8>=1.5.7",
+]
+audio = [
+    "librosa==0.8.1",
+]
+extra = [
+    "lightgbm>=3.3.0,<=3.3.3",  # TODO: widen?
+]
+extra_ts = [
+    "pystan==2.19.1.1",
+    "prophet==1.1",
+    "neuralforecast>=1.6.4,<1.7.0",
+    "mxnet>=1.6.0,<2.0.0",
+    "gluonts>=0.13.2,<0.14.0",
+]
+image = [
+    "torchvision>=0.16.0",
+    "pillow>8.3.1",
+]
+quantum = [
+    "qiskit==0.31.0",
+]
+xai = [
+    "shap>=0.40.0",
+    "pyod==1.0.4",
+    "suod>=0.1.3",  # TODO: remove?
+]
 
 [build-system]
 requires = ["poetry-core"]
