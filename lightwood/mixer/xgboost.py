@@ -1,13 +1,19 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Tuple
 import time
 
 import torch
 import optuna
-import xgboost as xgb
 import numpy as np
 import pandas as pd
+import xgboost as xgb
 from sklearn.preprocessing import OrdinalEncoder
 from type_infer.dtype import dtype
+
+try:
+    from xgboost_ray import RayDMatrix, RayParams, RayXGBClassifier, RayXGBRegressor
+    # from ray import tune  # TODO enable later
+except ImportError:
+    RayDMatrix = RayParams = RayXGBClassifier = RayXGBRegressor = None  # TODO: add support for tune
 
 from lightwood.helpers.log import log
 from lightwood.helpers.parallelism import get_nr_procs
@@ -20,6 +26,7 @@ optuna.logging.set_verbosity(optuna.logging.CRITICAL)
 
 
 def check_gpu_support():
+    # TODO: improve this check
     try:
         from sklearn.datasets import load_iris
         from sklearn.model_selection import train_test_split
@@ -101,12 +108,12 @@ class XGBoostMixer(BaseMixer):
 
         self.max_bin = 255
 
-    def _to_dataset(self, ds: EncodedDs, output_dtype: str, mode='train'):
+    def _to_dataset(self, ds: EncodedDs, output_dtype: str, mode='train') -> Tuple[np.ndarray, pd.Series]:
         """
         Helper method to wrangle a datasource into the format that the underlying model requires.
         :param ds: EncodedDS that contains the dataframe to transform.
         :param output_dtype:
-        :return: modified `data` object that conforms to XGBoost's expected format.
+        :return: modified `data` objects that conform to XGBoost's expected format.
         """  # noqa
         data = None
         for input_col in self.input_cols:
@@ -181,17 +188,35 @@ class XGBoostMixer(BaseMixer):
         if output_dtype not in self.num_dtypes:
             self.all_classes = self.ordinal_encoder.categories_[0]
             self.params['num_class'] = self.all_classes.size
-            model_class = xgb.XGBClassifier
+            model_class = xgb.XGBClassifier if not RayDMatrix else RayXGBClassifier
+            self.params["ray_objective"] = "multi:softmax"  # TODO: dispatch to binary if target is binary
+            self.params["ray_eval_metric"] = ["merror"]  # TODO: similar to "logloss" here
         else:
-            model_class = xgb.XGBRegressor
+            model_class = xgb.XGBRegressor if not RayDMatrix else RayXGBRegressor
+            self.params["ray_objective"] = "reg:squarederror"
+            self.params["ray_eval_metric"] = ["error"]  # TODO: something equivalent to "reg:squarederror"
 
         # Determine time per iterations
         start = time.time()
         self.params['n_estimators'] = 1
 
-        with xgb.config_context(verbosity=0):
+        if RayDMatrix is not None:
+            self.params["tree_method"] = "approx"
+            self.params["objective"] = self.params.pop("ray_objective")
+            self.params["eval_metric"] = self.params.pop("ray_eval_metric")
+
+            # evals_result = {}
+            self.params['n_jobs'] = 1  # TODO: this (proxy to `n_actors`) should be either automatically set, by cluster inspection, OR defined by the user via params
             self.model = model_class(**self.params)
             self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
+            # TODO: reenable this?
+            # metric_name = "error" if output_dtype in self.num_dtypes else "merror"
+            # print("Final training error: {:.4f}".format(evals_result["train"][metric_name][-1]))
+            # TODO: check whether possible to merge fit calls
+        else:
+            with xgb.config_context(verbosity=0):
+                self.model = model_class(**self.params)
+                self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
 
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
@@ -222,9 +247,15 @@ class XGBoostMixer(BaseMixer):
         # TODO: reinstance these on each run! keep or use via eval_set in fit()?
         # self.params['callbacks'] = [(train_dataset, 'train'), (dev_dataset, 'eval')]
 
-        with xgb.config_context(verbosity=0):
-            self.model = model_class(**self.params)
+        if RayDMatrix is not None:
             self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
+            # TODO: reenable this?
+            # metric_name = "error" if output_dtype in self.num_dtypes else "merror"
+            # print("Final training error: {:.4f}".format(evals_result["train"][metric_name][-1]))
+        else:
+            with xgb.config_context(verbosity=0):
+                self.model = model_class(**self.params)
+                self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
 
         if self.fit_on_dev:
             self.partial_fit(dev_data, train_data)
