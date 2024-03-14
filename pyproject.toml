@@ -17,7 +17,7 @@ nltk = ">=3.8, <3.9"  # TODO upper cap needed?
 python-dateutil = ">=2.8.2"
 pandas = ">=2.0.0, <2.1.0"  # TODO why the upper cap here?
 schema = ">=0.6.8"  # TODO needed?
-torch = ">=2.0.0, <2.1"  # TODO try to remove upper cap?
+torch = ">=2.0.0"  # TODO try to remove upper cap?
 requests = ">=2.0.0"  # TODO needed?
 transformers = ">=4.34.0"
 optuna = ">=3.1.0,<4.0.0"
