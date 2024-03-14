@@ -141,17 +141,10 @@ class XGBoostMixer(BaseMixer):
             elif output_dtype in self.num_dtypes:
                 weight_map = getattr(self.target_encoder, 'target_weights', None)
                 if weight_map is not None:
-                    # get a sorted list of intervals to assign weights
-                    weight_map_values = np.sort(list(weight_map.keys()))
+                    target_encoder = ds.encoders[self.target]
 
-                    # search for the containing interval in the provided weight map, and assign that weight.
-                    weights = [
-                        weight_map[
-                            weight_map_values[
-                                np.min([np.searchsorted(weight_map_values, x), len(weight_map_values) - 1])
-                            ]
-                        ] for x in
-                        label_data]
+                    # get the weights from the numeric target encoder
+                    weights = target_encoder.get_weights(label_data)
 
                 if output_dtype in self.float_dtypes:
                     label_data = label_data.astype(float)
@@ -211,7 +204,7 @@ class XGBoostMixer(BaseMixer):
 
         with xgb.config_context(verbosity=0):
             self.model = model_class(**self.params)
-            if train_weights and dev_weights:
+            if train_weights is not None and dev_weights is not None:
                 self.model.fit(train_dataset, train_labels, sample_weight=train_weights,
                                eval_set=[(dev_dataset, dev_labels)],
                                sample_weight_eval_set=[dev_weights])
@@ -250,7 +243,7 @@ class XGBoostMixer(BaseMixer):
 
         with xgb.config_context(verbosity=0):
             self.model = model_class(**self.params)
-            if train_weights and dev_weights:
+            if train_weights is not None and dev_weights is not None:
                 self.model.fit(train_dataset, train_labels, sample_weight=train_weights,
                                eval_set=[(dev_dataset, dev_labels)],
                                sample_weight_eval_set=[dev_weights])

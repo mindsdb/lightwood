@@ -112,11 +112,12 @@ class TestNumericEncoder(unittest.TestCase):
                     assert not is_none(x) or x != 0.0
 
     def test_weights(self):
+        num_bins = 10
         data = np.random.normal(loc=0.0, scale=1.0, size=1000)
-        hist, bin_edges = np.histogram(data, bins=10, density=False)
+        hist, bin_edges = np.histogram(data, bins=num_bins, density=False)
 
-        # constrict bins so that final histograms align, throw out minimum bin as the np.searchsorted is left justified.
-
+        # constrict bins so that final histograms align, throw out minimum bin as the np.searchsorted is left justified
+        # and this leads always to a singleton bin that contains the lowest value.
         bin_edges = bin_edges[1:]
 
         # construct target weight mapping. This mapping will round each entry to the lower bin edge.
@@ -130,6 +131,6 @@ class TestNumericEncoder(unittest.TestCase):
         self.assertTrue(type(generated_weights) is np.ndarray)
 
         # distributions should match
-        gen_hist, _ = np.histogram(generated_weights, bins=10, density=False)
+        gen_hist, _ = np.histogram(generated_weights, bins=num_bins, density=False)
 
         self.assertTrue(np.all(np.equal(hist, gen_hist)))

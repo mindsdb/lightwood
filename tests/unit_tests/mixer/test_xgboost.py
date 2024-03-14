@@ -14,7 +14,7 @@ class TestBasic(unittest.TestCase):
     def get_submodels(self):
         submodels = [
             {
-                'module': 'LightGBM',
+                'module': 'XGBoostMixer',
                 'args': {
                     'stop_after': '$problem_definition.seconds_per_mixer',
                     'fit_on_dev': True,
@@ -87,3 +87,4 @@ class TestBasic(unittest.TestCase):
 
         self.assertTrue(np.all(np.isclose(output_mean, loc, atol=0., rtol=.03)),
                         msg=f"the output mean {output_mean} is not close to {loc}")
+
