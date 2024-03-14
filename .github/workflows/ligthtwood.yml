@@ -25,6 +25,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        python -m venv ./env
+        source ./env/bin/activate
         python -m pip install --upgrade pip
         python -m pip install setuptools poetry flake8
         python -m poetry install -E image
