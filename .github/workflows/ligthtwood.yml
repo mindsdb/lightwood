@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m venv ./env
-        source ./env/bin/activate
+        source ./env/bin/activate  # poetry will add a venv otherwise, so we do it manually to activate in next steps
         python -m pip install --upgrade pip
         python -m pip install setuptools poetry flake8
         python -m poetry install -E image
@@ -40,10 +40,12 @@ jobs:
         CHECK_FOR_UPDATES: False
     - name: Lint with flake8
       run: |
+        source ./env/bin/activate
         python -m flake8 .
     - name: Test with unittest
       run: |
         # Run all the "standard" tests
+        source ./env/bin/activate
         python -m unittest discover tests
 
   deploy:
