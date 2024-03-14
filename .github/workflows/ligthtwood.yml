@@ -27,7 +27,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install setuptools poetry
-        poetry install -E image -E dev
+        poetry install -E dev -E image
     - name: Install dependencies OSX
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
