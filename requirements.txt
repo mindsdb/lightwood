@@ -32,3 +32,4 @@ tab-transformer-pytorch >= 0.2.1
 typing-inspect
 six
 regex
+lightgbm
