@@ -125,7 +125,7 @@ class TestNumericEncoder(unittest.TestCase):
         self.assertTrue(type(target_weights) is dict)
 
         # apply weight mapping
-        encoder = NumericEncoder(target_weights=target_weights)
+        encoder = NumericEncoder(is_target=True, target_weights=target_weights)
         generated_weights = encoder.get_weights(label_data=data)
 
         self.assertTrue(type(generated_weights) is np.ndarray)
