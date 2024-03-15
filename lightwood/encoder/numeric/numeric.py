@@ -42,7 +42,7 @@ class NumericEncoder(BaseEncoder):
         # Weight-balance info if encoder represents target
         self.target_weights = None
         self.index_weights = None
-        if self.is_target and self.target_weights is not None:
+        if self.is_target and target_weights is not None:
             self.target_weights = dc(target_weights)
             self.index_weights = torch.tensor(list(self.target_weights.values()))
 
