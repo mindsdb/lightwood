@@ -1,10 +1,8 @@
 import unittest
 import numpy as np
 import pandas as pd
-from sklearn.metrics import balanced_accuracy_score
 from lightwood.api.types import ProblemDefinition
-from lightwood.api.high_level import json_ai_from_problem, predictor_from_json_ai, JsonAI, code_from_json_ai, \
-    predictor_from_code  # noqa
+from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code
 
 np.random.seed(42)
 
@@ -30,10 +28,9 @@ class TestBasic(unittest.TestCase):
     def test_0_regression(self):
         """
         This test mocks a dataset intended to demonstrate the efficacy of weighting. The test does not work.
-
         """
-        #df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
-        #target = 'concrete_strength'
+        # df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
+        # target = 'concrete_strength'
 
         # generate data that mocks an observational skew by adding a linear selection to data
         data_size = 100000
@@ -41,7 +38,7 @@ class TestBasic(unittest.TestCase):
         scale = 10.0
         eps = .1
         target_data = np.random.normal(loc=loc, scale=scale, size=data_size)
-        epsilon = np.random.normal(loc=0.0, scale=loc*eps, size=len(target_data))
+        epsilon = np.random.normal(loc=0.0, scale=loc * eps, size=len(target_data))
         feature_data = target_data + epsilon
         df = pd.DataFrame({'feature': feature_data, 'target': target_data})
 
@@ -64,7 +61,7 @@ class TestBasic(unittest.TestCase):
             skewed_arr_list.append(bin_array)
 
         skewed_arr = np.concatenate(skewed_arr_list)
-        epsilon = np.random.normal(loc=0.0, scale=loc*eps, size=len(skewed_arr))
+        epsilon = np.random.normal(loc=0.0, scale=loc * eps, size=len(skewed_arr))
         skewed_feat = skewed_arr + epsilon
         skew_df = pd.DataFrame({'feature': skewed_feat, 'target': skewed_arr})
 

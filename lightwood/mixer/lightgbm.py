@@ -217,8 +217,11 @@ class LightGBM(BaseMixer):
         kwargs = {}
         if 'verbose_eval' in inspect.getfullargspec(lightgbm.train).args:
             kwargs['verbose_eval'] = False
-        self.model = lightgbm.train(self.params, lightgbm.Dataset(data['train']['data'], label=data['train']
-        ['label_data'], weight=data['train']['weights']), **kwargs)
+        self.model = lightgbm.train(self.params,
+                                    lightgbm.Dataset(data['train']['data'],
+                                                     label=data['train']['label_data'],
+                                                     weight=data['train']['weights']),
+                                    **kwargs)
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
 
