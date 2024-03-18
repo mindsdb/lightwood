@@ -4,9 +4,16 @@ import pandas as pd
 from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code
 
+try:
+    import lightgbm
+    NO_LGBM = False
+except ModuleNotFoundError:
+    NO_LGBM = True
+
 np.random.seed(42)
 
 
+@unittest.skipIf(NO_LGBM, "LightGBM is not available, skipping LightGBM tests.")
 class TestBasic(unittest.TestCase):
 
     def get_submodels(self):
@@ -27,10 +34,9 @@ class TestBasic(unittest.TestCase):
 
     def test_0_regression(self):
         """
-        This test mocks a dataset intended to demonstrate the efficacy of weighting. The test does not work.
+        This test mocks a dataset intended to demonstrate the efficacy of weighting. The operation does not successfully
+        test if the weighting procedure works as intended, but does test the code for bugs.
         """
-        # df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
-        # target = 'concrete_strength'
 
         # generate data that mocks an observational skew by adding a linear selection to data
         data_size = 100000

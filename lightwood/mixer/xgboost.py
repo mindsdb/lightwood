@@ -122,7 +122,7 @@ class XGBoostMixer(BaseMixer):
             weights = []
             label_data = ds.get_column_original_data(self.target)
             if output_dtype in self.cls_dtypes:
-                if mode == 'train':  # TODO weight maps?
+                if mode == 'train':
                     self.ordinal_encoder = OrdinalEncoder()
                     self.label_set = list(set(label_data))
                     self.ordinal_encoder.fit(np.array(list(self.label_set)).reshape(-1, 1))

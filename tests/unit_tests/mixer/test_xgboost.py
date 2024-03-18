@@ -27,11 +27,9 @@ class TestBasic(unittest.TestCase):
 
     def test_0_regression(self):
         """
-        This test mocks a dataset intended to demonstrate the efficacy of weighting. The test does not work.
-
+        This test mocks a dataset intended to demonstrate the efficacy of weighting. The operation does not successfully
+        test if the weighting procedure works as intended, but does test the code for bugs.
         """
-        # df = pd.read_csv('tests/data/concrete_strength.csv')[:500]
-        # target = 'concrete_strength'
 
         # generate data that mocks an observational skew by adding a linear selection to data
         data_size = 100000
@@ -85,4 +83,3 @@ class TestBasic(unittest.TestCase):
 
         self.assertTrue(np.all(np.isclose(output_mean, loc, atol=0., rtol=.03)),
                         msg=f"the output mean {output_mean} is not close to {loc}")
-
