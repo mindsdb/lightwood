@@ -86,7 +86,8 @@
              
   <h1>Source code for lightwood.encoder.numeric.numeric</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span> <span class="k">as</span> <span class="n">dc</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -107,11 +108,15 @@
 <span class="sd">    The ``absolute_mean`` is computed in the ``prepare`` method and is just the mean of the absolute values of all numbers feed to prepare (which are not none)</span>
 
 <span class="sd">    ``none`` stands for any number that is an actual python ``None`` value or any sort of non-numeric value (a string, nan, inf)</span>
-<span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">target_weights</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param data_type: The data type of the number (integer, float, quantity)</span>
+<span class="sd">        :param target_weights: a dictionary of weights to use on the examples.</span>
 <span class="sd">        :param is_target: Indicates whether the encoder refers to a target column or feature column (True==target)</span>
 <span class="sd">        :param positive_domain: Forces the encoder to always output positive values</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -121,12 +126,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">decode_log</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="mi">4</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span> <span class="k">else</span> <span class="mi">3</span>
 
+        <span class="c1"># Weight-balance info if encoder represents target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_target</span> <span class="ow">and</span> <span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span> <span class="o">=</span> <span class="n">dc</span><span class="p">(</span><span class="n">target_weights</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
 <div class="viewcode-block" id="NumericEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.NumericEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;NumericalEncoder&quot; uses a rule-based form to prepare results on training (priming) data. The averages etc. are taken from this distribution.</span>
 
 <span class="sd">        :param priming_data: an iterable data structure containing numbers numbers which will be used to compute the values used for normalizing the encoded representations</span>
-<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You can only call &quot;prepare&quot; once for a given encoder.&#39;</span><span class="p">)</span>
 
@@ -144,7 +156,8 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span>
 
-        <span class="n">inp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">posinf</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">neginf</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>  <span class="c1"># noqa</span>
+        <span class="n">inp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">posinf</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span>
+                                 <span class="n">neginf</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>  <span class="c1"># noqa</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">positive_domain</span><span class="p">:</span>
             <span class="n">sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sign_fn</span><span class="p">,</span> <span class="n">otypes</span><span class="o">=</span><span class="p">[</span><span class="nb">float</span><span class="p">])(</span><span class="n">inp_data</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -184,7 +197,7 @@
 <span class="sd">        :param decode_log: Whether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part</span>
 
 <span class="sd">        :returns: The decoded array</span>
-<span class="sd">        &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;You need to call &quot;prepare&quot; before calling &quot;encode&quot; or &quot;decode&quot;.&#39;</span><span class="p">)</span>
@@ -231,7 +244,26 @@
             <span class="n">ret</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
             <span class="n">ret</span><span class="p">[</span><span class="n">mask_none</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">return</span> <span class="n">ret</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># TODO: update signature on BaseEncoder and replace all encs to return ndarrays</span></div></div>
+        <span class="k">return</span> <span class="n">ret</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># TODO: update signature on BaseEncoder and replace all encs to return ndarrays</span></div>
+
+    <span class="k">def</span> <span class="nf">get_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_data</span><span class="p">):</span>
+        <span class="c1"># get a sorted list of intervals to assign weights. Keys are the interval edges.</span>
+        <span class="n">target_weight_keys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="n">target_weight_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="n">sorted_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">target_weight_keys</span><span class="p">)</span>
+
+        <span class="c1"># get sorted arrays for vector numpy operations</span>
+        <span class="n">target_weight_keys</span> <span class="o">=</span> <span class="n">target_weight_keys</span><span class="p">[</span><span class="n">sorted_indices</span><span class="p">]</span>
+        <span class="n">target_weight_values</span> <span class="o">=</span> <span class="n">target_weight_values</span><span class="p">[</span><span class="n">sorted_indices</span><span class="p">]</span>
+
+        <span class="c1"># find the indices of the bins according to the keys. clip to the length of the weight values (search sorted</span>
+        <span class="c1"># returns indices from 0 to N with N = len(target_weight_keys).</span>
+        <span class="n">assigned_target_weight_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">target_weight_keys</span><span class="p">,</span> <span class="n">label_data</span><span class="p">),</span>
+                                                 <span class="n">a_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                 <span class="n">a_max</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">target_weight_keys</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">target_weight_values</span><span class="p">[</span><span class="n">assigned_target_weight_indices</span><span class="p">]</span></div>
+
 </pre></div>
 
            </div>
