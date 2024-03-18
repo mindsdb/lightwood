@@ -1,5 +1,6 @@
 import math
-from typing import Union
+from typing import Union, Dict
+from copy import deepcopy as dc
 
 import torch
 import numpy as np
@@ -20,11 +21,15 @@ class NumericEncoder(BaseEncoder):
     The ``absolute_mean`` is computed in the ``prepare`` method and is just the mean of the absolute values of all numbers feed to prepare (which are not none)
 
     ``none`` stands for any number that is an actual python ``None`` value or any sort of non-numeric value (a string, nan, inf)
-    """ # noqa
+    """  # noqa
 
-    def __init__(self, data_type: dtype = None, is_target: bool = False, positive_domain: bool = False):
+    def __init__(self, data_type: dtype = None,
+                 target_weights: Dict[float, float] = None,
+                 is_target: bool = False,
+                 positive_domain: bool = False):
         """
         :param data_type: The data type of the number (integer, float, quantity)
+        :param target_weights: a dictionary of weights to use on the examples.
         :param is_target: Indicates whether the encoder refers to a target column or feature column (True==target)
         :param positive_domain: Forces the encoder to always output positive values
         """
@@ -34,12 +39,19 @@ class NumericEncoder(BaseEncoder):
         self.decode_log = False
         self.output_size = 4 if not self.is_target else 3
 
+        # Weight-balance info if encoder represents target
+        self.target_weights = None
+        self.index_weights = None
+        if self.is_target and target_weights is not None:
+            self.target_weights = dc(target_weights)
+            self.index_weights = torch.tensor(list(self.target_weights.values()))
+
     def prepare(self, priming_data: pd.Series):
         """
         "NumericalEncoder" uses a rule-based form to prepare results on training (priming) data. The averages etc. are taken from this distribution.
 
         :param priming_data: an iterable data structure containing numbers numbers which will be used to compute the values used for normalizing the encoded representations
-        """ # noqa
+        """  # noqa
         if self.is_prepared:
             raise Exception('You can only call "prepare" once for a given encoder.')
 
@@ -57,7 +69,8 @@ class NumericEncoder(BaseEncoder):
         if isinstance(data, pd.Series):
             data = data.values
 
-        inp_data = np.nan_to_num(data.astype(float), nan=0, posinf=np.finfo(np.float32).max, neginf=np.finfo(np.float32).min)  # noqa
+        inp_data = np.nan_to_num(data.astype(float), nan=0, posinf=np.finfo(np.float32).max,
+                                 neginf=np.finfo(np.float32).min)  # noqa
         if not self.positive_domain:
             sign = np.vectorize(self._sign_fn, otypes=[float])(inp_data)
         else:
@@ -97,7 +110,7 @@ class NumericEncoder(BaseEncoder):
         :param decode_log: Whether to decode the ``log`` or ``linear`` part of the representation, since the encoded vector contains both a log and a linear part
 
         :returns: The decoded array
-        """ # noqa
+        """  # noqa
 
         if not self.is_prepared:
             raise Exception('You need to call "prepare" before calling "encode" or "decode".')
@@ -145,3 +158,22 @@ class NumericEncoder(BaseEncoder):
             ret[mask_none] = None
 
         return ret.tolist()  # TODO: update signature on BaseEncoder and replace all encs to return ndarrays
+
+    def get_weights(self, label_data):
+        # get a sorted list of intervals to assign weights. Keys are the interval edges.
+        target_weight_keys = np.array(list(self.target_weights.keys()))
+        target_weight_values = np.array(list(self.target_weights.values()))
+        sorted_indices = np.argsort(target_weight_keys)
+
+        # get sorted arrays for vector numpy operations
+        target_weight_keys = target_weight_keys[sorted_indices]
+        target_weight_values = target_weight_values[sorted_indices]
+
+        # find the indices of the bins according to the keys. clip to the length of the weight values (search sorted
+        # returns indices from 0 to N with N = len(target_weight_keys).
+        assigned_target_weight_indices = np.clip(a=np.searchsorted(target_weight_keys, label_data),
+                                                 a_min=0,
+                                                 a_max=len(target_weight_keys) - 1).astype(np.int32)
+
+        return target_weight_values[assigned_target_weight_indices]
+

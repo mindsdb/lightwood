@@ -119,9 +119,10 @@ class XGBoostMixer(BaseMixer):
         data = data.cpu().numpy()
 
         if mode in ('train', 'dev'):
+            weights = []
             label_data = ds.get_column_original_data(self.target)
             if output_dtype in self.cls_dtypes:
-                if mode == 'train':  # TODO weight maps?
+                if mode == 'train':
                     self.ordinal_encoder = OrdinalEncoder()
                     self.label_set = list(set(label_data))
                     self.ordinal_encoder.fit(np.array(list(self.label_set)).reshape(-1, 1))
@@ -131,14 +132,26 @@ class XGBoostMixer(BaseMixer):
                     if x in self.label_set:
                         filtered_label_data.append(x)
 
+                weight_map = getattr(self.target_encoder, 'target_weights', None)
+                if weight_map is not None:
+                    weights = [weight_map[x] for x in label_data]
+
                 label_data = self.ordinal_encoder.transform(np.array(filtered_label_data).reshape(-1, 1)).flatten()
 
-            elif output_dtype == dtype.integer:
-                label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
-            elif output_dtype in self.float_dtypes:
-                label_data = label_data.astype(float)
+            elif output_dtype in self.num_dtypes:
+                weight_map = getattr(self.target_encoder, 'target_weights', None)
+                if weight_map is not None:
+                    target_encoder = ds.encoders[self.target]
 
-            return data, label_data
+                    # get the weights from the numeric target encoder
+                    weights = target_encoder.get_weights(label_data)
+
+                if output_dtype in self.float_dtypes:
+                    label_data = label_data.astype(float)
+                elif output_dtype == dtype.integer:
+                    label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
+
+            return data, label_data, weights
 
         else:
             return data
@@ -175,8 +188,8 @@ class XGBoostMixer(BaseMixer):
         }
 
         # Prepare the data
-        train_dataset, train_labels = self._to_dataset(train_data, output_dtype, mode='train')
-        dev_dataset, dev_labels = self._to_dataset(dev_data, output_dtype, mode='dev')
+        train_dataset, train_labels, train_weights = self._to_dataset(train_data, output_dtype, mode='train')
+        dev_dataset, dev_labels, dev_weights = self._to_dataset(dev_data, output_dtype, mode='dev')
 
         if output_dtype not in self.num_dtypes:
             self.all_classes = self.ordinal_encoder.categories_[0]
@@ -191,7 +204,13 @@ class XGBoostMixer(BaseMixer):
 
         with xgb.config_context(verbosity=0):
             self.model = model_class(**self.params)
-            self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
+            if train_weights is not None and dev_weights is not None:
+                self.model.fit(train_dataset, train_labels, sample_weight=train_weights,
+                               eval_set=[(dev_dataset, dev_labels)],
+                               sample_weight_eval_set=[dev_weights])
+            else:
+                self.model.fit(train_dataset, train_labels,
+                               eval_set=[(dev_dataset, dev_labels)])
 
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
@@ -224,7 +243,13 @@ class XGBoostMixer(BaseMixer):
 
         with xgb.config_context(verbosity=0):
             self.model = model_class(**self.params)
-            self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
+            if train_weights is not None and dev_weights is not None:
+                self.model.fit(train_dataset, train_labels, sample_weight=train_weights,
+                               eval_set=[(dev_dataset, dev_labels)],
+                               sample_weight_eval_set=[dev_weights])
+            else:
+                self.model.fit(train_dataset, train_labels,
+                               eval_set=[(dev_dataset, dev_labels)])
 
         if self.fit_on_dev:
             self.partial_fit(dev_data, train_data)
