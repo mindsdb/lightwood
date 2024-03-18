@@ -3,17 +3,12 @@ import numpy as np
 import pandas as pd
 from lightwood.api.types import ProblemDefinition
 from lightwood.api.high_level import json_ai_from_problem, code_from_json_ai, predictor_from_code
-
-try:
-    import lightgbm
-    NO_LGBM = False
-except ModuleNotFoundError:
-    NO_LGBM = True
+import importlib
 
 np.random.seed(42)
 
 
-@unittest.skipIf(NO_LGBM, "LightGBM is not available, skipping LightGBM tests.")
+@unittest.skipIf(importlib.util.find_spec('lightgbm') is None, "LightGBM is not available, skipping LightGBM tests.")
 class TestBasic(unittest.TestCase):
 
     def get_submodels(self):
