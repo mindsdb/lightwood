@@ -28,6 +28,7 @@ class PredictorInterface:
     You can also use the predictor to now estimate new data:
 
     - ``predict``: Deploys the chosen best model, and evaluates the given data to provide target estimates.
+    - ``test``: Similar to predict, but user also passes an accuracy function that will be used to compute a metric with the generated predictions.
     - ``save``: Saves the Predictor object for further use.
 
     The ``PredictorInterface`` is created via J{ai}son's custom code creation. A problem inherits from this class with pre-populated routines to fill out expected results, given the nature of each problem type.
@@ -127,12 +128,27 @@ class PredictorInterface:
 
     def predict(self, data: pd.DataFrame, args: Dict[str, object] = {}) -> pd.DataFrame:
         """
-        Intakes raw data to provide predicted values for your trained model.
+        Intakes raw data to provide model predictions.
+
+        :param data: Data (n_samples, n_columns) that the model will use as input to predict the corresponding target value for each sample.
+        :param args: any parameters used to customize inference behavior. Wrapped as a ``PredictionArguments`` object.
+
+        :returns: A dataframe containing predictions and additional sample-wise information. `n_samples` rows.
+        """  # noqa
+        pass
+
+    def test(
+            self, data: pd.DataFrame, metrics: list, args: Dict[str, object] = {}, strict: bool = False
+    ) -> pd.DataFrame:
+        """
+        Intakes raw data to compute values for a list of provided metrics using a Lightwood predictor.
 
         :param data: Data (n_samples, n_columns) that the model(s) will evaluate on and provide the target prediction.
+        :param metrics: A list of metrics to evaluate the model's performance on.
         :param args: parameters needed to update the predictor ``PredictionArguments`` object, which holds any parameters relevant for prediction.
+        :param strict: If True, the function will raise an error if the model does not support any of the requested metrics. Otherwise it skips them.
 
-        :returns: A dataframe of predictions of the same length of input.
+        :returns: A dataframe with `n_metrics` columns, each cell containing the respective score of each metric.
         """  # noqa
         pass
 

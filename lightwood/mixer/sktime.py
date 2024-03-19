@@ -69,6 +69,9 @@ class SkTime(BaseMixer):
         :param use_stl: Whether to use de-trenders and de-seasonalizers fitted in the timeseries analysis phase.
         """  # noqa
         super().__init__(stop_after)
+
+        assert ts_analysis['tss'].horizon > 1, log.error("Horizon must be greater than 1 when using the SkTime Mixer!")
+
         self.stable = False
         self.prepared = False
         self.supports_proba = False

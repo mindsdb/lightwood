@@ -50,7 +50,7 @@ class TestNumericEncoder(unittest.TestCase):
     def test_positive_domain(self):
         data = pd.Series([-1, -2, -100, 5, 10, 15])
         for encoder in [NumericEncoder(), TsNumericEncoder()]:
-            encoder.is_target = True        # only affects target values
+            encoder.is_target = True  # only affects target values
             encoder.positive_domain = True
             encoder.prepare(data)
             decoded_vals = encoder.decode(encoder.encode(data))
@@ -110,3 +110,27 @@ class TestNumericEncoder(unittest.TestCase):
                     assert is_none(dec)
                 else:
                     assert not is_none(x) or x != 0.0
+
+    def test_weights(self):
+        num_bins = 10
+        data = np.random.normal(loc=0.0, scale=1.0, size=1000)
+        hist, bin_edges = np.histogram(data, bins=num_bins, density=False)
+
+        # constrict bins so that final histograms align, throw out minimum bin as the np.searchsorted is left justified
+        # and this leads always to a singleton bin that contains the lowest value.
+        bin_edges = bin_edges[1:]
+
+        # construct target weight mapping. This mapping will round each entry to the lower bin edge.
+        target_weights = {bin_edge: bin_edge for bin_edge in bin_edges}
+        self.assertTrue(type(target_weights) is dict)
+
+        # apply weight mapping
+        encoder = NumericEncoder(is_target=True, target_weights=target_weights)
+        generated_weights = encoder.get_weights(label_data=data)
+
+        self.assertTrue(type(generated_weights) is np.ndarray)
+
+        # distributions should match
+        gen_hist, _ = np.histogram(generated_weights, bins=num_bins, density=False)
+
+        self.assertTrue(np.all(np.equal(hist, gen_hist)))
