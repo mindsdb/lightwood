@@ -46,6 +46,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    environment: PublishCI
     needs: test
     if: github.ref == 'refs/heads/stable' || github.event_name == 'release'
     steps:
@@ -57,11 +58,13 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-    - name: Build and publish
+        pip install poetry
+    - name: Build
+      run: poetry build
+    - name: Publish
       env:
-        TWINE_USERNAME:  __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        POETRY_HTTP_BASIC_PYPI_USERNAME: __token__
+        POETRY_HTTP_BASIC_PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        python setup.py sdist
-        twine upload dist/*
+        poetry publish --dry-run
+        poetry publish
