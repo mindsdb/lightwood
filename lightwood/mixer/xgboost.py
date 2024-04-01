@@ -11,9 +11,8 @@ from type_infer.dtype import dtype
 
 try:
     from xgboost_ray import RayDMatrix, RayParams, RayXGBClassifier, RayXGBRegressor
-    # from ray import tune  # TODO enable later
 except ImportError:
-    RayDMatrix = RayParams = RayXGBClassifier = RayXGBRegressor = None  # TODO: add support for tune
+    RayDMatrix = RayParams = RayXGBClassifier = RayXGBRegressor = None
 
 from lightwood.helpers.log import log
 from lightwood.helpers.parallelism import get_nr_procs
@@ -126,9 +125,10 @@ class XGBoostMixer(BaseMixer):
         data = data.cpu().numpy()
 
         if mode in ('train', 'dev'):
+            weights = []
             label_data = ds.get_column_original_data(self.target)
             if output_dtype in self.cls_dtypes:
-                if mode == 'train':  # TODO weight maps?
+                if mode == 'train':
                     self.ordinal_encoder = OrdinalEncoder()
                     self.label_set = list(set(label_data))
                     self.ordinal_encoder.fit(np.array(list(self.label_set)).reshape(-1, 1))
@@ -138,14 +138,26 @@ class XGBoostMixer(BaseMixer):
                     if x in self.label_set:
                         filtered_label_data.append(x)
 
+                weight_map = getattr(self.target_encoder, 'target_weights', None)
+                if weight_map is not None:
+                    weights = [weight_map[x] for x in label_data]
+
                 label_data = self.ordinal_encoder.transform(np.array(filtered_label_data).reshape(-1, 1)).flatten()
 
-            elif output_dtype == dtype.integer:
-                label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
-            elif output_dtype in self.float_dtypes:
-                label_data = label_data.astype(float)
+            elif output_dtype in self.num_dtypes:
+                weight_map = getattr(self.target_encoder, 'target_weights', None)
+                if weight_map is not None:
+                    target_encoder = ds.encoders[self.target]
 
-            return data, label_data
+                    # get the weights from the numeric target encoder
+                    weights = target_encoder.get_weights(label_data)
+
+                if output_dtype in self.float_dtypes:
+                    label_data = label_data.astype(float)
+                elif output_dtype == dtype.integer:
+                    label_data = label_data.clip(-pow(2, 63), pow(2, 63)).astype(int)
+
+            return data, label_data, weights
 
         else:
             return data
@@ -182,8 +194,8 @@ class XGBoostMixer(BaseMixer):
         }
 
         # Prepare the data
-        train_dataset, train_labels = self._to_dataset(train_data, output_dtype, mode='train')
-        dev_dataset, dev_labels = self._to_dataset(dev_data, output_dtype, mode='dev')
+        train_dataset, train_labels, train_weights = self._to_dataset(train_data, output_dtype, mode='train')
+        dev_dataset, dev_labels, dev_weights = self._to_dataset(dev_data, output_dtype, mode='dev')
 
         if output_dtype not in self.num_dtypes:
             self.all_classes = self.ordinal_encoder.categories_[0]
@@ -194,29 +206,27 @@ class XGBoostMixer(BaseMixer):
         else:
             model_class = xgb.XGBRegressor if not RayDMatrix else RayXGBRegressor
             self.params["ray_objective"] = "reg:squarederror"
-            self.params["ray_eval_metric"] = ["error"]  # TODO: something equivalent to "reg:squarederror"
+            self.params["ray_eval_metric"] = ["error"]  # TODO: equivalent to "reg:squarederror"
 
         # Determine time per iterations
         start = time.time()
         self.params['n_estimators'] = 1
+        fit_kwargs = {'eval_set': [(dev_dataset, dev_labels)]}
+        if train_weights is not None and dev_weights is not None:
+            fit_kwargs['sample_weight'] = train_weights
+            fit_kwargs['sample_weight_eval_set'] = dev_weights
 
         if RayDMatrix is not None:
             self.params["tree_method"] = "approx"
             self.params["objective"] = self.params.pop("ray_objective")
             self.params["eval_metric"] = self.params.pop("ray_eval_metric")
-
-            # evals_result = {}
             self.params['n_jobs'] = 1  # TODO: this (proxy to `n_actors`) should be either automatically set, by cluster inspection, OR defined by the user via params  # noqa
             self.model = model_class(**self.params)
-            self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
-            # TODO: reenable this?
-            # metric_name = "error" if output_dtype in self.num_dtypes else "merror"
-            # print("Final training error: {:.4f}".format(evals_result["train"][metric_name][-1]))
-            # TODO: check whether possible to merge fit calls
+            self.model.fit(train_dataset, train_labels, **fit_kwargs)
         else:
             with xgb.config_context(verbosity=0):
                 self.model = model_class(**self.params)
-                self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
+                self.model.fit(train_dataset, train_labels, **fit_kwargs)
 
         end = time.time()
         seconds_for_one_iteration = max(0.1, end - start)
@@ -244,18 +254,17 @@ class XGBoostMixer(BaseMixer):
             self.num_iterations = 1
         self.params['n_estimators'] = int(self.num_iterations)
 
-        # TODO: reinstance these on each run! keep or use via eval_set in fit()?
-        # self.params['callbacks'] = [(train_dataset, 'train'), (dev_dataset, 'eval')]
+        fit_kwargs = {'eval_set': [(dev_dataset, dev_labels)]}
+        if train_weights is not None and dev_weights is not None:
+            fit_kwargs['sample_weight'] = train_weights
+            fit_kwargs['sample_weight_eval_set'] = dev_weights
 
         if RayDMatrix is not None:
-            self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
-            # TODO: reenable this?
-            # metric_name = "error" if output_dtype in self.num_dtypes else "merror"
-            # print("Final training error: {:.4f}".format(evals_result["train"][metric_name][-1]))
+            self.model.fit(train_dataset, train_labels, **fit_kwargs)
         else:
             with xgb.config_context(verbosity=0):
                 self.model = model_class(**self.params)
-                self.model.fit(train_dataset, train_labels, eval_set=[(dev_dataset, dev_labels)])
+                self.model.fit(train_dataset, train_labels, **fit_kwargs)
 
         if self.fit_on_dev:
             self.partial_fit(dev_data, train_data)
