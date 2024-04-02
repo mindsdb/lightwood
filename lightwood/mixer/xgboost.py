@@ -215,7 +215,7 @@ class XGBoostMixer(BaseMixer):
         if train_weights is not None and len(train_weights) > 0 \
                 and dev_weights is not None and len(dev_weights) > 0:
             fit_kwargs['sample_weight'] = train_weights
-            fit_kwargs['sample_weight_eval_set'] = dev_weights
+            fit_kwargs['sample_weight_eval_set'] = dev_weights.reshape(1, -1)
 
         if RayDMatrix is not None:
             self.params["tree_method"] = "approx"
@@ -259,7 +259,7 @@ class XGBoostMixer(BaseMixer):
         if train_weights is not None and len(train_weights) > 0 \
                 and dev_weights is not None and len(dev_weights) > 0:
             fit_kwargs['sample_weight'] = train_weights
-            fit_kwargs['sample_weight_eval_set'] = dev_weights
+            fit_kwargs['sample_weight_eval_set'] = dev_weights.reshape(1, -1)
 
         if RayDMatrix is not None:
             self.model.fit(train_dataset, train_labels, **fit_kwargs)
