@@ -212,7 +212,8 @@ class XGBoostMixer(BaseMixer):
         start = time.time()
         self.params['n_estimators'] = 1
         fit_kwargs = {'eval_set': [(dev_dataset, dev_labels)]}
-        if train_weights is not None and dev_weights is not None:
+        if train_weights is not None and len(train_weights) > 0 \
+                and dev_weights is not None and len(dev_weights) > 0:
             fit_kwargs['sample_weight'] = train_weights
             fit_kwargs['sample_weight_eval_set'] = dev_weights
 
@@ -255,7 +256,8 @@ class XGBoostMixer(BaseMixer):
         self.params['n_estimators'] = int(self.num_iterations)
 
         fit_kwargs = {'eval_set': [(dev_dataset, dev_labels)]}
-        if train_weights is not None and dev_weights is not None:
+        if train_weights is not None and len(train_weights) > 0 \
+                and dev_weights is not None and len(dev_weights) > 0:
             fit_kwargs['sample_weight'] = train_weights
             fit_kwargs['sample_weight_eval_set'] = dev_weights
 
