@@ -63,7 +63,7 @@ class TestBasic(unittest.TestCase):
         self.assertTrue(acc > 0.5)
         self.assertTrue(all([0 <= p <= 1 for p in predictions['confidence']]))
 
-    @unittest.skipIf(importlib.util.find_spec('ray') is not None, "Ray is available, skipping as this will fail otherwise")
+    @unittest.skipIf(importlib.util.find_spec('ray') is not None, "Ray is available, skipping as this will fail otherwise")  # noqa
     def test_2_weighted_regression(self):
         """
         This test mocks a dataset intended to demonstrate the efficacy of weighting. The operation does not successfully
