@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Using your own pre-processing methods in Lightwood &mdash; lightwood 24.3.3.0 documentation</title>
+  <title>Using your own pre-processing methods in Lightwood &mdash; lightwood 24.3.3.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -42,7 +42,7 @@
               <img src="../../_static/mindsdblogo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                24.3.3.0
+                24.3.3.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -120,20 +120,13 @@
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2943:No torchvision detected, image helpers not supported.</span>
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2943:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2709:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2709:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <section id="1)-Load-your-data">
@@ -252,116 +245,25 @@
 <br/></pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2943:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2943:Analyzing a sample of 2478</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2943:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2943:Infering type for: id</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2943:Doing text detection for column: id</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2943:Column id has data type categorical</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2943:Infering type for: excerpt</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2943:Doing text detection for column: excerpt</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2943:Infering type for: target</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2943:Column target has data type float</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-yellow-fg">WARNING:type_infer-2943:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2943:Starting statistical analysis</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2943:Dropping features: [&#39;id&#39;]</span>
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2943:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:lightwood-2709:Dropping features: [&#39;url_legal&#39;, &#39;license&#39;, &#39;standard_error&#39;]</span>
+<span class="ansi-green-fg">INFO:type_infer-2709:Analyzing a sample of 2478</span>
+<span class="ansi-green-fg">INFO:type_infer-2709:from a total population of 2834, this is equivalent to 87.4% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2709:Infering type for: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2709:Doing text detection for column: id</span>
+<span class="ansi-green-fg">INFO:type_infer-2709:Column id has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2709:Infering type for: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2709:Doing text detection for column: excerpt</span>
+<span class="ansi-green-fg">INFO:type_infer-2709:Infering type for: target</span>
+<span class="ansi-green-fg">INFO:type_infer-2709:Column target has data type float</span>
+<span class="ansi-yellow-fg">WARNING:type_infer-2709:Column id is an identifier of type &#34;Hash-like identifier&#34;</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2709:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2709:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2709:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood, as it processes the data, will provide the user a few pieces of information.</p>
@@ -449,7 +351,7 @@
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 15.515635967254639,
+        &#34;expected_additional_time&#34;: 15.168050765991211,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -762,7 +664,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 21384.0,
                 &#34;seconds_per_encoder&#34;: 85536.0,
-                &#34;expected_additional_time&#34;: 15.515635967254639,
+                &#34;expected_additional_time&#34;: 15.168050765991211,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -792,7 +694,7 @@ class Predictor(PredictorInterface):
         self.accuracy_functions = [&#34;r2_score&#34;]
         self.identifiers = {&#34;id&#34;: &#34;Hash-like identifier&#34;}
         self.dtype_dict = {&#34;excerpt&#34;: &#34;rich_text&#34;, &#34;target&#34;: &#34;float&#34;}
-        self.lightwood_version = &#34;24.3.3.0&#34;
+        self.lightwood_version = &#34;24.3.3.1&#34;
         self.pred_args = PredictionArguments()
 
         # Any feature-column dependencies
@@ -963,6 +865,7 @@ class Predictor(PredictorInterface):
         feature_data = dict()
         for key, data in split_data.items():
             if key != &#34;stratified_on&#34;:
+
                 # compute and store two splits - full and filtered (useful for time series post-train analysis)
                 if key not in self.feature_cache:
                     featurized_split = EncodedDs(self.encoders, data, self.target)
@@ -1223,6 +1126,7 @@ class Predictor(PredictorInterface):
 
     @timed_predictor
     def predict(self, data: pd.DataFrame, args: Dict = {}) -&gt; pd.DataFrame:
+
         self.mode = &#34;predict&#34;
         n_phases = 3 if self.pred_args.all_mixers else 4
 
@@ -1302,6 +1206,7 @@ class Predictor(PredictorInterface):
         args: Dict[str, object] = {},
         strict: bool = False,
     ) -&gt; pd.DataFrame:
+
         preds = self.predict(data, args)
         preds = preds.rename(columns={&#34;prediction&#34;: self.target})
         filtered = []
@@ -1397,79 +1302,16 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2943:Starting statistical analysis</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2943:Dropping features: [&#39;id&#39;]</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2943:Finished statistical analysis</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-white-fg">DEBUG:lightwood-2943: `analyze_data` runtime: 0.05 seconds</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2943:Cleaning the data</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2943:Dropping features: [&#39;id&#39;]</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2943:Cleaning column =excerpt</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2943:Cleaning column =target</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2943:Converted target into strictly non-negative</span>
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-<span class="ansi-white-fg">DEBUG:lightwood-2943: `preprocess` runtime: 0.07 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2709:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2709:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2709:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2709: `analyze_data` runtime: 0.05 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2709:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2709:Dropping features: [&#39;id&#39;]</span>
+<span class="ansi-green-fg">INFO:lightwood-2709:Cleaning column =excerpt</span>
+<span class="ansi-green-fg">INFO:lightwood-2709:Cleaning column =target</span>
+<span class="ansi-green-fg">INFO:lightwood-2709:Converted target into strictly non-negative</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2709: `preprocess` runtime: 0.07 seconds</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
