@@ -216,8 +216,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -285,16 +285,16 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2741:Analyzing a sample of 2467</span>
-<span class="ansi-green-fg">INFO:type_infer-2741:from a total population of 2820, this is equivalent to 87.5% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2741:Infering type for: Month</span>
-<span class="ansi-green-fg">INFO:type_infer-2741:Column Month has data type date</span>
-<span class="ansi-green-fg">INFO:type_infer-2741:Infering type for: Sunspots</span>
-<span class="ansi-green-fg">INFO:type_infer-2741:Column Sunspots has data type float</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2775:Analyzing a sample of 2467</span>
+<span class="ansi-green-fg">INFO:type_infer-2775:from a total population of 2820, this is equivalent to 87.5% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2775:Infering type for: Month</span>
+<span class="ansi-green-fg">INFO:type_infer-2775:Column Month has data type date</span>
+<span class="ansi-green-fg">INFO:type_infer-2775:Infering type for: Sunspots</span>
+<span class="ansi-green-fg">INFO:type_infer-2775:Column Sunspots has data type float</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Starting statistical analysis</span>
 /opt/hostedtoolcache/Python/3.9.19/x64/lib/python3.9/site-packages/dataprep_ml/cleaners.py:163: UserWarning: The argument &#39;infer_datetime_format&#39; is deprecated and will be removed in a future version. A strict version of it is now the default, see https://pandas.pydata.org/pdeps/0004-consistent-to-datetime-parsing.html. You can safely remove this argument.
   result = pd.to_datetime(element,
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </section>
@@ -316,35 +316,35 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Learn phase 1/8] - Statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Learn phase 1/8] - Statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Starting statistical analysis</span>
 /opt/hostedtoolcache/Python/3.9.19/x64/lib/python3.9/site-packages/dataprep_ml/cleaners.py:163: UserWarning: The argument &#39;infer_datetime_format&#39; is deprecated and will be removed in a future version. A strict version of it is now the default, see https://pandas.pydata.org/pdeps/0004-consistent-to-datetime-parsing.html. You can safely remove this argument.
   result = pd.to_datetime(element,
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `analyze_data` runtime: 0.06 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Learn phase 2/8] - Data preprocessing</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `analyze_data` runtime: 0.06 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Learn phase 2/8] - Data preprocessing</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Cleaning the data</span>
 /opt/hostedtoolcache/Python/3.9.19/x64/lib/python3.9/site-packages/dataprep_ml/cleaners.py:163: UserWarning: The argument &#39;infer_datetime_format&#39; is deprecated and will be removed in a future version. A strict version of it is now the default, see https://pandas.pydata.org/pdeps/0004-consistent-to-datetime-parsing.html. You can safely remove this argument.
   result = pd.to_datetime(element,
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Transforming timeseries data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `preprocess` runtime: 0.09 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Learn phase 3/8] - Data splitting</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `split` runtime: 0.0 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Learn phase 4/8] - Preparing encoders</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2741:Preparing sequentially...</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `prepare` runtime: 0.05 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Learn phase 5/8] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `featurize` runtime: 0.05 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Learn phase 6/8] - Mixer training</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Training the mixers</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2741:XGBoost running on CPU</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2741:XGBoost running on CPU</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2741:XGBoost running on CPU</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2741:XGBoost running on CPU</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2741:XGBoost running on CPU</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2741:XGBoost running on CPU</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Transforming timeseries data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `preprocess` runtime: 0.09 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Learn phase 3/8] - Data splitting</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `split` runtime: 0.0 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Learn phase 4/8] - Preparing encoders</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2775:Preparing sequentially...</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `prepare` runtime: 0.05 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Learn phase 5/8] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `featurize` runtime: 0.05 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Learn phase 6/8] - Mixer training</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Training the mixers</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2775:XGBoost running on CPU</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2775:XGBoost running on CPU</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2775:XGBoost running on CPU</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2775:XGBoost running on CPU</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2775:XGBoost running on CPU</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2775:XGBoost running on CPU</span>
 /opt/hostedtoolcache/Python/3.9.19/x64/lib/python3.9/site-packages/torch/amp/grad_scaler.py:131: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(
 </pre></div></div>
@@ -354,12 +354,12 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[12:57:17] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
-[12:57:17] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
-[12:57:17] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
-[12:57:17] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
-[12:57:17] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
-[12:57:17] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
+[17:34:21] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
+[17:34:21] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
+[17:34:21] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
+[17:34:21] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
+[17:34:21] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
+[17:34:21] WARNING: ../src/learner.cc:339: No visible GPU is found, setting `gpu_id` to -1
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -372,30 +372,30 @@
 Consider using one of the following signatures instead:
         addcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1578.)
   exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss of 9.051180630922318 with learning rate 0.0001</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss of 9.014871209859848 with learning rate 0.0005</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss of 8.969509482383728 with learning rate 0.001</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss of 8.879052013158798 with learning rate 0.002</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss of 8.788950502872467 with learning rate 0.003</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss of 8.611965209245682 with learning rate 0.005</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss of 8.195775926113129 with learning rate 0.01</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss of 6.255893141031265 with learning rate 0.05</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Found learning rate of: 0.05</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 1: 0.5818348675966263</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 2: 0.4797109067440033</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 3: 0.48386093974113464</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 4: 0.49511992931365967</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 5: 0.39475560188293457</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 6: 0.39592696726322174</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 7: 0.3622782379388809</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 8: 0.38170479238033295</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 9: 0.5138543993234634</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 10: 0.6360723078250885</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 1: 0.29868809472430835</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 2: 0.30318967591632495</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `fit_mixer` runtime: 0.87 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Started fitting LGBM models for array prediction</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Started fitting XGBoost model</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss of 9.051180630922318 with learning rate 0.0001</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss of 9.014871209859848 with learning rate 0.0005</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss of 8.969509482383728 with learning rate 0.001</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss of 8.879052013158798 with learning rate 0.002</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss of 8.788950502872467 with learning rate 0.003</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss of 8.611965209245682 with learning rate 0.005</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss of 8.195775926113129 with learning rate 0.01</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss of 6.255893141031265 with learning rate 0.05</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Found learning rate of: 0.05</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 1: 0.5818348675966263</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 2: 0.4797109067440033</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 3: 0.48386093974113464</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 4: 0.49511992931365967</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 5: 0.39475560188293457</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 6: 0.39592696726322174</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 7: 0.3622782379388809</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 8: 0.38170479238033295</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 9: 0.5138543993234634</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 10: 0.6360723078250885</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 1: 0.29868809472430835</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 2: 0.30318967591632495</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `fit_mixer` runtime: 0.87 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Started fitting LGBM models for array prediction</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Started fitting XGBoost model</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -411,8 +411,8 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Training XGBoost with 57023 iterations given 7127.987198829651 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Training XGBoost with 57023 iterations given 7127.986482620239 seconds constraint</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -441,7 +441,7 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:Started fitting XGBoost model</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Started fitting XGBoost model</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -457,8 +457,8 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Training XGBoost with 57023 iterations given 7127.988854408264 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Training XGBoost with 57023 iterations given 7127.987569570541 seconds constraint</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -487,7 +487,7 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:Started fitting XGBoost model</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Started fitting XGBoost model</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -503,8 +503,8 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Training XGBoost with 57023 iterations given 7127.98838019371 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Training XGBoost with 57023 iterations given 7127.987584590912 seconds constraint</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -531,7 +531,7 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:Started fitting XGBoost model</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Started fitting XGBoost model</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -547,8 +547,8 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Training XGBoost with 57023 iterations given 7127.988798618317 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Training XGBoost with 57023 iterations given 7127.988139390945 seconds constraint</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -576,7 +576,7 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:Started fitting XGBoost model</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Started fitting XGBoost model</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -592,8 +592,8 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Training XGBoost with 57023 iterations given 7127.988030195236 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Training XGBoost with 57023 iterations given 7127.987740039825 seconds constraint</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -623,7 +623,7 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:Started fitting XGBoost model</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Started fitting XGBoost model</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -639,8 +639,8 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2741:A single GBM iteration takes 0.1 seconds</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Training XGBoost with 57023 iterations given 7127.988554954529 seconds constraint</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:A single GBM iteration takes 0.1 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Training XGBoost with 57023 iterations given 7127.987688064575 seconds constraint</span>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -662,7 +662,6 @@ Consider using one of the following signatures instead:
 [11]    validation_0-rmse:21.84587
 [12]    validation_0-rmse:21.78099
 [13]    validation_0-rmse:21.68890
-[14]    validation_0-rmse:21.70025
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -670,36 +669,36 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `fit_mixer` runtime: 0.49 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Ensembling the mixer</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Mixer: NeuralTs got accuracy: 0.875</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2741:This model does not output probability estimates</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Mixer: XGBoostArrayMixer got accuracy: 0.869</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Picked best mixer: NeuralTs</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `fit` runtime: 1.4 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Learn phase 7/8] - Ensemble analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Analyzing the ensemble of mixers</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:The block ICP is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:The block ConfStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:The block AccStats is now running its analyze() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:The block PermutationFeatureImportance is now running its analyze() method</span>
-<span class="ansi-yellow-fg">WARNING:lightwood-2741:Block &#39;PermutationFeatureImportance&#39; does not support time series nor text encoding, skipping...</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `analyze_ensemble` runtime: 0.16 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Learn phase 8/8] - Adjustment on validation requested</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Updating the mixers</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `fit_mixer` runtime: 0.49 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Ensembling the mixer</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Mixer: NeuralTs got accuracy: 0.875</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2775:This model does not output probability estimates</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Mixer: XGBoostArrayMixer got accuracy: 0.869</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Picked best mixer: NeuralTs</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `fit` runtime: 1.4 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Learn phase 7/8] - Ensemble analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Analyzing the ensemble of mixers</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:The block ICP is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:The block ConfStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:The block AccStats is now running its analyze() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:The block PermutationFeatureImportance is now running its analyze() method</span>
+<span class="ansi-yellow-fg">WARNING:lightwood-2775:Block &#39;PermutationFeatureImportance&#39; does not support time series nor text encoding, skipping...</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `analyze_ensemble` runtime: 0.17 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Learn phase 8/8] - Adjustment on validation requested</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Updating the mixers</span>
 /opt/hostedtoolcache/Python/3.9.19/x64/lib/python3.9/site-packages/torch/amp/grad_scaler.py:131: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
   warnings.warn(
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 1: 0.29626286526521045</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Loss @ epoch 2: 0.2954987535874049</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:Updating array of LGBM models...</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:XGBoost mixer does not have a `partial_fit` implementation</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:XGBoost mixer does not have a `partial_fit` implementation</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:XGBoost mixer does not have a `partial_fit` implementation</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:XGBoost mixer does not have a `partial_fit` implementation</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:XGBoost mixer does not have a `partial_fit` implementation</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:XGBoost mixer does not have a `partial_fit` implementation</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `adjust` runtime: 0.09 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `learn` runtime: 1.91 seconds</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 1: 0.29626286526521045</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Loss @ epoch 2: 0.2954987535874049</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:Updating array of LGBM models...</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:XGBoost mixer does not have a `partial_fit` implementation</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:XGBoost mixer does not have a `partial_fit` implementation</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:XGBoost mixer does not have a `partial_fit` implementation</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:XGBoost mixer does not have a `partial_fit` implementation</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:XGBoost mixer does not have a `partial_fit` implementation</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:XGBoost mixer does not have a `partial_fit` implementation</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `adjust` runtime: 0.09 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `learn` runtime: 1.91 seconds</span>
 </pre></div></div>
 </div>
 </section>
@@ -719,33 +718,33 @@ Consider using one of the following signatures instead:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Predict phase 1/4] - Data preprocessing</span>
-/tmp/fe9e06517fcc2d1f9b0dad2de6a8c7b995253453190b1d3817144818372185972.py:587: SettingWithCopyWarning:
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Predict phase 1/4] - Data preprocessing</span>
+/tmp/6d874c436e4ea3b4ab6fe8405d39224bccf4ee3cb821b6ec17150168614256983.py:587: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
   data[col] = [None] * len(data)
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Cleaning the data</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Cleaning the data</span>
 /opt/hostedtoolcache/Python/3.9.19/x64/lib/python3.9/site-packages/dataprep_ml/cleaners.py:163: UserWarning: The argument &#39;infer_datetime_format&#39; is deprecated and will be removed in a future version. A strict version of it is now the default, see https://pandas.pydata.org/pdeps/0004-consistent-to-datetime-parsing.html. You can safely remove this argument.
   result = pd.to_datetime(element,
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Transforming timeseries data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `preprocess` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Predict phase 2/4] - Feature generation</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `featurize` runtime: 0.01 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Predict phase 3/4] - Calling ensemble</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `_timed_call` runtime: 0.09 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2741:[Predict phase 4/4] - Analyzing output</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:The block ICP is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:The block ConfStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:The block AccStats is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:The block PermutationFeatureImportance is now running its explain() method</span>
-<span class="ansi-green-fg">INFO:lightwood-2741:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `explain` runtime: 0.09 seconds</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2741: `predict` runtime: 0.23 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Transforming timeseries data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `preprocess` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Predict phase 2/4] - Feature generation</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `featurize` runtime: 0.01 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Predict phase 3/4] - Calling ensemble</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `_timed_call` runtime: 0.09 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2775:[Predict phase 4/4] - Analyzing output</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:The block ICP is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:The block ConfStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:The block AccStats is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:AccStats.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:The block PermutationFeatureImportance is now running its explain() method</span>
+<span class="ansi-green-fg">INFO:lightwood-2775:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `explain` runtime: 0.09 seconds</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2775: `predict` runtime: 0.23 seconds</span>
 </pre></div></div>
 </div>
 <p>Let’s check how a single row might look:</p>
