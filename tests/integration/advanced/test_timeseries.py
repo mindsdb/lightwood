@@ -271,24 +271,25 @@ class TestTimeseries(unittest.TestCase):
         """  # noqa
 
         # synth square wave
-        tsteps = 100
+        tsteps = 250
         target = 'Value'
         horizon = 20
-        t = np.linspace(0, 100, tsteps, endpoint=False)
+        window = 5
+        t = np.linspace(0, 1000, tsteps, endpoint=False)
         ts = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * t, width=0.5))]
         df = pd.DataFrame(columns=['Time', target])
         df['Time'] = t
         df[target] = ts
         df[f'{target}_2x'] = [2 * elt for elt in ts]
 
-        train = df[:int(len(df) * 0.8)]
-        test = df[int(len(df) * 0.8):]
+        train = df[:-horizon]
+        test = df[-horizon:]
 
         pdef = ProblemDefinition.from_dict({'target': target,
                                             'time_aim': 200,
                                             'timeseries_settings': {
                                                 'order_by': 'Time',
-                                                'window': 5,
+                                                'window': window,
                                                 'horizon': horizon,
                                                 'historical_columns': [f'{target}_2x']
                                             }})
@@ -312,7 +313,7 @@ class TestTimeseries(unittest.TestCase):
         # test offsets
         ps1 = predictor.predict(test[1:])  # one step after latest (inferred)
         ps0 = predictor.predict(test)  # normal
-        psm1 = predictor.predict(train.iloc[[-1]])  # one step before latest
+        psm1 = predictor.predict(df[-(horizon + 1):])  # one step before latest
         times_1 = psm1['order_Time'].tolist()[0]
         values_1 = psm1['prediction'].tolist()[0]
         times0 = ps0['order_Time'].tolist()[0]
@@ -351,7 +352,7 @@ class TestTimeseries(unittest.TestCase):
 
     def test_6_time_series_sktime_mixer(self):
         """ Sanity check with vanilla sktime mixer using a synthetic square wave sampled at a 15 seconds interval"""
-        tsteps = 100
+        tsteps = 250
         target = 'Value'
         horizon = 20
         spacing = 15
@@ -361,8 +362,8 @@ class TestTimeseries(unittest.TestCase):
         df['Time'] = [str(start_ts + timedelta(seconds=f)) for f in ts_gen]
         df[target] = [i + f for i, f in enumerate(signal.sawtooth(2 * np.pi * 5 * ts_gen, width=0.5))]
         df[f'{target}_2x'] = [2 * elt for elt in df[target].values]
-        train = df[:int(len(df) * 0.8)]
-        test = df[int(len(df) * 0.8):]
+        train = df[:-horizon]
+        test = df[-horizon:]
         pdef = ProblemDefinition.from_dict({'target': target,
                                             'time_aim': 200,
                                             'timeseries_settings': {
@@ -435,7 +436,7 @@ class TestTimeseries(unittest.TestCase):
         """  # noqa
 
         # synth square wave
-        tsteps = 100
+        tsteps = 250
         target = 'Value'
         horizon = 20
         # added random noise for irregular sampling
@@ -447,8 +448,8 @@ class TestTimeseries(unittest.TestCase):
         df[target] = ts
         df[f'{target}_2x'] = [2 * elt for elt in ts]
 
-        train = df[:int(len(df) * 0.8)]
-        test = df[int(len(df) * 0.8):]
+        train = df[:-horizon]
+        test = df[-horizon:]
 
         pdef = ProblemDefinition.from_dict({'target': target,
                                             'time_aim': 200,
