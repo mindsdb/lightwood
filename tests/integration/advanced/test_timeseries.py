@@ -313,7 +313,7 @@ class TestTimeseries(unittest.TestCase):
         # test offsets
         ps1 = predictor.predict(test[1:])  # one step after latest (inferred)
         ps0 = predictor.predict(test)  # normal
-        psm1 = predictor.predict(df[-(horizon+1):])  # one step before latest
+        psm1 = predictor.predict(df[-(horizon + 1):])  # one step before latest
         times_1 = psm1['order_Time'].tolist()[0]
         values_1 = psm1['prediction'].tolist()[0]
         times0 = ps0['order_Time'].tolist()[0]
