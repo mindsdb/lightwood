@@ -21,10 +21,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-05-15T12:31:30.371645Z",
-     "iopub.status.busy": "2024-05-15T12:31:30.371452Z",
-     "iopub.status.idle": "2024-05-15T12:31:33.203343Z",
-     "shell.execute_reply": "2024-05-15T12:31:33.202682Z"
+     "iopub.execute_input": "2024-05-15T12:38:36.597254Z",
+     "iopub.status.busy": "2024-05-15T12:38:36.597058Z",
+     "iopub.status.idle": "2024-05-15T12:38:39.444383Z",
+     "shell.execute_reply": "2024-05-15T12:38:39.443711Z"
     }
    },
    "outputs": [
@@ -32,14 +32,14 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:No torchvision detected, image helpers not supported.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:No torchvision detected, image helpers not supported.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
      ]
     }
    ],
@@ -53,10 +53,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-05-15T12:31:33.206422Z",
-     "iopub.status.busy": "2024-05-15T12:31:33.206158Z",
-     "iopub.status.idle": "2024-05-15T12:31:33.429712Z",
-     "shell.execute_reply": "2024-05-15T12:31:33.429076Z"
+     "iopub.execute_input": "2024-05-15T12:38:39.447713Z",
+     "iopub.status.busy": "2024-05-15T12:38:39.447197Z",
+     "iopub.status.idle": "2024-05-15T12:38:39.569705Z",
+     "shell.execute_reply": "2024-05-15T12:38:39.568972Z"
     }
    },
    "outputs": [
@@ -98,10 +98,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-05-15T12:31:33.432194Z",
-     "iopub.status.busy": "2024-05-15T12:31:33.431990Z",
-     "iopub.status.idle": "2024-05-15T12:31:34.871737Z",
-     "shell.execute_reply": "2024-05-15T12:31:34.871077Z"
+     "iopub.execute_input": "2024-05-15T12:38:39.572420Z",
+     "iopub.status.busy": "2024-05-15T12:38:39.572012Z",
+     "iopub.status.idle": "2024-05-15T12:38:41.013683Z",
+     "shell.execute_reply": "2024-05-15T12:38:41.013049Z"
     },
     "scrolled": true
    },
@@ -110,364 +110,364 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Analyzing a sample of 979\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Analyzing a sample of 979\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:from a total population of 1030, this is equivalent to 95.0% of your data.\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:from a total population of 1030, this is equivalent to 95.0% of your data.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Using 3 processes to deduct types.\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Using 3 processes to deduct types.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Infering type for: cement\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Infering type for: cement\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Infering type for: slag\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Infering type for: slag\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Column cement has data type float\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Column slag has data type float\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Column slag has data type float\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Column cement has data type float\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Infering type for: water\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Infering type for: water\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Infering type for: flyAsh\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Infering type for: flyAsh\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Column water has data type float\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Column water has data type float\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Column flyAsh has data type float\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Column flyAsh has data type float\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Infering type for: superPlasticizer\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Infering type for: superPlasticizer\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Infering type for: coarseAggregate\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Infering type for: coarseAggregate\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Column coarseAggregate has data type float\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Infering type for: id\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Column superPlasticizer has data type float\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Column coarseAggregate has data type float\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Infering type for: fineAggregate\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Column superPlasticizer has data type float\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Infering type for: age\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Column id has data type integer\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Column age has data type integer\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Infering type for: fineAggregate\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Infering type for: concrete_strength\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Infering type for: age\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Column fineAggregate has data type float\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Infering type for: concrete_strength\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Column concrete_strength has data type float\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Column age has data type integer\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Infering type for: id\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Column fineAggregate has data type float\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2759:Column id has data type integer\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-2649:Column concrete_strength has data type float\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Starting statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Starting statistical analysis\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Finished statistical analysis\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Learn phase 1/8] - Statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Learn phase 1/8] - Statistical analysis\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Starting statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Starting statistical analysis\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Finished statistical analysis\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `analyze_data` runtime: 0.02 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `analyze_data` runtime: 0.02 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Learn phase 2/8] - Data preprocessing\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Learn phase 2/8] - Data preprocessing\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Cleaning the data\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Cleaning the data\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Learn phase 3/8] - Data splitting\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Learn phase 3/8] - Data splitting\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Splitting the data into train/test\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Splitting the data into train/test\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `split` runtime: 0.0 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `split` runtime: 0.0 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Learn phase 4/8] - Preparing encoders\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Learn phase 4/8] - Preparing encoders\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2759:Preparing sequentially...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-2649:Preparing sequentially...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2759:Preparing encoder for id...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-2649:Preparing encoder for id...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2759:Preparing encoder for cement...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-2649:Preparing encoder for cement...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2759:Preparing encoder for slag...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-2649:Preparing encoder for slag...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2759:Preparing encoder for flyAsh...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-2649:Preparing encoder for flyAsh...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2759:Preparing encoder for water...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-2649:Preparing encoder for water...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2759:Preparing encoder for superPlasticizer...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-2649:Preparing encoder for superPlasticizer...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2759:Preparing encoder for coarseAggregate...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-2649:Preparing encoder for coarseAggregate...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2759:Preparing encoder for fineAggregate...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-2649:Preparing encoder for fineAggregate...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2759:Preparing encoder for age...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-2649:Preparing encoder for age...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `prepare` runtime: 0.01 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `prepare` runtime: 0.01 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Learn phase 5/8] - Feature generation\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Learn phase 5/8] - Feature generation\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Featurizing the data\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Featurizing the data\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `featurize` runtime: 0.06 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `featurize` runtime: 0.06 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Learn phase 6/8] - Mixer training\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Learn phase 6/8] - Mixer training\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Training the mixers\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Training the mixers\u001b[0m\n"
      ]
     },
     {
@@ -487,224 +487,224 @@
       "Consider using one of the following signatures instead:\n",
       "\taddcmul_(Tensor tensor1, Tensor tensor2, *, Number value) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1578.)\n",
       "  exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)\n",
-      "\u001b[32mINFO:lightwood-2759:Loss of 39.99637508392334 with learning rate 0.0001\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss of 39.99637508392334 with learning rate 0.0001\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss of 21.826460361480713 with learning rate 0.0005\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss of 21.826460361480713 with learning rate 0.0005\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss of 15.12899512052536 with learning rate 0.001\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss of 15.12899512052536 with learning rate 0.001\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss of 15.062753021717072 with learning rate 0.002\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss of 15.062753021717072 with learning rate 0.002\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss of 26.490495562553406 with learning rate 0.003\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss of 26.490495562553406 with learning rate 0.003\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss of 33.6572003364563 with learning rate 0.005\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss of 33.6572003364563 with learning rate 0.005\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss of 303.60721158981323 with learning rate 0.01\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss of 303.60721158981323 with learning rate 0.01\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss of nan with learning rate 0.05\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss of nan with learning rate 0.05\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Found learning rate of: 0.002\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Found learning rate of: 0.002\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss @ epoch 1: 0.11838734149932861\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss @ epoch 1: 0.11838734149932861\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss @ epoch 2: 0.4641949534416199\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss @ epoch 2: 0.4641949534416199\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss @ epoch 3: 0.3976145386695862\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss @ epoch 3: 0.3976145386695862\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss @ epoch 4: 0.3706841468811035\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss @ epoch 4: 0.3706841468811035\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss @ epoch 5: 0.2367912232875824\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss @ epoch 5: 0.2367912232875824\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss @ epoch 6: 0.22560915350914001\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss @ epoch 6: 0.22560915350914001\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss @ epoch 7: 0.12089195847511292\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss @ epoch 7: 0.12089195847511292\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `fit_mixer` runtime: 0.52 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `fit_mixer` runtime: 0.53 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Ensembling the mixer\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Ensembling the mixer\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Mixer: Neural got accuracy: 0.238\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Mixer: Neural got accuracy: 0.238\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Picked best mixer: Neural\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Picked best mixer: Neural\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `fit` runtime: 0.53 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `fit` runtime: 0.54 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Learn phase 7/8] - Ensemble analysis\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Learn phase 7/8] - Ensemble analysis\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Analyzing the ensemble of mixers\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Analyzing the ensemble of mixers\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block ICP is now running its analyze() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block ICP is now running its analyze() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block ConfStats is now running its analyze() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block ConfStats is now running its analyze() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block AccStats is now running its analyze() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block AccStats is now running its analyze() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block PermutationFeatureImportance is now running its analyze() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block PermutationFeatureImportance is now running its analyze() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:[PFI] Using a random sample (1000 rows out of 10).\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:[PFI] Using a random sample (1000 rows out of 10).\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:[PFI] Set to consider first 10 columns out of 9: ['id', 'cement', 'slag', 'flyAsh', 'water', 'superPlasticizer', 'coarseAggregate', 'fineAggregate', 'age'].\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:[PFI] Set to consider first 10 columns out of 9: ['id', 'cement', 'slag', 'flyAsh', 'water', 'superPlasticizer', 'coarseAggregate', 'fineAggregate', 'age'].\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `analyze_ensemble` runtime: 0.15 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `analyze_ensemble` runtime: 0.15 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Learn phase 8/8] - Adjustment on validation requested\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Learn phase 8/8] - Adjustment on validation requested\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Updating the mixers\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Updating the mixers\u001b[0m\n"
      ]
     },
     {
@@ -719,21 +719,21 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss @ epoch 1: 0.1678172747294108\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss @ epoch 1: 0.1678172747294108\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `adjust` runtime: 0.03 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `adjust` runtime: 0.03 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `learn` runtime: 0.82 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `learn` runtime: 0.83 seconds\u001b[0m\n"
      ]
     }
    ],
@@ -770,10 +770,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-05-15T12:31:34.874734Z",
-     "iopub.status.busy": "2024-05-15T12:31:34.874316Z",
-     "iopub.status.idle": "2024-05-15T12:31:35.015369Z",
-     "shell.execute_reply": "2024-05-15T12:31:35.014803Z"
+     "iopub.execute_input": "2024-05-15T12:38:41.016512Z",
+     "iopub.status.busy": "2024-05-15T12:38:41.016092Z",
+     "iopub.status.idle": "2024-05-15T12:38:41.160419Z",
+     "shell.execute_reply": "2024-05-15T12:38:41.159845Z"
     }
    },
    "outputs": [
@@ -781,126 +781,126 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Predict phase 1/4] - Data preprocessing\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Predict phase 1/4] - Data preprocessing\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Cleaning the data\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Cleaning the data\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Predict phase 2/4] - Feature generation\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Predict phase 2/4] - Feature generation\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Featurizing the data\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Featurizing the data\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `featurize` runtime: 0.03 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `featurize` runtime: 0.03 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Predict phase 3/4] - Calling ensemble\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Predict phase 3/4] - Calling ensemble\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `_timed_call` runtime: 0.03 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `_timed_call` runtime: 0.03 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Predict phase 4/4] - Analyzing output\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Predict phase 4/4] - Analyzing output\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block ICP is now running its explain() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block ICP is now running its explain() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block ConfStats is now running its explain() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block ConfStats is now running its explain() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block AccStats is now running its explain() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block AccStats is now running its explain() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `explain` runtime: 0.05 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `explain` runtime: 0.05 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `predict` runtime: 0.13 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `predict` runtime: 0.13 seconds\u001b[0m\n"
      ]
     },
     {
@@ -1094,10 +1094,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-05-15T12:31:35.017903Z",
-     "iopub.status.busy": "2024-05-15T12:31:35.017554Z",
-     "iopub.status.idle": "2024-05-15T12:31:35.127911Z",
-     "shell.execute_reply": "2024-05-15T12:31:35.127311Z"
+     "iopub.execute_input": "2024-05-15T12:38:41.162902Z",
+     "iopub.status.busy": "2024-05-15T12:38:41.162689Z",
+     "iopub.status.idle": "2024-05-15T12:38:41.276226Z",
+     "shell.execute_reply": "2024-05-15T12:38:41.275636Z"
     }
    },
    "outputs": [
@@ -1105,35 +1105,35 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Cleaning the data\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Cleaning the data\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `preprocess` runtime: 0.02 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `preprocess` runtime: 0.02 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Cleaning the data\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Cleaning the data\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Updating the mixers\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Updating the mixers\u001b[0m\n"
      ]
     },
     {
@@ -1148,14 +1148,14 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:Loss @ epoch 1: 0.10915952424208324\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:Loss @ epoch 1: 0.10915952424208324\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `adjust` runtime: 0.11 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `adjust` runtime: 0.11 seconds\u001b[0m\n"
      ]
     }
    ],
@@ -1168,10 +1168,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-05-15T12:31:35.130571Z",
-     "iopub.status.busy": "2024-05-15T12:31:35.130366Z",
-     "iopub.status.idle": "2024-05-15T12:31:35.268592Z",
-     "shell.execute_reply": "2024-05-15T12:31:35.267965Z"
+     "iopub.execute_input": "2024-05-15T12:38:41.279047Z",
+     "iopub.status.busy": "2024-05-15T12:38:41.278590Z",
+     "iopub.status.idle": "2024-05-15T12:38:41.418298Z",
+     "shell.execute_reply": "2024-05-15T12:38:41.417642Z"
     }
    },
    "outputs": [
@@ -1179,126 +1179,126 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Predict phase 1/4] - Data preprocessing\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Predict phase 1/4] - Data preprocessing\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Cleaning the data\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Cleaning the data\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `preprocess` runtime: 0.01 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Predict phase 2/4] - Feature generation\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Predict phase 2/4] - Feature generation\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:Featurizing the data\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:Featurizing the data\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `featurize` runtime: 0.03 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `featurize` runtime: 0.03 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Predict phase 3/4] - Calling ensemble\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Predict phase 3/4] - Calling ensemble\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `_timed_call` runtime: 0.03 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `_timed_call` runtime: 0.03 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2759:[Predict phase 4/4] - Analyzing output\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-2649:[Predict phase 4/4] - Analyzing output\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block ICP is now running its explain() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block ICP is now running its explain() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block ConfStats is now running its explain() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block ConfStats is now running its explain() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:ConfStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block AccStats is now running its explain() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block AccStats is now running its explain() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:AccStats.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:The block PermutationFeatureImportance is now running its explain() method\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2759:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-2649:PermutationFeatureImportance.explain() has not been implemented, no modifications will be done to the data insights.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `explain` runtime: 0.05 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `explain` runtime: 0.05 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2759: `predict` runtime: 0.13 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-2649: `predict` runtime: 0.13 seconds\u001b[0m\n"
      ]
     },
     {
@@ -1462,10 +1462,10 @@
    "execution_count": 7,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-05-15T12:31:35.271408Z",
-     "iopub.status.busy": "2024-05-15T12:31:35.270879Z",
-     "iopub.status.idle": "2024-05-15T12:31:35.276560Z",
-     "shell.execute_reply": "2024-05-15T12:31:35.275925Z"
+     "iopub.execute_input": "2024-05-15T12:38:41.421175Z",
+     "iopub.status.busy": "2024-05-15T12:38:41.420697Z",
+     "iopub.status.idle": "2024-05-15T12:38:41.426502Z",
+     "shell.execute_reply": "2024-05-15T12:38:41.425844Z"
     }
    },
    "outputs": [
