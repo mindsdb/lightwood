@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "lightwood"
-version = "24.5.2.0"
+version = "24.5.2.1"
 description = "Lightwood is Legos for Machine Learning."
 authors = ["MindsDB Inc."]
 license = "GPL-3.0-only"
