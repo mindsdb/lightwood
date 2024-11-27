@@ -14,35 +14,35 @@ jobs:
       contents: write
 
     steps:
-    - name: checkout and set up
-      uses: actions/checkout@v2
+      - name: checkout and set up
+        uses: actions/checkout@v2
 
-    - name: setup python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
 
-    - name: install all dependencies
-      run: |
-        sudo apt install pandoc
-        python -m pip install --upgrade pip
-        pip install install 'Sphinx==6.2.1' 'sphinx-autoapi==3.0.0' 'sphinx-autodoc-typehints' 'sphinx-code-include' 'sphinx-rtd-theme' 'sphinxcontrib-applehelp' 'sphinxcontrib-devhelp' 'sphinxcontrib-htmlhelp' 'sphinxcontrib-jsmath' 'sphinxcontrib-napoleon' 'sphinxcontrib-qthelp' 'sphinxcontrib-serializinghtml' autoapi nbsphinx myst_parser pandoc jupyter matplotlib imblearn fsspec
-        pip install --no-cache-dir -e .
-    - name: Re-run notebooks
-      run: |
-        find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;  > out.txt 2>&1
-        cat out.txt
-        cat out.txt | grep -zvqi exception && echo 'no errors detected' || exit
-        cat out.txt | grep -zvqi error && echo 'no errors detected' || exit
-    - name: Make the docs
-      run: |
-        cd docssrc && make github
+      - name: install all dependencies
+        run: |
+          sudo apt install pandoc
+          python -m pip install --upgrade pip
+          pip install 'Sphinx==6.2.1' 'sphinx-autoapi==3.0.0' 'sphinx-autodoc-typehints' 'sphinx-code-include' 'sphinx-rtd-theme' 'sphinxcontrib-applehelp' 'sphinxcontrib-devhelp' 'sphinxcontrib-htmlhelp' 'sphinxcontrib-jsmath' 'sphinxcontrib-napoleon' 'sphinxcontrib-qthelp' 'sphinxcontrib-serializinghtml' autoapi nbsphinx myst_parser pandoc jupyter matplotlib imblearn fsspec
+          pip install --no-cache-dir -e .
+      - name: Re-run notebooks
+        run: |
+          find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;  > out.txt 2>&1
+          cat out.txt
+          cat out.txt | grep -zvqi exception && echo 'no errors detected' || exit
+          cat out.txt | grep -zvqi error && echo 'no errors detected' || exit
+      - name: Make the docs
+        run: |
+          cd docssrc && make github
 
-    - name: Deploy to another branch
-      uses: s0/git-publish-subdir-action@develop
-      env:
-        REPO: self
-        BRANCH: gh-pages # The branch name where you want to push the assets
-        FOLDER: docs # The directory where your assets are generated
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub will automatically add this - you don't need to bother getting a token
-        MESSAGE: "Rebuilt the docs" # The commit message
+      - name: Deploy to another branch
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
+          BRANCH: gh-pages # The branch name where you want to push the assets
+          FOLDER: docs # The directory where your assets are generated
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub will automatically add this - you don't need to bother getting a token
+          MESSAGE: "Rebuilt the docs" # The commit message
