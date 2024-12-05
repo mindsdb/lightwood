@@ -121,8 +121,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2443:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2443:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2526:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2526:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 </section>
@@ -270,29 +270,57 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2443:Analyzing a sample of 6920</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Using 3 processes to deduct types.</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Infering type for: year</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Infering type for: price</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Column price has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Column year has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Infering type for: transmission</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Infering type for: mileage</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Column mileage has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Infering type for: fuelType</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Infering type for: model</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Column transmission has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Infering type for: tax</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Column tax has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Infering type for: mpg</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Column mpg has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Infering type for: engineSize</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Column engineSize has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Column model has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2443:Column fuelType has data type categorical</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2443:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2443:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Analyzing a sample of 6920</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Using 3 processes to deduct types.</span>
+/opt/hostedtoolcache/Python/3.9.20/x64/lib/python3.9/multiprocessing/popen_fork.py:66: RuntimeWarning: Using fork() can cause Polars to deadlock in the child process.
+In addition, using fork() with Python in general is a recipe for mysterious
+deadlocks and crashes.
+
+The most likely reason you are seeing this error is because you are using the
+multiprocessing module on Linux, which uses fork() by default. This will be
+fixed in Python 3.14. Until then, you want to use the &#34;spawn&#34; context instead.
+
+See https://docs.pola.rs/user-guide/misc/multiprocessing/ for details.
+
+If you really know what your doing, you can silence this warning with the warning module
+or by setting POLARS_ALLOW_FORKING_THREAD=1.
+
+  self.pid = os.fork()
+<span class="ansi-green-fg">INFO:type_infer-2526:Infering type for: year</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Infering type for: price</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Column year has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Column price has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Infering type for: transmission</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Infering type for: mileage</span>
+/opt/hostedtoolcache/Python/3.9.20/x64/lib/python3.9/multiprocessing/popen_fork.py:66: RuntimeWarning: Using fork() can cause Polars to deadlock in the child process.
+In addition, using fork() with Python in general is a recipe for mysterious
+deadlocks and crashes.
+
+The most likely reason you are seeing this error is because you are using the
+multiprocessing module on Linux, which uses fork() by default. This will be
+fixed in Python 3.14. Until then, you want to use the &#34;spawn&#34; context instead.
+
+See https://docs.pola.rs/user-guide/misc/multiprocessing/ for details.
+
+If you really know what your doing, you can silence this warning with the warning module
+or by setting POLARS_ALLOW_FORKING_THREAD=1.
+
+  self.pid = os.fork()
+<span class="ansi-green-fg">INFO:type_infer-2526:Infering type for: model</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Column mileage has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Infering type for: fuelType</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Column model has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Infering type for: tax</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Column tax has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Infering type for: mpg</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Column mpg has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Infering type for: engineSize</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Column engineSize has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Column fuelType has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2526:Column transmission has data type categorical</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2526:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2526:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Let’s take a look at our JSON-AI and print to file.</p>
@@ -406,7 +434,7 @@
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 11.247170448303223,
+        &#34;expected_additional_time&#34;: 11.030799388885498,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -678,25 +706,25 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2443:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2443:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2443: `analyze_data` runtime: 0.43 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2443:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2443: `preprocess` runtime: 0.13 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2443:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2443: `split` runtime: 0.0 seconds</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2443:Preparing sequentially...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2443:Preparing encoder for year...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2443:Preparing encoder for mileage...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2443:Preparing encoder for tax...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2443:Preparing encoder for mpg...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2443:Preparing encoder for engineSize...</span>
-<span class="ansi-green-fg">INFO:lightwood-2443:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2443:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2443:Categories Detected = 1</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2443: `prepare` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2443:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2443: `featurize` runtime: 0.55 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2526:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2526:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2526: `analyze_data` runtime: 0.43 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2526:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2526: `preprocess` runtime: 0.13 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2526:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2526: `split` runtime: 0.0 seconds</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2526:Preparing sequentially...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2526:Preparing encoder for year...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2526:Preparing encoder for mileage...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2526:Preparing encoder for tax...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2526:Preparing encoder for mpg...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2526:Preparing encoder for engineSize...</span>
+<span class="ansi-green-fg">INFO:lightwood-2526:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2526:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2526:Categories Detected = 1</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2526: `prepare` runtime: 0.2 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2526:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2526: `featurize` runtime: 0.56 seconds</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>
