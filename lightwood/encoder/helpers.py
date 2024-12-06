@@ -45,7 +45,7 @@ class CatNormalizer:
     def __init__(self, encoder_class='one_hot'):
         self.encoder_class = encoder_class
         if encoder_class == 'one_hot':
-            self.scaler = OneHotEncoder(sparse=False, handle_unknown='ignore')
+            self.scaler = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
         else:
             self.scaler = OrdinalEncoder()
 

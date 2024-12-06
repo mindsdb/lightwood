@@ -136,8 +136,6 @@ files = [
 ]
 
 [package.dependencies]
-importlib-metadata = {version = "*", markers = "python_version < \"3.9\""}
-importlib-resources = {version = "*", markers = "python_version < \"3.9\""}
 Mako = "*"
 SQLAlchemy = ">=1.3.0"
 typing-extensions = ">=4"
@@ -775,6 +773,25 @@ files = [
     {file = "Cython-3.0.10-py2.py3-none-any.whl", hash = "sha256:fcbb679c0b43514d591577fd0d20021c55c240ca9ccafbdb82d3fb95e5edfee2"},
     {file = "Cython-3.0.10.tar.gz", hash = "sha256:dcc96739331fb854dcf503f94607576cfe8488066c61ca50dfd55836f132de99"},
 ]
+
+[[package]]
+name = "dask"
+version = "2024.8.0"
+description = "Parallel PyData with Task Scheduling"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "dask-2024.8.0-py3-none-any.whl", hash = "sha256:250ea3df30d4a25958290eec4f252850091c6cfaed82d098179c3b25bba18309"},
+    {file = "dask-2024.8.0.tar.gz", hash = "sha256:f1fec39373d2f101bc045529ad4e9b30e34e6eb33b7aa0fa7073aec7b1bf9eee"},
+]
+
+[package.extras]
+array = ["numpy (>=1.21)"]
+complete = ["dask[array,dataframe,diagnostics,distributed]", "lz4 (>=4.3.2)", "pyarrow (>=7.0)", "pyarrow-hotfix"]
+dataframe = ["dask-expr (>=1.1,<1.2)", "dask[array]", "pandas (>=2.0)"]
+diagnostics = ["bokeh (>=2.4.2)", "jinja2 (>=2.10.3)"]
+distributed = ["distributed (==2024.8.0)"]
+test = ["pandas[test]", "pre-commit", "pytest", "pytest-cov", "pytest-rerunfailures", "pytest-timeout", "pytest-xdist"]
 
 [[package]]
 name = "dataclasses-json"
@@ -1438,10 +1455,7 @@ files = [
 ]
 
 [package.dependencies]
-numpy = [
-    {version = ">=1.17.5", markers = "python_version == \"3.8\""},
-    {version = ">=1.19.3", markers = "python_version >= \"3.9\""},
-]
+numpy = {version = ">=1.19.3", markers = "python_version >= \"3.9\""}
 
 [[package]]
 name = "holidays"
@@ -1524,25 +1538,6 @@ files = [
 ]
 
 [[package]]
-name = "importlib-metadata"
-version = "7.1.0"
-description = "Read metadata from Python packages"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "importlib_metadata-7.1.0-py3-none-any.whl", hash = "sha256:30962b96c0c223483ed6cc7280e7f0199feb01a0e40cfae4d4450fc6fab1f570"},
-    {file = "importlib_metadata-7.1.0.tar.gz", hash = "sha256:b78938b926ee8d5f020fc4772d487045805a55ddbad2ecf21c6d60938dc7fcd2"},
-]
-
-[package.dependencies]
-zipp = ">=0.5"
-
-[package.extras]
-docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
-perf = ["ipython"]
-testing = ["flufl.flake8", "importlib-resources (>=1.3)", "jaraco.test (>=5.4)", "packaging", "pyfakefs", "pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy", "pytest-perf (>=0.9.2)", "pytest-ruff (>=0.2.1)"]
-
-[[package]]
 name = "importlib-resources"
 version = "6.4.0"
 description = "Read resources from Python packages"
@@ -1612,9 +1607,7 @@ files = [
 
 [package.dependencies]
 attrs = ">=22.2.0"
-importlib-resources = {version = ">=1.4.0", markers = "python_version < \"3.9\""}
 jsonschema-specifications = ">=2023.03.6"
-pkgutil-resolve-name = {version = ">=1.3.10", markers = "python_version < \"3.9\""}
 referencing = ">=0.28.4"
 rpds-py = ">=0.7.1"
 
@@ -1634,7 +1627,6 @@ files = [
 ]
 
 [package.dependencies]
-importlib-resources = {version = ">=1.4.0", markers = "python_version < \"3.9\""}
 referencing = ">=0.31.0"
 
 [[package]]
@@ -2564,7 +2556,6 @@ files = [
 ]
 
 [package.dependencies]
-importlib-metadata = {version = "*", markers = "python_version < \"3.9\""}
 llvmlite = "==0.41.*"
 numpy = ">=1.22,<1.27"
 
@@ -2978,17 +2969,6 @@ mic = ["olefile"]
 tests = ["check-manifest", "coverage", "defusedxml", "markdown2", "olefile", "packaging", "pyroma", "pytest", "pytest-cov", "pytest-timeout"]
 typing = ["typing-extensions"]
 xmp = ["defusedxml"]
-
-[[package]]
-name = "pkgutil-resolve-name"
-version = "1.3.10"
-description = "Resolve a name to an object."
-optional = true
-python-versions = ">=3.6"
-files = [
-    {file = "pkgutil_resolve_name-1.3.10-py3-none-any.whl", hash = "sha256:ca27cc078d25c5ad71a9de0a7a330146c4e014c2462d9af19c6b828280649c5e"},
-    {file = "pkgutil_resolve_name-1.3.10.tar.gz", hash = "sha256:357d6c9e6a755653cfd78893817c0853af365dd51ec97f3d358a819373bbd174"},
-]
 
 [[package]]
 name = "platformdirs"
@@ -3990,7 +3970,6 @@ files = [
 ]
 
 [package.dependencies]
-importlib-resources = {version = "*", markers = "python_version < \"3.9\""}
 numba = ">=0.53"
 numpy = ">=1.17"
 
@@ -4347,50 +4326,53 @@ test = ["coverage", "numpy", "pandas", "pytest", "pytest-cov", "safety", "scikit
 
 [[package]]
 name = "scikit-learn"
-version = "1.3.2"
+version = "1.5.2"
 description = "A set of python modules for machine learning and data mining"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "scikit-learn-1.3.2.tar.gz", hash = "sha256:a2f54c76accc15a34bfb9066e6c7a56c1e7235dda5762b990792330b52ccfb05"},
-    {file = "scikit_learn-1.3.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:e326c0eb5cf4d6ba40f93776a20e9a7a69524c4db0757e7ce24ba222471ee8a1"},
-    {file = "scikit_learn-1.3.2-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:535805c2a01ccb40ca4ab7d081d771aea67e535153e35a1fd99418fcedd1648a"},
-    {file = "scikit_learn-1.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1215e5e58e9880b554b01187b8c9390bf4dc4692eedeaf542d3273f4785e342c"},
-    {file = "scikit_learn-1.3.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0ee107923a623b9f517754ea2f69ea3b62fc898a3641766cb7deb2f2ce450161"},
-    {file = "scikit_learn-1.3.2-cp310-cp310-win_amd64.whl", hash = "sha256:35a22e8015048c628ad099da9df5ab3004cdbf81edc75b396fd0cff8699ac58c"},
-    {file = "scikit_learn-1.3.2-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:6fb6bc98f234fda43163ddbe36df8bcde1d13ee176c6dc9b92bb7d3fc842eb66"},
-    {file = "scikit_learn-1.3.2-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:18424efee518a1cde7b0b53a422cde2f6625197de6af36da0b57ec502f126157"},
-    {file = "scikit_learn-1.3.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3271552a5eb16f208a6f7f617b8cc6d1f137b52c8a1ef8edf547db0259b2c9fb"},
-    {file = "scikit_learn-1.3.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fc4144a5004a676d5022b798d9e573b05139e77f271253a4703eed295bde0433"},
-    {file = "scikit_learn-1.3.2-cp311-cp311-win_amd64.whl", hash = "sha256:67f37d708f042a9b8d59551cf94d30431e01374e00dc2645fa186059c6c5d78b"},
-    {file = "scikit_learn-1.3.2-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:8db94cd8a2e038b37a80a04df8783e09caac77cbe052146432e67800e430c028"},
-    {file = "scikit_learn-1.3.2-cp312-cp312-macosx_12_0_arm64.whl", hash = "sha256:61a6efd384258789aa89415a410dcdb39a50e19d3d8410bd29be365bcdd512d5"},
-    {file = "scikit_learn-1.3.2-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:cb06f8dce3f5ddc5dee1715a9b9f19f20d295bed8e3cd4fa51e1d050347de525"},
-    {file = "scikit_learn-1.3.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5b2de18d86f630d68fe1f87af690d451388bb186480afc719e5f770590c2ef6c"},
-    {file = "scikit_learn-1.3.2-cp312-cp312-win_amd64.whl", hash = "sha256:0402638c9a7c219ee52c94cbebc8fcb5eb9fe9c773717965c1f4185588ad3107"},
-    {file = "scikit_learn-1.3.2-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:a19f90f95ba93c1a7f7924906d0576a84da7f3b2282ac3bfb7a08a32801add93"},
-    {file = "scikit_learn-1.3.2-cp38-cp38-macosx_12_0_arm64.whl", hash = "sha256:b8692e395a03a60cd927125eef3a8e3424d86dde9b2370d544f0ea35f78a8073"},
-    {file = "scikit_learn-1.3.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:15e1e94cc23d04d39da797ee34236ce2375ddea158b10bee3c343647d615581d"},
-    {file = "scikit_learn-1.3.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:785a2213086b7b1abf037aeadbbd6d67159feb3e30263434139c98425e3dcfcf"},
-    {file = "scikit_learn-1.3.2-cp38-cp38-win_amd64.whl", hash = "sha256:64381066f8aa63c2710e6b56edc9f0894cc7bf59bd71b8ce5613a4559b6145e0"},
-    {file = "scikit_learn-1.3.2-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:6c43290337f7a4b969d207e620658372ba3c1ffb611f8bc2b6f031dc5c6d1d03"},
-    {file = "scikit_learn-1.3.2-cp39-cp39-macosx_12_0_arm64.whl", hash = "sha256:dc9002fc200bed597d5d34e90c752b74df516d592db162f756cc52836b38fe0e"},
-    {file = "scikit_learn-1.3.2-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1d08ada33e955c54355d909b9c06a4789a729977f165b8bae6f225ff0a60ec4a"},
-    {file = "scikit_learn-1.3.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:763f0ae4b79b0ff9cca0bf3716bcc9915bdacff3cebea15ec79652d1cc4fa5c9"},
-    {file = "scikit_learn-1.3.2-cp39-cp39-win_amd64.whl", hash = "sha256:ed932ea780517b00dae7431e031faae6b49b20eb6950918eb83bd043237950e0"},
+    {file = "scikit_learn-1.5.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:299406827fb9a4f862626d0fe6c122f5f87f8910b86fe5daa4c32dcd742139b6"},
+    {file = "scikit_learn-1.5.2-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:2d4cad1119c77930b235579ad0dc25e65c917e756fe80cab96aa3b9428bd3fb0"},
+    {file = "scikit_learn-1.5.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8c412ccc2ad9bf3755915e3908e677b367ebc8d010acbb3f182814524f2e5540"},
+    {file = "scikit_learn-1.5.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3a686885a4b3818d9e62904d91b57fa757fc2bed3e465c8b177be652f4dd37c8"},
+    {file = "scikit_learn-1.5.2-cp310-cp310-win_amd64.whl", hash = "sha256:c15b1ca23d7c5f33cc2cb0a0d6aaacf893792271cddff0edbd6a40e8319bc113"},
+    {file = "scikit_learn-1.5.2-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:03b6158efa3faaf1feea3faa884c840ebd61b6484167c711548fce208ea09445"},
+    {file = "scikit_learn-1.5.2-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:1ff45e26928d3b4eb767a8f14a9a6efbf1cbff7c05d1fb0f95f211a89fd4f5de"},
+    {file = "scikit_learn-1.5.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f763897fe92d0e903aa4847b0aec0e68cadfff77e8a0687cabd946c89d17e675"},
+    {file = "scikit_learn-1.5.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f8b0ccd4a902836493e026c03256e8b206656f91fbcc4fde28c57a5b752561f1"},
+    {file = "scikit_learn-1.5.2-cp311-cp311-win_amd64.whl", hash = "sha256:6c16d84a0d45e4894832b3c4d0bf73050939e21b99b01b6fd59cbb0cf39163b6"},
+    {file = "scikit_learn-1.5.2-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:f932a02c3f4956dfb981391ab24bda1dbd90fe3d628e4b42caef3e041c67707a"},
+    {file = "scikit_learn-1.5.2-cp312-cp312-macosx_12_0_arm64.whl", hash = "sha256:3b923d119d65b7bd555c73be5423bf06c0105678ce7e1f558cb4b40b0a5502b1"},
+    {file = "scikit_learn-1.5.2-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f60021ec1574e56632be2a36b946f8143bf4e5e6af4a06d85281adc22938e0dd"},
+    {file = "scikit_learn-1.5.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:394397841449853c2290a32050382edaec3da89e35b3e03d6cc966aebc6a8ae6"},
+    {file = "scikit_learn-1.5.2-cp312-cp312-win_amd64.whl", hash = "sha256:57cc1786cfd6bd118220a92ede80270132aa353647684efa385a74244a41e3b1"},
+    {file = "scikit_learn-1.5.2-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:e9a702e2de732bbb20d3bad29ebd77fc05a6b427dc49964300340e4c9328b3f5"},
+    {file = "scikit_learn-1.5.2-cp313-cp313-macosx_12_0_arm64.whl", hash = "sha256:b0768ad641981f5d3a198430a1d31c3e044ed2e8a6f22166b4d546a5116d7908"},
+    {file = "scikit_learn-1.5.2-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:178ddd0a5cb0044464fc1bfc4cca5b1833bfc7bb022d70b05db8530da4bb3dd3"},
+    {file = "scikit_learn-1.5.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f7284ade780084d94505632241bf78c44ab3b6f1e8ccab3d2af58e0e950f9c12"},
+    {file = "scikit_learn-1.5.2-cp313-cp313-win_amd64.whl", hash = "sha256:b7b0f9a0b1040830d38c39b91b3a44e1b643f4b36e36567b80b7c6bd2202a27f"},
+    {file = "scikit_learn-1.5.2-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:757c7d514ddb00ae249832fe87100d9c73c6ea91423802872d9e74970a0e40b9"},
+    {file = "scikit_learn-1.5.2-cp39-cp39-macosx_12_0_arm64.whl", hash = "sha256:52788f48b5d8bca5c0736c175fa6bdaab2ef00a8f536cda698db61bd89c551c1"},
+    {file = "scikit_learn-1.5.2-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:643964678f4b5fbdc95cbf8aec638acc7aa70f5f79ee2cdad1eec3df4ba6ead8"},
+    {file = "scikit_learn-1.5.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ca64b3089a6d9b9363cd3546f8978229dcbb737aceb2c12144ee3f70f95684b7"},
+    {file = "scikit_learn-1.5.2-cp39-cp39-win_amd64.whl", hash = "sha256:3bed4909ba187aca80580fe2ef370d9180dcf18e621a27c4cf2ef10d279a7efe"},
+    {file = "scikit_learn-1.5.2.tar.gz", hash = "sha256:b4237ed7b3fdd0a4882792e68ef2545d5baa50aca3bb45aa7df468138ad8f94d"},
 ]
 
 [package.dependencies]
-joblib = ">=1.1.1"
-numpy = ">=1.17.3,<2.0"
-scipy = ">=1.5.0"
-threadpoolctl = ">=2.0.0"
+joblib = ">=1.2.0"
+numpy = ">=1.19.5"
+scipy = ">=1.6.0"
+threadpoolctl = ">=3.1.0"
 
 [package.extras]
-benchmark = ["matplotlib (>=3.1.3)", "memory-profiler (>=0.57.0)", "pandas (>=1.0.5)"]
-docs = ["Pillow (>=7.1.2)", "matplotlib (>=3.1.3)", "memory-profiler (>=0.57.0)", "numpydoc (>=1.2.0)", "pandas (>=1.0.5)", "plotly (>=5.14.0)", "pooch (>=1.6.0)", "scikit-image (>=0.16.2)", "seaborn (>=0.9.0)", "sphinx (>=6.0.0)", "sphinx-copybutton (>=0.5.2)", "sphinx-gallery (>=0.10.1)", "sphinx-prompt (>=1.3.0)", "sphinxext-opengraph (>=0.4.2)"]
-examples = ["matplotlib (>=3.1.3)", "pandas (>=1.0.5)", "plotly (>=5.14.0)", "pooch (>=1.6.0)", "scikit-image (>=0.16.2)", "seaborn (>=0.9.0)"]
-tests = ["black (>=23.3.0)", "matplotlib (>=3.1.3)", "mypy (>=1.3)", "numpydoc (>=1.2.0)", "pandas (>=1.0.5)", "pooch (>=1.6.0)", "pyamg (>=4.0.0)", "pytest (>=7.1.2)", "pytest-cov (>=2.9.0)", "ruff (>=0.0.272)", "scikit-image (>=0.16.2)"]
+benchmark = ["matplotlib (>=3.3.4)", "memory_profiler (>=0.57.0)", "pandas (>=1.1.5)"]
+build = ["cython (>=3.0.10)", "meson-python (>=0.16.0)", "numpy (>=1.19.5)", "scipy (>=1.6.0)"]
+docs = ["Pillow (>=7.1.2)", "matplotlib (>=3.3.4)", "memory_profiler (>=0.57.0)", "numpydoc (>=1.2.0)", "pandas (>=1.1.5)", "plotly (>=5.14.0)", "polars (>=0.20.30)", "pooch (>=1.6.0)", "pydata-sphinx-theme (>=0.15.3)", "scikit-image (>=0.17.2)", "seaborn (>=0.9.0)", "sphinx (>=7.3.7)", "sphinx-copybutton (>=0.5.2)", "sphinx-design (>=0.5.0)", "sphinx-design (>=0.6.0)", "sphinx-gallery (>=0.16.0)", "sphinx-prompt (>=1.4.0)", "sphinx-remove-toctrees (>=1.0.0.post1)", "sphinxcontrib-sass (>=0.3.4)", "sphinxext-opengraph (>=0.9.1)"]
+examples = ["matplotlib (>=3.3.4)", "pandas (>=1.1.5)", "plotly (>=5.14.0)", "pooch (>=1.6.0)", "scikit-image (>=0.17.2)", "seaborn (>=0.9.0)"]
+install = ["joblib (>=1.2.0)", "numpy (>=1.19.5)", "scipy (>=1.6.0)", "threadpoolctl (>=3.1.0)"]
+maintenance = ["conda-lock (==2.5.6)"]
+tests = ["black (>=24.3.0)", "matplotlib (>=3.3.4)", "mypy (>=1.9)", "numpydoc (>=1.2.0)", "pandas (>=1.1.5)", "polars (>=0.20.30)", "pooch (>=1.6.0)", "pyamg (>=4.0.0)", "pyarrow (>=12.0.0)", "pytest (>=7.1.2)", "pytest-cov (>=2.9.0)", "ruff (>=0.2.1)", "scikit-image (>=0.17.2)"]
 
 [[package]]
 name = "scipy"
@@ -4522,44 +4504,49 @@ files = [
 
 [[package]]
 name = "sktime"
-version = "0.25.1"
+version = "0.33.0"
 description = "A unified framework for machine learning with time series"
 optional = false
-python-versions = "<3.13,>=3.8"
+python-versions = "<3.13,>=3.9"
 files = [
-    {file = "sktime-0.25.1-py3-none-any.whl", hash = "sha256:dcd7a877cb4e438580851892d25122a0753030c5cd3619ffe6121538ff836e1b"},
-    {file = "sktime-0.25.1.tar.gz", hash = "sha256:d55f1f5e5015c6b9a452e6cfe94a00087a371794aad1a169efeeb7e1b22e1e67"},
+    {file = "sktime-0.33.0-py3-none-any.whl", hash = "sha256:82fc104604056f6e80dca79c80bbf9b1adb643f6a08c807a31736a773dfee830"},
+    {file = "sktime-0.33.0.tar.gz", hash = "sha256:d330a82d55a6e14c517cecab144c845193f8fd84b2d787510752a7a5ca9ed2e9"},
 ]
 
 [package.dependencies]
-numpy = ">=1.21,<1.27"
+dask = {version = "<2024.8.3", markers = "<empty>"}
+joblib = ">=1.2.0,<1.5"
+numpy = ">=1.21,<2.1"
 packaging = "*"
-pandas = ">=1.1,<2.2.0"
-scikit-base = "<0.8.0"
-scikit-learn = ">=0.24,<1.4.0"
+pandas = ">=1.1,<2.3.0"
+scikit-base = ">=0.6.1,<0.10.0"
+scikit-learn = ">=0.24,<1.6.0"
 scipy = ">=1.2,<2.0.0"
 
 [package.extras]
-alignment = ["dtw-python (>=1.3,<1.4)", "numba (>=0.53,<0.59)"]
-all-extras = ["arch (>=5.6,<6.4.0)", "cloudpickle", "dash (!=2.9.0)", "dask (<2024.1.1)", "dtw-python", "esig (==0.9.7)", "filterpy (>=1.4.5)", "gluonts (>=0.9)", "h5py", "hmmlearn (>=0.2.7)", "holidays", "keras-self-attention", "kotsu (>=0.3.1)", "matplotlib (>=3.3.2)", "mne", "numba (>=0.53,<0.59)", "pmdarima (>=1.8,!=1.8.1,<3.0.0)", "prophet (>=1.1)", "pycatch22 (<0.4.4)", "pykalman-bardo (>=0.9.7,<0.10)", "pyod (>=0.8)", "scikit-optimize", "scikit-posthocs (>=0.6.5)", "seaborn (>=0.11)", "seasonal", "skpro (>=2,<2.2.0)", "statsforecast (>=0.5.2,<1.7.0)", "statsmodels (>=0.12.1)", "stumpy (>=1.5.1)", "tbats (>=1.1)", "tensorflow", "tsfresh (>=0.17)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)", "xarray"]
-all-extras-pandas2 = ["arch (>=5.6,<6.4.0)", "cloudpickle", "dash (!=2.9.0)", "dask (<2024.1.1)", "dtw-python", "esig (==0.9.7)", "filterpy (>=1.4.5)", "gluonts (>=0.9)", "h5py", "hmmlearn (>=0.2.7)", "holidays", "keras-self-attention", "kotsu (>=0.3.1)", "matplotlib (>=3.3.2)", "mne", "numba (>=0.53,<0.59)", "pmdarima (>=1.8,!=1.8.1,<3.0.0)", "prophet (>=1.1)", "pycatch22 (<0.4.4)", "pykalman-bardo (>=0.9.7,<0.10)", "pyod (>=0.8)", "scikit-posthocs (>=0.6.5)", "seaborn (>=0.11)", "seasonal", "skpro (>=2,<2.2.0)", "statsforecast (>=0.5.2,<1.7.0)", "statsmodels (>=0.12.1)", "stumpy (>=1.5.1)", "tbats (>=1.1)", "tensorflow", "tsfresh (>=0.17)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)", "xarray"]
-annotation = ["hmmlearn (>=0.2.7,<0.4)", "numba (>=0.53,<0.59)", "pyod (>=0.8,<1.2)"]
+alignment = ["dtaidistance (<2.4)", "dtw-python (>=1.3,<1.6)", "numba (>=0.53,<0.61)"]
+all-extras = ["arch (>=5.6,<7.1.0)", "autots (>=0.6.1,<0.7)", "cloudpickle", "dash (!=2.9.0)", "dtaidistance (<2.4)", "dtw-python", "esig (==0.9.7)", "filterpy (>=1.4.5)", "gluonts (>=0.9)", "h5py", "hmmlearn (>=0.2.7)", "holidays", "keras-self-attention", "matplotlib (>=3.3.2,!=3.9.1)", "mne", "numba (>=0.53,<0.61)", "optuna (<3.7)", "pmdarima (>=1.8,!=1.8.1,<3.0.0)", "polars[pandas] (>=0.20,<2.0)", "prophet (>=1.1)", "pycatch22 (<0.4.6)", "pyod (>=0.8)", "pyts (<0.14.0)", "scikit-optimize", "scikit-posthocs (>=0.6.5)", "seaborn (>=0.11)", "seasonal", "skforecast (>=0.12.1,<0.14)", "skpro (>=2,<2.6.0)", "statsforecast (>=1.0.0,<1.8.0)", "statsmodels (>=0.12.1)", "stumpy (>=1.5.1)", "tbats (>=1.1)", "temporian (>=0.7.0,!=0.8.0,<0.9.0)", "tensorflow (>=2,<2.17)", "tsfresh (>=0.17)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)", "u8darts (>=0.29.0,<0.31)", "xarray"]
+all-extras-pandas2 = ["arch (>=5.6,<7.1.0)", "autots (>=0.6.1,<0.7)", "cloudpickle", "dash (!=2.9.0)", "dtaidistance (<2.4)", "dtw-python", "esig (==0.9.7)", "filterpy (>=1.4.5)", "gluonts (>=0.9)", "h5py", "hmmlearn (>=0.2.7)", "holidays", "keras-self-attention", "matplotlib (>=3.3.2,!=3.9.1)", "mne", "numba (>=0.53,<0.61)", "optuna (<3.7)", "pmdarima (>=1.8,!=1.8.1,<3.0.0)", "polars[pandas] (>=0.20,<2.0)", "prophet (>=1.1)", "pycatch22 (<0.4.6)", "pyod (>=0.8)", "scikit-posthocs (>=0.6.5)", "seaborn (>=0.11)", "seasonal", "skforecast (>=0.12.1,<0.14)", "skpro (>=2,<2.6.0)", "statsforecast (>=1.0.0,<1.8.0)", "statsmodels (>=0.12.1)", "stumpy (>=1.5.1)", "tbats (>=1.1)", "temporian (>=0.7.0,!=0.8.0,<0.9.0)", "tensorflow (>=2,<2.17)", "tsbootstrap (>=0.1.0,<0.2)", "tsfresh (>=0.17)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)", "u8darts (>=0.29.0,<0.31)", "xarray"]
+annotation = ["hmmlearn (>=0.2.7,<0.4)", "numba (>=0.53,<0.61)", "pyod (>=0.8,<1.2)"]
 binder = ["jupyter", "pandas (<2.0.0)"]
-classification = ["esig (>=0.9.7,<0.10)", "numba (>=0.53,<0.59)", "tensorflow (>=2,<=2.14)", "tsfresh (>=0.17,<0.21)"]
-clustering = ["numba (>=0.53,<0.59)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)"]
-cython-extras = ["mrseql", "mrsqm", "numba (<0.59)"]
+classification = ["esig (>=0.9.7,<0.10)", "numba (>=0.53,<0.61)", "tensorflow (>=2,<2.17)", "tsfresh (>=0.17,<0.21)"]
+clustering = ["numba (>=0.53,<0.61)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)"]
+compatibility-tests = ["catboost"]
+cython-extras = ["mrseql (<0.0.3)", "mrsqm", "numba (<0.61)"]
+datasets = ["rdata", "requests"]
 dev = ["backoff", "httpx", "pre-commit", "pytest", "pytest-cov", "pytest-randomly", "pytest-timeout", "pytest-xdist", "wheel"]
-dl = ["tensorflow (>=2,<=2.14)", "torch"]
-docs = ["Sphinx (!=7.2.0,<8.0.0)", "jupyter", "myst-parser", "nbsphinx (>=0.8.6)", "numpydoc", "pydata-sphinx-theme", "sphinx-copybutton", "sphinx-design (<0.6.0)", "sphinx-gallery (<0.16.0)", "sphinx-issues (<5.0.0)", "tabulate"]
-forecasting = ["arch (>=5.6,<6.4)", "pmdarima (>=1.8,!=1.8.1,<2.1)", "prophet (>=1.1,<1.2)", "skpro (>=2,<2.2)", "statsforecast (>=0.5.2,<1.7)", "statsmodels (>=0.12.1,<0.15)", "tbats (>=1.1,<1.2)"]
+dl = ["FrEIA", "neuralforecast (>=1.6.4,<1.8.0)", "peft (>=0.10.0)", "pykan (>=0.2,<0.2.7)", "pytorch-forecasting (>=1.0.0,<1.2.0)", "tensorflow (>=2,<2.17)", "torch", "transformers[torch] (<4.41.0)"]
+docs = ["Sphinx (!=7.2.0,<9.0.0)", "jupyter", "myst-parser", "nbsphinx (>=0.8.6)", "numpydoc", "pydata-sphinx-theme", "sphinx-copybutton", "sphinx-design (<0.7.0)", "sphinx-gallery (<0.18.0)", "sphinx-issues (<5.0.0)", "tabulate"]
+forecasting = ["arch (>=5.6,<7.1)", "autots (>=0.6.1,<0.7)", "pmdarima (>=1.8,!=1.8.1,<2.1)", "prophet (>=1.1,<1.2)", "skforecast (>=0.12.1,<0.14)", "skpro (>=2,<2.6.0)", "statsforecast (>=1.0.0,<1.8.0)", "statsmodels (>=0.12.1,<0.15)", "tbats (>=1.1,<1.2)"]
 mlflow = ["mlflow"]
 mlflow-tests = ["boto3", "botocore", "mlflow", "moto"]
-networks = ["keras-self-attention (>=0.51,<0.52)", "tensorflow (>=2,<=2.14)"]
+networks = ["keras-self-attention (>=0.51,<0.52)", "tensorflow (>=2,<2.17)"]
+numpy1 = ["numpy (<3.0.0)"]
 pandas1 = ["pandas (<2.0.0)"]
 param-est = ["seasonal (>=0.3.1,<0.4)", "statsmodels (>=0.12.1,<0.15)"]
-regression = ["numba (>=0.53,<0.59)", "tensorflow (>=2,<=2.14)"]
-tests = ["pytest (>=7.4,<7.5)", "pytest-cov (>=4.1,<4.2)", "pytest-randomly (>=3.15,<3.16)", "pytest-timeout (>=2.1,<2.3)", "pytest-xdist (>=3.3,<3.6)"]
-transformations = ["esig (>=0.9.7,<0.10)", "filterpy (>=1.4.5,<1.5)", "holidays (>=0.29,<0.42)", "mne (>=1.5,<1.7)", "numba (>=0.53,<0.59)", "pycatch22 (>=0.4,<0.4.4)", "pykalman-bardo (>=0.9.7,<0.10)", "statsmodels (>=0.12.1,<0.15)", "stumpy (>=1.5.1,<1.13)", "tsfresh (>=0.17,<0.21)"]
+regression = ["numba (>=0.53,<0.61)", "tensorflow (>=2,<2.17)"]
+tests = ["pytest (>=7.4,<8.4)", "pytest-cov (>=4.1,<5.1)", "pytest-randomly (>=3.15,<3.16)", "pytest-timeout (>=2.1,<2.4)", "pytest-xdist (>=3.3,<3.7)"]
+transformations = ["esig (>=0.9.7,<0.10)", "filterpy (>=1.4.5,<1.5)", "holidays (>=0.29,<0.57)", "mne (>=1.5,<1.9)", "numba (>=0.53,<0.61)", "pycatch22 (>=0.4,<0.4.6)", "statsmodels (>=0.12.1,<0.15)", "stumpy (>=1.5.1,<1.13)", "temporian (>=0.7.0,!=0.8.0,<0.9.0)", "tsfresh (>=0.17,<0.21)"]
 
 [[package]]
 name = "slicer"
@@ -5188,7 +5175,6 @@ lightning-utilities = ">=0.8.0"
 numpy = ">1.20.0"
 packaging = ">17.1"
 torch = ">=1.10.0"
-typing-extensions = {version = "*", markers = "python_version < \"3.9\""}
 
 [package.extras]
 all = ["SciencePlots (>=2.0.0)", "ipadic (>=1.0.0)", "matplotlib (>=3.3.0)", "mecab-python3 (>=1.0.6)", "mypy (==1.9.0)", "nltk (>=3.6)", "piq (<=0.8.0)", "pretty-errors (>=1.2.0)", "pycocotools (>2.0.0)", "pystoi (>=0.3.0)", "regex (>=2021.9.24)", "scipy (>1.0.0)", "sentencepiece (>=0.2.0)", "torch (==2.3.0)", "torch-fidelity (<=0.4.0)", "torchaudio (>=0.10.0)", "torchvision (>=0.8)", "tqdm (>=4.41.0)", "transformers (>4.4.0)", "transformers (>=4.10.0)", "types-PyYAML", "types-emoji", "types-protobuf", "types-requests", "types-setuptools", "types-six", "types-tabulate"]
@@ -5748,5 +5734,5 @@ xai = ["pyod", "shap", "suod"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.8.1,<3.12"
-content-hash = "7fec5e8912536971acce269365bf548350f37e57825a20a856d50d60fdbe7d3f"
+python-versions = ">=3.9,<3.12"
+content-hash = "985acc0dba5919c63b5ac163be5a6cb997c234459ae83a5d1a3392140d20ce58"

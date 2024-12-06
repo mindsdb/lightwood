@@ -59,7 +59,7 @@ class ICP(BaseAnalysisBlock):
                 all_classes = np.array([ns.encoded_val_data.encoders[ns.target].rev_map[idx] for idx in class_keys])
 
             if data_type != dtype.tags:
-                enc = OneHotEncoder(sparse=False, handle_unknown='ignore')
+                enc = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
                 enc.fit(all_classes.reshape(-1, 1))
                 output['label_encoders'] = enc  # needed to repr cat labels inside nonconformist
             else:
