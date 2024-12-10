@@ -4,8 +4,7 @@ on:
   push:
   pull_request:
     branches:
-      - stable
-      - staging
+      - main
   release:
     types: [published]
 
@@ -47,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: PublishCI
     needs: test
-    if: github.ref == 'refs/heads/stable' || github.event_name == 'release'
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python

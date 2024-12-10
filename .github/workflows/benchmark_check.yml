@@ -3,7 +3,7 @@ name: Benchmark Result Check Lightwood
 on:
   pull_request:
     branches:
-      - stable
+      - main
 
 jobs:
   check:

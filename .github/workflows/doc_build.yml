@@ -3,7 +3,7 @@ name: Documentation Build Lightwood
 on:
   push:
     branches:
-      - staging
+      - main
       - separate_doc_branch
       - jupyter_actions
 

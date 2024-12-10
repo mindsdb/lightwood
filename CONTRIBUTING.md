@@ -24,11 +24,10 @@ If you are participating in this year's Hacktoberfest event, please scroll down 
 In general, we follow the ["fork-and-pull"](https://docs.github.com/en/github/collaborating-with-pull-requests/getting-started/about-collaborative-development-models#fork-and-pull-model) git workflow. Here are the steps:
 
 1. Fork the Lightwood repository
-2. Checkout the `staging` branch, which is the development version that gets released weekly (there can be exceptions, but make sure to ask and confirm with us).
-3. Make changes and commit them 
-4. Make sure that the CI tests pass. You can run the test suite locally with `flake8 .` to check style and `python -m unittest discover tests` to run the automated tests. This doesn't guarantee it will pass remotely since we run on multiple envs, but should work in most cases.
-5. Push your local branch to your fork
-6. Submit a pull request from your repo to the `staging` branch of `mindsdb/lightwood` so that we can review your changes. Be sure to merge the latest from staging before making a pull request!
+2. Make changes and commit them 
+3. Make sure that the CI tests pass. You can run the test suite locally with `flake8 .` to check style and `python -m unittest discover tests` to run the automated tests. This doesn't guarantee it will pass remotely since we run on multiple envs, but should work in most cases.
+4. Push your local branch to your fork
+5. Submit a pull request from your repo to the `main` branch of `mindsdb/lightwood` so that we can review your changes. Be sure to merge the latest from main before making a pull request!
 
 
 > Note: You will need to sign a CLI agreement for the code since lightwood is under a GPL license. 
@@ -82,4 +81,4 @@ Please check https://mindsdb.com/hacktoberfest for more details.
 
 
 ## Contributor Code of Conduct
-Please note that this project is released with a [Contributor Code of Conduct](https://github.com/mindsdb/lightwood/blob/stable/CODE_OF_CONDUCT.md). By participating in this project, you agree to abide by its terms.
+Please note that this project is released with a [Contributor Code of Conduct](https://github.com/mindsdb/lightwood/blob/main/CODE_OF_CONDUCT.md). By participating in this project, you agree to abide by its terms.
