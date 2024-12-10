@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: PublishCI
     needs: test
-    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    if: github.event_name == 'release'
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
