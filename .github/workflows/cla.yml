@@ -20,5 +20,5 @@ jobs:
           path-to-signatures: 'assets/contributions-agreement/signatures/cla.json'
           # Add path to the CLA here
           path-to-cla-document: 'https://github.com/mindsdb/mindsdb_native/blob/stable/assets/contributions-agreement/individual-contributor.md'
-          branch: 'staging'
+          branch: 'main'
           allowlist: bot*, George3d6, ZoranPandovski, paxcema, torrmal, Stpmax, maximlopin, mindsdbadmin
