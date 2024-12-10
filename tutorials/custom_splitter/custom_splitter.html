@@ -124,8 +124,8 @@ as a final pass to see what models perform best.</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2256:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2256:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2169:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2169:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <section id="1)-Load-your-data">
@@ -371,9 +371,9 @@ Text(0.5, 1.0, &#39;Distribution of Classes&#39;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2256:Analyzing a sample of 18424</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:from a total population of 284807, this is equivalent to 6.5% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Using 3 processes to deduct types.</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Analyzing a sample of 18424</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:from a total population of 284807, this is equivalent to 6.5% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Using 3 processes to deduct types.</span>
 /opt/hostedtoolcache/Python/3.9.20/x64/lib/python3.9/multiprocessing/popen_fork.py:66: RuntimeWarning: Using fork() can cause Polars to deadlock in the child process.
 In addition, using fork() with Python in general is a recipe for mysterious
 deadlocks and crashes.
@@ -402,70 +402,70 @@ If you really know what your doing, you can silence this warning with the warnin
 or by setting POLARS_ALLOW_FORKING_THREAD=1.
 
   self.pid = os.fork()
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: Time</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V3</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V6</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column Time has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V1</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V1 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V3 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V2</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V4</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V6 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V7</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V2 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V9</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V4 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V5</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V7 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V8</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V9 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V10</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V10 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V11</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V5 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V12</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V8 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V15</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V11 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V18</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V15 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V16</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V12 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V13</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V18 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V19</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V16 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V19 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V17</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V13 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V20</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V14</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V20 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V21</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V17 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V14 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V24</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V27</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V21 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V22</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V24 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V25</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V27 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V28</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V25 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V26</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V22 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: V23</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V26 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: Class</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V28 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Infering type for: Amount</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column Class has data type binary</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column V23 has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2256:Column Amount has data type float</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2256:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2256:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: Time</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V3</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V6</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column Time has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V1</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V3 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V4</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V4 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V6 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V5</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V7</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V1 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V2</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V2 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V9</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V5 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V8</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V7 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V12</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V8 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V15</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V9 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V10</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V12 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V13</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V15 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V16</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V13 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V14</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V10 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V11</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V14 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V18</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V16 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V17</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V18 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V11 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V19</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V21</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V17 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V24</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V19 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V20</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V21 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V22</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V24 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V25</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V25 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V26</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V20 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V22 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V27</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V23</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V26 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: Class</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column Class has data type binary</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V27 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V23 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: V28</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column V28 has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Infering type for: Amount</span>
+<span class="ansi-green-fg">INFO:type_infer-2169:Column Amount has data type float</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2169:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2169:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Lightwood looks at each of the many columns and indicates they are mostly float, with exception of “<strong>Class</strong>” which is binary.</p>
@@ -695,7 +695,7 @@ class Predictor(PredictorInterface):
                 &#34;unbias_target&#34;: True,
                 &#34;seconds_per_mixer&#34;: 42768.0,
                 &#34;seconds_per_encoder&#34;: None,
-                &#34;expected_additional_time&#34;: 69.06691217422485,
+                &#34;expected_additional_time&#34;: 69.79603791236877,
                 &#34;time_aim&#34;: 259200,
                 &#34;target_weights&#34;: None,
                 &#34;positive_domain&#34;: False,
@@ -1439,10 +1439,10 @@ class Predictor(PredictorInterface):
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2256:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2256: `preprocess` runtime: 18.61 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2256:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2256: `split` runtime: 1.62 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2169:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2169: `preprocess` runtime: 18.74 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2169:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2169: `split` runtime: 1.79 seconds</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">

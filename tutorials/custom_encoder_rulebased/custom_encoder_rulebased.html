@@ -121,8 +121,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2586:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2586:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2446:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2446:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 </section>
@@ -270,9 +270,9 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2586:Analyzing a sample of 6920</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Using 3 processes to deduct types.</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Analyzing a sample of 6920</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Using 3 processes to deduct types.</span>
 /opt/hostedtoolcache/Python/3.9.20/x64/lib/python3.9/multiprocessing/popen_fork.py:66: RuntimeWarning: Using fork() can cause Polars to deadlock in the child process.
 In addition, using fork() with Python in general is a recipe for mysterious
 deadlocks and crashes.
@@ -287,12 +287,10 @@ If you really know what your doing, you can silence this warning with the warnin
 or by setting POLARS_ALLOW_FORKING_THREAD=1.
 
   self.pid = os.fork()
-<span class="ansi-green-fg">INFO:type_infer-2586:Infering type for: year</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Infering type for: price</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Column price has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Column year has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Infering type for: transmission</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Infering type for: mileage</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Infering type for: year</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Infering type for: price</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Column year has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Column price has data type integer</span>
 /opt/hostedtoolcache/Python/3.9.20/x64/lib/python3.9/multiprocessing/popen_fork.py:66: RuntimeWarning: Using fork() can cause Polars to deadlock in the child process.
 In addition, using fork() with Python in general is a recipe for mysterious
 deadlocks and crashes.
@@ -307,20 +305,22 @@ If you really know what your doing, you can silence this warning with the warnin
 or by setting POLARS_ALLOW_FORKING_THREAD=1.
 
   self.pid = os.fork()
-<span class="ansi-green-fg">INFO:type_infer-2586:Infering type for: model</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Column mileage has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Infering type for: fuelType</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Column transmission has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Infering type for: tax</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Column tax has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Infering type for: mpg</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Column mpg has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Infering type for: engineSize</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Column engineSize has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Column fuelType has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2586:Column model has data type categorical</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2586:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2586:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Infering type for: model</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Infering type for: transmission</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Infering type for: mileage</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Column mileage has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Infering type for: fuelType</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Column model has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Infering type for: tax</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Column tax has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Infering type for: mpg</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Column mpg has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Infering type for: engineSize</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Column engineSize has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Column transmission has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2446:Column fuelType has data type categorical</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2446:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2446:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Let’s take a look at our JSON-AI and print to file.</p>
@@ -434,7 +434,7 @@ or by setting POLARS_ALLOW_FORKING_THREAD=1.
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 11.097458839416504,
+        &#34;expected_additional_time&#34;: 11.046051979064941,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -706,25 +706,25 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2586:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2586:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2586: `analyze_data` runtime: 0.43 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2586:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2586: `preprocess` runtime: 0.13 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2586:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2586: `split` runtime: 0.0 seconds</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2586:Preparing sequentially...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2586:Preparing encoder for year...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2586:Preparing encoder for mileage...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2586:Preparing encoder for tax...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2586:Preparing encoder for mpg...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2586:Preparing encoder for engineSize...</span>
-<span class="ansi-green-fg">INFO:lightwood-2586:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2586:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2586:Categories Detected = 1</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2586: `prepare` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2586:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2586: `featurize` runtime: 0.57 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2446:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2446:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2446: `analyze_data` runtime: 0.44 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2446:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2446: `preprocess` runtime: 0.13 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2446:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2446: `split` runtime: 0.0 seconds</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2446:Preparing sequentially...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2446:Preparing encoder for year...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2446:Preparing encoder for mileage...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2446:Preparing encoder for tax...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2446:Preparing encoder for mpg...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-2446:Preparing encoder for engineSize...</span>
+<span class="ansi-green-fg">INFO:lightwood-2446:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2446:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-2446:Categories Detected = 1</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2446: `prepare` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2446:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-2446: `featurize` runtime: 0.56 seconds</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>
