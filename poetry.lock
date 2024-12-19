@@ -4485,50 +4485,47 @@ files = [
 
 [[package]]
 name = "sktime"
-version = "0.35.0"
+version = "0.30.0"
 description = "A unified framework for machine learning with time series"
 optional = false
-python-versions = "<3.14,>=3.9"
+python-versions = "<3.13,>=3.9"
 files = [
-    {file = "sktime-0.35.0-py3-none-any.whl", hash = "sha256:7c0aef94e748ad5283caff46a42ec58ecd8fd1f5a5649af54ed1cd66e0b97db7"},
-    {file = "sktime-0.35.0.tar.gz", hash = "sha256:eb9864295cdb3663b9bec9f602efb3a6f126f1f4bad25c1bc7839828ec4965ff"},
+    {file = "sktime-0.30.0-py3-none-any.whl", hash = "sha256:e6499f50422374b4d43c5bb46d4591139e66c5c15da32e5b5ae955bef8ecd210"},
+    {file = "sktime-0.30.0.tar.gz", hash = "sha256:66e532e847aa71345011a3230cc7bc0e0d95f8c61308e197295477347c21cd1b"},
 ]
 
 [package.dependencies]
 joblib = ">=1.2.0,<1.5"
-numpy = ">=1.21,<2.2"
+numpy = ">=1.21,<1.27"
 packaging = "*"
 pandas = ">=1.1,<2.3.0"
-scikit-base = ">=0.6.1,<0.13.0"
+scikit-base = ">=0.6.1,<0.9.0"
 scikit-learn = ">=0.24,<1.6.0"
 scipy = ">=1.2,<2.0.0"
 
 [package.extras]
-alignment = ["dtaidistance (<2.4)", "dtw-python (>=1.3,<1.6)", "numba (>=0.53,<0.61)"]
-all-extras = ["arch (>=5.6,<7.1.0)", "autots (>=0.6.1,<0.7)", "cloudpickle", "dash (!=2.9.0)", "dask (<2024.8.1)", "dtaidistance (<2.4)", "dtw-python", "esig (==0.9.7)", "filterpy (>=1.4.5)", "gluonts (>=0.9)", "h5py", "hmmlearn (>=0.2.7)", "holidays", "keras-self-attention", "matplotlib (>=3.3.2,!=3.9.1)", "mne", "numba (>=0.53,<0.61)", "optuna (<4.2)", "pmdarima (>=1.8,!=1.8.1,<3.0.0)", "polars[pandas] (>=0.20,<2.0)", "prophet (>=1.1)", "pycatch22 (<0.4.6)", "pyod (>=0.8)", "pyts (<0.14.0)", "scikit-optimize", "scikit_posthocs (>=0.6.5)", "seaborn (>=0.11)", "seasonal", "skforecast (>=0.12.1,<0.14)", "skpro (>=2,<2.9.0)", "statsforecast (>=1.0.0,<1.8.0)", "statsmodels (>=0.12.1)", "stumpy (>=1.5.1)", "tbats (>=1.1)", "temporian (>=0.7.0,!=0.8.0,<0.9.0)", "tensorflow (>=2,<2.17)", "tsfresh (>=0.17)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)", "u8darts (>=0.29.0,<0.32.0)", "xarray"]
-all-extras-pandas2 = ["arch (>=5.6,<7.1.0)", "autots (>=0.6.1,<0.7)", "cloudpickle", "dash (!=2.9.0)", "dask (<2024.11.3)", "dtaidistance (<2.4)", "dtw-python", "esig (==0.9.7)", "filterpy (>=1.4.5)", "gluonts (>=0.9)", "h5py", "hmmlearn (>=0.2.7)", "holidays", "keras-self-attention", "matplotlib (>=3.3.2,!=3.9.1)", "mne", "numba (>=0.53,<0.61)", "optuna (<4.2)", "pmdarima (>=1.8,!=1.8.1,<3.0.0)", "polars[pandas] (>=0.20,<2.0)", "prophet (>=1.1)", "pycatch22 (<0.4.6)", "pyod (>=0.8)", "scikit_posthocs (>=0.6.5)", "seaborn (>=0.11)", "seasonal", "skforecast (>=0.12.1,<0.14)", "skpro (>=2,<2.9.0)", "statsforecast (>=1.0.0,<1.8.0)", "statsmodels (>=0.12.1)", "stumpy (>=1.5.1)", "tbats (>=1.1)", "temporian (>=0.7.0,!=0.8.0,<0.9.0)", "tensorflow (>=2,<2.17)", "tsbootstrap (>=0.1.0,<0.2)", "tsfresh (>=0.17)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)", "u8darts (>=0.29.0,<0.32.0)", "xarray"]
-annotation = ["hmmlearn (>=0.2.7,<0.4)", "numba (>=0.53,<0.61)", "pyod (>=0.8,<1.2)"]
-binder = ["jupyter", "pandas (<2.0.0)", "skchange"]
-classification = ["esig (>=0.9.7,<0.10)", "numba (>=0.53,<0.61)", "tensorflow (>=2,<2.17)", "tsfresh (>=0.17,<0.21)"]
-clustering = ["numba (>=0.53,<0.61)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)"]
-compatibility-tests = ["catboost"]
-cython-extras = ["mrseql (<0.0.3)", "mrsqm", "numba (<0.61)"]
-dataframe = ["dask (<2024.11.3)", "dask (<2024.8.1)"]
+alignment = ["dtw-python (>=1.3,<1.6)", "numba (>=0.53,<0.60)"]
+all-extras = ["arch (>=5.6,<7.1.0)", "cloudpickle", "dash (!=2.9.0)", "dask (<2024.5.3)", "dtw-python", "esig (==0.9.7)", "filterpy (>=1.4.5)", "gluonts (>=0.9)", "h5py", "hmmlearn (>=0.2.7)", "holidays", "keras-self-attention", "matplotlib (>=3.3.2)", "mne", "numba (>=0.53,<0.60)", "pmdarima (>=1.8,!=1.8.1,<3.0.0)", "prophet (>=1.1)", "pycatch22 (<0.4.6)", "pyod (>=0.8)", "pyts (<0.14.0)", "scikit-optimize", "scikit-posthocs (>=0.6.5)", "seaborn (>=0.11)", "seasonal", "skpro (>=2,<2.4.0)", "statsforecast (>=1.0.0,<1.8.0)", "statsmodels (>=0.12.1)", "stumpy (>=1.5.1)", "tbats (>=1.1)", "temporian (>=0.7.0,!=0.8.0,<0.9.0)", "tensorflow (>=2,<2.17)", "tsbootstrap (>=0.1.0,<0.2)", "tsfresh (>=0.17)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)", "xarray"]
+all-extras-pandas2 = ["arch (>=5.6,<7.1.0)", "cloudpickle", "dash (!=2.9.0)", "dask (<2024.5.3)", "dtw-python", "esig (==0.9.7)", "filterpy (>=1.4.5)", "gluonts (>=0.9)", "h5py", "hmmlearn (>=0.2.7)", "holidays", "keras-self-attention", "matplotlib (>=3.3.2)", "mne", "numba (>=0.53,<0.60)", "pmdarima (>=1.8,!=1.8.1,<3.0.0)", "prophet (>=1.1)", "pycatch22 (<0.4.6)", "pyod (>=0.8)", "scikit-posthocs (>=0.6.5)", "seaborn (>=0.11)", "seasonal", "skpro (>=2,<2.4.0)", "statsforecast (>=1.0.0,<1.8.0)", "statsmodels (>=0.12.1)", "stumpy (>=1.5.1)", "tbats (>=1.1)", "temporian (>=0.7.0,!=0.8.0,<0.9.0)", "tensorflow (>=2,<2.17)", "tsbootstrap (>=0.1.0,<0.2)", "tsfresh (>=0.17)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)", "xarray"]
+annotation = ["hmmlearn (>=0.2.7,<0.4)", "numba (>=0.53,<0.60)", "pyod (>=0.8,<1.2)"]
+binder = ["jupyter", "pandas (<2.0.0)"]
+classification = ["esig (>=0.9.7,<0.10)", "numba (>=0.53,<0.60)", "tensorflow (>=2,<2.17)", "tsfresh (>=0.17,<0.21)"]
+clustering = ["numba (>=0.53,<0.60)", "tslearn (>=0.5.2,!=0.6.0,<0.7.0)"]
+cython-extras = ["mrseql", "mrsqm", "numba (<0.60)"]
+dataframe = ["dask (<2024.5.3)", "dask (<2024.5.3)"]
 datasets = ["rdata", "requests"]
-detection = ["hmmlearn (>=0.2.7,<0.4)", "numba (>=0.53,<0.61)", "pyod (>=0.8,<1.2)"]
-dev = ["backoff", "httpx", "pre-commit", "pytest", "pytest-randomly", "pytest-timeout", "pytest-xdist", "wheel"]
-dl = ["FrEIA", "einops (>0.7.0)", "gluonts (>=0.14.3)", "huggingface-hub (>=0.23.0)", "hydra-core", "lightning (>=2.0)", "neuralforecast (>=1.6.4,<1.8.0)", "peft (>=0.10.0,<0.14.0)", "pykan (>=0.2.1,<0.2.7)", "pytorch-forecasting (>=1.0.0,<1.2.0)", "tensorflow (>=2,<2.17)", "torch", "transformers[torch] (<4.41.0)"]
-docs = ["Sphinx (!=7.2.0,<9.0.0)", "jupyter", "myst-parser", "nbsphinx (>=0.8.6)", "numpydoc", "pydata-sphinx-theme", "sphinx-copybutton", "sphinx-design (<0.7.0)", "sphinx-gallery (<0.19.0)", "sphinx-issues (<6.0.0)", "tabulate"]
-forecasting = ["arch (>=5.6,<7.1)", "autots (>=0.6.1,<0.7)", "pmdarima (>=1.8,!=1.8.1,<2.1)", "prophet (>=1.1,<1.2)", "skforecast (>=0.12.1,<0.14)", "skpro (>=2,<2.9.0)", "statsforecast (>=1.0.0,<1.8.0)", "statsmodels (>=0.12.1,<0.15)", "tbats (>=1.1,<1.2)"]
+dev = ["backoff", "httpx", "pre-commit", "pytest", "pytest-cov", "pytest-randomly", "pytest-timeout", "pytest-xdist", "wheel"]
+dl = ["FrEIA", "neuralforecast (>=1.6.4,<1.8.0)", "pykan", "tensorflow (>=2,<2.17)", "torch", "transformers[torch] (<4.41.0)"]
+docs = ["Sphinx (!=7.2.0,<8.0.0)", "jupyter", "myst-parser", "nbsphinx (>=0.8.6)", "numpydoc", "pydata-sphinx-theme", "sphinx-copybutton", "sphinx-design (<0.7.0)", "sphinx-gallery (<0.17.0)", "sphinx-issues (<5.0.0)", "tabulate"]
+forecasting = ["arch (>=5.6,<7.1)", "pmdarima (>=1.8,!=1.8.1,<2.1)", "prophet (>=1.1,<1.2)", "skpro (>=2,<2.4.0)", "statsforecast (>=1.0.0,<1.8.0)", "statsmodels (>=0.12.1,<0.15)", "tbats (>=1.1,<1.2)"]
 mlflow = ["mlflow"]
 mlflow-tests = ["boto3", "botocore", "mlflow", "moto"]
 networks = ["keras-self-attention (>=0.51,<0.52)", "tensorflow (>=2,<2.17)"]
-numpy1 = ["numpy (<2.0.0)"]
 pandas1 = ["pandas (<2.0.0)"]
 param-est = ["seasonal (>=0.3.1,<0.4)", "statsmodels (>=0.12.1,<0.15)"]
-regression = ["numba (>=0.53,<0.61)", "tensorflow (>=2,<2.17)"]
-tests = ["pytest (>=7.4,<8.4)", "pytest-randomly (>=3.15,<3.17)", "pytest-timeout (>=2.1,<2.4)", "pytest-xdist (>=3.3,<3.7)"]
-transformations = ["esig (>=0.9.7,<0.10)", "filterpy (>=1.4.5,<1.5)", "holidays (>=0.29,<0.59)", "mne (>=1.5,<1.9)", "numba (>=0.53,<0.61)", "pycatch22 (>=0.4,<0.4.6)", "statsmodels (>=0.12.1,<0.15)", "stumpy (>=1.5.1,<1.13)", "temporian (>=0.7.0,!=0.8.0,<0.9.0)", "tsfresh (>=0.17,<0.21)"]
+regression = ["numba (>=0.53,<0.60)", "tensorflow (>=2,<2.17)"]
+tests = ["pytest (>=7.4,<8.3)", "pytest-cov (>=4.1,<5.1)", "pytest-randomly (>=3.15,<3.16)", "pytest-timeout (>=2.1,<2.4)", "pytest-xdist (>=3.3,<3.7)"]
+transformations = ["esig (>=0.9.7,<0.10)", "filterpy (>=1.4.5,<1.5)", "holidays (>=0.29,<0.51)", "mne (>=1.5,<1.8)", "numba (>=0.53,<0.60)", "pycatch22 (>=0.4,<0.4.6)", "statsmodels (>=0.12.1,<0.15)", "stumpy (>=1.5.1,<1.13)", "temporian (>=0.7.0,!=0.8.0,<0.9.0)", "tsbootstrap (>=0.1.0,<0.2)", "tsfresh (>=0.17,<0.21)"]
 
 [[package]]
 name = "slicer"
@@ -5717,4 +5714,4 @@ xai = ["pyod", "shap", "suod"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "f4b24e5c915a6df01ec248d4d600a82aa7583f69f828428097a6ca635c8d49fb"
+content-hash = "917f58e35cf0f2680c77ba64a7eebd040059d5f8f654f3ee3393ce7611631caf"
