@@ -10,6 +10,7 @@ from lightwood.analysis.helpers.conf_stats import ConfStats
 from lightwood.analysis.nn_conf.temp_scale import TempScaler
 from lightwood.analysis.helpers.feature_importance import PermutationFeatureImportance
 
+
 # Blocks with extra requirements
 try:
     from lightwood.analysis.helpers.shap import ShapleyValues
