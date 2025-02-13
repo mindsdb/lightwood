@@ -37,6 +37,10 @@ jobs:
       - name: Lint with flake8
         run: |
           poetry run python -m flake8 .
+      - name: Install NLTK data
+        run: |
+          python -m nltk.downloader punkt
+          python -m nltk.downloader punkt_tab
       - name: Test with unittest
         run: |
           # Run all the "standard" tests
