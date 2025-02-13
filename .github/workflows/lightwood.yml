@@ -39,8 +39,9 @@ jobs:
           poetry run python -m flake8 .
       - name: Install NLTK data
         run: |
-          python -m nltk.downloader punkt
-          python -m nltk.downloader punkt_tab
+          poetry run python -m nltk.downloader punkt
+          poetry run python -m nltk.downloader punkt_tab
+          poetry run python -m nltk.downloader stopwords
       - name: Test with unittest
         run: |
           # Run all the "standard" tests
