@@ -3388,10 +3388,8 @@ files = [
     {file = "pydateinfer-0.3.0.tar.gz", hash = "sha256:53068057bf3130073655f21f3f31b977c6aae57a19623942130787e618f6a8fa"},
 ]
 
-[package.source]
-type = "legacy"
-url = "https://pypi.org/simple"
-reference = "legacy"
+[package.dependencies]
+pytz = "*"
 
 [[package]]
 name = "pyflakes"
@@ -5394,4 +5392,4 @@ xai = ["pyod", "shap", "suod"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.12"
-content-hash = "de403f4fc2a37ea377e1b3afca4e3133a92a9b19880457f0e59146c33c5afe13"
+content-hash = "253fdb25f3a356cb51a9fae95711df8c40b1cabc6905e6eb4b1274dedb53e45f"
