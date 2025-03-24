@@ -12,9 +12,9 @@ from transformers import (
     DistilBertModel,
     DistilBertForSequenceClassification,
     DistilBertTokenizerFast,
-    AdamW,
     get_linear_schedule_with_warmup,
 )
+from torch.optim import AdamW
 from sklearn.model_selection import train_test_split
 
 from lightwood.encoder.text.helpers.pretrained_helpers import TextEmbed
