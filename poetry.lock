@@ -1754,19 +1754,19 @@ tests = ["contextlib2", "matplotlib (>=3.0)", "pytest", "pytest-cov", "pytest-mp
 
 [[package]]
 name = "lightgbm"
-version = "4.4.0"
-description = "LightGBM Python Package"
+version = "4.6.0"
+description = "LightGBM Python-package"
 optional = true
 python-versions = ">=3.7"
 groups = ["main"]
 markers = "extra == \"extra\""
 files = [
-    {file = "lightgbm-4.4.0-py3-none-macosx_10_15_x86_64.macosx_11_6_x86_64.macosx_12_5_x86_64.whl", hash = "sha256:f51f17a10ef9b4669b9c95a2297213b57debbc9deadfe5c1489a7f3c9e2617c5"},
-    {file = "lightgbm-4.4.0-py3-none-macosx_14_0_arm64.whl", hash = "sha256:d96b06c85f0840da95bbbf31a095b207186bb0e584cee0fe2f2e7f24fb07c70f"},
-    {file = "lightgbm-4.4.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:a04875e4c0ffda7c67a0ab5bd8892f154a491833f4f5b39c4acf5b3add099699"},
-    {file = "lightgbm-4.4.0-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:8700b41f637717d36763a282d280b8d4722a87103030b7f0f373b96da0225022"},
-    {file = "lightgbm-4.4.0-py3-none-win_amd64.whl", hash = "sha256:460dd78586dccfc0ed756571690fcfcd3d61770ed7972746c655c3b11cce8a93"},
-    {file = "lightgbm-4.4.0.tar.gz", hash = "sha256:9e8a7640911481134e60987d5d1e1cd157f430c3b4b38de8d36fc55c302bc299"},
+    {file = "lightgbm-4.6.0-py3-none-macosx_10_15_x86_64.whl", hash = "sha256:b7a393de8a334d5c8e490df91270f0763f83f959574d504c7ccb9eee4aef70ed"},
+    {file = "lightgbm-4.6.0-py3-none-macosx_12_0_arm64.whl", hash = "sha256:2dafd98d4e02b844ceb0b61450a660681076b1ea6c7adb8c566dfd66832aafad"},
+    {file = "lightgbm-4.6.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:4d68712bbd2b57a0b14390cbf9376c1d5ed773fa2e71e099cac588703b590336"},
+    {file = "lightgbm-4.6.0-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:cb19b5afea55b5b61cbb2131095f50538bd608a00655f23ad5d25ae3e3bf1c8d"},
+    {file = "lightgbm-4.6.0-py3-none-win_amd64.whl", hash = "sha256:37089ee95664b6550a7189d887dbf098e3eadab03537e411f52c63c121e3ba4b"},
+    {file = "lightgbm-4.6.0.tar.gz", hash = "sha256:cb1c59720eb569389c0ba74d14f52351b573af489f230032a1c9f314f8bab7fe"},
 ]
 
 [package.dependencies]
@@ -1777,7 +1777,7 @@ scipy = "*"
 arrow = ["cffi (>=1.15.1)", "pyarrow (>=6.0.1)"]
 dask = ["dask[array,dataframe,distributed] (>=2.0.0)", "pandas (>=0.24.0)"]
 pandas = ["pandas (>=0.24.0)"]
-scikit-learn = ["scikit-learn (!=0.22.0)"]
+scikit-learn = ["scikit-learn (>=0.24.2)"]
 
 [[package]]
 name = "lightning-utilities"
@@ -5371,4 +5371,4 @@ xai = ["pyod", "shap", "suod"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.12"
-content-hash = "f959ce38c75527f6566c02c1ddde2cfaefa9493dc8a939df14049cc48444747c"
+content-hash = "431b23346f0384dd78024424d265ae20c1ae5a2442e0bfb29ca485d22abfe5ea"
