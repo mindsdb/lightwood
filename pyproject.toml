@@ -84,3 +84,7 @@ xai = [
     "pyod",
     "suod",
 ]
+
+[tool.poetry.group.dev.dependencies]
+setuptools = "57.5.0"
+
