@@ -825,6 +825,7 @@ dataclasses-json = ">=0.6.3,<0.7.0"
 numpy = ">=1,<2"
 pandas = ">=2,<3"
 pydantic = "*"
+pydateinfer = "0.3.0"
 python-dateutil = ">=2.1"
 scipy = ">=1.7.3"
 type-infer = ">=0.0.16"
@@ -3377,6 +3378,20 @@ dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
 
 [[package]]
+name = "pydateinfer"
+version = "0.3.0"
+description = "Infers date format from examples"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "pydateinfer-0.3.0.tar.gz", hash = "sha256:53068057bf3130073655f21f3f31b977c6aae57a19623942130787e618f6a8fa"},
+]
+
+[package.dependencies]
+pytz = "*"
+
+[[package]]
 name = "pyflakes"
 version = "3.2.0"
 description = "passive checker of Python programs"
@@ -5377,4 +5392,4 @@ xai = ["pyod", "shap", "suod"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.12"
-content-hash = "253fdb25f3a356cb51a9fae95711df8c40b1cabc6905e6eb4b1274dedb53e45f"
+content-hash = "143c66e5179969b7960e62d47be9ba902a0e7329552c12f4ab41b78d0e30bf78"
