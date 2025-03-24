@@ -3376,9 +3376,6 @@ typing-extensions = ">=4.2.0"
 dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
 
-[package.dependencies]
-pytz = "*"
-
 [[package]]
 name = "pyflakes"
 version = "3.2.0"
