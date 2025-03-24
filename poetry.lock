@@ -825,7 +825,6 @@ dataclasses-json = ">=0.6.3,<0.7.0"
 numpy = ">=1,<2"
 pandas = ">=2,<3"
 pydantic = "*"
-pydateinfer = "0.3.0"
 python-dateutil = ">=2.1"
 scipy = ">=1.7.3"
 type-infer = ">=0.0.16"
@@ -3376,17 +3375,6 @@ typing-extensions = ">=4.2.0"
 [package.extras]
 dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
-
-[[package]]
-name = "pydateinfer"
-version = "0.3.0"
-description = "Infers date format from examples"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "pydateinfer-0.3.0.tar.gz", hash = "sha256:53068057bf3130073655f21f3f31b977c6aae57a19623942130787e618f6a8fa"},
-]
 
 [package.dependencies]
 pytz = "*"
