@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lightwood.encoder.array.ts_num_array &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>lightwood.encoder.array.ts_num_array &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
@@ -80,16 +80,16 @@
            <div itemprop="articleBody">
              
   <h1>Source code for lightwood.encoder.array.ts_num_array</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.encoder</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
-<span class="kn">from</span> <span class="nn">lightwood.encoder.numeric</span> <span class="kn">import</span> <span class="n">TsNumericEncoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.encoder</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEncoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.encoder.numeric</span><span class="w"> </span><span class="kn">import</span> <span class="n">TsNumericEncoder</span>
 
 
-<div class="viewcode-block" id="TsArrayNumericEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder">[docs]</a><span class="k">class</span> <span class="nc">TsArrayNumericEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">grouped_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="TsArrayNumericEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TsArrayNumericEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">positive_domain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">grouped_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This encoder handles arrays of numerical time series data by wrapping the numerical encoder with behavior specific to time series tasks.</span>
 <span class="sd">        </span>
@@ -108,7 +108,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span> <span class="o">=</span> <span class="n">TsNumericEncoder</span><span class="p">(</span><span class="n">is_target</span><span class="o">=</span><span class="n">is_target</span><span class="p">,</span> <span class="n">positive_domain</span><span class="o">=</span><span class="n">positive_domain</span><span class="p">,</span> <span class="n">grouped_by</span><span class="o">=</span><span class="n">grouped_by</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_window</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">output_size</span>
 
-<div class="viewcode-block" id="TsArrayNumericEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">):</span>
+<div class="viewcode-block" id="TsArrayNumericEncoder.prepare"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.prepare">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priming_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method prepares the underlying time series numerical encoder.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -118,7 +118,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sub_encoder</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">priming_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="TsArrayNumericEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">],</span> <span class="n">dependency_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="TsArrayNumericEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.encode">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">],</span> <span class="n">dependency_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Encodes a list of time series arrays using the underlying time series numerical encoder.</span>
 <span class="sd">        </span>
@@ -138,7 +138,7 @@
 
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nan_value</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TsArrayNumericEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_values</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]:</span>
+<div class="viewcode-block" id="TsArrayNumericEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.decode">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_values</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Decodes a list of encoded arrays into values in their original domains.</span>
 
@@ -160,7 +160,7 @@
 
         <span class="k">return</span> <span class="n">ret</span></div>
 
-<div class="viewcode-block" id="TsArrayNumericEncoder.decode_one"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.decode_one">[docs]</a>    <span class="k">def</span> <span class="nf">decode_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_value</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+<div class="viewcode-block" id="TsArrayNumericEncoder.decode_one"><a class="viewcode-back" href="../../../../encoder.html#encoder.TsArrayNumericEncoder.decode_one">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">decode_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_value</span><span class="p">,</span> <span class="n">dependency_data</span><span class="o">=</span><span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Decodes a single window of a time series into its original domain.</span>
 
@@ -182,7 +182,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

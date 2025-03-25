@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>api.types &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>api.types &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -82,26 +82,26 @@
   <h1>Source code for api.types</h1><div class="highlight"><pre>
 <span></span><span class="c1"># TODO: type hint the returns</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
-<span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">type_infer.dtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">dtype</span>
 
 <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
 
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">dataclasses_json</span> <span class="kn">import</span> <span class="n">dataclass_json</span>
-<span class="kn">from</span> <span class="nn">dataclasses_json.core</span> <span class="kn">import</span> <span class="n">_asdict</span><span class="p">,</span> <span class="n">Json</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.helpers.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses_json</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass_json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses_json.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">_asdict</span><span class="p">,</span> <span class="n">Json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
 
 <span class="c1"># See: https://www.python.org/dev/peps/pep-0589/ for how this works</span>
 <span class="c1"># Not very intuitive but very powerful abstraction, might be useful in other places (@TODO)</span>
-<div class="viewcode-block" id="Module"><a class="viewcode-back" href="../../api/types.html#api.types.Module">[docs]</a><span class="k">class</span> <span class="nc">Module</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<div class="viewcode-block" id="Module"><a class="viewcode-back" href="../../api/types.html#api.types.Module">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Module</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Modules are the blocks of code that end up being called from the JSON AI, representing either object instantiations or function calls.</span>
 
@@ -113,7 +113,7 @@
 
 
 <div class="viewcode-block" id="TimeseriesSettings"><a class="viewcode-back" href="../../api/types.html#api.types.TimeseriesSettings">[docs]</a><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">TimeseriesSettings</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TimeseriesSettings</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For time-series specific problems, more specific treatment of the data is necessary. The following attributes \</span>
 <span class="sd">        enable time-series tasks to be carried out properly.</span>
@@ -153,7 +153,7 @@
     <span class="n">interval_periods</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
 
 <div class="viewcode-block" id="TimeseriesSettings.from_dict"><a class="viewcode-back" href="../../api/types.html#api.types.TimeseriesSettings.from_dict">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a TimeseriesSettings object from python dictionary specifications.</span>
 
@@ -192,7 +192,7 @@
         <span class="k">return</span> <span class="n">timeseries_settings</span></div>
 
 <div class="viewcode-block" id="TimeseriesSettings.from_json"><a class="viewcode-back" href="../../api/types.html#api.types.TimeseriesSettings.from_json">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a TimeseriesSettings object from JSON specifications via python dictionary.</span>
 
@@ -202,7 +202,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">TimeseriesSettings</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="TimeseriesSettings.to_dict"><a class="viewcode-back" href="../../api/types.html#api.types.TimeseriesSettings.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
+<div class="viewcode-block" id="TimeseriesSettings.to_dict"><a class="viewcode-back" href="../../api/types.html#api.types.TimeseriesSettings.to_dict">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a dictionary from ``TimeseriesSettings`` object</span>
 
@@ -210,7 +210,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">_asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="n">encode_json</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TimeseriesSettings.to_json"><a class="viewcode-back" href="../../api/types.html#api.types.TimeseriesSettings.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
+<div class="viewcode-block" id="TimeseriesSettings.to_json"><a class="viewcode-back" href="../../api/types.html#api.types.TimeseriesSettings.to_json">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates JSON config from TimeseriesSettings object</span>
 <span class="sd">        :returns: The JSON config syntax containing the ``TimeSeriesSettings`` specifications.</span>
@@ -219,7 +219,7 @@
 
 
 <div class="viewcode-block" id="ProblemDefinition"><a class="viewcode-back" href="../../api/types.html#api.types.ProblemDefinition">[docs]</a><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">ProblemDefinition</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProblemDefinition</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The ``ProblemDefinition`` object indicates details on how the models that predict the target are prepared. \</span>
 <span class="sd">        The only required specification from a user is the ``target``, which indicates the column within the input \</span>
@@ -275,7 +275,7 @@
     <span class="n">seed_nr</span><span class="p">:</span> <span class="nb">int</span>
 
 <div class="viewcode-block" id="ProblemDefinition.from_dict"><a class="viewcode-back" href="../../api/types.html#api.types.ProblemDefinition.from_dict">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a ProblemDefinition object from a python dictionary with necessary specifications.</span>
 
@@ -330,7 +330,7 @@
         <span class="k">return</span> <span class="n">problem_definition</span></div>
 
 <div class="viewcode-block" id="ProblemDefinition.from_json"><a class="viewcode-back" href="../../api/types.html#api.types.ProblemDefinition.from_json">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a ProblemDefinition Object from JSON config file.</span>
 
@@ -340,7 +340,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="ProblemDefinition.to_dict"><a class="viewcode-back" href="../../api/types.html#api.types.ProblemDefinition.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
+<div class="viewcode-block" id="ProblemDefinition.to_dict"><a class="viewcode-back" href="../../api/types.html#api.types.ProblemDefinition.to_dict">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a python dictionary from the ProblemDefinition object</span>
 
@@ -348,7 +348,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">_asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="n">encode_json</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ProblemDefinition.to_json"><a class="viewcode-back" href="../../api/types.html#api.types.ProblemDefinition.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
+<div class="viewcode-block" id="ProblemDefinition.to_json"><a class="viewcode-back" href="../../api/types.html#api.types.ProblemDefinition.to_json">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a JSON config from the ProblemDefinition object</span>
 
@@ -358,7 +358,7 @@
 
 
 <div class="viewcode-block" id="JsonAI"><a class="viewcode-back" href="../../api/types.html#api.types.JsonAI">[docs]</a><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">JsonAI</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">JsonAI</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The JsonAI Class allows users to construct flexible JSON config to specify their ML pipeline. JSON-AI follows a \</span>
 <span class="sd">    recipe of how to pre-process data, construct features, and train on the target column. To do so, the following \</span>
@@ -398,7 +398,7 @@
     <span class="n">accuracy_functions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Module</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="JsonAI.from_dict"><a class="viewcode-back" href="../../api/types.html#api.types.JsonAI.from_dict">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a JSON-AI object from dictionary specifications of the JSON-config.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -439,11 +439,11 @@
         <span class="k">return</span> <span class="n">json_ai</span></div>
 
 <div class="viewcode-block" id="JsonAI.from_json"><a class="viewcode-back" href="../../api/types.html#api.types.JsonAI.from_json">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Creates a JSON-AI object from JSON config&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">JsonAI</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="JsonAI.to_dict"><a class="viewcode-back" href="../../api/types.html#api.types.JsonAI.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
+<div class="viewcode-block" id="JsonAI.to_dict"><a class="viewcode-back" href="../../api/types.html#api.types.JsonAI.to_dict">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a python dictionary with necessary modules within the ML pipeline specified from the JSON-AI object.</span>
 
@@ -460,7 +460,7 @@
                 <span class="k">del</span> <span class="n">as_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">as_dict</span></div>
 
-<div class="viewcode-block" id="JsonAI.to_json"><a class="viewcode-back" href="../../api/types.html#api.types.JsonAI.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
+<div class="viewcode-block" id="JsonAI.to_json"><a class="viewcode-back" href="../../api/types.html#api.types.JsonAI.to_json">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates JSON config to represent the necessary modules within the ML pipeline specified from the JSON-AI object.</span>
 
@@ -471,7 +471,7 @@
 
 <div class="viewcode-block" id="SubmodelData"><a class="viewcode-back" href="../../api/types.html#api.types.SubmodelData">[docs]</a><span class="nd">@dataclass_json</span>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">SubmodelData</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SubmodelData</span><span class="p">:</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">accuracy</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">is_best</span><span class="p">:</span> <span class="nb">bool</span></div>
@@ -479,7 +479,7 @@
 
 <div class="viewcode-block" id="ModelAnalysis"><a class="viewcode-back" href="../../api/types.html#api.types.ModelAnalysis">[docs]</a><span class="nd">@dataclass_json</span>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">ModelAnalysis</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ModelAnalysis</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The ``ModelAnalysis`` class stores useful information to describe a model and understand its predictive performance on a validation dataset.</span>
 <span class="sd">    For each trained ML algorithm, we store:</span>
@@ -509,7 +509,7 @@
 
 
 <div class="viewcode-block" id="PredictionArguments"><a class="viewcode-back" href="../../api/types.html#api.types.PredictionArguments">[docs]</a><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">PredictionArguments</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PredictionArguments</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class contains all possible arguments that can be passed to a Lightwood predictor at inference time.</span>
 <span class="sd">    On each predict call, all arguments included in a parameter dictionary will update the respective fields</span>
@@ -541,7 +541,7 @@
     <span class="n">return_embedding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="PredictionArguments.from_dict"><a class="viewcode-back" href="../../api/types.html#api.types.PredictionArguments.from_dict">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a ``PredictionArguments`` object from a python dictionary with necessary specifications.</span>
 
@@ -577,7 +577,7 @@
 
         <span class="k">return</span> <span class="n">pred_args</span></div>
 
-<div class="viewcode-block" id="PredictionArguments.to_dict"><a class="viewcode-back" href="../../api/types.html#api.types.PredictionArguments.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
+<div class="viewcode-block" id="PredictionArguments.to_dict"><a class="viewcode-back" href="../../api/types.html#api.types.PredictionArguments.to_dict">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encode_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Json</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a python dictionary from the ``PredictionArguments`` object</span>
 
@@ -593,7 +593,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

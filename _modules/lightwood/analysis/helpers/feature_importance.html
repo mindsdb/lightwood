@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lightwood.analysis.helpers.feature_importance &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>lightwood.analysis.helpers.feature_importance &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
@@ -80,21 +80,21 @@
            <div itemprop="articleBody">
              
   <h1>Source code for lightwood.analysis.helpers.feature_importance</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleNamespace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">sklearn.utils</span> <span class="kn">import</span> <span class="n">shuffle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">shuffle</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span>
-<span class="kn">from</span> <span class="nn">lightwood.analysis.base</span> <span class="kn">import</span> <span class="n">BaseAnalysisBlock</span>
-<span class="kn">from</span> <span class="nn">mindsdb_evaluator</span> <span class="kn">import</span> <span class="n">evaluate_accuracies</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.helpers.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.data.encoded_ds</span><span class="w"> </span><span class="kn">import</span> <span class="n">EncodedDs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.analysis.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseAnalysisBlock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindsdb_evaluator</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate_accuracies</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">PredictionArguments</span>
 
 
-<div class="viewcode-block" id="PermutationFeatureImportance"><a class="viewcode-back" href="../../../../analysis.html#analysis.PermutationFeatureImportance">[docs]</a><span class="k">class</span> <span class="nc">PermutationFeatureImportance</span><span class="p">(</span><span class="n">BaseAnalysisBlock</span><span class="p">):</span>
+<div class="viewcode-block" id="PermutationFeatureImportance"><a class="viewcode-back" href="../../../../analysis.html#analysis.PermutationFeatureImportance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PermutationFeatureImportance</span><span class="p">(</span><span class="n">BaseAnalysisBlock</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Analysis block that estimates column importances via permutation.</span>
 
@@ -114,14 +114,14 @@
 <span class="sd">        https://scikit-learn.org/stable/modules/permutation_importance.html</span>
 <span class="sd">        https://compstat-lmu.github.io/iml_methods_limitations/pfi.html</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">disable_column_importance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">row_limit</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">col_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">deps</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;AccStats&#39;</span><span class="p">,)):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">disable_column_importance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">row_limit</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">col_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">deps</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;AccStats&#39;</span><span class="p">,)):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">deps</span><span class="o">=</span><span class="n">deps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disable_column_importance</span> <span class="o">=</span> <span class="n">disable_column_importance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">row_limit</span> <span class="o">=</span> <span class="n">row_limit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">col_limit</span> <span class="o">=</span> <span class="n">col_limit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_decimals</span> <span class="o">=</span> <span class="mi">3</span>
 
-<div class="viewcode-block" id="PermutationFeatureImportance.analyze"><a class="viewcode-back" href="../../../../analysis.html#analysis.PermutationFeatureImportance.analyze">[docs]</a>    <span class="k">def</span> <span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+<div class="viewcode-block" id="PermutationFeatureImportance.analyze"><a class="viewcode-back" href="../../../../analysis.html#analysis.PermutationFeatureImportance.analyze">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
         <span class="n">ns</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">disable_column_importance</span><span class="p">:</span>
@@ -193,7 +193,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

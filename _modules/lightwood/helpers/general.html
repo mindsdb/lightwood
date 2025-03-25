@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lightwood.helpers.general &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>lightwood.helpers.general &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
@@ -80,13 +80,13 @@
            <div itemprop="articleBody">
              
   <h1>Source code for lightwood.helpers.general</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">type_infer.helpers</span> <span class="kn">import</span> <span class="n">is_nan_numeric</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">type_infer.helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_nan_numeric</span>
 
 
-<div class="viewcode-block" id="is_none"><a class="viewcode-back" href="../../../helpers.html#helpers.is_none">[docs]</a><span class="k">def</span> <span class="nf">is_none</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="is_none"><a class="viewcode-back" href="../../../helpers.html#helpers.is_none">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">is_none</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pandas has no way to guarantee &quot;stability&quot; for the type of a column, it choses to arbitrarily change it based on the values.</span>
 <span class="sd">    Pandas also change the values in the columns based on the types.</span>
@@ -130,7 +130,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

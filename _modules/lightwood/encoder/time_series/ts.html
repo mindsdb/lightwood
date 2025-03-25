@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lightwood.encoder.time_series.ts &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>lightwood.encoder.time_series.ts &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
@@ -80,19 +80,19 @@
            <div itemprop="articleBody">
              
   <h1>Source code for lightwood.encoder.time_series.ts</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Iterable</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Iterable</span>
 
-<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
-<span class="kn">from</span> <span class="nn">lightwood.encoder.array</span> <span class="kn">import</span> <span class="n">ArrayEncoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">type_infer.dtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.encoder.array</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayEncoder</span>
 
 
-<div class="viewcode-block" id="TimeSeriesEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.TimeSeriesEncoder">[docs]</a><span class="k">class</span> <span class="nc">TimeSeriesEncoder</span><span class="p">(</span><span class="n">ArrayEncoder</span><span class="p">):</span>
+<div class="viewcode-block" id="TimeSeriesEncoder"><a class="viewcode-back" href="../../../../encoder.html#encoder.TimeSeriesEncoder">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TimeSeriesEncoder</span><span class="p">(</span><span class="n">ArrayEncoder</span><span class="p">):</span>
     <span class="n">is_timeseries_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">is_trainable_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">original_type</span><span class="p">:</span> <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">original_type</span><span class="p">:</span> <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Time series encoder. This module will pass the normalized series values, along with moving averages taken from the series&#39; last `window` values.</span>
 <span class="sd">        :param stop_after: time budget in seconds.</span>
@@ -103,7 +103,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">max_mavg_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_mavg_offset</span>
 
-<div class="viewcode-block" id="TimeSeriesEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TimeSeriesEncoder.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="TimeSeriesEncoder.encode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TimeSeriesEncoder.encode">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Iterable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Encodes time series data.</span>
 
@@ -125,7 +125,7 @@
 
         <span class="k">return</span> <span class="n">base_encode</span></div>
 
-<div class="viewcode-block" id="TimeSeriesEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TimeSeriesEncoder.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Iterable</span><span class="p">]:</span>
+<div class="viewcode-block" id="TimeSeriesEncoder.decode"><a class="viewcode-back" href="../../../../encoder.html#encoder.TimeSeriesEncoder.decode">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Iterable</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts data as a list of arrays. Removes all encoded moving average information.</span>
 
@@ -143,7 +143,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

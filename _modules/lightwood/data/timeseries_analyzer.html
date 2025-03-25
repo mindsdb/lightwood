@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lightwood.data.timeseries_analyzer &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>lightwood.data.timeseries_analyzer &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
@@ -80,18 +80,18 @@
            <div itemprop="articleBody">
              
   <h1>Source code for lightwood.data.timeseries_analyzer</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">type_infer.dtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">dtype</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">TimeseriesSettings</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.ts</span> <span class="kn">import</span> <span class="n">get_ts_groups</span><span class="p">,</span> <span class="n">get_delta</span><span class="p">,</span> <span class="n">Differencer</span>
-<span class="kn">from</span> <span class="nn">lightwood.encoder.time_series.helpers.common</span> <span class="kn">import</span> <span class="n">generate_target_group_normalizers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeseriesSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.helpers.ts</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_ts_groups</span><span class="p">,</span> <span class="n">get_delta</span><span class="p">,</span> <span class="n">Differencer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.encoder.time_series.helpers.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_target_group_normalizers</span>
 
 
-<div class="viewcode-block" id="timeseries_analyzer"><a class="viewcode-back" href="../../../data.html#data.timeseries_analyzer">[docs]</a><span class="k">def</span> <span class="nf">timeseries_analyzer</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+<div class="viewcode-block" id="timeseries_analyzer"><a class="viewcode-back" href="../../../data.html#data.timeseries_analyzer">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">timeseries_analyzer</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="n">dtype_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
                         <span class="n">timeseries_settings</span><span class="p">:</span> <span class="n">TimeseriesSettings</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This module analyzes (pre-processed) time series data and stores a few useful insights used in the rest of Lightwood&#39;s pipeline.</span>
@@ -136,7 +136,7 @@
             <span class="p">}</span></div>
 
 
-<span class="k">def</span> <span class="nf">get_naive_residuals</span><span class="p">(</span><span class="n">target_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_naive_residuals</span><span class="p">(</span><span class="n">target_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes forecasting residuals for the naive method (forecasts for time `t` is the value observed at `t-1`).</span>
 <span class="sd">    Useful for computing MASE forecasting error.</span>
@@ -158,7 +158,7 @@
     <span class="k">return</span> <span class="n">residuals</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">scale_factor</span>
 
 
-<span class="k">def</span> <span class="nf">get_grouped_naive_residuals</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_grouped_naive_residuals</span><span class="p">(</span>
         <span class="n">info</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">tss</span><span class="p">:</span> <span class="n">TimeseriesSettings</span>
@@ -177,7 +177,7 @@
     <span class="k">return</span> <span class="n">group_residuals</span><span class="p">,</span> <span class="n">group_scale_factors</span>
 
 
-<span class="k">def</span> <span class="nf">get_differencers</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">group_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_differencers</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">group_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
     <span class="n">differencers</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">grouped</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">group_cols</span><span class="p">)</span> <span class="k">if</span> <span class="n">group_cols</span> <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">group</span><span class="p">,</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">:</span>
@@ -194,7 +194,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

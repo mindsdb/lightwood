@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>api.json_ai &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>api.json_ai &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -81,23 +81,23 @@
              
   <h1>Source code for api.json_ai</h1><div class="highlight"><pre>
 <span></span><span class="c1"># TODO: add_implicit_values unit test ensures NO changes for a fully specified file.</span>
-<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 
-<span class="kn">from</span> <span class="nn">type_infer.dtype</span> <span class="kn">import</span> <span class="n">dtype</span>
-<span class="kn">from</span> <span class="nn">type_infer.base</span> <span class="kn">import</span> <span class="n">TypeInformation</span>
-<span class="kn">from</span> <span class="nn">dataprep_ml</span> <span class="kn">import</span> <span class="n">StatisticalAnalysis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">type_infer.dtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">dtype</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">type_infer.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeInformation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataprep_ml</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatisticalAnalysis</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.helpers.templating</span> <span class="kn">import</span> <span class="n">_consolidate_analysis_blocks</span><span class="p">,</span> <span class="n">_add_cls_kwarg</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.constants</span> <span class="kn">import</span> <span class="n">IMPORTS</span><span class="p">,</span> <span class="n">IMPORT_EXTERNAL_DIRS</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.helpers.templating</span><span class="w"> </span><span class="kn">import</span> <span class="n">_consolidate_analysis_blocks</span><span class="p">,</span> <span class="n">_add_cls_kwarg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.helpers.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">IMPORTS</span><span class="p">,</span> <span class="n">IMPORT_EXTERNAL_DIRS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">JsonAI</span><span class="p">,</span>
     <span class="n">ProblemDefinition</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">import</span> <span class="nn">lightwood.ensemble</span>
-<span class="kn">import</span> <span class="nn">lightwood.encoder</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lightwood.ensemble</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lightwood.encoder</span>
 
 
-<div class="viewcode-block" id="lookup_encoder"><a class="viewcode-back" href="../../api/json_ai.html#api.json_ai.lookup_encoder">[docs]</a><span class="k">def</span> <span class="nf">lookup_encoder</span><span class="p">(</span>
+<div class="viewcode-block" id="lookup_encoder"><a class="viewcode-back" href="../../api/json_ai.html#api.json_ai.lookup_encoder">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">lookup_encoder</span><span class="p">(</span>
     <span class="n">col_dtype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -222,7 +222,7 @@
     <span class="k">return</span> <span class="n">encoder_dict</span></div>
 
 
-<div class="viewcode-block" id="generate_json_ai"><a class="viewcode-back" href="../../api/json_ai.html#api.json_ai.generate_json_ai">[docs]</a><span class="k">def</span> <span class="nf">generate_json_ai</span><span class="p">(</span>
+<div class="viewcode-block" id="generate_json_ai"><a class="viewcode-back" href="../../api/json_ai.html#api.json_ai.generate_json_ai">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">generate_json_ai</span><span class="p">(</span>
     <span class="n">type_information</span><span class="p">:</span> <span class="n">TypeInformation</span><span class="p">,</span>
     <span class="n">statistical_analysis</span><span class="p">:</span> <span class="n">StatisticalAnalysis</span><span class="p">,</span>
     <span class="n">problem_definition</span><span class="p">:</span> <span class="n">ProblemDefinition</span><span class="p">,</span>
@@ -476,7 +476,7 @@
     <span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_merge_implicit_values</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">implicit_value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_merge_implicit_values</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">implicit_value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function for `_populate_implicit_field`.</span>
 <span class="sd">    Takes a user-defined field along with its implicit value, and merges them together.</span>
@@ -505,7 +505,7 @@
     <span class="k">return</span> <span class="n">field</span>
 
 
-<span class="k">def</span> <span class="nf">_populate_implicit_field</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_populate_implicit_field</span><span class="p">(</span>
     <span class="n">json_ai</span><span class="p">:</span> <span class="n">JsonAI</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">implicit_value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">is_timeseries</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -549,7 +549,7 @@
     <span class="n">json_ai</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="add_implicit_values"><a class="viewcode-back" href="../../api/json_ai.html#api.json_ai.add_implicit_values">[docs]</a><span class="k">def</span> <span class="nf">add_implicit_values</span><span class="p">(</span><span class="n">json_ai</span><span class="p">:</span> <span class="n">JsonAI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonAI</span><span class="p">:</span>
+<div class="viewcode-block" id="add_implicit_values"><a class="viewcode-back" href="../../api/json_ai.html#api.json_ai.add_implicit_values">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">add_implicit_values</span><span class="p">(</span><span class="n">json_ai</span><span class="p">:</span> <span class="n">JsonAI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JsonAI</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    To enable brevity in writing, auto-generate the &quot;unspecified/missing&quot; details required in the ML pipeline.</span>
 
@@ -804,7 +804,7 @@
     <span class="k">return</span> <span class="n">json_ai</span></div>
 
 
-<div class="viewcode-block" id="validate_json_ai"><a class="viewcode-back" href="../../api/json_ai.html#api.json_ai.validate_json_ai">[docs]</a><span class="k">def</span> <span class="nf">validate_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">:</span> <span class="n">JsonAI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="validate_json_ai"><a class="viewcode-back" href="../../api/json_ai.html#api.json_ai.validate_json_ai">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">validate_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">:</span> <span class="n">JsonAI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks the validity of a ``JsonAI`` object</span>
 
@@ -812,7 +812,7 @@
 
 <span class="sd">    :returns: Whether the JsonAI is valid, i.e. doesn&#39;t contain prohibited values, unknown values and can be turned into code.</span>
 <span class="sd">    &quot;&quot;&quot;</span> <span class="c1"># noqa</span>
-    <span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">predictor_from_code</span><span class="p">,</span> <span class="n">code_from_json_ai</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.api.high_level</span><span class="w"> </span><span class="kn">import</span> <span class="n">predictor_from_code</span><span class="p">,</span> <span class="n">code_from_json_ai</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">predictor_from_code</span><span class="p">(</span><span class="n">code_from_json_ai</span><span class="p">(</span><span class="n">json_ai</span><span class="p">))</span>
@@ -828,7 +828,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tutorial - Introduction to Lightwood’s statistical analysis &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>Tutorial - Introduction to Lightwood’s statistical analysis &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -103,7 +103,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/mindsdb/lightwood/main/tests/data/hdi.csv&#39;</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -206,7 +206,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.api.high_level</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.api.high_level</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProblemDefinition</span>
 
 <span class="n">problem_definition</span> <span class="o">=</span> <span class="n">ProblemDefinition</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;Development Index&#39;</span><span class="p">})</span>
 </pre></div>
@@ -217,8 +217,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2488:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2488:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-2967:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-2967:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 <p>Let’s see how this object has been populated. <code class="docutils literal notranslate"><span class="pre">ProblemDefinition</span></code> is a Python <code class="docutils literal notranslate"><span class="pre">dataclass</span></code>, so it comes with some convenient tools to achieve this:</p>
@@ -226,7 +226,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">fields</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">fields</span>
 
 <span class="p">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">problem_definition</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">ProblemDefinition</span><span class="p">)}</span>
 </pre></div>
@@ -264,8 +264,8 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">type_infer.api</span> <span class="kn">import</span> <span class="n">infer_types</span>
-<span class="kn">from</span> <span class="nn">type_infer.base</span> <span class="kn">import</span> <span class="n">TypeInformation</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">type_infer.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">infer_types</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">type_infer.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeInformation</span>
 
 <span class="n">type_information</span> <span class="o">=</span> <span class="n">infer_types</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;engine&#39;</span><span class="p">:</span> <span class="s1">&#39;rule_based&#39;</span><span class="p">,</span> <span class="s1">&#39;pct_invalid&#39;</span><span class="p">:</span> <span class="n">problem_definition</span><span class="o">.</span><span class="n">pct_invalid</span><span class="p">})</span>
 
@@ -278,22 +278,22 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2488:Analyzing a sample of 222</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:from a total population of 225, this is equivalent to 98.7% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Infering type for: Population</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Column Population has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Infering type for: Area (sq. mi.)</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Column Area (sq. mi.) has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Infering type for: Pop. Density </span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Column Pop. Density  has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Infering type for: GDP ($ per capita)</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Column GDP ($ per capita) has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Infering type for: Literacy (%)</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Column Literacy (%) has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Infering type for: Infant mortality </span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Column Infant mortality  has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Infering type for: Development Index</span>
-<span class="ansi-green-fg">INFO:type_infer-2488:Column Development Index has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Analyzing a sample of 222</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:from a total population of 225, this is equivalent to 98.7% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Infering type for: Population</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Column Population has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Infering type for: Area (sq. mi.)</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Column Area (sq. mi.) has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Infering type for: Pop. Density </span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Column Pop. Density  has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Infering type for: GDP ($ per capita)</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Column GDP ($ per capita) has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Infering type for: Literacy (%)</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Column Literacy (%) has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Infering type for: Infant mortality </span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Column Infant mortality  has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Infering type for: Development Index</span>
+<span class="ansi-green-fg">INFO:type_infer-2967:Column Development Index has data type categorical</span>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -340,8 +340,8 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dataprep_ml.insights</span> <span class="kn">import</span> <span class="n">StatisticalAnalysis</span>  <span class="c1"># the class where everything is stored</span>
-<span class="kn">from</span> <span class="nn">dataprep_ml.insights</span> <span class="kn">import</span> <span class="n">statistical_analysis</span> <span class="c1"># generates an instance of the class</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataprep_ml.insights</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatisticalAnalysis</span>  <span class="c1"># the class where everything is stored</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataprep_ml.insights</span><span class="w"> </span><span class="kn">import</span> <span class="n">statistical_analysis</span> <span class="c1"># generates an instance of the class</span>
 
 <span class="n">stan</span> <span class="o">=</span> <span class="n">statistical_analysis</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
                             <span class="n">type_information</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span>
@@ -355,8 +355,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2488:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2488:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2967:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-2967:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 </section>
@@ -586,8 +586,8 @@ Biased buckets: [650.86, 6183.17, 976.29, 325.43, 0.0]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
 <span class="c1"># generate color map</span>
 <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">tab10</span>
@@ -682,7 +682,7 @@ Biased buckets: [650.86, 6183.17, 976.29, 325.43, 0.0]
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

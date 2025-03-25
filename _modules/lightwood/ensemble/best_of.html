@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lightwood.ensemble.best_of &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>lightwood.ensemble.best_of &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
@@ -80,31 +80,31 @@
            <div itemprop="articleBody">
              
   <h1>Source code for lightwood.ensemble.best_of</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">mindsdb_evaluator</span> <span class="kn">import</span> <span class="n">evaluate_accuracies</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mindsdb_evaluator</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate_accuracies</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">type_infer.helpers</span> <span class="kn">import</span> <span class="n">is_nan_numeric</span>
-<span class="kn">from</span> <span class="nn">lightwood.mixer.base</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
-<span class="kn">from</span> <span class="nn">lightwood.ensemble.base</span> <span class="kn">import</span> <span class="n">BaseEnsemble</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span><span class="p">,</span> <span class="n">SubmodelData</span>
-<span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.helpers.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">type_infer.helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_nan_numeric</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.mixer.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseMixer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.ensemble.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEnsemble</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">PredictionArguments</span><span class="p">,</span> <span class="n">SubmodelData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.data.encoded_ds</span><span class="w"> </span><span class="kn">import</span> <span class="n">EncodedDs</span>
 
 <span class="c1"># special dispatches</span>
-<span class="kn">from</span> <span class="nn">lightwood.mixer</span> <span class="kn">import</span> <span class="n">GluonTSMixer</span>  <span class="c1"># imported from base mixer folder as it needs optional dependencies</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.mixer</span><span class="w"> </span><span class="kn">import</span> <span class="n">GluonTSMixer</span>  <span class="c1"># imported from base mixer folder as it needs optional dependencies</span>
 
 
-<div class="viewcode-block" id="BestOf"><a class="viewcode-back" href="../../../ensemble.html#ensemble.BestOf">[docs]</a><span class="k">class</span> <span class="nc">BestOf</span><span class="p">(</span><span class="n">BaseEnsemble</span><span class="p">):</span>
+<div class="viewcode-block" id="BestOf"><a class="viewcode-back" href="../../../ensemble.html#ensemble.BestOf">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BestOf</span><span class="p">(</span><span class="n">BaseEnsemble</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This ensemble acts as a mixer selector. </span>
 <span class="sd">    After evaluating accuracy for all internal mixers with the validation data, it sets the best mixer as the underlying model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
     <span class="n">indexes_by_accuracy</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseMixer</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">accuracy_functions</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseMixer</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">accuracy_functions</span><span class="p">,</span>
                  <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mixers</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">special_dispatch_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">GluonTSMixer</span><span class="p">]</span>
@@ -145,7 +145,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">prepared</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">submodel_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indexes_by_accuracy</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">is_best</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepared</span>
         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">all_mixers</span><span class="p">:</span>
             <span class="n">predictions</span> <span class="o">=</span> <span class="p">{}</span>
@@ -164,7 +164,7 @@
                         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unstable mixer </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mixer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> failed with exception: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">.</span><span class="se">\</span>
 <span class="s1">                        Trying next best&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">special_dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mixer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">special_dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mixer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">ts_analysis</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mixer</span><span class="p">,</span> <span class="n">GluonTSMixer</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">mixer</span><span class="o">.</span><span class="n">model_train_stats</span><span class="o">.</span><span class="n">loss_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 </pre></div>
@@ -176,7 +176,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

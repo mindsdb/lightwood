@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lightwood.mixer.sktime &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>lightwood.mixer.sktime &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
@@ -80,27 +80,27 @@
            <div itemprop="articleBody">
              
   <h1>Source code for lightwood.mixer.sktime</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">importlib</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">optuna</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">sktime.forecasting.compose</span> <span class="kn">import</span> <span class="n">TransformedTargetForecaster</span>
-<span class="kn">from</span> <span class="nn">sktime.forecasting.base</span> <span class="kn">import</span> <span class="n">ForecastingHorizon</span><span class="p">,</span> <span class="n">BaseForecaster</span>
-<span class="kn">from</span> <span class="nn">sktime.performance_metrics.forecasting</span> <span class="kn">import</span> <span class="n">MeanAbsolutePercentageError</span>
-<span class="kn">from</span> <span class="nn">sktime.forecasting.statsforecast</span> <span class="kn">import</span> <span class="n">StatsForecastAutoARIMA</span> <span class="k">as</span> <span class="n">AutoARIMA</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.forecasting.compose</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransformedTargetForecaster</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.forecasting.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ForecastingHorizon</span><span class="p">,</span> <span class="n">BaseForecaster</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.performance_metrics.forecasting</span><span class="w"> </span><span class="kn">import</span> <span class="n">MeanAbsolutePercentageError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sktime.forecasting.statsforecast</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatsForecastAutoARIMA</span> <span class="k">as</span> <span class="n">AutoARIMA</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.templating</span> <span class="kn">import</span> <span class="n">_add_cls_kwarg</span>
-<span class="kn">from</span> <span class="nn">lightwood.mixer.base</span> <span class="kn">import</span> <span class="n">BaseMixer</span>
-<span class="kn">from</span> <span class="nn">lightwood.api.types</span> <span class="kn">import</span> <span class="n">PredictionArguments</span>
-<span class="kn">from</span> <span class="nn">lightwood.data.encoded_ds</span> <span class="kn">import</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.helpers.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.helpers.templating</span><span class="w"> </span><span class="kn">import</span> <span class="n">_add_cls_kwarg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.mixer.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseMixer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">PredictionArguments</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.data.encoded_ds</span><span class="w"> </span><span class="kn">import</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span>
 
 
-<div class="viewcode-block" id="SkTime"><a class="viewcode-back" href="../../../mixer.html#mixer.SkTime">[docs]</a><span class="k">class</span> <span class="nc">SkTime</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
+<div class="viewcode-block" id="SkTime"><a class="viewcode-back" href="../../../mixer.html#mixer.SkTime">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SkTime</span><span class="p">(</span><span class="n">BaseMixer</span><span class="p">):</span>
     <span class="n">forecaster</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">target</span><span class="p">:</span> <span class="nb">str</span>
@@ -108,7 +108,7 @@
     <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">hyperparam_search</span><span class="p">:</span> <span class="nb">bool</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">stop_after</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
             <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -193,7 +193,7 @@
         <span class="c1"># the default assumption is to forecast the next `self.horizon` after said data point</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fh</span> <span class="o">=</span> <span class="n">ForecastingHorizon</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizon</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">is_relative</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SkTime.fit"><a class="viewcode-back" href="../../../mixer.html#mixer.SkTime.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SkTime.fit"><a class="viewcode-back" href="../../../mixer.html#mixer.SkTime.fit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fits a set of sktime forecasters. The number of models depends on how many groups are observed at training time.</span>
 
@@ -212,7 +212,7 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">ConcatedEncodedDs</span><span class="p">([</span><span class="n">train_data</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Internal method that fits forecasters to a given dataframe.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -297,7 +297,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_class</span><span class="p">()</span>  <span class="c1"># with default options (i.e. no seasonality, among others)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">fh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fh</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SkTime.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.SkTime.partial_fit">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SkTime.partial_fit"><a class="viewcode-back" href="../../../mixer.html#mixer.SkTime.partial_fit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">EncodedDs</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Note: sktime asks for &quot;specification of the time points for which forecasts are requested&quot;, and this mixer complies by assuming forecasts will start immediately after the last observed value.</span>
 
@@ -312,7 +312,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">dev_data</span><span class="p">,</span> <span class="n">train_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span><span class="p">],</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">EncodedDs</span><span class="p">,</span> <span class="n">ConcatedEncodedDs</span><span class="p">],</span>
                  <span class="n">args</span><span class="p">:</span> <span class="n">PredictionArguments</span> <span class="o">=</span> <span class="n">PredictionArguments</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calls the mixer to emit forecasts.</span>
@@ -358,7 +358,7 @@
 
         <span class="k">return</span> <span class="n">ydf</span><span class="p">[[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]]</span>
 
-    <span class="k">def</span> <span class="nf">_call_groupmodel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_call_groupmodel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                          <span class="n">ydf</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                          <span class="n">model</span><span class="p">:</span> <span class="n">BaseForecaster</span><span class="p">,</span>
                          <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
@@ -393,14 +393,14 @@
             <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_preds</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ydf</span>
 
-    <span class="k">def</span> <span class="nf">_call_default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ydf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">idxs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_call_default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ydf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">idxs</span><span class="p">):</span>
         <span class="c1"># last value from each window equals shifted target (by 1)  # noqa</span>
         <span class="n">series</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">flatten</span><span class="p">())[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">all_preds</span> <span class="o">=</span> <span class="p">[[</span><span class="n">value</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">horizon</span><span class="p">)]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">series</span><span class="p">]</span>
         <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;prediction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idxs</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_preds</span>
         <span class="k">return</span> <span class="n">ydf</span>
 
-    <span class="k">def</span> <span class="nf">_get_best_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">train_data</span><span class="p">,</span> <span class="n">test_data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_best_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">train_data</span><span class="p">,</span> <span class="n">test_data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Helper function for Optuna hyperparameter optimization.</span>
 <span class="sd">        For now, it uses dev data split to find the best model out of the list specified in self.possible_models.</span>
@@ -422,13 +422,13 @@
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Trial got error: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">error</span>
 
-    <span class="k">def</span> <span class="nf">_transform_index_to_datetime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">series_oby</span><span class="p">,</span> <span class="n">freq</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_transform_index_to_datetime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">series_oby</span><span class="p">,</span> <span class="n">freq</span><span class="p">):</span>
         <span class="n">series_oby</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">series_oby</span><span class="p">])</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">series_oby</span><span class="p">[</span><span class="n">series_oby</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">series_oby</span><span class="p">)]))</span>
         <span class="n">series</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="n">series</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">series</span>
 
-    <span class="k">def</span> <span class="nf">_get_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">]</span>
         <span class="n">secs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span>
                 <span class="mi">60</span><span class="p">,</span>
@@ -449,7 +449,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

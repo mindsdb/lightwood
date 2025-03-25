@@ -43,10 +43,10 @@
    "id": "raising-adventure",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-12-19T16:32:16.604198Z",
-     "iopub.status.busy": "2024-12-19T16:32:16.603971Z",
-     "iopub.status.idle": "2024-12-19T16:32:20.500249Z",
-     "shell.execute_reply": "2024-12-19T16:32:20.499588Z"
+     "iopub.execute_input": "2025-03-25T09:00:24.549687Z",
+     "iopub.status.busy": "2025-03-25T09:00:24.549477Z",
+     "iopub.status.idle": "2025-03-25T09:00:29.120596Z",
+     "shell.execute_reply": "2025-03-25T09:00:29.119827Z"
     }
    },
    "outputs": [
@@ -54,14 +54,14 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2551:No torchvision detected, image helpers not supported.\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-3490:No torchvision detected, image helpers not supported.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2551:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-3490:No torchvision/pillow detected, image encoder not supported\u001b[0m\n"
      ]
     }
    ],
@@ -93,10 +93,10 @@
    "id": "technical-government",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-12-19T16:32:20.503021Z",
-     "iopub.status.busy": "2024-12-19T16:32:20.502445Z",
-     "iopub.status.idle": "2024-12-19T16:32:20.732793Z",
-     "shell.execute_reply": "2024-12-19T16:32:20.732082Z"
+     "iopub.execute_input": "2025-03-25T09:00:29.123324Z",
+     "iopub.status.busy": "2025-03-25T09:00:29.122990Z",
+     "iopub.status.idle": "2025-03-25T09:00:29.352135Z",
+     "shell.execute_reply": "2025-03-25T09:00:29.351425Z"
     }
    },
    "outputs": [
@@ -243,10 +243,10 @@
    "id": "absent-maker",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-12-19T16:32:20.735040Z",
-     "iopub.status.busy": "2024-12-19T16:32:20.734644Z",
-     "iopub.status.idle": "2024-12-19T16:32:31.926827Z",
-     "shell.execute_reply": "2024-12-19T16:32:31.926099Z"
+     "iopub.execute_input": "2025-03-25T09:00:29.354504Z",
+     "iopub.status.busy": "2025-03-25T09:00:29.354016Z",
+     "iopub.status.idle": "2025-03-25T09:00:40.519581Z",
+     "shell.execute_reply": "2025-03-25T09:00:40.518825Z"
     }
    },
    "outputs": [
@@ -254,195 +254,161 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Analyzing a sample of 6920\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Analyzing a sample of 6920\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:from a total population of 10668, this is equivalent to 64.9% of your data.\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:from a total population of 10668, this is equivalent to 64.9% of your data.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Using 3 processes to deduct types.\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Using 3 processes to deduct types.\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "/opt/hostedtoolcache/Python/3.9.20/x64/lib/python3.9/multiprocessing/popen_fork.py:66: RuntimeWarning: Using fork() can cause Polars to deadlock in the child process.\n",
-      "In addition, using fork() with Python in general is a recipe for mysterious\n",
-      "deadlocks and crashes.\n",
-      "\n",
-      "The most likely reason you are seeing this error is because you are using the\n",
-      "multiprocessing module on Linux, which uses fork() by default. This will be\n",
-      "fixed in Python 3.14. Until then, you want to use the \"spawn\" context instead.\n",
-      "\n",
-      "See https://docs.pola.rs/user-guide/misc/multiprocessing/ for details.\n",
-      "\n",
-      "If you really know what your doing, you can silence this warning with the warning module\n",
-      "or by setting POLARS_ALLOW_FORKING_THREAD=1.\n",
-      "\n",
-      "  self.pid = os.fork()\n"
+      "\u001b[32mINFO:type_infer-3490:Infering type for: price\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Infering type for: year\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Infering type for: year\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Infering type for: price\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Infering type for: model\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "/opt/hostedtoolcache/Python/3.9.20/x64/lib/python3.9/multiprocessing/popen_fork.py:66: RuntimeWarning: Using fork() can cause Polars to deadlock in the child process.\n",
-      "In addition, using fork() with Python in general is a recipe for mysterious\n",
-      "deadlocks and crashes.\n",
-      "\n",
-      "The most likely reason you are seeing this error is because you are using the\n",
-      "multiprocessing module on Linux, which uses fork() by default. This will be\n",
-      "fixed in Python 3.14. Until then, you want to use the \"spawn\" context instead.\n",
-      "\n",
-      "See https://docs.pola.rs/user-guide/misc/multiprocessing/ for details.\n",
-      "\n",
-      "If you really know what your doing, you can silence this warning with the warning module\n",
-      "or by setting POLARS_ALLOW_FORKING_THREAD=1.\n",
-      "\n",
-      "  self.pid = os.fork()\n",
-      "\u001b[32mINFO:type_infer-2551:Infering type for: model\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Column price has data type integer\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Column price has data type integer\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Infering type for: transmission\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Column year has data type integer\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Column year has data type integer\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Infering type for: transmission\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Infering type for: mileage\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Infering type for: mileage\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Column mileage has data type integer\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Column mileage has data type integer\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Infering type for: fuelType\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Infering type for: fuelType\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Column transmission has data type categorical\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Column model has data type categorical\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Infering type for: tax\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Infering type for: tax\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Column tax has data type integer\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Column tax has data type integer\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Infering type for: mpg\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Infering type for: mpg\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Column mpg has data type float\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Column mpg has data type float\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Infering type for: engineSize\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Infering type for: engineSize\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Column engineSize has data type float\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Column engineSize has data type float\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Column model has data type categorical\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Column fuelType has data type categorical\u001b[0m\n"
+      "\u001b[32mINFO:type_infer-3490:Column fuelType has data type categorical\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:type_infer-2551:Column transmission has data type categorical\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-3490:Starting statistical analysis\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2551:Starting statistical analysis\u001b[0m\n"
-     ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "\u001b[32mINFO:dataprep_ml-2551:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-3490:Finished statistical analysis\u001b[0m\n"
      ]
     }
    ],
@@ -471,10 +437,10 @@
    "id": "coastal-paragraph",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-12-19T16:32:31.929537Z",
-     "iopub.status.busy": "2024-12-19T16:32:31.929216Z",
-     "iopub.status.idle": "2024-12-19T16:32:31.934646Z",
-     "shell.execute_reply": "2024-12-19T16:32:31.934031Z"
+     "iopub.execute_input": "2025-03-25T09:00:40.522504Z",
+     "iopub.status.busy": "2025-03-25T09:00:40.521901Z",
+     "iopub.status.idle": "2025-03-25T09:00:40.527929Z",
+     "shell.execute_reply": "2025-03-25T09:00:40.527229Z"
     }
    },
    "outputs": [
@@ -579,7 +545,7 @@
       "        \"unbias_target\": true,\n",
       "        \"seconds_per_mixer\": 21384.0,\n",
       "        \"seconds_per_encoder\": 85536.0,\n",
-      "        \"expected_additional_time\": 11.148000478744507,\n",
+      "        \"expected_additional_time\": 11.12000560760498,\n",
       "        \"time_aim\": 259200,\n",
       "        \"target_weights\": null,\n",
       "        \"positive_domain\": false,\n",
@@ -677,10 +643,10 @@
    "id": "e03db1b0",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-12-19T16:32:31.936956Z",
-     "iopub.status.busy": "2024-12-19T16:32:31.936581Z",
-     "iopub.status.idle": "2024-12-19T16:32:31.941921Z",
-     "shell.execute_reply": "2024-12-19T16:32:31.941309Z"
+     "iopub.execute_input": "2025-03-25T09:00:40.530525Z",
+     "iopub.status.busy": "2025-03-25T09:00:40.529899Z",
+     "iopub.status.idle": "2025-03-25T09:00:40.535543Z",
+     "shell.execute_reply": "2025-03-25T09:00:40.534873Z"
     }
    },
    "outputs": [
@@ -800,10 +766,10 @@
    "id": "e30866c1",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-12-19T16:32:31.944016Z",
-     "iopub.status.busy": "2024-12-19T16:32:31.943624Z",
-     "iopub.status.idle": "2024-12-19T16:32:31.946818Z",
-     "shell.execute_reply": "2024-12-19T16:32:31.946310Z"
+     "iopub.execute_input": "2025-03-25T09:00:40.537677Z",
+     "iopub.status.busy": "2025-03-25T09:00:40.537449Z",
+     "iopub.status.idle": "2025-03-25T09:00:40.540908Z",
+     "shell.execute_reply": "2025-03-25T09:00:40.540374Z"
     }
    },
    "outputs": [],
@@ -862,10 +828,10 @@
    "id": "elementary-fusion",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-12-19T16:32:31.948939Z",
-     "iopub.status.busy": "2024-12-19T16:32:31.948577Z",
-     "iopub.status.idle": "2024-12-19T16:32:31.951692Z",
-     "shell.execute_reply": "2024-12-19T16:32:31.951092Z"
+     "iopub.execute_input": "2025-03-25T09:00:40.542982Z",
+     "iopub.status.busy": "2025-03-25T09:00:40.542789Z",
+     "iopub.status.idle": "2025-03-25T09:00:40.545849Z",
+     "shell.execute_reply": "2025-03-25T09:00:40.545302Z"
     }
    },
    "outputs": [],
@@ -891,10 +857,10 @@
    "id": "inappropriate-james",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-12-19T16:32:31.953823Z",
-     "iopub.status.busy": "2024-12-19T16:32:31.953457Z",
-     "iopub.status.idle": "2024-12-19T16:32:32.360414Z",
-     "shell.execute_reply": "2024-12-19T16:32:32.359748Z"
+     "iopub.execute_input": "2025-03-25T09:00:40.547899Z",
+     "iopub.status.busy": "2025-03-25T09:00:40.547708Z",
+     "iopub.status.idle": "2025-03-25T09:00:40.786077Z",
+     "shell.execute_reply": "2025-03-25T09:00:40.785439Z"
     }
    },
    "outputs": [],
@@ -925,10 +891,10 @@
    "id": "palestinian-harvey",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-12-19T16:32:32.362838Z",
-     "iopub.status.busy": "2024-12-19T16:32:32.362454Z",
-     "iopub.status.idle": "2024-12-19T16:32:33.495453Z",
-     "shell.execute_reply": "2024-12-19T16:32:33.494778Z"
+     "iopub.execute_input": "2025-03-25T09:00:40.788529Z",
+     "iopub.status.busy": "2025-03-25T09:00:40.788285Z",
+     "iopub.status.idle": "2025-03-25T09:00:41.947366Z",
+     "shell.execute_reply": "2025-03-25T09:00:41.946799Z"
     }
    },
    "outputs": [
@@ -936,133 +902,133 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2551:Starting statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-3490:Starting statistical analysis\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2551:Finished statistical analysis\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-3490:Finished statistical analysis\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2551: `analyze_data` runtime: 0.42 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-3490: `analyze_data` runtime: 0.44 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2551:Cleaning the data\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-3490:Cleaning the data\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2551: `preprocess` runtime: 0.13 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-3490: `preprocess` runtime: 0.13 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2551:Splitting the data into train/test\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-3490:Splitting the data into train/test\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2551: `split` runtime: 0.0 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-3490: `split` runtime: 0.0 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2551:Preparing sequentially...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-3490:Preparing sequentially...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2551:Preparing encoder for year...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-3490:Preparing encoder for year...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2551:Preparing encoder for mileage...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-3490:Preparing encoder for mileage...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2551:Preparing encoder for tax...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-3490:Preparing encoder for tax...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2551:Preparing encoder for mpg...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-3490:Preparing encoder for mpg...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:dataprep_ml-2551:Preparing encoder for engineSize...\u001b[0m\n"
+      "\u001b[37mDEBUG:dataprep_ml-3490:Preparing encoder for engineSize...\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2551:Categories Detected = 1\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-3490:Categories Detected = 1\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2551:Categories Detected = 1\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-3490:Categories Detected = 1\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:lightwood-2551:Categories Detected = 1\u001b[0m\n"
+      "\u001b[32mINFO:lightwood-3490:Categories Detected = 1\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2551: `prepare` runtime: 0.02 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-3490: `prepare` runtime: 0.02 seconds\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[32mINFO:dataprep_ml-2551:Featurizing the data\u001b[0m\n"
+      "\u001b[32mINFO:dataprep_ml-3490:Featurizing the data\u001b[0m\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "\u001b[37mDEBUG:lightwood-2551: `featurize` runtime: 0.55 seconds\u001b[0m\n"
+      "\u001b[37mDEBUG:lightwood-3490: `featurize` runtime: 0.57 seconds\u001b[0m\n"
      ]
     }
    ],
@@ -1097,10 +1063,10 @@
    "id": "silent-dealing",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-12-19T16:32:33.497687Z",
-     "iopub.status.busy": "2024-12-19T16:32:33.497302Z",
-     "iopub.status.idle": "2024-12-19T16:32:33.505854Z",
-     "shell.execute_reply": "2024-12-19T16:32:33.505218Z"
+     "iopub.execute_input": "2025-03-25T09:00:41.949854Z",
+     "iopub.status.busy": "2025-03-25T09:00:41.949625Z",
+     "iopub.status.idle": "2025-03-25T09:00:41.959242Z",
+     "shell.execute_reply": "2025-03-25T09:00:41.958656Z"
     }
    },
    "outputs": [
@@ -1202,10 +1168,10 @@
    "id": "superior-mobility",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2024-12-19T16:32:33.507935Z",
-     "iopub.status.busy": "2024-12-19T16:32:33.507546Z",
-     "iopub.status.idle": "2024-12-19T16:32:33.510919Z",
-     "shell.execute_reply": "2024-12-19T16:32:33.510297Z"
+     "iopub.execute_input": "2025-03-25T09:00:41.961382Z",
+     "iopub.status.busy": "2025-03-25T09:00:41.961176Z",
+     "iopub.status.idle": "2025-03-25T09:00:41.964913Z",
+     "shell.execute_reply": "2025-03-25T09:00:41.964327Z"
     }
    },
    "outputs": [
@@ -1249,7 +1215,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.9.20"
+   "version": "3.9.21"
   }
  },
  "nbformat": 4,

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>lightwood.data.encoded_ds &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>lightwood.data.encoded_ds &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
@@ -80,17 +80,17 @@
            <div itemprop="articleBody">
              
   <h1>Source code for lightwood.data.encoded_ds</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
-<span class="kn">from</span> <span class="nn">lightwood.encoder.base</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.encoder.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEncoder</span>
 
 
-<div class="viewcode-block" id="EncodedDs"><a class="viewcode-back" href="../../../data.html#data.EncodedDs">[docs]</a><span class="k">class</span> <span class="nc">EncodedDs</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoders</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseEncoder</span><span class="p">],</span> <span class="n">data_frame</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="EncodedDs"><a class="viewcode-back" href="../../../data.html#data.EncodedDs">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">EncodedDs</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoders</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseEncoder</span><span class="p">],</span> <span class="n">data_frame</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Lightwood datasource from a data frame and some encoders. This class inherits from `torch.utils.data.Dataset`.</span>
 <span class="sd">        </span>
@@ -120,7 +120,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Y_cache</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span><span class="p">),),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">build_cache</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The length of an `EncodedDs` datasource equals the amount of rows of the original dataframe.</span>
 
@@ -128,7 +128,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The getter yields a tuple (X, y), where:</span>
 <span class="sd">          - `X `is a concatenation of all encoded representations of the row. Size: (B, n_features)</span>
@@ -150,7 +150,7 @@
 
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span>
 
-    <span class="k">def</span> <span class="nf">_encode_idxs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idxs</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_encode_idxs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idxs</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idxs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Passed indexes is not an iterable. Check the type! Index: </span><span class="si">{</span><span class="n">idxs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -193,7 +193,7 @@
 
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span>
 
-<div class="viewcode-block" id="EncodedDs.get_column_original_data"><a class="viewcode-back" href="../../../data.html#data.EncodedDs.get_column_original_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_column_original_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<div class="viewcode-block" id="EncodedDs.get_column_original_data"><a class="viewcode-back" href="../../../data.html#data.EncodedDs.get_column_original_data">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_column_original_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the original data for any given column of the `EncodedDs`.</span>
 
@@ -202,7 +202,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EncodedDs.get_encoded_column_data"><a class="viewcode-back" href="../../../data.html#data.EncodedDs.get_encoded_column_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_encoded_column_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="EncodedDs.get_encoded_column_data"><a class="viewcode-back" href="../../../data.html#data.EncodedDs.get_encoded_column_data">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_encoded_column_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the encoded data for any given column of the `EncodedDs`.</span>
 
@@ -237,7 +237,7 @@
 
         <span class="k">return</span> <span class="n">encoded_data</span></div>
 
-<div class="viewcode-block" id="EncodedDs.get_encoded_data"><a class="viewcode-back" href="../../../data.html#data.EncodedDs.get_encoded_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_encoded_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="EncodedDs.get_encoded_data"><a class="viewcode-back" href="../../../data.html#data.EncodedDs.get_encoded_data">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_encoded_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets all encoded data.</span>
 
@@ -251,7 +251,7 @@
 
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">encoded_dfs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EncodedDs.build_cache"><a class="viewcode-back" href="../../../data.html#data.EncodedDs.build_cache">[docs]</a>    <span class="k">def</span> <span class="nf">build_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="EncodedDs.build_cache"><a class="viewcode-back" href="../../../data.html#data.EncodedDs.build_cache">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">build_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; This method builds a cache for the entire dataframe provided at initialization. &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_cache</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Cannot build a cache for EncodedDS with `use_cache` set to False.&quot;</span><span class="p">)</span>
@@ -262,20 +262,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Y_cache</span> <span class="o">=</span> <span class="n">Y</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache_built</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="EncodedDs.clear_cache"><a class="viewcode-back" href="../../../data.html#data.EncodedDs.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="EncodedDs.clear_cache"><a class="viewcode-back" href="../../../data.html#data.EncodedDs.clear_cache">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Clears the `EncodedDs` cache. &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X_cache</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span><span class="p">),),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Y_cache</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span><span class="p">),),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache_built</span> <span class="o">=</span> <span class="kc">False</span></div></div>
 
 
-<div class="viewcode-block" id="ConcatedEncodedDs"><a class="viewcode-back" href="../../../data.html#data.ConcatedEncodedDs">[docs]</a><span class="k">class</span> <span class="nc">ConcatedEncodedDs</span><span class="p">(</span><span class="n">EncodedDs</span><span class="p">):</span>
+<div class="viewcode-block" id="ConcatedEncodedDs"><a class="viewcode-back" href="../../../data.html#data.ConcatedEncodedDs">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ConcatedEncodedDs</span><span class="p">(</span><span class="n">EncodedDs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `ConcatedEncodedDs` abstracts over multiple encoded datasources (`EncodedDs`) as if they were a single entity.</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="c1"># TODO: We should probably delete this abstraction, it&#39;s not really useful and it adds complexity/overhead</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_ds_arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">EncodedDs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_ds_arr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">EncodedDs</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># @TODO: missing super() call here?</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span> <span class="o">=</span> <span class="n">encoded_ds_arr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_lengths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span><span class="p">]</span>
@@ -284,14 +284,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">target</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">data_frame</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        See `lightwood.data.encoded_ds.EncodedDs.__len__()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># @TODO: behavior here is not intuitive</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_lengths</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        See `lightwood.data.encoded_ds.EncodedDs.__getitem__()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -302,21 +302,21 @@
                 <span class="n">idx</span> <span class="o">-=</span> <span class="n">length</span>
         <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ConcatedEncodedDs.get_column_original_data"><a class="viewcode-back" href="../../../data.html#data.ConcatedEncodedDs.get_column_original_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_column_original_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<div class="viewcode-block" id="ConcatedEncodedDs.get_column_original_data"><a class="viewcode-back" href="../../../data.html#data.ConcatedEncodedDs.get_column_original_data">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_column_original_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        See `lightwood.data.encoded_ds.EncodedDs.get_column_original_data()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">encoded_df_arr</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">get_column_original_data</span><span class="p">(</span><span class="n">column_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">encoded_df_arr</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ConcatedEncodedDs.get_encoded_column_data"><a class="viewcode-back" href="../../../data.html#data.ConcatedEncodedDs.get_encoded_column_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_encoded_column_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="ConcatedEncodedDs.get_encoded_column_data"><a class="viewcode-back" href="../../../data.html#data.ConcatedEncodedDs.get_encoded_column_data">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_encoded_column_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        See `lightwood.data.encoded_ds.EncodedDs.get_encoded_column_data()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">encoded_df_arr</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">get_encoded_column_data</span><span class="p">(</span><span class="n">column_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoded_ds_arr</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">encoded_df_arr</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ConcatedEncodedDs.clear_cache"><a class="viewcode-back" href="../../../data.html#data.ConcatedEncodedDs.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ConcatedEncodedDs.clear_cache"><a class="viewcode-back" href="../../../data.html#data.ConcatedEncodedDs.clear_cache">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        See `lightwood.data.encoded_ds.EncodedDs.clear_cache()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -331,7 +331,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

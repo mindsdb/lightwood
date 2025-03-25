@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Custom Encoder: Rule-Based &mdash; lightwood 24.12.3.0 documentation</title>
+  <title>Custom Encoder: Rule-Based &mdash; lightwood 25.3.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -104,11 +104,11 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="c1"># Lightwood modules</span>
-<span class="kn">import</span> <span class="nn">lightwood</span> <span class="k">as</span> <span class="nn">lw</span>
-<span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> \
+<span class="kn">import</span><span class="w"> </span><span class="nn">lightwood</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">lw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProblemDefinition</span><span class="p">,</span> \
                       <span class="n">JsonAI</span><span class="p">,</span> \
                       <span class="n">json_ai_from_problem</span><span class="p">,</span> \
                       <span class="n">code_from_json_ai</span><span class="p">,</span> \
@@ -121,8 +121,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:lightwood-2551:No torchvision detected, image helpers not supported.</span>
-<span class="ansi-green-fg">INFO:lightwood-2551:No torchvision/pillow detected, image encoder not supported</span>
+<span class="ansi-green-fg">INFO:lightwood-3490:No torchvision detected, image helpers not supported.</span>
+<span class="ansi-green-fg">INFO:lightwood-3490:No torchvision/pillow detected, image encoder not supported</span>
 </pre></div></div>
 </div>
 </section>
@@ -270,57 +270,29 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:type_infer-2551:Analyzing a sample of 6920</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Using 3 processes to deduct types.</span>
-/opt/hostedtoolcache/Python/3.9.20/x64/lib/python3.9/multiprocessing/popen_fork.py:66: RuntimeWarning: Using fork() can cause Polars to deadlock in the child process.
-In addition, using fork() with Python in general is a recipe for mysterious
-deadlocks and crashes.
-
-The most likely reason you are seeing this error is because you are using the
-multiprocessing module on Linux, which uses fork() by default. This will be
-fixed in Python 3.14. Until then, you want to use the &#34;spawn&#34; context instead.
-
-See https://docs.pola.rs/user-guide/misc/multiprocessing/ for details.
-
-If you really know what your doing, you can silence this warning with the warning module
-or by setting POLARS_ALLOW_FORKING_THREAD=1.
-
-  self.pid = os.fork()
-<span class="ansi-green-fg">INFO:type_infer-2551:Infering type for: year</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Infering type for: price</span>
-/opt/hostedtoolcache/Python/3.9.20/x64/lib/python3.9/multiprocessing/popen_fork.py:66: RuntimeWarning: Using fork() can cause Polars to deadlock in the child process.
-In addition, using fork() with Python in general is a recipe for mysterious
-deadlocks and crashes.
-
-The most likely reason you are seeing this error is because you are using the
-multiprocessing module on Linux, which uses fork() by default. This will be
-fixed in Python 3.14. Until then, you want to use the &#34;spawn&#34; context instead.
-
-See https://docs.pola.rs/user-guide/misc/multiprocessing/ for details.
-
-If you really know what your doing, you can silence this warning with the warning module
-or by setting POLARS_ALLOW_FORKING_THREAD=1.
-
-  self.pid = os.fork()
-<span class="ansi-green-fg">INFO:type_infer-2551:Infering type for: model</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Column price has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Column year has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Infering type for: transmission</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Infering type for: mileage</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Column mileage has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Infering type for: fuelType</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Column model has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Infering type for: tax</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Column tax has data type integer</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Infering type for: mpg</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Column mpg has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Infering type for: engineSize</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Column engineSize has data type float</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Column fuelType has data type categorical</span>
-<span class="ansi-green-fg">INFO:type_infer-2551:Column transmission has data type categorical</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2551:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2551:Finished statistical analysis</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Analyzing a sample of 6920</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:from a total population of 10668, this is equivalent to 64.9% of your data.</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Using 3 processes to deduct types.</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Infering type for: price</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Infering type for: year</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Infering type for: model</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Column price has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Infering type for: transmission</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Column year has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Infering type for: mileage</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Column mileage has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Infering type for: fuelType</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Column transmission has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Infering type for: tax</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Column tax has data type integer</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Infering type for: mpg</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Column mpg has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Infering type for: engineSize</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Column engineSize has data type float</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Column model has data type categorical</span>
+<span class="ansi-green-fg">INFO:type_infer-3490:Column fuelType has data type categorical</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-3490:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-3490:Finished statistical analysis</span>
 </pre></div></div>
 </div>
 <p>Let’s take a look at our JSON-AI and print to file.</p>
@@ -434,7 +406,7 @@ or by setting POLARS_ALLOW_FORKING_THREAD=1.
         &#34;unbias_target&#34;: true,
         &#34;seconds_per_mixer&#34;: 21384.0,
         &#34;seconds_per_encoder&#34;: 85536.0,
-        &#34;expected_additional_time&#34;: 11.148000478744507,
+        &#34;expected_additional_time&#34;: 11.12000560760498,
         &#34;time_aim&#34;: 259200,
         &#34;target_weights&#34;: null,
         &#34;positive_domain&#34;: false,
@@ -472,7 +444,7 @@ or by setting POLARS_ALLOW_FORKING_THREAD=1.
 <section id="3)-Create-your-custom-encoder-(LabelEncoder).">
 <h1>3) Create your custom encoder (<code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code>).<a class="headerlink" href="#3)-Create-your-custom-encoder-(LabelEncoder)." title="Permalink to this heading"></a></h1>
 <p>Once our JSON-AI is filled, let’s make our LabelEncoder. All Lightwood encoders inherit from the <code class="docutils literal notranslate"><span class="pre">BaseEncoder</span></code> class, found <a class="reference external" href="https://github.com/mindsdb/lightwood/blob/staging/lightwood/encoder/base.py">here</a>.</p>
-<p><img alt="BaseEncoder" src="../../_images/baseencoder.png" /></p>
+<img alt="BaseEncoder" src="../../_images/baseencoder.png" />
 <p>The <code class="docutils literal notranslate"><span class="pre">BaseEncoder</span></code> has 5 expected calls:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">__init__</span></code>: instantiate the encoder</p></li>
@@ -519,15 +491,15 @@ or by setting POLARS_ALLOW_FORKING_THREAD=1.
 
 <span class="sd">Create a LabelEncoder that transforms categorical data into a label.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span> <span class="nn">lightwood.encoder</span> <span class="kn">import</span> <span class="n">BaseEncoder</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">lightwood.helpers.log</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.encoder</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEncoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.helpers.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span>
 
 
-<span class="k">class</span> <span class="nc">LabelEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LabelEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a label representation for categorical data. The data will rely on sorted to organize the order of the labels.</span>
 
@@ -543,7 +515,7 @@ or by setting POLARS_ALLOW_FORKING_THREAD=1.
     <span class="n">is_timeseries_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">is_trainable_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">stop_after</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_target</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">stop_after</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Label Encoder</span>
 
@@ -556,7 +528,7 @@ or by setting POLARS_ALLOW_FORKING_THREAD=1.
         <span class="c1"># For LabelEncoder, this is always 1 (1 label per category)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">dev_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a LabelEncoder for categorical data.</span>
 
@@ -579,7 +551,7 @@ or by setting POLARS_ALLOW_FORKING_THREAD=1.
 
         <span class="bp">self</span><span class="o">.</span><span class="n">is_prepared</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="nb">list</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="nb">list</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert pre-processed data into the labeled values</span>
 
@@ -592,7 +564,7 @@ or by setting POLARS_ALLOW_FORKING_THREAD=1.
 
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">enc</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">object</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoded_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">object</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert torch.Tensor labels into categorical data</span>
 
@@ -610,13 +582,17 @@ or by setting POLARS_ALLOW_FORKING_THREAD=1.
 Writing LabelEncoder.py
 </pre></div></div>
 </div>
-<p>Some additional notes: (1) The <code class="docutils literal notranslate"><span class="pre">encode()</span></code> call should be able to intake a list of values, it is optional to make it compatible with <code class="docutils literal notranslate"><span class="pre">pd.Series</span></code> or <code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code> (2) The output of <code class="docutils literal notranslate"><span class="pre">encode()</span></code> must be a torch tensor with dimensionality <span class="math notranslate nohighlight">\(N_{rows} x N_{output}\)</span>.</p>
+<p>Some additional notes:</p>
+<ol class="arabic simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">encode()</span></code> call should be able to intake a list of values, it is optional to make it compatible with <code class="docutils literal notranslate"><span class="pre">pd.Series</span></code> or <code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></p></li>
+<li><p>The output of <code class="docutils literal notranslate"><span class="pre">encode()</span></code> must be a torch tensor with dimensionality <span class="math notranslate nohighlight">\(N_{rows} x N_{output}\)</span>.</p></li>
+</ol>
 <p>Now that the <code class="docutils literal notranslate"><span class="pre">LabelEncoder</span></code> is complete, move this to <code class="docutils literal notranslate"><span class="pre">~/lightwood_modules</span></code> and we’re ready to try this out!</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood</span> <span class="kn">import</span> <span class="n">load_custom_module</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lightwood</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_custom_module</span>
 <span class="n">load_custom_module</span><span class="p">(</span><span class="s1">&#39;LabelEncoder.py&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -640,7 +616,7 @@ Writing LabelEncoder.py
 </div>
 <p>Suppose you have many columns that are categorical- you may want to enforce your approach explicitly without naming each column. This can be done by examining the <code class="docutils literal notranslate"><span class="pre">data_dtype</span></code> of JSON-AI’s features. For all features that are type <code class="docutils literal notranslate"><span class="pre">categorical</span></code> (while this is a <code class="docutils literal notranslate"><span class="pre">str</span></code>, it’s ideal to import dtype and explicitly check the data type), replace the default <code class="docutils literal notranslate"><span class="pre">Encoder</span></code> with your encoder. In this case, this is <code class="docutils literal notranslate"><span class="pre">LabelEncoder.LabelEncoder</span></code>. #### Strategy 2: Programatically change <em>all</em> encoder
 assignments for a data type</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lightwood.api</span> <span class="kn">import</span> <span class="n">dtype</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">lightwood.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">dtype</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">json_ai</span><span class="o">.</span><span class="n">dtype_dict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">dtype</span><span class="o">.</span><span class="n">categorical</span><span class="p">:</span>
         <span class="n">json_ai</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;LabelEncoder.LabelEncoder&#39;</span>
@@ -706,25 +682,25 @@ assignments for a data type</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-<span class="ansi-green-fg">INFO:dataprep_ml-2551:Starting statistical analysis</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2551:Finished statistical analysis</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2551: `analyze_data` runtime: 0.42 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2551:Cleaning the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2551: `preprocess` runtime: 0.13 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2551:Splitting the data into train/test</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2551: `split` runtime: 0.0 seconds</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2551:Preparing sequentially...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2551:Preparing encoder for year...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2551:Preparing encoder for mileage...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2551:Preparing encoder for tax...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2551:Preparing encoder for mpg...</span>
-<span class="ansi-white-fg">DEBUG:dataprep_ml-2551:Preparing encoder for engineSize...</span>
-<span class="ansi-green-fg">INFO:lightwood-2551:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2551:Categories Detected = 1</span>
-<span class="ansi-green-fg">INFO:lightwood-2551:Categories Detected = 1</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2551: `prepare` runtime: 0.02 seconds</span>
-<span class="ansi-green-fg">INFO:dataprep_ml-2551:Featurizing the data</span>
-<span class="ansi-white-fg">DEBUG:lightwood-2551: `featurize` runtime: 0.55 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-3490:Starting statistical analysis</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-3490:Finished statistical analysis</span>
+<span class="ansi-white-fg">DEBUG:lightwood-3490: `analyze_data` runtime: 0.44 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-3490:Cleaning the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-3490: `preprocess` runtime: 0.13 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-3490:Splitting the data into train/test</span>
+<span class="ansi-white-fg">DEBUG:lightwood-3490: `split` runtime: 0.0 seconds</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-3490:Preparing sequentially...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-3490:Preparing encoder for year...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-3490:Preparing encoder for mileage...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-3490:Preparing encoder for tax...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-3490:Preparing encoder for mpg...</span>
+<span class="ansi-white-fg">DEBUG:dataprep_ml-3490:Preparing encoder for engineSize...</span>
+<span class="ansi-green-fg">INFO:lightwood-3490:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-3490:Categories Detected = 1</span>
+<span class="ansi-green-fg">INFO:lightwood-3490:Categories Detected = 1</span>
+<span class="ansi-white-fg">DEBUG:lightwood-3490: `prepare` runtime: 0.02 seconds</span>
+<span class="ansi-green-fg">INFO:dataprep_ml-3490:Featurizing the data</span>
+<span class="ansi-white-fg">DEBUG:lightwood-3490: `featurize` runtime: 0.57 seconds</span>
 </pre></div></div>
 </div>
 <p>The splitter creates 3 data-splits, a “train”, “dev”, and “test” set. The <code class="docutils literal notranslate"><span class="pre">featurize</span></code> command from the predictor allows us to convert the cleaned data into features. We can access this as follows:</p>
@@ -834,7 +810,7 @@ assignments for a data type</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2017-2024, MindsDB.</p>
+    <p>&#169; Copyright 2017-2025, MindsDB.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
