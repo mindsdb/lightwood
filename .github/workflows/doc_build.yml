@@ -29,6 +29,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install 'Sphinx==6.2.1' 'sphinx-autoapi==3.0.0' 'sphinx-autodoc-typehints' 'sphinx-code-include' 'sphinx-rtd-theme' 'sphinxcontrib-applehelp' 'sphinxcontrib-devhelp' 'sphinxcontrib-htmlhelp' 'sphinxcontrib-jsmath' 'sphinxcontrib-napoleon' 'sphinxcontrib-qthelp' 'sphinxcontrib-serializinghtml' autoapi nbsphinx myst_parser pandoc jupyter matplotlib imblearn fsspec
           pip install --no-cache-dir -e .
+      - name: Install NLTK data
+        run: |
+          python -m nltk.downloader punkt
+          python -m nltk.downloader punkt_tab
+          python -m nltk.downloader stopwords
       - name: Re-run notebooks
         run: |
           find . -iname '*.ipynb' -exec jupyter nbconvert --to notebook --inplace --execute {} \;  > out.txt 2>&1
