@@ -1,5 +1,5 @@
 [build-system]
-requires = ["poetry-core", "setuptools<58.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
@@ -84,7 +84,3 @@ xai = [
     "pyod",
     "suod",
 ]
-
-[tool.poetry.group.dev.dependencies]
-setuptools = "57.5.0"
-
