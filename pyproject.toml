@@ -12,7 +12,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"
-type_infer = ">=0.0.15"
+type_infer = ">=0.0.22"
 dataprep_ml = ">=24.5.1.2,<24.6.1.0"
 mindsdb-evaluator = ">=0.0.13"
 numpy = ">1.23.0"
