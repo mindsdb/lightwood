@@ -6,13 +6,13 @@ from collections import deque
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
+from torch.optim import AdamW
 import pandas as pd
 from type_infer.dtype import dtype
 from transformers import (
     DistilBertModel,
     DistilBertForSequenceClassification,
     DistilBertTokenizerFast,
-    AdamW,
     get_linear_schedule_with_warmup,
 )
 from sklearn.model_selection import train_test_split
@@ -282,7 +282,10 @@ class PretrainedLangEncoder(BaseEncoder):
                     for vbatch in val_dataset:
                         val_loss += self._call(vbatch).item()
 
-                    log.info(f"Epoch {epoch+1} train batch {bidx+1} - Validation loss: {val_loss/len(val_dataset)}")
+                    log.info(
+                        f"Epoch {epoch + 1} train batch {bidx + 1} - "
+                        f"Validation loss: {val_loss / len(val_dataset)}"
+                    )
                     if val_loss / len(val_dataset) >= best_val_loss:
                         break
 
