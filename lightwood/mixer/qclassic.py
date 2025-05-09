@@ -13,9 +13,15 @@ class QClassic(Neural):
             input_cols: List[str],
             timeseries_settings: TimeseriesSettings, target_encoder: BaseEncoder, net: str, fit_on_dev: bool,
             search_hyperparameters: bool):
-        super().__init__(stop_after, target, dtype_dict,
-                         input_cols, timeseries_settings, target_encoder,
-                         net, fit_on_dev, search_hyperparameters)
+        super().__init__(
+            stop_after=stop_after,
+            target=target,
+            dtype_dict=dtype_dict,
+            target_encoder=target_encoder,
+            net=net,
+            fit_on_dev=fit_on_dev,
+            search_hyperparameters=search_hyperparameters
+        )
 
         quantum_nets = {"QClassic": QClassicNet}
         self.net_class = quantum_nets.get(net, QClassicNet)
