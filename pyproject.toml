@@ -11,7 +11,7 @@ license = "GPL-3.0-only"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
+python = ">=3.10,<3.13"
 type_infer = "0.0.22"
 dataprep_ml = "0.0.24"
 mindsdb-evaluator = "0.0.17"
