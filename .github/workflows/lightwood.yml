@@ -21,18 +21,18 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install NLTK data
-        run: |
-          python -m pip install poetry
-          poetry run python -m nltk.downloader punkt
-          poetry run python -m nltk.downloader punkt_tab
-          poetry run python -m nltk.downloader stopwords
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          python -m pip install poetry
           python -m pip install setuptools==57.5.0
           python -m pip install pydateinfer==0.3.0
           poetry install -E dev -E image
+      - name: Install NLTK data
+        run: |
+          poetry run python -m nltk.downloader punkt
+          poetry run python -m nltk.downloader punkt_tab
+          poetry run python -m nltk.downloader stopwords
       - name: Install dependencies OSX
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
