@@ -6,13 +6,13 @@ from collections import deque
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
+from torch.optim import AdamW
 import pandas as pd
 from type_infer.dtype import dtype
 from transformers import (
     DistilBertModel,
     DistilBertForSequenceClassification,
     DistilBertTokenizerFast,
-    AdamW,
     get_linear_schedule_with_warmup,
 )
 from sklearn.model_selection import train_test_split
