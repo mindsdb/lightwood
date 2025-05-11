@@ -265,9 +265,9 @@ class SignErrorErrFunc(RegressionErrFunc):
 
 
 class TSAbsErrorErrFunc(TSErrFunc):
-    """Calculates absolute error nonconformity for time series problems.
+    r"""Calculates absolute error nonconformity for time series problems.
 
-        For each forecasted step ``y_h`` for h \in 1..horizon, nonconformity is defined as
+        For each forecasted step ``y_h`` for h \\in 1..horizon, nonconformity is defined as
 
         .. math::
             | y_ni - hat{y}_ni |

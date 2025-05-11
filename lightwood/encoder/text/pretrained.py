@@ -282,7 +282,10 @@ class PretrainedLangEncoder(BaseEncoder):
                     for vbatch in val_dataset:
                         val_loss += self._call(vbatch).item()
 
-                    log.info(f"Epoch {epoch+1} train batch {bidx+1} - Validation loss: {val_loss/len(val_dataset)}")
+                    log.info(
+                        f"Epoch {epoch + 1} train batch {bidx + 1} - "
+                        f"Validation loss: {val_loss / len(val_dataset)}"
+                    )
                     if val_loss / len(val_dataset) >= best_val_loss:
                         break
 
@@ -318,7 +321,7 @@ class PretrainedLangEncoder(BaseEncoder):
         return loss
 
     def _train_callback(self, epoch, loss):
-        log.info(f"{self.name} at epoch {epoch+1} and loss {loss}!")
+        log.info(f"{self.name} at epoch {epoch + 1} and loss {loss}!")
 
     def encode(self, column_data: Iterable[str]) -> torch.Tensor:
         """
