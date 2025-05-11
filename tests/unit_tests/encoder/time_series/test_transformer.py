@@ -82,5 +82,5 @@ class TestTransformerEncoder(unittest.TestCase):
         results = torch.isclose(answer, correct_answer, atol=1)
         acc = (results.sum() / results.numel()).item()
 
-        print(f'Transformer correctly reconstructed {round(100*acc, 2)}%')
+        print(f'Transformer correctly reconstructed {round(100 * acc, 2)}%')
         assert acc >= 0.5
