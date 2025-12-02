@@ -1,7 +1,33 @@
-from typing import Iterable
+from typing import Iterable, Any
 
 import numpy as np
 from type_infer.helpers import is_nan_numeric
+
+
+def convert_numpy_to_python(obj: Any) -> Any:
+    """
+    Recursively converts numpy types to Python native types.
+    This is necessary for compatibility with numpy 2.0, where the string representation
+    of numpy scalars changed (e.g., np.float64(1.5) instead of 1.5).
+
+    :param obj: Any object that may contain numpy types
+    :return: The same object structure with numpy types converted to Python native types
+    """
+    if isinstance(obj, dict):
+        return {convert_numpy_to_python(k): convert_numpy_to_python(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        converted = [convert_numpy_to_python(item) for item in obj]
+        return type(obj)(converted)
+    elif isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, (np.bool_, bool)):
+        return bool(obj)
+    else:
+        return obj
 
 
 def is_none(value):
