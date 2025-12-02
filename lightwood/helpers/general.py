@@ -1,4 +1,4 @@
-from typing import Iterable, Any
+from typing import Iterable
 
 import numpy as np
 from type_infer.helpers import is_nan_numeric
