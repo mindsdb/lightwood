@@ -67,8 +67,6 @@ extra_ts = [
     "pystan",
     "prophet",
     "neuralforecast",
-    "mxnet",
-    "gluonts",
 ]
 image = [
     "torchvision",

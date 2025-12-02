@@ -11,9 +11,6 @@ from lightwood.ensemble.base import BaseEnsemble
 from lightwood.api.types import PredictionArguments, SubmodelData
 from lightwood.data.encoded_ds import EncodedDs
 
-# special dispatches
-from lightwood.mixer import GluonTSMixer  # imported from base mixer folder as it needs optional dependencies
-
 
 class BestOf(BaseEnsemble):
     """
@@ -25,24 +22,19 @@ class BestOf(BaseEnsemble):
     def __init__(self, target, mixers: List[BaseMixer], data: EncodedDs, accuracy_functions,
                  args: PredictionArguments, ts_analysis: Optional[dict] = None, fit: bool = True) -> None:
         super().__init__(target, mixers, data, fit=False)
-        self.special_dispatch_list = [GluonTSMixer]
 
         if fit:
             score_list = []
             for _, mixer in enumerate(self.mixers):
+                score_dict = evaluate_accuracies(
+                    data.data_frame,
+                    mixer(data, args)['prediction'],
+                    target,
+                    accuracy_functions,
+                    ts_analysis=ts_analysis
+                )
 
-                if type(mixer) in self.special_dispatch_list:
-                    avg_score = self.special_dispatch(mixer, data, args, target, ts_analysis)
-                else:
-                    score_dict = evaluate_accuracies(
-                        data.data_frame,
-                        mixer(data, args)['prediction'],
-                        target,
-                        accuracy_functions,
-                        ts_analysis=ts_analysis
-                    )
-
-                    avg_score = np.mean(list(score_dict.values()))
+                avg_score = np.mean(list(score_dict.values()))
                 log.info(f'Mixer: {type(mixer).__name__} got accuracy: {avg_score}')
 
                 if is_nan_numeric(avg_score):
@@ -81,7 +73,3 @@ class BestOf(BaseEnsemble):
                     else:
                         log.warning(f'Unstable mixer {type(mixer).__name__} failed with exception: {e}.\
                         Trying next best')
-
-    def special_dispatch(self, mixer, data, args, target, ts_analysis):
-        if isinstance(mixer, GluonTSMixer):
-            return mixer.model_train_stats.loss_history[-1]

@@ -572,7 +572,7 @@ def add_implicit_values(json_ai: JsonAI) -> JsonAI:
             mixers[i]["args"]["fit_on_dev"] = mixers[i]["args"].get("fit_on_dev", "True")
             mixers[i]["args"]["use_stl"] = mixers[i]["args"].get("use_stl", "False")
 
-        elif mixers[i]["module"] in ("NHitsMixer", "GluonTSMixer"):
+        elif mixers[i]["module"] in ("NHitsMixer", ):
             mixers[i]["args"]["horizon"] = "$problem_definition.timeseries_settings.horizon"
             mixers[i]["args"]["window"] = "$problem_definition.timeseries_settings.window"
             mixers[i]["args"]["ts_analysis"] = mixers[i]["args"].get(
