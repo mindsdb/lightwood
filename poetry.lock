@@ -5566,4 +5566,4 @@ xai = ["pyod", "shap", "suod"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.14"
-content-hash = "ab1953db0ec796dbcfbb54f8355b787baf8c4c40694041e44ec62c400a4ab3c4"
+content-hash = "40075b4c3423427a0949a47695aff31a687cfc54ddbe0920ea0e24646535971c"
