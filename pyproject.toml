@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "lightwood"
-version = "25.9.1.0"
+version = "25.12.1.0"
 description = "Lightwood is Legos for Machine Learning."
 authors = ["MindsDB Inc."]
 license = "GPL-3.0-only"
@@ -12,10 +12,10 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
-type_infer = "0.0.25"
-dataprep_ml = "0.0.25"
-mindsdb-evaluator = "0.0.20"
-numpy = ">1.23.0"
+type_infer = "0.0.26"
+dataprep_ml = "0.0.26"
+mindsdb-evaluator = "0.0.21"
+numpy = "^2"
 nltk = ">=3.9"
 pandas = "2.2.3"
 torch = "~2.8.0"
@@ -45,8 +45,6 @@ lightgbm = {version = ">=4.6.0,<4.7.0", optional = true}
 pystan = {version = "==2.19.1.1", optional = true}
 prophet = {version = "==1.1", optional = true}
 neuralforecast = {version = ">=1.6.4,<1.7.0", optional = true}
-mxnet = {version = ">=1.6.0,<2.0.0", optional = true}
-gluonts = {version = ">=0.13.2,<0.14.0", optional = true}
 torchvision = {version = ">=0.15.0", optional = true}
 pillow = {version = ">=10.3.0", optional = true}
 qiskit = {version = "==1.4.2", optional = true}
@@ -69,8 +67,6 @@ extra_ts = [
     "pystan",
     "prophet",
     "neuralforecast",
-    "mxnet",
-    "gluonts",
 ]
 image = [
     "torchvision",

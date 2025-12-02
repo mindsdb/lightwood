@@ -26,11 +26,6 @@ except Exception:
     ProphetMixer = None
 
 try:
-    from lightwood.mixer.gluonts import GluonTSMixer
-except Exception:
-    GluonTSMixer = None
-
-try:
     from lightwood.mixer.lightgbm import LightGBM
     from lightwood.mixer.lightgbm_array import LightGBMArray
 except Exception:
@@ -43,5 +38,5 @@ except Exception:
     TabTransformerMixer = None
 
 __all__ = ['BaseMixer', 'Neural', 'NeuralTs', 'LightGBM', 'RandomForest', 'LightGBMArray', 'Unit', 'Regression',
-           'SkTime', 'QClassic', 'ProphetMixer', 'ETSMixer', 'ARIMAMixer', 'NHitsMixer', 'GluonTSMixer', 'XGBoostMixer',
+           'SkTime', 'QClassic', 'ProphetMixer', 'ETSMixer', 'ARIMAMixer', 'NHitsMixer', 'XGBoostMixer',
            'TabTransformerMixer', 'XGBoostArrayMixer']

@@ -1,3 +1,4 @@
+import json
 from typing import Callable
 from collections import deque
 
@@ -8,11 +9,23 @@ from type_infer.dtype import dtype
 
 
 def is_allowed(v):
-    if '(' in str(v):
+    if isinstance(v, dict):
+        # this required for compatability with nuimpy v1 and v2:
+        # v1: str({np.float64(1.5): np.float64(1.5)}) = {1.5: 1.5}
+        # v2: str({np.float64(1.5): np.float64(1.5)}) = {np.float64(1.5): np.float64(1.5)}
+        # v2: json.dumps({np.float64(1.5): np.float64(1.5)}) = {"1.5": 1.5}
+        try:
+            s = json.dumps(v)
+        except Exception:
+            s = str(v)
+    else:
+        s = str(v)
+
+    if '(' in s:
         return False
-    if 'lambda' in str(v):
+    if 'lambda' in s:
         return False
-    if '__' in str(v):
+    if '__' in s:
         return False
 
     return True
