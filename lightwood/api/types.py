@@ -12,7 +12,6 @@ else:
 
 from dataclasses import dataclass
 from lightwood.helpers.log import log
-from lightwood.helpers.general import convert_numpy_to_python
 from dataclasses_json import dataclass_json
 from dataclasses_json.core import _asdict, Json
 import json
@@ -215,9 +214,6 @@ class ProblemDefinition:
             log.warning(f'Your specified time aim of {time_aim} is too short. Setting it to 10 seconds.')
 
         target_weights = obj.get('target_weights', None)
-        # Convert numpy types to Python native types for compatibility with numpy 2.0
-        if target_weights is not None:
-            target_weights = convert_numpy_to_python(target_weights)
         positive_domain = obj.get('positive_domain', False)
         dtype_dict = obj.get('dtype_dict', {})
         timeseries_settings = TimeseriesSettings.from_dict(obj.get('timeseries_settings', {}))
