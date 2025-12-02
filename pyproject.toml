@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "lightwood"
-version = "25.9.1.0"
+version = "25.12.1.0"
 description = "Lightwood is Legos for Machine Learning."
 authors = ["MindsDB Inc."]
 license = "GPL-3.0-only"
@@ -12,10 +12,10 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
-type_infer = "0.0.25"
-dataprep_ml = "0.0.25"
-mindsdb-evaluator = "0.0.20"
-numpy = ">1.23.0"
+type_infer = "0.0.26"
+dataprep_ml = "0.0.26"
+mindsdb-evaluator = "0.0.21"
+numpy = "^2"
 nltk = ">=3.9"
 pandas = "2.2.3"
 torch = "~2.8.0"
