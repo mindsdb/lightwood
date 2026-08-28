@@ -1,0 +1,5 @@
+# Everything under .github/ decides what runs in CI, on which runner, and with
+# which secrets in scope. This repo accepts pull requests from outside
+# contributors, so a change here is a change to a trust boundary rather than to
+# the product. DevOps reviews it.
+.github/ @mindsdb/devops
